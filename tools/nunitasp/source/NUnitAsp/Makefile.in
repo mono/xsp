@@ -5,8 +5,11 @@ DISTFILES=Makefile.in \
 	 $(DIR_SOURCES) \
 	  NUnitAsp.csproj
 
+HTMLDTD = Sgml/Html.dtd
+
 # 
 NUNITASP_REFERENCES= System.Web NUnit.Framework
+
 REFS= $(addsuffix .dll, $(addprefix -r:, $(NUNITASP_REFERENCES)))
 
 ASPTESTERDIR_SOURCES = \
@@ -65,7 +68,7 @@ install: $(DLLNAME)
 	cp $(DLLNAME) $(LOCAL_LIB_DIR)
 
 $(DLLNAME): $(NUNITASP_SOURCES)
-	$(MCS) $(MCSFLAGS) $(REFS) -target:library -out:$@ $^
+	$(MCS) $(MCSFLAGS) -resource:$(HTMLDTD),NUnit.Extensions.Asp.Sgml.Html.dtd $(REFS) -target:library -out:$@ $^
 
 clean:
 	rm -f $(DLLNAME) *~ *.pdb
@@ -81,5 +84,5 @@ distdir:
 	cp $(DISTFILES) $(distdir)
 	cp $(ASPTESTERDIR_SOURCES) $(distdir)/AspTester
 	cp $(HTMLTESTERDIR_SOURCES) $(distdir)/HtmlTester
-	cp $(SGMLDIR_SOURCES) $(distdir)/Sgml
+	cp $(SGMLDIR_SOURCES) $(HTMLDTD) $(distdir)/Sgml
 

@@ -1,3 +1,7 @@
+2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* htmlselect.aspx: another one that is rendered by our System.Web.
+
 2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* htmlinputbutton.aspx: New file. Renders fine with our System.Web.

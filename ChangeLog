@@ -1,3 +1,10 @@
+2004-11-12 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: remove MKDIR_P
+	* server/InitialWorkerRequest.cs: don't print the exception if the
+	stream is not reused.
+	* autogen.sh: aclocal goes first.
+
 2004-11-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs: if the client is HTTP/1.1 or sends a

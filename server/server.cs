@@ -114,10 +114,6 @@ namespace Mono.ASPNET
 			bool verbose = true;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
 			string apps = ConfigurationSettings.AppSettings ["MonoApplications"];
-			if (apps != null && apps != "")
-				Console.WriteLine ("Warning: --applications is deprecated. Use " +
-						   "--appconfigdir or --appconfigfile instead.");
-
 			string appConfigDir = ConfigurationSettings.AppSettings ["MonoApplicationsConfigDir"];
 			string appConfigFile = ConfigurationSettings.AppSettings ["MonoApplicationsConfigFile"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];

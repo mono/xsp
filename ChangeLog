@@ -1,5 +1,10 @@
 2004-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* doc/xsp.1.in:
+	* server/server.cs: don't flag --applications as deprecated.
+
+2004-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* test/serial.aspx: test that I used when gathering information to fix
 	bug #59495.
 

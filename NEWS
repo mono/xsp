@@ -1,8 +1,28 @@
+December 11, 2003 - Gonzalo Paniagua
+---------------------------------------
+
+  * Added nunit-asp.
+
+December 2, 2003 - Gonzalo Paniagua
+---------------------------------------
+
+  * Released 0.8
+
+November 24, 2003 - Gonzalo Paniagua
+---------------------------------------
+
+  * Jackson added an ASP.NET state server.
+  
+October 23, 2003 - Gonzalo Paniagua
+---------------------------------------
+
+  * More speed improvements in serialization.
+  
 October 3, 2003 - Gonzalo Paniagua
 ---------------------------------------
 
   * Speed improvements.
-  * Ability to sto the server pressing enter.
+  * Ability to stop the server pressing enter.
 
 September 22, 2003 - Gonzalo Paniagua
 ---------------------------------------

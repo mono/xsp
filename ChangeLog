@@ -1,5 +1,26 @@
 2004-11-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server/MonoWorkerRequest.cs:
+	* server/ModMonoWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs:
+	* server/ModMonoRequest.cs:
+	* server/BaseRequestBroker.cs:
+	* server/AssemblyInfoModMono.cs.in:
+	* server/ModMonoApplicationHost.cs:
+	* server/ApplicationServer.cs:
+	* server/InitialWorkerRequest.cs:
+	* server/BaseApplicationHost.cs:
+	* server/XSPApplicationHost.cs:
+	* server/ModMonoTCPWebSource.cs:
+	* server/AssemblyInfo.cs.in:
+	* server/LingeringNetworkStream.cs:
+	* server/server.cs:
+	* server/IWebSource.cs:
+	* server/IApplicationHost.cs:
+	* COPYING: relicensed under MIT style license.
+
+2004-11-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/XSPWorkerRequest.cs: max. line length for headers is now 8kB.
 
 	* server/ApplicationServer.cs: don't Exit in Stop(). Call the new 

@@ -1,0 +1,18 @@
+<people>
+	<person>
+		<name>Ben Maurer</name>
+		<jobs>
+			<job>Make test suite</job>
+			<job>Do xslt</job>
+			<job>Do calculus homework</job>
+		</jobs>
+	</person>
+	<person>
+		<name>Miguel de Icaza</name>
+		<jobs>
+			<job>Ask ben to make test suite</job>
+			<job>Ask ben when xslt will be done</job>
+			<job>Tell ben calculus build character</job>
+		</jobs>
+	</person>
+</people>

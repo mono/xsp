@@ -94,6 +94,11 @@ This applies only to xsp.exe: by default xsp will stop processing
 requests when the return key is pressed.  Use this to avoid this
 behavior. 
 .TP
+.I \-\-terminate (mod-mono-server only)
+Gracefully terminates a running mod-mono-server instance.  All other
+options but --filename or --address and --port" are ignored if this
+option is provided.
+.TP
 .I \-\-version
 Displays version information and exits.
 .TP

@@ -112,9 +112,13 @@ namespace Mono.ASPNET
 			}
 
 			DirectoryInfo di = new DirectoryInfo (directoryName);
-			foreach (FileInfo fi in di.GetFiles ("*.webapp")) {
-				AddApplicationsFromConfigFile (fi.FullName);
+			if (!di.Exists) {
+				Console.Error.WriteLine ("Directory {0} does not exist.", directoryName);
+				return;
 			}
+			
+			foreach (FileInfo fi in di.GetFiles ("*.webapp"))
+				AddApplicationsFromConfigFile (fi.FullName);
 		}
 
  		public void AddApplicationsFromConfigFile (string fileName)
@@ -139,6 +143,10 @@ namespace Mono.ASPNET
 		void AddApplicationFromElement (XmlElement el)
 		{
 			XmlNode n;
+
+			n = el.SelectSingleNode ("enabled");
+			if (n != null && n.InnerText.Trim () == "false")
+				return;
 
 			string vpath = el.SelectSingleNode ("vpath").InnerText;
 			string path = el.SelectSingleNode ("path").InnerText;
@@ -229,7 +237,7 @@ namespace Mono.ASPNET
  				throw new InvalidOperationException ("SetApplications must be called first.");
 
  			if (vpathToHost.Count == 0)
- 				throw new InvalidOperationException ("No applications defined.");
+ 				throw new InvalidOperationException ("No applications defined or all of them are disabled");
  				
 			listen_socket = webSource.CreateSocket ();
 			listen_socket.Listen (500);

@@ -5,7 +5,7 @@
 .\" Author:
 .\"   Gonzalo Paniagua Javier (gonzalo@ximian.com)
 .\"
-.TH xsp "1" "10 Jul 2004" "xsp @VERSION@" "User Commands"
+.TH xsp "1" "21 Nov 2004" "xsp @VERSION@" "User Commands"
 .SH NAME 
 XSP \- Mono ASP.NET Web Server
 .SH SYNOPSIS
@@ -129,6 +129,8 @@ The format of the .webapp files used for --appconfigfile and
         <vport>{port for the application}</vport>
         <vpath>{virtual directory in apache}</vpath>
         <path>{physical path to aspx files}</path>
+        <!-- <enabled> is true by default -->
+        <enabled>{true|false}</enabled>
 </web-application>
 </apps>
 .fi

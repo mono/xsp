@@ -4,5 +4,7 @@
         <path>/home/mono/public_html/html</path>
 	<!-- vhost and port are ignored in xsp.exe -->
         <vhost>my.host.name</vhost>
-        <vport>80</vport>
+        <vport>8080</vport>
+	<!-- <enabled> is true by default -->
+	<!-- <enabled>false</enabled> -->
 </web-application>

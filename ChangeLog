@@ -1,5 +1,16 @@
 2004-11-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* test/global.asax: added code here.
+	* doc/xsp.1.in: added information on --terminate and <enabled>
+	for .webapp files.
+	
+	* test/sample.webapp: aded <enabled>
+	* server/ApplicationServer.cs: don't bail out if the directory given in
+	--appconfigdir does not exist. If the <enabled> no exists and is
+	'false', don't set up that application.
+
+2004-11-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/ModMonoApplicationHost.cs: support for --terminate. Ensure that
 	no one else is listening on the same unix socket.
 	* server/ModMonoTCPWebSource.cs: support for --terminate.

@@ -53,12 +53,8 @@ RepeatColumns="5">
 
 				<ItemTemplate>
 
-					<asp:HyperLink id=Hyperlink1 NavigateUrl='<%#
-DataBinder.Eval(Container.DataItem,"Name") %>' ImageUrl='<%#
-string.Concat("thumbnail.ashx?filename=",DataBinder.Eval(Container.DataItem,"Name"))
-%>' Runat="server">
-
-					</asp:HyperLink>
+					<asp:Label Text="<%# DataBinder.Eval (Container.DataItem,"Name") %>"
+					runat="server" />
 
 				</ItemTemplate>
 

@@ -459,11 +459,15 @@ public class HtmlControlTag : Tag
 		controls = new Hashtable (new CaseInsensitiveHashCodeProvider (),
 					  new CaseInsensitiveComparer ()); 
 
+#if MONO
+		Type MyForm = typeof (HtmlForm);
+#else
 		Assembly assembly = Assembly.LoadFrom ("MyForm.dll");
 		Type MyForm = assembly.GetType ("Mono.ASP.MyHtmlForm");
+#endif
 		controls.Add ("A", typeof (HtmlAnchor));
 		controls.Add ("BUTTON", typeof (HtmlButton));
-		controls.Add ("FORM", MyForm);//typeof (HtmlForm));
+		controls.Add ("FORM", MyForm);
 		controls.Add ("IMG", typeof (HtmlImage));
 		controls.Add ("INPUT", "INPUT");
 		controls.Add ("SELECT", typeof (HtmlSelect));

@@ -4,6 +4,7 @@ CSC=mcs
 CSCFLAGS= $(REFS) --define MONO
 REFS= -r System.Web -r System.Drawing
 LIBTARGET=--target library
+MYFORM=
 else
 _OUT=/out:
 CSC=csc.exe
@@ -13,10 +14,12 @@ ifdef DEBUGMONOSW
 REFERENCES= .\\System.Web		\
 	    System.Drawing
 SYSTEM_WEB=System.Web.dll
+MYFORM=
 else
 REFERENCES= System.Web \
 	    System.Drawing
 SYSTEM_WEB= remove_system_web
+MYFORM=MyForm.dll
 endif
 REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
 endif
@@ -27,7 +30,7 @@ SOURCES = asp-parser.cs \
 	  driver.cs \
 	  generator.cs
 
-all:  $(SYSTEM_WEB) MyForm.dll xsp.exe
+all:  $(SYSTEM_WEB) $(MYFORM) xsp.exe
 
 xsp.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) $(_OUT)$@ $^

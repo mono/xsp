@@ -1,3 +1,8 @@
+2002-06-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs: ignore white space between webcontrols opening/closing
+	tags.
+
 2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* asp-tokenizer.cs: a little more freedom for unquoted attribute

@@ -116,6 +116,8 @@ class ControlStack
 {
 	private Stack controls;
 	private ControlStackData top;
+	private bool space_between_tags;
+	private bool sbt_valid;
 
 	class ControlStackData 
 	{
@@ -196,6 +198,7 @@ class ControlStack
 					    childKind,
 					    defaultPropertyName,
 					    container_type);
+		sbt_valid = false;
 		controls.Push (top);
 	}
 
@@ -204,6 +207,7 @@ class ControlStack
 		controls.Pop ();
 		if (controls.Count != 0)
 			top = (ControlStackData) controls.Peek ();
+		sbt_valid = false;
 	}
 
 	public Type PeekType ()
@@ -253,6 +257,25 @@ class ControlStack
 		}
 
 		set { top.useCodeRender= value; }
+	}
+	
+	// Does white space between tags matter?
+	// Currently it only matters in WebControls
+	public bool SpaceBetweenTags
+	{
+		get {
+			if (!sbt_valid){
+				sbt_valid = true;
+				Type type = top.controlType;
+				if (type.Namespace == "System.Web.UI.WebControls")
+					space_between_tags = true;
+				else if (type.IsSubclassOf (typeof (System.Web.UI.WebControls.WebControl)))
+					space_between_tags = true;
+				else
+					space_between_tags = false;
+			}
+			return space_between_tags;
+		}
 	}
 	
 	public Type Container
@@ -513,19 +536,16 @@ public class Generator
 
 	private void ProcessPlainText ()
 	{
-		PlainText asis;
-		if (controls.PeekChildKind () != ChildrenKind.CONTROLS){
-			asis = (PlainText) elements.Current;
-			string result = asis.Text.Trim ();
-			if (result != ""){
-				string tag_id = controls.PeekTagID ();
-				throw new ApplicationException ("Literal content not allowed for " + tag_id);
-			}
+		PlainText asis = (PlainText) elements.Current;
+		string trimmed = asis.Text.Trim ();
+		if (trimmed == "" && controls.SpaceBetweenTags == true)
 			return;
+
+		if (trimmed != "" && controls.PeekChildKind () != ChildrenKind.CONTROLS){
+			string tag_id = controls.PeekTagID ();
+			throw new ApplicationException ("Literal content not allowed for " + tag_id);
 		}
 		
-		asis = (PlainText) elements.Current;
-			
 		string escaped_text = Escape (asis.Text);
 		current_function.AppendFormat ("\t\t\t__parser.AddParsedSubObject (" + 
 					       "new System.Web.UI.LiteralControl (\"{0}\"));\n",

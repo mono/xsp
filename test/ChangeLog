@@ -1,3 +1,7 @@
+2002-07-06  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* dbpage1.aspx: displays data from a database in a Table.
+
 2002-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server-side-object.aspx: New file.

@@ -1,2 +1,2 @@
-SUBDIRS=doc server test tools nunit-tests
+SUBDIRS=doc server test tools scripts nunit-tests 
 

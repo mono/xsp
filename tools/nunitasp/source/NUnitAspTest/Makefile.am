@@ -10,7 +10,7 @@ nunitasptestdir = $(libdir)
 noinst_SCRIPTS = NUnitAspTest.dll
 
 EXTRA_DIST = $(local_sources) NUnitAspTest.csproj
-CLEANFILES = NUnitAspTest.dll
+CLEANFILES = NUnitAspTest.dll NUnitAspTest.dll.mdb
 
 # 
 

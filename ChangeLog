@@ -1,3 +1,18 @@
+2004-08-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile.am:
+	* configure.in:
+	* nunit-tests/standalone/Makefile.am:
+	* scripts/.cvsignore:
+	* scripts/Makefile.am:
+	* scripts/script.in:
+	* server/Makefile.am:
+	* tools/asp_state/Makefile.am:
+	* tools/dbsessmgr/Makefile.am:
+	* tools/nunitasp/source/NUnitAsp/Makefile.am:
+	* tools/nunitasp/source/NUnitAspTest/Makefile.am: added xsp and
+	mod-mono-server scripts, remove .mdb files when cleaning.
+
 2004-07-30 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: fix host matching in presence of *.

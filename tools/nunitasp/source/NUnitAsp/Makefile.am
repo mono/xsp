@@ -9,7 +9,7 @@ nunitaspdir = $(libdir)
 nunitasp_SCRIPTS = NUnitAsp.dll
 
 EXTRA_DIST = $(local_sources) NUnitAsp.csproj
-CLEANFILES = NUnitAsp.dll
+CLEANFILES = NUnitAsp.dll NUnitAsp.dll.mdb
 
 asptesterdir_sources = \
 	$(srcdir)/AspTester/AspControlTester.cs \

@@ -37,6 +37,7 @@ AC_OUTPUT([
 	doc/Makefile
         nunit-tests/Makefile
         nunit-tests/standalone/Makefile
+	scripts/Makefile
 	server/AssemblyInfo.cs
 	server/AssemblyInfoModMono.cs
 	server/Makefile

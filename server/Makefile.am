@@ -6,7 +6,7 @@ modmonoserverdir = $(bindir)
 xsp_SCRIPTS = xsp.exe
 modmonoserver_SCRIPTS = mod-mono-server.exe
 
-CLEANFILES = xsp.exe mod-mono-server.exe
+CLEANFILES = xsp.exe mod-mono-server.exe xsp.exe.mdb mod-mono-server.exe.mdb
 EXTRA_DIST = $(common) $(xsp_only) $(modmono_only)
 
 # 

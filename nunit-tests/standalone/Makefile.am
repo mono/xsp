@@ -6,7 +6,7 @@ MCSFLAGS= -debug+ -debug:full -nologo \
 DLLNAME = standalone-tests.dll
 
 EXTRA_DIST = $(aspnet_files) $(cs_files)
-CLEANFILES = $(DLLNAME)
+CLEANFILES = $(DLLNAME) $(DLLNAME).mdb
 
 aspnet_files = \
 	test1.aspx \

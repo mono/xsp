@@ -1,3 +1,8 @@
+
+2004-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web.config: commented out gzip and mono.aspnet. It's
+	causing troubles some times.
 2004-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* doc/xsp.1.in:
@@ -5,15 +10,15 @@
 
 2004-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
-	* test/serial.aspx: test that I used when gathering information to fix
-	bug #59495.
+	* test/serial.aspx: test that I used when gathering information
+	to fix bug #59495.
 
 2004-06-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* INSTALL: added note for windows users.
 	* configure.in: 0.14.99
-	* server/InitialWorkerRequest.cs: UrlDecode the path and check safety.
-	Fixes bug #59429.
+	* server/InitialWorkerRequest.cs: UrlDecode the path and check
+	safety.  Fixes bug #59429.
 
 2004-06-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

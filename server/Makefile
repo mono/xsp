@@ -9,7 +9,9 @@ REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
 
 SOURCES = server.cs \
 	  MonoApplicationHost.cs \
-	  MonoWorkerRequest.cs
+	  MonoWorkerRequest.cs \
+	  Tracing.cs
+
 all: server.exe
 	
 install: server.exe web.config global.asax
@@ -25,7 +27,7 @@ server.exe: $(SOURCES)
 
 trace: 
 	rm -f server.exe
-	make -C . CSCFLAGS=/d:TRACE
+	make -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
 
 clean:
 	rm -f server.exe *~ *.pdb

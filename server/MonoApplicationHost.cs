@@ -78,7 +78,7 @@ namespace Mono.ASPNET
 			runner = new Thread (new ThreadStart (RunServer));
 			runner.Start ();
 			stop = false;
-			Trace.WriteLine ("Server started.");
+			WebTrace.WriteLine ("Server started.");
 		}
 
 		public void Stop ()
@@ -88,7 +88,7 @@ namespace Mono.ASPNET
 
 			stop = true;	
 			listen_socket.Stop ();
-			Trace.WriteLine ("Server stopped.");
+			WebTrace.WriteLine ("Server stopped.");
 		}
 
 		private void RunServer ()
@@ -97,7 +97,7 @@ namespace Mono.ASPNET
 			TcpClient client;
 			while (!stop){
 				client = listen_socket.AcceptTcpClient ();
-				Trace.WriteLine ("Accepted connection.");
+				WebTrace.WriteLine ("Accepted connection.");
 				Worker worker = new Worker (client, this);
 				ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 			}

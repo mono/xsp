@@ -35,6 +35,7 @@ namespace Mono.ASPNET
 		StringBuilder responseHeaders;
 		string status;
 		ArrayList response;
+		static Encoding encoding = new UTF8Encoding (false);
 
 		public MonoWorkerRequest (TcpClient client, MonoApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
@@ -51,11 +52,12 @@ namespace Mono.ASPNET
 			input = new StreamReader (output);
 			responseHeaders = new StringBuilder ();
 			response = new ArrayList ();
+			status = "HTTP/1.0 200 OK\r\n";
 		}
 
 		public override void CloseConnection ()
 		{
-			Trace.WriteLine ("CloseConnection()");
+			WebTrace.WriteLine ("CloseConnection()");
 			input.Close ();
 			client.Close ();
 		}
@@ -63,105 +65,108 @@ namespace Mono.ASPNET
 		public override void FlushResponse (bool finalFlush)
 		{
 			try {
-			Trace.WriteLine ("FlushResponse()");
-			if (!headersSent) {
-				StreamWriter w = new StreamWriter (output);
-				w.Write (responseHeaders.ToString ());
-				w.Write ("\r\n");
-				headersSent = true;
-			}
+				WebTrace.WriteLine ("FlushResponse({0}), {1}", finalFlush, headersSent);
+				if (!headersSent) {
+					responseHeaders.Insert (0, status);
+					responseHeaders.Append ("\r\n");
+					byte [] b = encoding.GetBytes (responseHeaders.ToString ());
+					output.Write (b, 0, b.Length);
+					headersSent = true;
+				}
 
-			foreach (byte [] bytes in response)
-				output.Write (bytes, 0, bytes.Length);
+				foreach (byte [] bytes in response)
+					output.Write (bytes, 0, bytes.Length);
 
-			output.Flush ();
-			response.Clear ();
-			if (finalFlush)
-				CloseConnection ();
-				
+				output.Flush ();
+				response.Clear ();
+				if (finalFlush)
+					CloseConnection ();
 			} catch (Exception e) {
-				Trace.WriteLine (e.ToString ());
+				WebTrace.WriteLine (e.ToString ());
 			}
 		}
 
 		public override string GetAppPath ()
 		{
-			Trace.WriteLine ("GetAppPath()");
+			WebTrace.WriteLine ("GetAppPath()");
 			return appHost.VPath;
 		}
 
 		public override string GetAppPathTranslated ()
 		{
-			Trace.WriteLine ("GetAppPath()");
+			WebTrace.WriteLine ("GetAppPath()");
 			return appHost.Path;
 		}
 
 
 		public override string GetFilePath ()
 		{
-			Trace.WriteLine ("GetFilePath()");
+			WebTrace.WriteLine ("GetFilePath()");
 			return path;
 		}
 
 		public override string GetFilePathTranslated ()
 		{
-			Trace.WriteLine ("GetFilePathTranslated()");
+			WebTrace.WriteLine ("GetFilePathTranslated()");
 			//FIXME: bear in mind virtual directory
 			return Path.Combine (appHost.Path, path.Substring (1).Replace ('/', Path.DirectorySeparatorChar));
 		}
 
 		public override string GetHttpVerbName ()
 		{
-			Trace.WriteLine ("GetHttpVerbName()");
+			WebTrace.WriteLine ("GetHttpVerbName()");
 			return verb;
 		}
 
 		public override string GetHttpVersion ()
 		{
-			Trace.WriteLine ("GetHttpVersion()");
+			WebTrace.WriteLine ("GetHttpVersion()");
 			return protocol;
 		}
 
 		public override string GetKnownRequestHeader (int index)
 		{
+			if (headers == null)
+				return null;
+
 			string headerName = HttpWorkerRequest.GetKnownRequestHeaderName (index);
-			Trace.WriteLine (String.Format ("GetKnownRequestHeader({0}) -> {1}", index, headerName));
+			WebTrace.WriteLine (String.Format ("GetKnownRequestHeader({0}) -> {1}", index, headerName));
 			return headers [headerName] as string;
 		}
 
 		public override string GetLocalAddress ()
 		{
-			Trace.WriteLine ("GetLocalAddress()");
+			WebTrace.WriteLine ("GetLocalAddress()");
 			return "localhost";
 		}
 
 		public override int GetLocalPort ()
 		{
-			Trace.WriteLine ("GetLocalPort()");
+			WebTrace.WriteLine ("GetLocalPort()");
 			return 8080;
 		}
 
 		public override string GetPathInfo ()
 		{
-			Trace.WriteLine ("GetPathInfo()");
+			WebTrace.WriteLine ("GetPathInfo()");
 			return "GetPathInfo";
 		}
 
 		public override byte [] GetPreloadedEntityBody ()
 		{
-			Trace.WriteLine ("GetPreloadedEntityBody");
+			WebTrace.WriteLine ("GetPreloadedEntityBody");
 			return null;
 		}
 
 		public override string GetQueryString ()
 		{
-			Trace.WriteLine ("GetQueryString()");
+			WebTrace.WriteLine ("GetQueryString()");
 			return queryString;
 		}
 
 		public override byte [] GetQueryStringRawBytes ()
 		{
-			Trace.WriteLine ("GetQueryStringRawBytes()");
+			WebTrace.WriteLine ("GetQueryStringRawBytes()");
 			if (queryString == null)
 				return null;
 			return Encoding.Default.GetBytes (queryString);
@@ -169,7 +174,7 @@ namespace Mono.ASPNET
 
 		public override string GetRawUrl ()
 		{
-			Trace.WriteLine ("GetRawUrl()");
+			WebTrace.WriteLine ("GetRawUrl()");
 			if (queryString != null && queryString.Length > 0)
 				return path + "/" + queryString;
 
@@ -178,39 +183,45 @@ namespace Mono.ASPNET
 
 		public override string GetRemoteAddress ()
 		{
-			Trace.WriteLine ("GetRemoteAddress()");
+			WebTrace.WriteLine ("GetRemoteAddress()");
 			return "remoteAddress";
 		}
 
 		public override int GetRemotePort ()
 		{
-			Trace.WriteLine ("GetRemotePort()");
+			WebTrace.WriteLine ("GetRemotePort()");
 			return 0;
 		}
 
 
 		public override string GetServerName ()
 		{
-			Trace.WriteLine ("GetServerName()");
+			WebTrace.WriteLine ("GetServerName()");
 			return "localhost";
 		}
 
 		public override string GetServerVariable (string name)
 		{
-			Trace.WriteLine ("GetServerVariable()");
+			WebTrace.WriteLine ("GetServerVariable()");
 			return "me piden " + name;
 		}
 
 		public override string GetUnknownRequestHeader (string name)
 		{
-			Trace.WriteLine ("GetUnknownRequestHeader()");
+			WebTrace.WriteLine ("GetUnknownRequestHeader()");
+			if (headers == null)
+				return null;
+
 			return headers [name] as string;
 		}
 
 		public override string [][] GetUnknownRequestHeaders ()
 		{
-			Trace.WriteLine ("GetKnownRequestHeaders()");
+			WebTrace.WriteLine ("GetKnownRequestHeaders()");
 			if (unknownHeaders == null) {
+				if (headers == null)
+					return (unknownHeaders = new string [0][]);
+
 				ICollection keysColl = headers.Keys;
 				ICollection valuesColl = headers.Values;
 				string [] keys = new string [keysColl.Count];
@@ -240,19 +251,19 @@ namespace Mono.ASPNET
 
 		public override string GetUriPath ()
 		{
-			Trace.WriteLine ("GetUriPath()");
+			WebTrace.WriteLine ("GetUriPath()");
 			return path;
 		}
 
 		public override bool HeadersSent ()
 		{
-			Trace.WriteLine ("HeadersSent()");
+			WebTrace.WriteLine ("HeadersSent() -> " + headersSent);
 			return headersSent;
 		}
 
 		public override bool IsClientConnected ()
 		{
-			Trace.WriteLine ("IsClientConnected()");
+			WebTrace.WriteLine ("IsClientConnected()");
 			return true; //FIXME
 		}
 
@@ -274,7 +285,7 @@ namespace Mono.ASPNET
 			if (!GetRequestData ())
 				return;
 
-			Trace.WriteLine ("ProcessRequest()");
+			WebTrace.WriteLine ("ProcessRequest()");
 			HttpRuntime.ProcessRequest (this);
 		}
 
@@ -300,7 +311,6 @@ namespace Mono.ASPNET
 			switch (length) {
 			case 1:
 				path = s [0];
-				protocol = "HTTP/1.0";
 				break;
 			case 2:
 				path = s [0];
@@ -339,23 +349,34 @@ namespace Mono.ASPNET
 
 		private bool GetRequestData ()
 		{
-			if (!GetRequestLine () || !GetRequestHeaders ())
+			try {
+				if (!GetRequestLine ())
+					return false;
+
+				if (protocol == null) {
+					protocol = "HTTP/1.0";
+				} else 	if (!GetRequestHeaders ()) {
+					return false;
+				}
+
+				WebTrace.WriteLine ("verb: " + verb);
+				WebTrace.WriteLine ("path: " + path);
+				WebTrace.WriteLine ("queryString: " + queryString);
+				WebTrace.WriteLine ("protocol: " + protocol);
+				if (headers != null) {
+					foreach (string key in headers.Keys)
+						WebTrace.WriteLine (key + ": " + headers [key]);
+				}
+			} catch (Exception) {
 				return false;
-
-
-			Trace.WriteLine ("verb: {0}", verb);
-			Trace.WriteLine ("path: {0}", path);
-			Trace.WriteLine ("queryString: {0}", queryString);
-			Trace.WriteLine ("protocol: {0}", protocol);
-			foreach (string key in headers.Keys)
-				Trace.WriteLine (String.Format ("{0}: {1}", key, headers [key]));
-
+			}
+			
 			return true;
 		}
 
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
-			Trace.WriteLine ("ReadEntityBody()");
+			WebTrace.WriteLine ("ReadEntityBody()");
 			if (buffer == null || size == 0)
 				return 0;
 
@@ -406,7 +427,7 @@ namespace Mono.ASPNET
 
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
-			Trace.WriteLine ("SendResponseFromFile()");
+			WebTrace.WriteLine ("SendResponseFromFile()");
 			Stream file = null;
 			try {
 				file = File.OpenRead (filename);
@@ -419,7 +440,7 @@ namespace Mono.ASPNET
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{
-			Trace.WriteLine ("SendResponseFromFile(2)");
+			WebTrace.WriteLine ("SendResponseFromFile(2)");
 			Stream file = null;
 			try {
 				file = new FileStream (handle, FileAccess.Read);
@@ -432,7 +453,7 @@ namespace Mono.ASPNET
 
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
-			Trace.WriteLine ("SendResponseFromMemory()");
+			WebTrace.WriteLine ("SendResponseFromMemory()");
 			if (length <= 0)
 				return;
 
@@ -443,13 +464,13 @@ namespace Mono.ASPNET
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			Trace.WriteLine ("SendStatus()");
-			status = String.Format ("{0} {1} {2}", protocol, statusCode, statusDescription);
+			status = String.Format ("{0} {1} {2}\r\n", protocol, statusCode, statusDescription);
+			WebTrace.WriteLine ("SendStatus() -> " + status);
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
 		{
-			Trace.WriteLine ("SendUnknownResponseHeader()");
+			WebTrace.WriteLine ("SendUnknownResponseHeader (" + name + ", " + value + ")");
 			if (!headersSent)
 				responseHeaders.AppendFormat ("{0}: {1}\r\n", name, value);
 		}

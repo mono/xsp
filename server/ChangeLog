@@ -1,3 +1,18 @@
+2002-10-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: added Tracing.cs
+
+	* MonoApplicationHost.cs: use WebTrace.
+	
+	* MonoWorkerRequest.cs: use WebTrace. Also changed FlushResponse. Now
+	it outputs correctly the status and the headers.
+	
+	* Tracing.cs: new file. Almost the same as System.Web.Util.WebTrace.
+	It's used to get some output under MS runtime, which disables normal
+	tracing for System.Web.
+
+	* server.cs: removed Trace stuff.
+
 2002-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: added 'trace' target.

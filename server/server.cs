@@ -18,9 +18,6 @@ namespace Mono.ASPNET
 	{
 		public static int Main (string [] args)
 		{
-			Trace.Listeners.Clear();
-			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
-
 			Type type = typeof (MonoApplicationHost);
 			string cwd = Directory.GetCurrentDirectory ();
 			MonoApplicationHost host;

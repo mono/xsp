@@ -2,6 +2,7 @@
 
 	* htmlinputbutton.aspx: New file. Renders fine with our System.Web.
 	* htmlinputcheckbox.aspx: another one.
+	* htmlinputfile.aspx: another one.
 
 2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

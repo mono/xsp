@@ -299,6 +299,7 @@ public class Generator
 {
 	private object [] parts;
 	private ArrayListWrapper elements;
+	private StringBuilder buildOptions;
 	private StringBuilder prolog;
 	private StringBuilder declarations;
 	private StringBuilder script;
@@ -328,8 +329,7 @@ public class Generator
 		this.className = className.Replace ('-', '_'); 
 		this.className = className.Replace (' ', '_');
 		this.fullPath = Path.GetFullPath (filename);
-		//FIXME: get them from directives
-		this.parent = "System.Web.UI.Page";
+		this.parent = "System.Web.UI.Page"; // Overriden by @ Page Inherits
 		//
 		this.interfaces = enableSessionStateLiteral;
 		this.has_form_tag = false;
@@ -346,18 +346,20 @@ public class Generator
 		constructor = new StringBuilder ();
 		init_funcs = new StringBuilder ();
 		epilog = new StringBuilder ();
+		buildOptions = new StringBuilder ();
 
 		current_function = new StringBuilder ();
 		functions = new Stack ();
 		functions.Push (current_function);
 
-		parts = new Object [6];
-		parts [0] = prolog;
-		parts [1] = declarations;
-		parts [2] = script;
-		parts [3] = constructor;
-		parts [4] = init_funcs;
-		parts [5] = epilog;
+		parts = new Object [7];
+		parts [0] = buildOptions;
+		parts [1] = prolog;
+		parts [2] = declarations;
+		parts [3] = script;
+		parts [4] = constructor;
+		parts [5] = init_funcs;
+		parts [6] = epilog;
 
 		prolog.Append ("namespace ASP {\n" +
 			      "\tusing System;\n" + 
@@ -411,8 +413,10 @@ public class Generator
 	
 	private void PageDirective (TagAttributes att)
 	{
-		if (att ["ClassName"] != null)
+		if (att ["ClassName"] != null){
 			this.className = (string) att ["ClassName"];
+			return;
+		}
 
 		if (att ["EnableSessionState"] != null){
 			string est = (string) att ["EnableSessionState"];
@@ -421,8 +425,20 @@ public class Generator
 			else if (0 != String.Compare (est, "true", true))
 				throw new ApplicationException ("EnableSessionState in Page directive not set to " +
 								"a correct value: " + est);
-
+			return;
 		}
+
+		if (att ["Inherits"] != null){
+			parent = (string) att ["Inherits"];
+			string source_file = att ["Src"] as string;
+			if (source_file != null)
+				buildOptions.AppendFormat ("//<compileandreference src=\"{0}\"/>\n", source_file);
+			else
+				buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", parent);
+
+			return;
+		}
+
 		//FIXME: add support for more attributes.
 	}
 
@@ -440,6 +456,7 @@ public class Generator
 								att.ToString ());
 			prolog.AppendFormat ("\tusing {0};\n", name_space);
 			Foundry.RegisterFoundry (tag_prefix, assembly_name, name_space);
+			buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", assembly_name);
 			return;
 		}
 
@@ -769,7 +786,7 @@ public class Generator
 			PropertyInfo [] subprops = prop.PropertyType.GetProperties ();
 			foreach (PropertyInfo subprop in subprops){
 				if (0 != String.Compare (subprop.Name, parts [1], true))
-					return false;
+					continue;
 
 				bool is_bool = subprop.PropertyType == typeof (bool);
 				if (!is_bool && att == null){

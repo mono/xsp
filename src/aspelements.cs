@@ -153,13 +153,23 @@ public class TagAttributes
 		get { return (got_hashed ? atts_hash.Keys : keys); }
 	}
 
+	private int CaseInsensitiveSearch (string key)
+	{
+		// Hope not to have many attributes when the tag is not a server tag...
+		for (int i = 0; i < keys.Count; i++){
+			if (0 == String.Compare ((string) keys [i], key, true))
+				return i;
+		}
+		return -1;
+	}
+	
 	public object this [object key]
 	{
 		get {
 			if (got_hashed)
 				return atts_hash [key];
 
-			int idx = keys.IndexOf (key);
+			int idx = CaseInsensitiveSearch ((string) key);
 			if (idx == -1)
 				return null;
 					
@@ -170,7 +180,7 @@ public class TagAttributes
 			if (got_hashed)
 				atts_hash [key] = value;
 			else {
-				int idx = keys.IndexOf (key);
+				int idx = CaseInsensitiveSearch ((string) key);
 				keys [idx] = value;
 			}
 		}

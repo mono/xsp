@@ -1,3 +1,11 @@
+2002-05-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* aspelements.cs: (TagAttributes) perform a case insensitive search
+	of keys when using the ArrayList instead of the Hashtable.
+
+	* generator.cs: added support for Inherits and Src for @ Page.
+	Fixed bug in ProcessProperties.
+
 2002-05-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: some Makefile love.

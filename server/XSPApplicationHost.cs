@@ -71,12 +71,12 @@ namespace Mono.ASPNET
 			Socket.Shutdown (SocketShutdown.Send);
 			while (waited < max_useconds_to_linger) {
 				int nread = 0;
-				if (buffer == null)
-					buffer = new byte [512];
-
 				try {
 					if (!Socket.Poll (useconds_to_linger, SelectMode.SelectRead))
 						break;
+
+					if (buffer == null)
+						buffer = new byte [512];
 
 					nread = Socket.Receive (buffer, 0, buffer.Length, 0);
 				} catch { }

@@ -1,3 +1,8 @@
+2003-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web.config: the new mono.aspnet configuration section has been added
+	and other contents from ../server/web.config file.
+
 2003-07-09  Lluis Sanchez Gual <lluis@ximian.com>
 
 	* README: added descrption of web service samples.

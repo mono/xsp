@@ -1,3 +1,22 @@
+2003-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* AcceptEncodingConfig.cs: class to hold the configuration for the
+	filters enabled in web.config.
+
+	* AcceptEncodingModule.cs: IHttpModule to plug the filters.
+
+	* AcceptEncodingSectionHandler.cs: configuration file section handler
+	for accept-encoding filters.
+
+	* GZipFilter.cs: sample filter for gzip encoding.
+
+	* Makefile: reference ICSharpCode.SharpZipLib, added new files and
+	renamed executable to xsp.exe
+
+	* server.exe.config: removed and renamed to...
+	* xsp.exe.config: ...this one.
+	* web.config: Removed file. It's been merged with ../test/
+
 2003-07-09  Lluis Sanchez Gual <lluis@ximian.com>
 
 	* Makefile: install target: copy web service files.

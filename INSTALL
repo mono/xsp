@@ -8,7 +8,7 @@ Steps for installing the server:
 	...and follow the instructions...
 
     You can change the listen port from the default (8080) using the
-    configuration file (server.exe.config).
+    configuration file (xsp.exe.config).
 
     Or you can use the --port command line option.
 
@@ -16,6 +16,11 @@ Steps for installing the server:
     you may need to modify the values of DBProviderAssembly, DBConnectionType
     and/or DbConnectionString in web.config file.
 
-NOTE for windows users: you may need to set authentication mode to "None" in
-web.config file until RNGCryptoServiceProvider works in windows.
+Notes for MS runtime users
+----------------------------
+You may need to set authentication mode to "None" in web.config file until
+RNGCryptoServiceProvider works in windows.
+
+If you're compiling under windows, you may need to copy 
+ICSharpCode.SharpZipLib.dll (distributed with mono) to xsp/server and xsp/server/test/bin directories if it's not installed for the system.
 

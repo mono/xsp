@@ -24,10 +24,12 @@
 	mono xsp.exe --port 80
 
     The default is port 8080, or you can configure the server using
-    the server.exe.config file.
+    the xsp.exe.config file.
 
     There are other command line options and appSettings options.
-    Run 'mono server.exe --help' to view all of them.
+    Run 'mono xsp.exe --help' to view all of them.
+
+    You can also set some configuration values in test/web.config file.
 
     This is not a full fledged server, it is just a shell for hosting
     ASP.NET.

@@ -4,7 +4,7 @@ CSC=mcs
 CSCFLAGS+= /debug+ /debug:full /nologo
 
 # 
-REFERENCES= System.Web
+REFERENCES= System.Web ICSharpCode.SharpZipLib
 REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
 
 SOURCES = AssemblyInfo.cs \
@@ -13,27 +13,30 @@ SOURCES = AssemblyInfo.cs \
 	  MonoWorkerRequest.cs \
 	  XSPWorkerRequest.cs \
 	  Tracing.cs \
-          server.cs
-	  
+          server.cs \
+	  AcceptEncodingConfig.cs \
+	  AcceptEncodingModule.cs \
+	  AcceptEncodingSectionHandler.cs \
+	  GZipFilter.cs
 
-all: server.exe
+all: xsp.exe
 	
-install: server.exe web.config global.asax
+install: xsp.exe global.asax
 	rm -rf test
 	mkdir -p test/bin
-	cp server.exe server.exe.config web.config global.asax test
-	cp server.exe test/bin
+	cp xsp.exe xsp.exe.config global.asax test
+	cp xsp.exe test/bin
 	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx ../test/*.xml ../test/*.xsl ../test/*.png ../test/*.inc test
 	cp ../test/*.dll test/bin
 
-server.exe: $(SOURCES)
+xsp.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) $(REFS) /out:$@ $^
 
 trace: 
-	rm -f server.exe
+	rm -f xsp.exe
 	$(MAKE) -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
 
 clean:
-	rm -f server.exe *~ *.pdb
+	rm -f xsp.exe *~ *.pdb
 	rm -rf test
 

@@ -1,3 +1,8 @@
+2005-03-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/server.cs: fix lockfile name generation. Patch by Mike Lasky.
+	Closes bug #73234.
+
 2005-03-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoApplicationHost.cs: ensure we close the stream to the

@@ -269,7 +269,7 @@ namespace Mono.ASPNET
 					Console.WriteLine ("ERROR: --address without --port");
 					Environment.Exit (1);
 				}
-				lockfile = Path.Combine (Path.GetTempPath (), filename);
+				lockfile = Path.Combine (Path.GetTempPath (), Path.GetFileName (filename));
 				lockfile = String.Format ("{0}_{1}", lockfile, hash);
 			} else {
 				lockfile = Path.Combine (Path.GetTempPath (), "mod_mono_TCP_");

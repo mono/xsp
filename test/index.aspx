@@ -13,7 +13,8 @@ DirectoryInfo dir = new DirectoryInfo (".");
 FileInfo[] files = dir.GetFiles ();
 for (int i=0; i < files.Length; i++) {
 	string FileName = Path.GetFileName(files[i].FullName);
-	if (Path.GetExtension (files[i].FullName) == ".aspx")
+	string extension = Path.GetExtension (files[i].FullName);
+	if (extension == ".aspx" || extension == ".ashx")
 	FileList.Text += "<li><a href=\"" + FileName + "\">" + FileName + "</a></li>\n";
 }
 %>

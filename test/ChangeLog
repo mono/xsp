@@ -1,3 +1,8 @@
+2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* index.aspx: also list .ashx files.
+	* webhandler.ashx: added new sample.
+
 2003-07-30  Sebastien Pouliot  <spouliot@videotron.ca>
 
 	* Makefile: Corrected extensions.dll for csc, error: Options '/out' and '/target' 

@@ -575,7 +575,11 @@ public enum ChildrenKind
 	/*
 	 * Special case for list controls (ListBox, DropDownList...)
 	 */
-	LISTITEM
+	LISTITEM,
+	/* For HtmlSelect children. They are <option> tags that must
+	 * be treated as ListItem
+	 */
+	OPTION
 }
 
 // TODO: support for ControlBuilderAttribute that may be used in custom controls

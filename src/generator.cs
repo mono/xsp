@@ -563,9 +563,8 @@ public class Generator
 					 string defaultPropertyName)
 	{
 		ChildrenKind prev_children_kind = controls.PeekChildKind ();
-		if (prev_children_kind != ChildrenKind.CONTROLS &&
-		    prev_children_kind != ChildrenKind.DBCOLUMNS &&
-		    prev_children_kind != ChildrenKind.LISTITEM){
+		if (prev_children_kind == ChildrenKind.NONE || 
+		    prev_children_kind == ChildrenKind.PROPERTIES){
 			string prev_tag_id = controls.PeekTagID ();
 			throw new ApplicationException ("Child controls not allowed for " + prev_tag_id);
 		}
@@ -605,6 +604,10 @@ public class Generator
 							"\n\t\t\t{1} __ctrl;\n\t\t\t__ctrl = new {1} ();" +
 							"\n\t\t\tthis.{0} = __ctrl;\n",
 							control_id, control_type);
+
+		if (children_kind == ChildrenKind.CONTROLS || children_kind == ChildrenKind.OPTION)
+			current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
+						 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
 	
 	private void DataBoundProperty (string varName, string value)
@@ -864,10 +867,6 @@ public class Generator
 						"SetAttribute (\"{0}\", \"{1}\");\n",
 						id, Escape ((string) att [id]));
 		}
-
-		if (controls.PeekChildKind () == ChildrenKind.CONTROLS)
-			current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
-						 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
 	
 	private void AddCodeRenderControl (StringBuilder function, int index)
@@ -946,8 +945,16 @@ public class Generator
 			 control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)) ||
 			 control_type == typeof (System.Web.UI.WebControls.ListItem)){
 			old_function.Append ("\n\t\t}\n\n");
+			string parsed = "";
+			string ctrl_name = "ctrl";
+			if (controls.PeekChildKind () == ChildrenKind.CONTROLS){
+				parsed = "ParsedSubObject";
+				ctrl_name = "parser";
+			}
+
 			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n" +
-						       "\t\t\t__ctrl.Add (this.{0});\n\n", control_id);
+						       "\t\t\t__{1}.Add{2} (this.{0});\n\n",
+						       control_id, ctrl_name, parsed);
 		}
 		else if (controls.PeekChildKind () == ChildrenKind.LISTITEM){
 			old_function.Append ("\n\t\t}\n\n");
@@ -1019,8 +1026,13 @@ public class Generator
 		Type controlType = html_ctrl.ControlType;
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", controlType, html_ctrl.ControlID);
 
-		ChildrenKind children_kind = html_ctrl.IsContainer ? ChildrenKind.CONTROLS :
-								     ChildrenKind.NONE;
+		ChildrenKind children_kind;
+		if (0 != String.Compare (html_ctrl.TagID, "select", true))
+			children_kind = html_ctrl.IsContainer ? ChildrenKind.CONTROLS :
+								ChildrenKind.NONE;
+		else
+			children_kind = ChildrenKind.OPTION;
+
 		NewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind, null); 
 
 		current_function.AppendFormat ("\t\t\t__ctrl.ID = \"{0}\";\n", html_ctrl.ControlID);
@@ -1211,6 +1223,17 @@ public class Generator
 			throw new ApplicationException (tag + " not allowed inside " + tag_id);
 		}
 					
+		if (child_kind == ChildrenKind.OPTION){
+			if (0 != String.Compare (tag.TagID, "option", true))
+				throw new ApplicationException ("Only <option> tags allowed inside <select>.");
+
+			string default_id = Tag.GetDefaultID ();
+			Type type = typeof (System.Web.UI.WebControls.ListItem);
+			declarations.AppendFormat ("\t\tprotected {0} {1};\n", type, default_id);
+			NewControlFunction (tag.TagID, default_id, type, ChildrenKind.CONTROLS, null); 
+			return;
+		}
+
 		if (child_kind == ChildrenKind.CONTROLS){
 			elements.Current = new PlainText (((Tag) elements.Current).PlainHtml);
 			ProcessPlainText ();

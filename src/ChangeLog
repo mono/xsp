@@ -1,3 +1,11 @@
+2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* aspelements.cs: added OPTION to ChildrenKind enum.
+
+	* generator.cs: special case for HtmlSelect and <option> tags. Options
+	are treated almost like ListItem and are the unique tag allowed inside
+	<select>.
+
 2002-06-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MyForm.cs: render enctype attribute.

@@ -295,6 +295,7 @@ namespace Mono.ASPNET
 					if (s == listen_socket) {
 						try {
 							client = s.Accept ();
+							client.Blocking = true;
 						} catch (Exception e) {
 							continue;
 						}

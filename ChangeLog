@@ -1,3 +1,7 @@
+2004-10-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: set the accepted socket to Blocking.
+
 2004-10-03 Ben Maurer  <bmaurer@ximian.com>
 
 	* server/ApplicationServer.cs: use UtcNow

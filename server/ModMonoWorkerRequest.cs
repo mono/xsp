@@ -55,6 +55,7 @@
 using System;
 using System.Web;
 using System.Collections;
+using System.Configuration;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -102,6 +103,35 @@ namespace Mono.ASPNET
 		string path;
 		string pathInfo;
 		string [][] unknownHeaders;
+		static string [] indexFiles = { "index.aspx",
+						"Default.aspx",
+						"default.aspx",
+						"index.html",
+						"index.htm" };
+
+		static XSPWorkerRequest ()
+		{
+			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+			SetDefaultIndexFiles (indexes);
+		}
+
+		static void SetDefaultIndexFiles (string list)
+		{
+			if (list == null)
+				return;
+
+			ArrayList files = new ArrayList ();
+			string [] fs = list.Split (',');
+			foreach (string f in fs) {
+				string trimmed = f.Trim ();
+				if (trimmed == "") 
+					continue;
+
+				files.Add (trimmed);
+			}
+
+			indexFiles = (string []) files.ToArray (typeof (string));
+		}
 
 		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost)
 			: base (appHost)
@@ -132,6 +162,33 @@ namespace Mono.ASPNET
 			return result;
 		}
 
+		bool TryDirectory ()
+		{
+			string localPath = GetFilePathTranslated ();
+			
+			if (!Directory.Exists (localPath))
+				return true;
+
+			string oldPath = path;
+			if (!path.EndsWith ("/"))
+				path += "/";
+
+			bool catOne = false;
+			foreach (string indexFile in indexFiles) {
+				string testfile = Path.Combine (localPath, indexFile);
+				if (File.Exists (testfile)) {
+					path += indexFile;
+					catOne = true;
+					break;
+				}
+			}
+
+			if (!catOne)
+				path = oldPath;
+
+			return true;
+		}
+
 		protected override bool GetRequestData ()
 		{
 			verb = request.GetHttpVerbName ();
@@ -139,6 +196,12 @@ namespace Mono.ASPNET
 			queryString = request.GetQueryString ();
 
 			path = request.GetUri ();
+			if (TryDirectory ()) {
+				pathInfo = "";
+				return true;
+			} else if (path [path.Length - 1] == '/') {
+				path = path + "/" + indexFiles [0];
+			}
 
 			// Yes, MS only looks for the '.'. Try setting a handler
 			// for something not containing a '.' and you won't get
@@ -225,7 +288,6 @@ namespace Mono.ASPNET
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
 			request.SetStatusCode (statusCode);
-			// Protocol will be added by XSP
 			request.SetStatusLine (String.Format("{0} {1}", statusCode, statusDescription));
 		}
 

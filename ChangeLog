@@ -1,5 +1,17 @@
 2004-05-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* NEWS:
+	* README: updated.
+
+	* configure.in:
+	* doc/Makefile.am:
+	* doc/xsp.1.in: updated manual page and install the same one for
+	mod-mono-server.
+
+	* doc/xsp.1: Removed.
+
+2004-05-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/Makefile.am: InitialWorkerRequest.cs is only needed for xsp.
 
 	* server/XSPApplicationHost.cs:

@@ -1,4 +1,11 @@
-.TH xsp 1 "15 November 2003"
+.\" 
+.\" xsp/mod-mono-server manual page.
+.\" (c) Copyright 2003 Ximian, Inc. 
+.\" (c) Copyright 2004 Novell, Inc. 
+.\" Author:
+.\"   Gonzalo Paniagua Javier (gonzalo@ximian.com)
+.\"
+.TH xsp "1" "19 May 2004" "xsp @VERSION@" "User Commands"
 .SH NAME 
 XSP \- Mono ASP.NET Web Server
 .SH SYNOPSIS
@@ -12,24 +19,18 @@ or
 .SH DESCRIPTION
 XSP and mod-mono-server are both hosts for ASP.NET-based applications.
 .PP
-If run as `xsp', the process provides a minimalistic web server web
-server which hosts the ASP.NET runtime and can be used to test and
-debug web applications that use the System.Web facilities in Mono.
-This server is most convenient for testing and running small sites,
-does not offer everything a production web server offers. 
+If run as `xsp', the process provides a minimalistic web server which
+hosts the ASP.NET runtime and can be used to test and debug web
+applications that use the System.Web facilities in Mono.  This server is
+most convenient for testing and running small sites, does not offer
+everything a production web server offers. 
 .PP
 `mod-mono-server' is an ASP.NET runtime host that can communicate with
 another web server (at the time of this writing Apache 1.3 and Apache
-2.0 were supported).   This mechanism is better used for high-traffic
+2.0 were supported). This mechanism is better used for high-traffic
 servers or production systems, since it can integrate with the main
 HTTP server and leverage all of the optimizations and extensions of an
 existing server, while providing the ASP.NET runtime.
-.PP
-The Mono SQLSessionServer allows you to use any database provider that
-implements the IDbConnection interface. The default provider is
-Npgsql. If you are not using Npgsql you need to add the
-StateDBProviderAssembly and StateDBConnectionType to the appSettings
-in your web.config file.
 .SH OPTIONS
 .TP
 .I \-\-port PORT
@@ -41,8 +42,18 @@ Sets the IP address to listen on. By default it's 0.0.0.0.
 .TP
 .I \-\-root PATH
 The root directory for XSP.  The default is the directory where XSP is
-executed. The current directory will be changed to this one before creating
-any application.
+executed. The current directory will be changed to this one before
+creating any application.
+.TP
+.I \-\-appconfigfile FILENAME
+Adds application definitions from the XML configuration file. See sample
+configuration file that comes with the server (sample.webapp) and
+.B WEBAPP FILE FORMAT
+below.
+.TP
+.I \-\-appconfigdir DIR
+Adds application definitions from all XML files found in the specified
+directory DIR. Files must have '.webapp' extension.
 .TP
 .I \-\-applications APPS
 A semicolon separated list of virtual directory and real directory for all the
@@ -64,16 +75,23 @@ Two applications like the above ones are handled.
 This applies only to xsp.exe: by default xsp will stop processing
 requests when the return key is pressed.  Use this to avoid this
 behavior. 
+.TP
+.I \-\-version
+Displays version information and exits.
+.TP
+.I --help
+Shows the list of options and exits.
 .SH AUTHORS
 The Mono XSP server was written by Gonzalo Paniagua Javier
 (gonzalo@ximian.com).
 .SH SEE ALSO
-.BR mono (1), mod_mono (8)
-System.Web, System.Web.Hosting namespace.
+.BR mono (1), dbsessmgr (1), asp_state (1), mod_mono (8)
+.PP
+System.Web, System.Web.Hosting namespaces.
 .PP
 http://www.asp.net is Microsoft's official site for ASP.NET
 .SH MORE INFORMATION
 The Mono project (http://www.go-mono.com) is a collaborative effort
-led by Ximian (http://www.ximian.com) to implement an open source
+led by Novell (http://www.novell.com) to implement an open source
 version of the .NET Framework.
 

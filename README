@@ -50,12 +50,10 @@
     host it on applications or other web servers. 
 
         If you are interested in hosting the ASP.NET classes for
-    higher performance in an Apache module or your favorite web
-    server, you could use the code in this module as a starting point
-    for it. See mod_mono in mono CVS.
-
-	The code to look at is: server/MonoApplicationHost.cs and
-    server/MonoWorkerRequest.cs.  
+    higher performance in an Apache module or your favorite web server,
+    you could use the code in this module as a starting point for it.
+    See mod_mono in mono CVS, which already does that for apache 1.3 and
+    2.0.
 
 * Directory Layout
 ------------------
@@ -72,13 +70,8 @@
 		MonoApplicationHost and MonoWorkerRequest can be used to embed
 		an ASP.NET serve in your application.
 		
-	src/
-		Source files for the parser/generator and test server.
-		OBSOLETED!!!
-	
-	TESTED	We'll be updating this file with controls and applications out
-		there in the web that we test and work fine.
+	tools/
+		asp_state, dbsessmgr and nunit-asp
 
-		
 Maintainer: gonzalo@ximian.com
 

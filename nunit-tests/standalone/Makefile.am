@@ -1,5 +1,7 @@
 MCSFLAGS= -debug+ -debug:full -nologo \
-	   -lib:@top_srcdir@/tools/nunitasp/source/NUnitAsp
+	   -lib:@top_srcdir@/tools/nunitasp/source/NUnitAsp \
+	   -lib:"$(libdir)"
+
 
 DLLNAME = standalone-tests.dll
 

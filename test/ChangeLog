@@ -1,3 +1,17 @@
+2003-07-09  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* README: added descrption of web service samples.
+	* Makefile: added compilation of extensions and service client.
+	* web.config: Copied from the server directory. It includes soap extension configuration.
+	* TestService.asmx: New file. A simple test service.
+	* ConverterService.asmx: New file. Currency conversion test service.
+	* TraceExtension.cs: New file. Trace soap extension.
+	* EncryptExtension.cs: New file. A Soap extension that encrypts the info.
+	* DumpExtension.cs: New file. Dump soap extension.
+	* ServiceClient.cs: New file. Web service test app.
+	* ServiceClient.exe.config: New file. Config file for the ServiceClient test app.
+	* Reference.cs: New file. Web service client proxy implementation.
+
 2003-05-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* body.inc: New file.

@@ -1,7 +1,7 @@
 <%@ Page Language = "C#" %>
 <html>
 <head>
-<title>Testing properties in inner tags</title>
+<title>Calendar Test</title>
 </head>
 <body>
 	<form runat=server>

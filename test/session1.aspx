@@ -14,7 +14,7 @@
 	}
 </script>
 <head>
-<title>Button</title>
+<title>Session Test</title>
 </head>
 <body>
 <form runat="server">

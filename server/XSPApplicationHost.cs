@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
@@ -24,7 +25,18 @@ namespace Mono.ASPNET
 	{
 		IApplicationHost host;
 		Socket client;
+		static byte [] error500;
 
+		static Worker ()
+		{
+			string s = "HTTP/1.0 500 Server error\n\n" +
+				   "<html><body><h1>500 Server error</h1>\n" +
+				   "Your client sent a request that was not understood by this server.\n" +
+				   "</body></html>\n";
+			
+			error500 = Encoding.Default.GetBytes (s);
+		}
+		
 		public Worker (Socket client, IApplicationHost host)
 		{
 			this.client = client;
@@ -33,8 +45,18 @@ namespace Mono.ASPNET
 		
 		public void Run (object state)
 		{
-			XSPWorkerRequest mwr = new XSPWorkerRequest (client, host);
-			mwr.ProcessRequest ();
+			try {
+				XSPWorkerRequest mwr = new XSPWorkerRequest (client, host);
+				mwr.ProcessRequest ();
+			} catch (Exception e) {
+				Console.WriteLine (e);
+				try {
+					NetworkStream ns = new NetworkStream (client, false);
+					ns.Write (error500, 0, error500.Length);
+					ns.Close ();
+					client.Close ();
+				} catch {}
+			}
 		}
 	}
 	

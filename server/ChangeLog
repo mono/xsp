@@ -1,3 +1,10 @@
+2003-08-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPApplicationHost.cs: handle possible exceptions in ProcessRequest.
+	* XSPWorkerRequest.cs: don't do any check on the verb. If an error
+	happens reading the request or the headers, send a 500 back and
+	terminate.
+
 2003-08-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* AssemblyInfo.cs: updated version number.

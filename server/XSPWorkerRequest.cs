@@ -41,6 +41,8 @@ namespace Mono.ASPNET
 		int inputLength;
 		int position;
 		
+		static byte [] error500;
+
 		static string serverHeader;
 
 		static string dirSeparatorString = Path.DirectorySeparatorChar.ToString ();
@@ -67,6 +69,11 @@ namespace Mono.ASPNET
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);
 
+			string s = "<html><body><h1>500 Server error</h1>\n" +
+				   "Your client sent a request that was not understood by this server.\n" +
+				   "</body></html>\n";
+			
+			error500 = Encoding.Default.GetBytes (s);
 		}
 
 		static void SetDefaultIndexFiles (string list)
@@ -447,25 +454,17 @@ namespace Mono.ASPNET
 				return false;
 
 			req = req.Trim ();
-			int length = req.Length;
-			if (length >= 5 && 0 == String.Compare ("GET ", req.Substring (0, 4), true))
-				verb = "GET";
-			else if (length >= 6 && 0 == String.Compare ("POST ", req.Substring (0, 5), true))
-				verb = "POST";
-			else
-				throw new InvalidOperationException ("Unsupported method in query: " + req);
-
-			req = req.Substring (verb.Length + 1).TrimStart ();
 			string [] s = req.Split (' ');
-			length = s.Length;
 
-			switch (length) {
-			case 1:
-				path = s [0];
-				break;
+			switch (s.Length) {
 			case 2:
-				path = s [0];
-				protocol = s [1];
+				verb = s [0].Trim ();
+				path = s [1].Trim ();
+				break;
+			case 3:
+				verb = s [0].Trim ();
+				path = s [1].Trim ();
+				protocol = s [2].Trim ();
 				break;
 			default:
 				return false;
@@ -507,12 +506,12 @@ namespace Mono.ASPNET
 		{
 			try {
 				if (!GetRequestLine ())
-					return false;
+					throw new Exception ("Error reading request line");
 
 				if (protocol == null) {
 					protocol = "HTTP/1.0";
 				} else 	if (!GetRequestHeaders ()) {
-					return false;
+					throw new Exception ("Error getting headers");
 				}
 
 				WebTrace.WriteLine ("verb: " + verb);
@@ -524,6 +523,9 @@ namespace Mono.ASPNET
 						WebTrace.WriteLine (key + ": " + headers [key]);
 				}
 			} catch (Exception) {
+				SendStatus (500, "Server error");
+				SendResponseFromMemory (error500, error500.Length);
+				FlushResponse (true);
 				return false;
 			}
 			

@@ -92,6 +92,11 @@ namespace Mono.ASPNET
 		{
 			request.Decline ();
 		}
+
+		public void NotFound ()
+		{
+			request.NotFound ();
+		}
 	}
 
 	public class ModMonoWorkerRequest : MonoWorkerRequest

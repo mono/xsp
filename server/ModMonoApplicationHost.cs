@@ -159,6 +159,11 @@ namespace Mono.ASPNET
 				}
 				
 				VPathToHost vapp = server.GetApplicationForPath (vhost, port, rr.GetUriPath (), false);
+				if (vapp == null) {
+					rr.NotFound (); // No app to handle the request
+					return;
+				}
+
 				ModMonoApplicationHost host = (ModMonoApplicationHost) vapp.AppHost;
 				if (host == null) {
 					rr.Decline ();

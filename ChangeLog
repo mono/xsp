@@ -1,3 +1,10 @@
+2004-07-13 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoApplicationHost.cs:
+	* server/ModMonoRequest.cs:
+	* server/ModMonoWorkerRequest.cs: when we can't find a suitable
+	application, return NOT_FOUND to mod_mono.
+
 2004-07-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/Makefile.am: added ModMonoTCPWebSource.

@@ -76,6 +76,7 @@ namespace Mono.ASPNET
 		GET_CLIENT_BLOCK,
 		SET_STATUS,
 		DECLINE_REQUEST,
+		NOT_FOUND,
 		LAST_COMMAND
 	}
 
@@ -161,6 +162,11 @@ namespace Mono.ASPNET
 		public void Decline ()
 		{
 			SendSimpleCommand (Cmd.DECLINE_REQUEST);
+		}
+
+		public void NotFound ()
+		{
+			SendSimpleCommand (Cmd.NOT_FOUND);
 		}
 
 		public string GetProtocol ()

@@ -47,13 +47,13 @@ namespace Mono.ASPNET
 			error500 = Encoding.Default.GetBytes (s);
 		}
 		
-		public Worker (Socket client, IApplicationHost host)
+		public Worker (Socket client, EndPoint localEP, IApplicationHost host)
 		{
 			ns = new NetworkStream (client, true);
 			this.host = host;
 #if !MODMONO_SERVER
 			remoteEP = client.RemoteEndPoint;
-			localEP = client.LocalEndPoint;
+			this.localEP = localEP;
 #endif
 		}
 
@@ -226,7 +226,7 @@ namespace Mono.ASPNET
 			while (!stop){
 				client = listen_socket.Accept ();
 				WebTrace.WriteLine ("Accepted connection.");
-				Worker worker = new Worker (client, this);
+				Worker worker = new Worker (client, listen_socket.LocalEndPoint, this);
 				ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 			}
 

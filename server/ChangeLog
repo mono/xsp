@@ -1,3 +1,8 @@
+2002-12-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* MonoWorkerRequest.cs: changes to match recent MapPath fixing in
+	System.Web.
+
 2002-12-13  Juli Mallett  <jmallett@FreeBSD.org>
 
 	* Makefile, server/Makefile, src/Makefile: Spell `make' as `$(MAKE)'.

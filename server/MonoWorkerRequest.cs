@@ -3,7 +3,7 @@
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//	Simon White (simon@psionics.demon.co.uk)
+//	Simon Waite (simon@psionics.demon.co.uk)
 //
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
 //
@@ -296,17 +296,14 @@ namespace Mono.ASPNET
 			if (path == null || path.Length == 0 || path == "/")
 				return appHost.Path.Replace ('/', Path.DirectorySeparatorChar);
 
-			if (path [0] == '~' && path.Length > 1 && path [1] == '/') {
-				path = path.Substring (2);
-			} else if (path.IndexOf ("/~/") == 0) {
-				// Not sure about this. It makes request such us /~/dir/file work
-				path = path.Substring (3);
-			} else if (path [0] == '/' && path.Length > 1) {
+			int len = path.Length;
+			if (path [0] == '/' && len > 1) {
 				path = path.Substring (1);
+			} else if (path [0] == '~' && len > 2 && path [1] == '/') {
+				path = path.Substring (2);
 			}
 				
-			path =  Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
-			return path;
+			return Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
 		}
 
 		public void ProcessRequest ()
@@ -353,6 +350,11 @@ namespace Mono.ASPNET
 			if (qmark != -1) {
 				queryString = path.Substring (qmark + 1);
 				path = path.Substring (0, qmark);
+			}
+
+			if (path.StartsWith ("/~/")) {
+				// Not sure about this. It makes request such us /~/dir/file work
+				path = path.Substring (2);
 			}
 
 			return true;

@@ -14,21 +14,23 @@ Given a HTTP query in the form:
 
 [GET|POST] filename.aspx HTTP/1.0
 
-It generates its C# code using xsp, compiles it with mcs, renders the page
-and send it back to the client.
+It generates its C# code using xsp, compiles it with csc, renders the page
+and send it back to the client. It does not use System.Web.Hosting classes
+when rendering.
 
 
-How to test
-------------
+How to see it working
+-----------------------
+* Run make in xsp/src and xsp/src/HttpServer
 
-* Create a directory (./testing).
+* Create a directory ./testing
 
-* Copy ../xsp.exe, ../MyForm.dll, server.exe and xsp.bat to it.
+* Copy ../xsp.exe, ../MyForm.dll, server.exe and xsp.bat to ./testing.
 
 * Copy some aspx file to ./testing 
 
-* (optional) Verify that xsp yourfile.aspx generates C# code and that mcs
-can compile it).
+* (optional) Verify that 'xsp yourfile.aspx' generates C# code and that csc
+can compile it (reference System.Web.dll and System.Drawing.dll!).
 
 * cd ./testing; ./server PORTNUMBER
 
@@ -38,6 +40,42 @@ can compile it).
 	  get yourfile.aspx http/1.0
 
 * For the rest, use your browser: http://127.0.0.1:PORTNUMBER/yourfile.aspx
+
+
+How to help debugging mono System.Web
+----------------------------------------
+* Follow the steps in previous section.
+
+* Create ./testing/lib
+
+* Run make in mcs/class and copy mcs/class/lib/System.Web.dll and
+mcs/class/lib/System.Drawing.dll to ./testing/lib
+
+* In directory (folder? :) ./testing run './server --usemonoclasses PORT'.
+
+* Don't forget to read the above IMPORTANT note. You'll have to rerun the
+server on every access to a given page.
+
+* Try accesing any .aspx file you have in ./testing.
+
+	o You get an error saying that xxxxx.dll or one of its dependencies
+	was not found.
+
+		-Run the file last_compilation_command.bat and see if it 
+		compiles. Probably not. May be a missing class or feature?
+		Go! Implement/fix it!
+
+	o You get incorrect HTML rendered on the browser.
+
+		-Edit xxxxx.cs try to guess which class has the error when
+		rendering (may be you already know because that table or 
+		button is not what you expected). Then try to fix the error.
+
+	o You get the correct HTML rendered on the browser.
+	
+		-Congratulations! Put your sample page under xsp/tests if you
+		want.
+
 
 - Enjoy!
 

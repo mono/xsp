@@ -51,7 +51,7 @@ class MyWorkerRequest
 	private string csFileName;
 	private TextReader input;
 	private TextWriter output;
-	private ArrayList references;
+	private ArrayList cscOptions;
 	private string className;
 	private string full_request;
 	private string method;
@@ -69,15 +69,25 @@ class MyWorkerRequest
 
 		this.input = input;
 		this.output = output;
-		references = new ArrayList ();
-		AddReference ("MyForm.dll");
-		AddReference ("System.Web");
-		AddReference ("System.Drawing");
+		cscOptions = new ArrayList ();
+		cscOptions.Add ("/noconfig");
+		cscOptions.Add ("/nologo");
+		cscOptions.Add ("/debug+");
+		cscOptions.Add ("/debug:full");
+		cscOptions.Add ("/target:library");
+		AddReference ("mscorlib.dll");
+		AddReference ("System.dll");
+		AddReference (".\\MyForm.dll");
+		AddReference (Server.SystemWeb);
+		AddReference (Server.SystemDrawing);
 	}
 
 	public void ProcessRequest ()
 	{
 		GetRequest ();
+		if (!fileName.EndsWith (".aspx"))
+			return;
+
 		Console.WriteLine ("Running xsp...");
 		Xsp ();
 		Console.WriteLine ("Xsp finished...");
@@ -105,21 +115,17 @@ class MyWorkerRequest
 			fileName = fileName.Substring (1);
 
 		int end = fileName.IndexOf (' ');
-		fileName = fileName.Substring (0, end);
+		if (end != -1)
+			fileName = fileName.Substring (0, end);
 		Console.WriteLine ("File name: {0}", fileName);
 		csFileName = fileName.Replace (".aspx", ".cs");
 	}
 	
 	private void Xsp ()
 	{
-		StringWriter xsp_out = new StringWriter (new StringBuilder ());
-		TextWriter old_out = Console.Out;
-		Console.SetOut (xsp_out);
 		Process proc = Process.Start ("xsp.bat", fileName + " " + csFileName);
 		proc.WaitForExit ();
 		proc.Close ();
-		Console.SetOut (old_out);
-		xsp_out.Close ();
 	}
 
 	private HttpBrowserCapabilities GetCapabilities ()
@@ -144,8 +150,7 @@ class MyWorkerRequest
 
 	private void AddReference (string reference)
 	{
-		references.Add ("-r");
-		references.Add (reference);
+		cscOptions.Add ("/r:" + reference);
 	}
 	
 	private string GetAttributeValue (string line, string att)
@@ -171,7 +176,7 @@ class MyWorkerRequest
 			else if (line.StartsWith ("//<compileandreference ")){
 				string src = GetAttributeValue (line, "src");
 				dll = src.Replace (".cs", ".dll"); //FIXME
-				File.Delete (dll);
+				//File.Delete (dll);
 				Compile (src, dll);
 				AddReference (dll.Replace (".dll", ""));
 			}
@@ -188,7 +193,7 @@ class MyWorkerRequest
 	private Page Build ()
 	{
 		string dll = fileName.Replace (".aspx", ".dll"); //FIXME
-		File.Delete (dll);
+		//File.Delete (dll);
 		Compile (fileName.Replace (".aspx", ".cs"), dll);
 		Assembly page_dll = Assembly.LoadFrom (dll);
 		if (page_dll == null)
@@ -199,30 +204,30 @@ class MyWorkerRequest
 
 	private void Compile (string csName, string dllName)
 	{
-		string [] args = new string [references.Count + 4];
+		string [] args = new string [cscOptions.Count + 1];
 		int i = 0;
-		foreach (string reference in references)
-			args [i++] = reference;
+		foreach (string option in cscOptions)
+			args [i++] = option;
 
-		args [i++] = "--target";
-		args [i++] = "library";
 		args [i] = csName;
 
 		string cmdline = "";
 		foreach (string arg in args)
 			cmdline += " " + arg;
 
-		Console.WriteLine ("Running... mcs.exe {0}", cmdline);
-		TextWriter old_out = Console.Out;
-		StringBuilder mcs_output = new StringBuilder ();
-		StringWriter new_out = new StringWriter (mcs_output);
-		Console.SetOut (new_out);
-		Process proc = Process.Start ("mcs.exe", cmdline);
+		if (!Server.UseMonoClasses){
+			Console.WriteLine ("Writing compilation command to last_compilation_command.bat");
+			StreamWriter last_command = new StreamWriter (
+							File.Create ("last_compilation_command.bat"));
+			last_command.WriteLine ("csc.exe {0}", cmdline);
+			last_command.Close ();
+		}
+
+		Console.WriteLine ("Running... csc.exe {0}", cmdline);
+		Process proc = Process.Start ("csc.exe", cmdline);
 		proc.WaitForExit ();
-		new_out.Close ();
 		proc.Close ();
-		Console.SetOut (old_out);
-		Console.WriteLine ("{0}\n<!-- Finished compilation of {0} -->", mcs_output, csName);
+		Console.WriteLine ("<!-- Finished compilation of {0} -->", csName);
 	}
 }
 
@@ -353,14 +358,60 @@ public class Server
 		workers = new_workers;
 	}
 	
-	public static void Main (string [] args)
+	private static bool useMonoClasses;
+
+	public static bool UseMonoClasses
 	{
+		get { return useMonoClasses; }
+	}
+
+	public static string SystemWeb
+	{
+		get { return (!useMonoClasses ? "System.Web.dll" : ".\\lib\\System.Web.dll"); }
+	}
+
+	public static string SystemDrawing
+	{
+		get { return (!useMonoClasses ? "System.Drawing.dll" : ".\\lib\\System.Drawing.dll"); }
+	}
+
+	private static void Usage ()
+	{
+		Console.WriteLine ("Usage: server [--usemonoclasses] port");
+		Console.WriteLine ("By default, it uses csc to compile against mono " +
+				   "System.Web and System.Color, which must be copied\n" +
+				   "to the directory where you run the server.");
+		Environment.Exit (1);
+	}
+
+	public static int Main (string [] args)
+	{
+		if (args.Length == 0 || args.Length > 3)
+			Usage ();
+
 		int port = 80;
-		if (args.Length >= 1)
-			port = Int32.Parse (args [0]);
+		bool useMonoClasses_set = false;
+		bool port_set = false;
+		foreach (string arg in args){
+			if (!useMonoClasses_set && 0 == String.Compare (arg, "--usemonoclasses")){
+				useMonoClasses = true;
+				useMonoClasses_set = true;
+			}
+			else if (!port_set){
+				try {
+					port = Int32.Parse (arg);
+					port_set = true;
+				} catch (Exception){
+					Usage ();
+				}
+			}
+			else
+				Usage ();
+		}
 
 		Server server = new Server (port);
 		server.Start ();
+		return 0;
 	}
 }
 

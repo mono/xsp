@@ -1,0 +1,17 @@
+2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* README: documented how to help debugging System.Web.
+
+	* server.cs: added option --usemonoclasses to test our System.Web
+	and System.Drawing. Use csc instead of mcs to compile.
+
+2002-05-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: New file.
+	* README: New file.
+	* server.cs: New file.
+	* xsp.bat: New file.
+
+	Highly experimental web server that uses xsp + mcs generate and compile
+	pages from .aspx.
+

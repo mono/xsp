@@ -1,3 +1,9 @@
+2002-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* dbpage2.aspx: new sample. It uses tabcontrol2 and sets up a page
+	with 4 tabs (Browse, Insert, Update, Delete) for maintenance of a simple
+	PostgreSQL database using ADO.NET.
+
 2002-07-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* tabcontrol.aspx: removed .dll extension from assembly file name.

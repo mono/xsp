@@ -1,0 +1,38 @@
+.TH xsp 1 "19 February 2003"
+.SH NAME 
+XSP \- Mono Sample Web Server
+.SH SYNOPSIS
+.B mono xsp.exe
+[options]
+.SH DESCRIPTION
+XSP is a sample web server thats hosts the ASP.NET runtime and can be
+used to test and debug web applications that use the System.Web
+facilities in Mono.
+.SH OPTIONS
+.TP
+.I \-\-virtual NAME
+Exposes the root at the given NAME on the web, for example:
+.nf
+	mono xsp.exe --virtual Blog 
+.fi
+Would expose the current directory on http://localhost:8080/Blog/
+.TP
+.I \-\-root PATH
+The root directory for XSP.  The default is the directory where XSP is
+executed. 
+.TP
+.I \-\-port PORT
+Changes the default port where the XSP server will listen to
+requests.  By default XSP listens on port 8080.
+.AUTHORS
+The Mono XSP server was written by Gonzalo Paniagua Javier
+(gonzalo@ximian.com).
+.SH SEE ALSO
+mono(1), System.Web, System.Web.Hosting namespace
+.PP
+http://www.asp.net is Microsoft's official site for ASP.NET
+.SH MORE INFORMATION
+The Mono project (http://www.go-mono.com) is a collaborative effort
+led by Ximian (http://www.ximian.com) to implement an open source
+version of the .NET Framework.
+

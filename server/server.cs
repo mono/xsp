@@ -48,7 +48,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
 			Console.WriteLine ("minimalistic HTTP server\n");
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    xsp.exe [--root rootdir] [--applications APPS] [--virtual virtualdir]");
+			Console.WriteLine ("    xsp.exe [--root rootdir] [--applications APPS]");
 			Console.WriteLine ("            [--port N] [--address addr]");
 			Console.WriteLine ();
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
@@ -192,7 +192,9 @@ namespace Mono.ASPNET
 
 			ManualResetEvent evt = null;
 			try {
-				server.Start ();
+				if (server.Start () == false)
+					return 2;
+
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();

@@ -259,7 +259,7 @@ namespace Mono.ASPNET
  			}
  		}
  
-		public void Start ()
+		public bool Start ()
 		{
 			if (started)
 				throw new InvalidOperationException ("The server is already started.");
@@ -270,7 +270,7 @@ namespace Mono.ASPNET
 #if MODMONO_SERVER
 			if (filename == null)
 				throw new InvalidOperationException ("filename not set");
-				
+
 			File.Delete (filename);
 			listen_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 			EndPoint ep = new UnixEndPoint (filename);
@@ -285,6 +285,7 @@ namespace Mono.ASPNET
 			runner.Start ();
 			stop = false;
 			WebTrace.WriteLine ("Server started.");
+			return true;
 		}
 
 		public void Stop ()

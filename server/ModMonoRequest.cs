@@ -99,7 +99,6 @@ namespace Mono.ASPNET
 		string queryString;
 		string protocol;
 		string uri;
-		string pathInfo;
 		string localAddress;
 		string remoteAddress;
 		string remoteName;

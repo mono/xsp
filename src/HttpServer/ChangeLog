@@ -1,3 +1,10 @@
+2002-07-17  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* Makefile: use only mcs.
+
+	* server.cs: use index.aspx or index.html by default if the
+	path is a directory. Fixed file read for non-aspx files.
+
 2002-07-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server.cs: added support for <compileroptions> and little fix to dll

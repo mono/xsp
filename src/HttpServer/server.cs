@@ -555,6 +555,21 @@ class MyWorkerRequest
 		if (dirSeparator != '/')
 			fileOnDisk.Replace ('/', dirSeparator);
 
+		bool is_dir = Directory.Exists (fileOnDisk);
+		if (fileOnDisk == String.Empty || is_dir) {
+			string dir = is_dir ? Path.GetDirectoryName (fileOnDisk) : "";
+			
+			if (File.Exists ("index.aspx"))
+				fileOnDisk = dir + dirSeparator + "index.aspx";
+			else if (File.Exists ("index.html"))
+				fileOnDisk = dir + dirSeparator + "index.html";
+			
+			if (Path.IsPathRooted (fileOnDisk))
+				fileOnDisk = fileOnDisk.Substring (1);
+				
+			fileName = fileOnDisk;
+		}
+
 		if (!File.Exists (fileOnDisk)){
 			RenderErrorPage (404, "Not Found", "File '" + fileName + "' not found.");
 			return;
@@ -581,13 +596,11 @@ class MyWorkerRequest
 	{
 		Stream fileInput = File.Open (fileOnDisk, FileMode.Open); //FIXME
 		byte [] fileContent = new byte [8192];
-		int offset = 0;
 		int count = fileContent.Length;
 		Decoder decoder = Encoding.UTF8.GetDecoder ();
-		while ((count = fileInput.Read (fileContent, offset, count)) != 0) {
+		while ((count = fileInput.Read (fileContent, 0, count)) != 0) {
 			char [] chars = new char [decoder.GetCharCount (fileContent, 0, count)];
 			decoder.GetChars (fileContent, 0, count, chars, 0);
-			offset += count;
 			outputBuffer.Write (chars);
 			chars = null;
 		}
@@ -723,7 +736,7 @@ class MyWorkerRequest
 
 	private void SendData ()
 	{
-		if (response.StatusCode != 302){
+		if (response == null || response.StatusCode != 302){
 			HttpHelpers.SendStatus (output, 200, "OK");
 		} else {
 			HttpHelpers.SendStatus (output, 302, "Found");

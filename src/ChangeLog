@@ -1,3 +1,9 @@
+2002-07-17  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* Makefile: use only mcs.
+
+	* MyForm.cs: removed.
+
 2002-07-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* driver.cs: use the full file name from the command line.

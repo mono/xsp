@@ -1,6 +1,6 @@
 <%@ Page Language="C#" %>
 <%@ Import namespace="System.Reflection" %>
-<%@ Register TagPrefix="Mono" NAmespace="Mono.Controls" assembly="tabcontrol2" %>
+<%@ Register TagPrefix="Mono" Namespace="Mono.Controls" assembly="tabcontrol2.dll" %>
 <html>
 <!-- You must compile tabcontrol2.cs and copy the dll to the output/ directory -->
 <!-- Authors:
@@ -24,35 +24,38 @@
 </script>
 
 <body>
-<center>
-<h3>Test for Tabs user control (tabcontrol2.dll)</h3>
-<hr>
-</center>
-<form runat="server">
-<Mono:Tabs2 runat="server" id="tabs">
-	<Mono:TabContent runat="server" label="Empty" />
-	<Mono:TabContent runat="server" label="Image">
-		Hi there<p>
-		<asp:Image id="im" runat="server"
-			AlternateText="Yes, again the dancing monkey"
-			ImageAlign="left"
-			ImageUrl="http://www.ximian.com/images/logo_ximian.gif"/>
-	</Mono:TabContent>
-	<Mono:TabContent runat="server" Label="Form">
-		<asp:Button id="btn"
-		     Text="Submit"
-		     OnClick="Clicked"
-		     runat="server"/>
-		<br>
-		<span runat=server id="uno"/>
-		<br>
-		<span runat=server id="dos"/>
-		<br>
-		<asp:TextBox id="txt1" Text="You can write here." TextMode="MultiLine" OnTextChanged="txt_Changed" runat="server" rows=5 />
-	<br>
-	</Mono:TabContent>
-</Mono:Tabs2>
-</form>
+    <center>
+        <h3>Test for Tabs user control (tabcontrol2.dll)</h3>
+        <hr>
+    </center>
+
+    <form runat="server">
+        <Mono:Tabs2 runat="server" id="tabs">
+    	    <Mono:TabContent runat="server" label="Empty" />
+    	    <Mono:TabContent runat="server" label="Image">
+        	Hi there
+        	<p>
+        	<asp:Image id="im" runat="server"
+        		AlternateText="Yes, again the dancing monkey"
+        		ImageAlign="left"
+        		ImageUrl="http://www.ximian.com/images/logo_ximian.gif"/>
+            </Mono:TabContent>
+            <Mono:TabContent runat="server" Label="Form">
+        	 <asp:Button id="btn"
+        		Text="Submit"
+        		OnClick="Clicked"
+        		runat="server"/>
+        	 <br>
+        	 <span runat=server id="uno"/>
+        	 <br>
+        	 <span runat=server id="dos"/>
+        	 <br>
+        	 <asp:TextBox id="txt1" Text="You can write here." TextMode="MultiLine" 
+		  OnTextChanged="txt_Changed" runat="server" rows=5 />
+        	 <br>
+            </Mono:TabContent>
+        </Mono:Tabs2>
+    </form>
 </body>
 </html>
 

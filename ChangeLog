@@ -1,3 +1,7 @@
+2004-10-03 Ben Maurer  <bmaurer@ximian.com>
+
+	* server/ApplicationServer.cs: use UtcNow
+
 2004-09-30 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/web_regularexpressionvalidator.aspx: improved example. Patch by

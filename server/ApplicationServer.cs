@@ -301,7 +301,7 @@ namespace Mono.ASPNET
 						WebTrace.WriteLine ("Accepted connection.");
 						SetSocketOptions (client);
 						allSockets.Add (client);
-						timeouts [client] = DateTime.Now;
+						timeouts [client] = DateTime.UtcNow;
 						continue;
 					}
 
@@ -315,7 +315,7 @@ namespace Mono.ASPNET
 				if (w > 0) {
 					Socket [] socks_timeout = new Socket [w];
 					timeouts.Keys.CopyTo (socks_timeout, 0);
-					DateTime now = DateTime.Now;
+					DateTime now = DateTime.UtcNow;
 					foreach (Socket k in socks_timeout) {
 						DateTime atime = (DateTime) timeouts [k];
 						TimeSpan diff = now - atime;

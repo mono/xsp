@@ -637,6 +637,7 @@ namespace Mono.ASPNET
 	class HttpErrors
 	{
 		static byte [] error500;
+		static byte [] badRequest;
 
 		static HttpErrors ()
 		{
@@ -646,6 +647,14 @@ namespace Mono.ASPNET
 				   "Your client sent a request that was not understood by this server.\r\n" +
 				   "</body></html>\r\n";
 			error500 = Encoding.ASCII.GetBytes (s);
+
+			string br = "HTTP/1.0 400 Bad Request\r\n" + 
+				"Connection: close\r\n\r\n" +
+				"<html><head><title>400 Bad Request</title></head>" +
+				"<body><h1>Bad Request</h1>The request was not understood" +
+				"<p></body></html>";
+
+			badRequest = Encoding.ASCII.GetBytes (br);
 		}
 
 		public static byte [] NotFound (string uri)
@@ -657,6 +666,11 @@ namespace Mono.ASPNET
 				"server.<p>\r\n</body></html>\r\n", uri);
 
 			return Encoding.ASCII.GetBytes (s);
+		}
+
+		public static byte [] BadRequest ()
+		{
+			return badRequest;
 		}
 
 		public static byte [] ServerError ()

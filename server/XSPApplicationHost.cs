@@ -228,7 +228,14 @@ namespace Mono.ASPNET
 					return;
 
 				InitialWorkerRequest ir = new InitialWorkerRequest (stream);
-				ir.ReadRequestData ();
+				try {
+					ir.ReadRequestData ();
+				} catch (Exception ex) {
+					byte [] badReq = HttpErrors.BadRequest ();
+                                        Write (badReq, 0, badReq.Length);
+                                        throw ex;
+				}
+
 				RequestData rdata = ir.RequestData;
 				string vhost = null; // TODO: read the headers in InitialWorkerRequest
 				int port = ((IPEndPoint) localEP).Port;

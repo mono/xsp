@@ -1,3 +1,9 @@
+2005-02-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: added BadRequest () to HttpErrors.
+	* server/XSPApplicationHost.cs: if there's a failure reading the
+	request, write back a 400 error to the client. Patch by Russ Young.
+
 2005-01-26  Lluis Sanchez Gual <lluis@ximian.com>
 
 	* configure.in: Added masterpages test directory.

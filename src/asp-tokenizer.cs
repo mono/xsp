@@ -163,7 +163,7 @@ class AspTokenizer {
 				while ((c = sr.Peek ()) != -1 && c != '<')
 					sb.Append ((char) read_char ());
 
-				return (c != -1) ? Token.TEXT : Token.EOF;
+				return (c != -1 || sb.Length > 0) ? Token.TEXT : Token.EOF;
 			}
 
 			if (inTag && current_token == '=' && !Char.IsWhiteSpace ((char) c)){ 

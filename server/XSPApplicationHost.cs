@@ -255,11 +255,12 @@ namespace Mono.ASPNET
 						rdata.Path, rdata.PathInfo, rdata.QueryString,
 						rdata.Protocol, rdata.InputBuffer, redirect);
 			} catch (Exception e) {
-				if (!(e is RequestLineException))
+				bool ignore = ((e is RequestLineException) || (e is IOException));
+				if (!ignore)
 					Console.WriteLine (e);
 
 				try {
-					if (!(e is IOException)) {
+					if (!ignore) {
 						byte [] error = HttpErrors.ServerError ();
 						Write (error, 0, error.Length);
 					}

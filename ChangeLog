@@ -1,3 +1,9 @@
+2004-12-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: don't print IOExceptions caused by
+	socket read/write errors and don't send back a 500 error on IOExceptions
+	or error reading request line. Fixes bug #70391.
+
 2004-12-07 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs: if we don't have a Content-Length, force

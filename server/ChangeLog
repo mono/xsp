@@ -1,3 +1,8 @@
+2003-09-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPApplicationHost.cs: added a ISponsor for NetworkStream and don't
+	crash xsp.exe if RemoteEndPoint throws an exception.
+
 2003-09-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* ModMonoWorkerRequest.cs: don't cache the values from mod_mono_unix

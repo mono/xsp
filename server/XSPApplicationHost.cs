@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using System.Runtime.Remoting.Lifetime;
 #if MODMONO_SERVER
 using Mono.Posix;
 #endif
@@ -23,7 +24,7 @@ using Mono.Posix;
 namespace Mono.ASPNET
 {
 	[Serializable]
-	class Worker
+	class Worker : ISponsor
 	{
 		IApplicationHost host;
 		NetworkStream ns;
@@ -52,7 +53,9 @@ namespace Mono.ASPNET
 			ns = new NetworkStream (client, true);
 			this.host = host;
 #if !MODMONO_SERVER
-			remoteEP = client.RemoteEndPoint;
+			try {
+				remoteEP = client.RemoteEndPoint;
+			} catch { }
 			this.localEP = localEP;
 #endif
 		}
@@ -61,6 +64,9 @@ namespace Mono.ASPNET
 		{
 			try {
 #if !MODMONO_SERVER
+				if (remoteEP == null)
+					return;
+
 				InitialWorkerRequest ir = new InitialWorkerRequest (ns);
 				ir.ReadRequestData ();
 				rdata = ir.RequestData;
@@ -97,6 +103,12 @@ namespace Mono.ASPNET
 				return;
 
 			mwr.ProcessRequest ();
+		}
+
+		TimeSpan ISponsor.Renewal (ILease lease)
+		{
+			Console.WriteLine ("Renewal called: {0}", lease.GetType ());
+			return TimeSpan.MaxValue;
 		}
 	}
 

@@ -1,3 +1,8 @@
+2002-09-30  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: avoid throwing exception when the connextion is closed
+	on the other end.
+
 2002-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server.cs: Process works now!

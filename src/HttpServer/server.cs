@@ -185,7 +185,10 @@ class PageFactory
 								dll,
 								"ASP." + className,
 								fileWriteTime);
+					try {
 					cachedData.Add (fileName, cached);
+					} catch {
+					}
 				}
 			}
 
@@ -408,6 +411,7 @@ class HttpHelpers
 		response.End ();
 		*/
 
+		try {
 		SendStatus (writer, code, message);
 		SendHeader (writer, "Content-Type", "text/html");
 		string content = String.Format ("<html>\n<title>Error {0}: {1}</title>\n<body>" + 
@@ -416,6 +420,8 @@ class HttpHelpers
 		SendHeader (writer, "Content-Length", content.Length.ToString ());
 		writer.Write ("\r\n");
 		writer.Write (content);
+		} catch (Exception) {
+		}
 	}
 
 	private static void WriteFormattedSource (TextWriter writer, string source)
@@ -682,9 +688,14 @@ class MyWorkerRequest
 	
 	private bool GetRequestData ()
 	{
+		try {
 		GetRequestMethod ();
 		GetCapabilities ();
 		GetQueryOptions ();
+		} catch {
+			return false;
+		}
+		
 
 		if (query [0] == '/')
 			query = query.Substring (1);
@@ -724,13 +735,17 @@ class MyWorkerRequest
 		response = new HttpResponse (outputBuffer);
 		try {
 			page.ProcessRequest (new HttpContext (request, response));
-			SendData ();
+			try {
+				SendData ();
+			} catch (Exception) {
+			}
+		} catch (InvalidOperationException e) {
 		} catch (Exception e) {
 			Console.WriteLine ("Caught exception rendering page:\n" + e.ToString ());
 			if (e is TargetInvocationException)
 				Console.WriteLine (e.InnerException.ToString ());
 			HttpHelpers.RenderErrorPage (output, 500, "Internal Server Error",
-						     "The server failed to render '" + fileName + "'");
+						     "The server failed to render '" + fileName + "'. May be a program error?");
 		}
 	}
 
@@ -780,7 +795,9 @@ class Worker
 	{
 		Console.WriteLine ("Started processing...");
 		StreamWriter stream_output = new StreamWriter (socket.GetStream ());
-		HtmlTextWriter output = new HtmlTextWriter (stream_output);
+		stream_output.AutoFlush = true;
+		StreamWriter output = new StreamWriter (socket.GetStream ());
+		output.AutoFlush = true;
 		StreamReader input = new StreamReader (socket.GetStream ());
 		try {
 			MyWorkerRequest proc = new MyWorkerRequest (input, output, stream_output);

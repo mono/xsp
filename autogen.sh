@@ -1,4 +1,4 @@
-automake -a
 aclocal
+automake -a
 autoconf
 ./configure $*

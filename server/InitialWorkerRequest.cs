@@ -95,6 +95,8 @@ namespace Mono.ASPNET
 		{
 			inputBuffer = AllocateBuffer ();
 			inputLength = stream.Read (inputBuffer, 0, BSize);
+			if (inputLength == 0) // Socket closed
+				throw new IOException ("socket closed");
 			position = 0;
 		}
 
@@ -150,7 +152,12 @@ namespace Mono.ASPNET
 
 		bool GetRequestLine ()
 		{
-			string req = ReadLine ();
+			string req = null;
+			try {
+				req = ReadLine ();
+			} catch {
+			}
+
 			if (req == null)
 				return false;
 

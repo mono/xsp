@@ -4,7 +4,7 @@ DIST_DIR="@abs_top_builddir@/$(NAME_VERSION)"
 TARFILE=$(NAME_VERSION).tar.gz
 PREFIX=@prefix@
 TEST_DIR=$(DESTDIR)$(PREFIX)/share/doc/xsp/test
-DISTFILES=README NEWS INSTALL configure mkinstalldirs Makefile.in
+DISTFILES=README NEWS INSTALL configure mkinstalldirs Makefile.in install-sh
 
 .PHONY: all install clean uninstall dist
 

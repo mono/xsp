@@ -107,6 +107,7 @@ namespace Mono.ASPNET
 			ILease l = (ILease) GetLifetimeService ();
 			l.Register (this);
 			if (!mwr.ReadRequestData ()) {
+				requestFinished = true;
 				return;
 			}
 

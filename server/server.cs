@@ -12,6 +12,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Web.Hosting;
 
 namespace Mono.ASPNET
@@ -62,12 +63,17 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                            /:.;/blog:../myblog");
 			Console.WriteLine ("                           Two applications like the above ones are handled.");
 			Console.WriteLine ("                    Default value: /:.");
+			Console.WriteLine ("                    AppSettings key name: MonoApplications");
+			Console.WriteLine ();
+			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
+			Console.WriteLine ("               when the server has no controlling terminal.");
 
 			Console.WriteLine ();
 		}
 		
 		public static int Main (string [] args)
 		{
+			bool nonstop = false;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
 			string apps = ConfigurationSettings.AppSettings ["MonoApplications"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
@@ -109,9 +115,16 @@ namespace Mono.ASPNET
 				case "--applications":
 					apps = args [++i];
 					break;
+				case "--nonstop":
+					nonstop = true;
+					break;
 				case "--help":
 					ShowHelp ();
 					return 0;
+				default:
+					Console.WriteLine ("Unknown argument: {0}", a);
+					ShowHelp ();
+					return 1;
 				}
 			}
 
@@ -148,15 +161,26 @@ namespace Mono.ASPNET
 			
 			Console.WriteLine ("Root directory: {0}", rootDir);
 
+			ManualResetEvent evt = null;
 			try {
 				host.Start ();
-				Console.WriteLine ("Hit Return to stop the server.");
-				Console.ReadLine ();
+				if (!nonstop) {
+					Console.WriteLine ("Hit Return to stop the server.");
+					Console.ReadLine ();
+				} else {
+					evt = new ManualResetEvent (false);
+					evt.WaitOne ();
+				}
 			} catch (Exception e) {
 				Console.WriteLine ("Error: {0}", e.Message);
+				if (evt != null)
+					evt.Set ();
 				return 1;
 			}
 			
+			if (evt != null)
+				evt.Set ();
+
 			return 0;
 		}
 	}

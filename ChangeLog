@@ -1,3 +1,10 @@
+2003-10-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile.in: fix dist target.
+	* server/XSPApplicationHost.cs: re-added line removed by mistake.
+	* server/server.cs: added --nonstop argument to allow xsp be run with
+	no controlling tty.
+
 2003-10-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* INSTALL: updated.

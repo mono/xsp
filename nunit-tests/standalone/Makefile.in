@@ -5,9 +5,10 @@ DISTFILES=Makefile.in $(ASPNET_FILES) $(CS_FILES)
 
 ASPNET_FILES = \
 	test1.aspx \
-	test2.aspx
+	test2.aspx \
+	test3.aspx
 
-CS_FILES = $(ASPNET_FILES:.aspx=.cs)
+CS_FILES = test1.cs
 
 # 
 REFERENCES= System.Web NUnit.Framework NUnitAsp

@@ -1,5 +1,11 @@
 2003-12-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* standalone/Makefile.in: added test3.aspx
+	* standalone/test1.cs: moved other tests to this one.
+	* standalone/test3.aspx: New test.
+
+2003-12-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* standalone/Makefile.in: added test2. Added 'reautogen' target to
 	regenerate Makefile after modifying Makefile.in.
 

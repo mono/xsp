@@ -181,6 +181,14 @@ public class TagAttributes
 		get { return (got_hashed ? atts_hash.Count : keys.Count);}
 	}
 
+	public bool IsDataBound (string att)
+	{
+		if (!got_hashed)
+			return false;
+
+		return (att.StartsWith ("<%#") && att.EndsWith ("%>"));
+	}
+	
 	public override string ToString ()
 	{
 		string ret = "";

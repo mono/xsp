@@ -1,3 +1,11 @@
+2002-05-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* aspelements.cs:
+	(TagAttributes): new function IsDataBound () to check for data bound
+	attributes.
+
+	* generator.cs: support data bound attributes.
+
 2002-05-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* generator.cs: 

@@ -125,6 +125,7 @@ class ControlStack
 		public string defaultPropertyName;
 		public int childrenNumber;
 		public Type container;
+		public StringBuilder dataBindFunction;
 
 		public ControlStackData (Type controlType,
 					 string controlID,
@@ -233,11 +234,27 @@ class ControlStack
 			top.childrenNumber++;
 	}
 	
+	public bool HasDataBindFunction ()
+	{
+		if (top.dataBindFunction == null || top.dataBindFunction.Length == 0)
+			return false;
+		return true;
+	}
+	
 	public Type Container
 	{
 		get { return top.container; }
 	}
 	
+	public StringBuilder DataBindFunction
+	{
+		get {
+			if (top.dataBindFunction == null)
+				top.dataBindFunction = new StringBuilder ();
+			return top.dataBindFunction;
+		}
+	}
+
 	public int Count
 	{
 		get { return controls.Count; }
@@ -530,10 +547,37 @@ public class Generator
 							control_id, control_type);
 	}
 	
+	private void DataBoundProperty (string varName, string value)
+	{
+		if (value == "")
+			throw new ApplicationException ("Empty data binding tag.");
+
+		string control_id = controls.PeekControlID ();
+		string control_type_string = controls.PeekType ().ToString ();
+		StringBuilder db_function = controls.DataBindFunction;
+		string container = "System.Web.UI.Control";
+		if (db_function.Length == 0)
+			db_function.AppendFormat ("\t\tpublic void __DataBind_{0} (object sender, " + 
+						  "System.EventArgs e) {{\n" +
+						  "\t\t\t{1} Container;\n" +
+						  "\t\t\t{2} target;\n" +
+						  "\t\t\ttarget = ({2}) sender;\n" +
+						  "\t\t\tContainer = ({1}) target.BindingContainer;\n",
+						  control_id, container, control_type_string);
+
+		/* Removes '<%#' and '%>' */
+		string real_value = value.Remove (0,3);
+		real_value = real_value.Remove (real_value.Length - 2, 2);
+		real_value = real_value.Trim ();
+
+		db_function.AppendFormat ("\t\t\ttarget.{0} = System.Convert.ToString ({1});\n",
+					  varName, real_value);
+	}
+
 	/*
 	 * Returns true if it generates some code for the specified property
 	 */
-	private void AddPropertyCode (Type prop_type, string var_name, string att)
+	private void AddPropertyCode (Type prop_type, string var_name, string att, bool isDataBound)
 	{
 		/* FIXME: should i check for this or let the compiler fail?
 		 * if (!prop.CanWrite)
@@ -543,8 +587,12 @@ public class Generator
 			if (att == null)
 				throw new ApplicationException ("null value for attribute " + var_name );
 
-			current_function.AppendFormat ("\t\t\t__ctrl.{0} = \"{1}\";\n", var_name,
-							Escape (att)); // FIXME: really Escape this?
+			if (isDataBound)
+				DataBoundProperty (var_name, att);
+			else
+				current_function.AppendFormat ("\t\t\t__ctrl.{0} = \"{1}\";\n", var_name,
+								Escape (att)); // FIXME: really Escape this?
+				
 		} 
 		else if (prop_type.IsEnum){
 			if (att == null)
@@ -668,9 +716,10 @@ public class Generator
 	private bool ProcessProperties (PropertyInfo prop, string id, TagAttributes att)
 	{
 		bool is_processed = false;
+		bool isDataBound = att.IsDataBound ((string) att [id]);
 
 		if (0 == String.Compare (prop.Name, id, true)){
-			AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id]);
+			AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id], isDataBound);
 			is_processed = true;
 		}
 		else if (prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
@@ -700,7 +749,7 @@ public class Generator
 
 				AddPropertyCode (subprop.PropertyType,
 						 prop.Name + "." + subprop.Name,
-						 value);
+						 value, isDataBound);
 				is_processed = true;
 			}
 		}
@@ -775,6 +824,11 @@ public class Generator
 
 		string control_id = controls.PeekControlID ();
 		Type control_type = controls.PeekType ();
+
+		bool hasDataBindFunction = controls.HasDataBindFunction ();
+		if (hasDataBindFunction)
+			old_function.AppendFormat ("\t\t\t__ctrl.DataBinding += new System.EventHandler " +
+						   "(this.__DataBind_{0});\n", control_id);
 		
 		if (control_type == typeof (System.Web.UI.ITemplate)){
 			old_function.Append ("\n\t\t}\n\n");
@@ -815,6 +869,11 @@ public class Generator
 		}
 
 		init_funcs.Append (old_function);
+		if (hasDataBindFunction){
+			StringBuilder db_function = controls.DataBindFunction;
+			db_function.Append ("\t\t}\n\n");
+			init_funcs.Append (db_function);
+		}
 		// Avoid getting empty stacks for unbalanced open/close tags
 		if (controls.Count > 1)
 			controls.Pop ();

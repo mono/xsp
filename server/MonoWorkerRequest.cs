@@ -40,6 +40,16 @@ namespace Mono.ASPNET
 		static Encoding encoding = new UTF8Encoding (false);
 		static string serverHeader;
 
+		static string dirSeparatorString = Path.DirectorySeparatorChar.ToString ();
+
+		// Any other?
+		static string [] indexFiles = { "index.aspx",
+						"Default.aspx",
+						"default.aspx",
+						"index.html",
+						"index.htm" };
+						
+
 		static MonoWorkerRequest ()
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -106,9 +116,6 @@ namespace Mono.ASPNET
 		public override string GetAppPath ()
 		{
 			WebTrace.WriteLine ("GetAppPath()");
-			if (appHost.VPath == "/")
-				return "";
-
 			return appHost.VPath;
 		}
 
@@ -306,9 +313,35 @@ namespace Mono.ASPNET
 			return Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
 		}
 
+		bool TryDirectory ()
+		{
+			string localPath = GetFilePathTranslated ();
+			
+			if (!Directory.Exists (localPath))
+				return true;
+
+			if (localPath.EndsWith (dirSeparatorString)) {
+				foreach (string indexFile in indexFiles) {
+					if (File.Exists (localPath + indexFile)) {
+						path += indexFile;
+						break;
+					}
+				}
+				return true;
+			}
+
+			SendStatus (302, "Found");
+			SendUnknownResponseHeader ("Location", path + '/');
+			FlushResponse (true);
+			return false;
+		}
+
 		public void ProcessRequest ()
 		{
 			if (!GetRequestData ())
+				return;
+
+			if (!TryDirectory ())
 				return;
 
 			WebTrace.WriteLine ("ProcessRequest()");

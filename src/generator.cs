@@ -536,8 +536,8 @@ public class Generator
 				throw new ApplicationException ("Invalid attributes for @ Register: " +
 								att.ToString ());
 			prolog.AppendFormat ("\tusing {0};\n", name_space);
-			Foundry.RegisterFoundry (tag_prefix, assembly_name, name_space);
-			buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", assembly_name);
+			Foundry.RegisterFoundry (tag_prefix, assembly_name + ".dll", name_space);
+			buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", assembly_name + ".dll");
 			return;
 		}
 

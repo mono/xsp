@@ -536,8 +536,9 @@ public class Generator
 				throw new ApplicationException ("Invalid attributes for @ Register: " +
 								att.ToString ());
 			prolog.AppendFormat ("\tusing {0};\n", name_space);
-			Foundry.RegisterFoundry (tag_prefix, assembly_name + ".dll", name_space);
-			buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", assembly_name + ".dll");
+			string dll = "output" + Path.DirectorySeparatorChar + assembly_name + ".dll";
+			Foundry.RegisterFoundry (tag_prefix, dll, name_space);
+			buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", dll);
 			return;
 		}
 
@@ -562,6 +563,7 @@ public class Generator
 			switch (data.result) {
 			case UserControlResult.OK:
 				prolog.AppendFormat ("\tusing {0};\n", "ASP");
+				string dll = "output" + Path.DirectorySeparatorChar + data.assemblyName + ".dll";
 				Foundry.RegisterFoundry (tag_prefix, data.assemblyName, "ASP", data.className);
 				buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", data.assemblyName);
 				break;

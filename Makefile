@@ -1,4 +1,5 @@
 EXES= src/xsp.exe src/HttpServer/server.exe src/HttpServer/redirector.sh
+TESTS= test/*.aspx test/*.png test/*.xml
 
 all: 
 	(cd src && make)
@@ -7,8 +8,7 @@ install: all
 	-mkdir rundir
 	-mkdir rundir/output
 	cp $(EXES) rundir/
-	cp test/*.aspx rundir/
-	cp test/*.png rundir/
+	cp $(TESTS) rundir/
 	mcs --target library -o rundir/output/tabcontrol.dll \
 	    -r System.Web test/tabcontrol.cs
 	mcs --target library -o rundir/output/tabcontrol2.dll \

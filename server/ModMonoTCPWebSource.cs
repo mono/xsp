@@ -44,7 +44,21 @@ namespace Mono.ASPNET
 
 			this.bindAddress = bindAddress;
 		}
-		
+
+		public override bool GracefulShutdown ()
+		{
+			EndPoint ep = bindAddress;
+			Socket sock = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+			try {
+				sock.Connect (ep);
+			} catch (Exception e) {
+				Console.Error.WriteLine ("Cannot connect to {0}: {1}", ep, e.Message);
+				return false;
+			}
+
+			return SendShutdownCommandAndClose (sock);
+		}
+
 		public override Socket CreateSocket ()
 		{
 			if (bindAddress == null)

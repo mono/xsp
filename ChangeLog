@@ -1,3 +1,11 @@
+2004-11-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoApplicationHost.cs: support for --terminate. Ensure that
+	no one else is listening on the same unix socket.
+	* server/ModMonoTCPWebSource.cs: support for --terminate.
+	* server/server.cs: added --terminate option to mod-mono-server. You
+	can use it to gracefully terminate a running mod-mono-server.
+
 2004-11-12 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in: remove MKDIR_P

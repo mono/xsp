@@ -24,6 +24,7 @@ namespace Mono.ASPNET
 	public class ModMonoWebSource: IWebSource, IDisposable
 	{
 		string filename;
+		bool file_bound;
 
 		protected ModMonoWebSource () {}
 
@@ -34,16 +35,55 @@ namespace Mono.ASPNET
 
 			this.filename = filename;
 		}
-		
+
+		public virtual bool GracefulShutdown ()
+		{
+			EndPoint ep = new UnixEndPoint (filename);
+			Socket sock = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+			try {
+				sock.Connect (ep);
+			} catch (Exception e) {
+				Console.Error.WriteLine ("Cannot connect to {0}: {1}", filename, e.Message);
+				return false;
+			}
+
+			return SendShutdownCommandAndClose (sock);
+		}
+
+		protected bool SendShutdownCommandAndClose (Socket sock)
+		{
+			byte [] b = new byte [] {0};
+			bool result = true;
+			try {
+				sock.Send (b);
+			} catch {
+				result = false;
+			}
+
+			sock.Close ();
+			return result;
+		}
+
 		public virtual Socket CreateSocket ()
 		{
 			if (filename == null)
 				throw new InvalidOperationException ("filename not set");
 
-			File.Delete (filename);
-			Socket listen_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 			EndPoint ep = new UnixEndPoint (filename);
+			if (File.Exists (filename)) {
+				Socket conn = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+				try {
+					conn.Connect (ep);
+					conn.Close ();
+					throw new InvalidOperationException ("There's already a server listening on " + filename);
+				} catch (SocketException se) {
+				}
+				File.Delete (filename);
+			}
+
+			Socket listen_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (ep);
+			file_bound = true;
 			return listen_socket;
 		}
  
@@ -72,7 +112,8 @@ namespace Mono.ASPNET
 			if (filename != null) {
 				string f = filename;
 				filename = null;
-				File.Delete (f);
+				if (file_bound)
+					File.Delete (f);
 			}
 		}
 		
@@ -191,7 +232,7 @@ namespace Mono.ASPNET
 									modRequest.GetAllHeaderValues());
 				
 			} catch (Exception e) {
-				Console.WriteLine (e);
+				Console.WriteLine ("In ModMonoWorker.Run: {0}", e.Message);
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();

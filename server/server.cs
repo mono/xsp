@@ -107,6 +107,11 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                    Default value: /:.");
 			Console.WriteLine ("                    AppSettings key name: MonoApplications");
 			Console.WriteLine ();
+#if MODMONO_SERVER
+			Console.WriteLine ("    --terminate: gracefully terminates a running mod-mono-server instance.");
+			Console.WriteLine ("                 All other options but --filename or --address and --port");
+			Console.WriteLine ("                 are ignored if this option is provided.");
+#endif
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
 			Console.WriteLine ();
@@ -126,7 +131,8 @@ namespace Mono.ASPNET
 			Root = 1 << 5,
 			FileName = 1 << 6,
 			Address = 1 << 7,
-			Port = 1 << 8
+			Port = 1 << 8,
+			Terminate = 1 << 9,
 		}
 
 		static void CheckAndSetOptions (string name, Options value, ref Options options)
@@ -151,7 +157,7 @@ namespace Mono.ASPNET
 		public static int Main (string [] args)
 		{
 			bool nonstop = false;
-			bool verbose = true;
+			bool verbose = false;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
 			string apps = ConfigurationSettings.AppSettings ["MonoApplications"];
 			string appConfigDir = ConfigurationSettings.AppSettings ["MonoApplicationsConfigDir"];
@@ -178,6 +184,9 @@ namespace Mono.ASPNET
 				case "--filename":
 					CheckAndSetOptions (a, Options.FileName, ref options);
 					filename = args [++i];
+					break;
+				case "--terminate":
+					CheckAndSetOptions (a, Options.Terminate, ref options);
 					break;
 #endif
 				case "--port":
@@ -270,6 +279,17 @@ namespace Mono.ASPNET
 				webSource = new ModMonoTCPWebSource (ipaddr, port);
 			} else {
 				webSource = new ModMonoWebSource (filename);
+			}
+
+			if ((options & Options.Terminate) != 0) {
+				if (verbose)
+					Console.WriteLine ("Shutting down running mod-mono-server...");
+				
+				bool res = ((ModMonoWebSource) webSource).GracefulShutdown ();
+				if (verbose)
+					Console.WriteLine (res ? "Done." : "Failed");
+
+				return (res) ? 0 : 1;
 			}
 
 			ApplicationServer server = new ApplicationServer (webSource);

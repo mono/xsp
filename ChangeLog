@@ -1,3 +1,15 @@
+2004-04-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: HostVPath treated as HostVPath + "/".
+
+	* server/XSPApplicationHost.cs: replaced CR by CRLF in error messages
+	sent to the client. Close the connection if we're writing an error.
+
+	* server/XSPWorkerRequest.cs: replaced CR by CRLF and added the server
+	header to the error.
+
+	* server/server.cs: removed useless line.
+
 2004-03-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: really close the opened connection.

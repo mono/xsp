@@ -178,7 +178,6 @@ namespace Mono.ASPNET
 
 			rootDir = Directory.GetCurrentDirectory ();
 			
-			Type type = typeof (XSPApplicationHost);
 			XSPApplicationServer server =  new XSPApplicationServer (apps);
 #if MODMONO_SERVER
 			server.SetListenFile (filename);

@@ -74,9 +74,11 @@ namespace Mono.ASPNET
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);
 
-			string s = "<html><body><h1>500 Server error</h1>\n" +
-				   "Your client sent a request that was not understood by this server.\n" +
-				   "</body></html>\n";
+			string s = "HTTP/1.0 500 Server error\r\n" +
+				   serverHeader + 
+				    "<html><body><h1>500 Server error</h1>\r\n" +
+				   "Your client sent a request that was not understood by this server.\r\n" +
+				   "</body></html>\r\n";
 			
 			error500 = Encoding.Default.GetBytes (s);
 		}

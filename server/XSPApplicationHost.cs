@@ -29,18 +29,19 @@ namespace Mono.ASPNET
 
 		static HttpErrors ()
 		{
-			string s = "HTTP/1.0 500 Server error\n\n" +
-				   "<html><head><title>500 Server Error</title><body><h1>Server error</h1>\n" +
-				   "Your client sent a request that was not understood by this server.\n" +
-				   "</body></html>\n";
+			string s = "HTTP/1.0 500 Server error\r\n\r\n" +
+				   "<html><head><title>500 Server Error</title><body><h1>Server error</h1>\r\n" +
+				   "Your client sent a request that was not understood by this server.\r\n" +
+				   "</body></html>\r\n";
 			error500 = Encoding.Default.GetBytes (s);
 		}
 
 		public static byte [] NotFound (string uri)
 		{
-			string s = String.Format ("<html><head><title>404 Not Found</title></head>\n" +
+			string s = String.Format ("HTTP/1.0 404 Not Found\r\n\r\n" + 
+				"<html><head><title>404 Not Found</title></head>\r\n" +
 				"<body><h1>Not Found</h1>The requested URL {0} was not found on this " +
-				"server.<p>\n</body></html>\n", uri);
+				"server.<p>\r\n</body></html>\r\n", uri);
 
 			return Encoding.ASCII.GetBytes (s);
 		}
@@ -93,6 +94,7 @@ namespace Mono.ASPNET
 				if (host == null) {
 					byte [] nf = HttpErrors.NotFound (rdata.Path);
 					ns.Write (nf, 0, nf.Length);
+					ns.Close ();
 					return;
 				}
 #else

@@ -234,7 +234,7 @@ namespace Mono.ASPNET
 				path = path.Substring (1);
 
 			int len = HostVPath.Length;
-			if (path.StartsWith (HostVPath + "/"))
+			if (path == HostVPath || path.StartsWith (HostVPath + "/"))
 				path = path.Substring (len + 1);
 
 			if (path.Length > 0 && path [0] == '/')

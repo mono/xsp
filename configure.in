@@ -18,6 +18,14 @@ if test "x$MCS" = "xno" ; then
 	MCS=$CSC
 fi
 
+case "$host" in
+	*-*-mingw*|*-*-cygwin*)
+	platform_win32=yes	
+	;;
+esac
+
+AM_CONDITIONAL(PLATFORM_WIN32, test x$platform_win32 = xyes)
+
 echo "$CS compiler: $MCS"
 
 AC_SUBST(MCS)

@@ -1,6 +1,10 @@
 SUBDIRS = AspTester HtmlTester
 
+if PLATFORM_WIN32
+MCSFLAGS= -debug+ -debug:full -nologo -lib:../NUnitAsp -lib:"$(libdir)"
+else
 MCSFLAGS= -debug+ -debug:full -nologo -lib:../NUnitAsp
+endif
 
 nunitasptestdir = $(libdir)
 nunitasptest_SCRIPTS = NUnitAspTest.dll
@@ -45,9 +49,15 @@ nunitasptest_sources = \
 	$(asptesterdir_sources) \
 	$(htmltesterdir_sources)
 
+if PLATFORM_WIN32
+files=$(subst /,\\,$(nunitasptest_sources))
+else
+files=$(nunitasptest_sources)
+endif
+
 NUnitAspTest.dll: $(nunitasptest_sources)
 	$(MCS) $(MCSFLAGS) -r:System.Web.dll -lib:../AspTest \
-		-r NUnitAsp.dll -r NUnit.Framework.dll \
-		-r System.DirectoryServices \
-		-target:library -out:$@ $^
+		-r:NUnitAsp.dll -r:NUnit.Framework.dll \
+		-r:System.DirectoryServices.dll \
+		-target:library -out:$@ $(files)
 

@@ -1,13 +1,15 @@
 SUBDIRS = AspTester HtmlTester Sgml
 
+if PLATFORM_WIN32
+MCSFLAGS= -debug+ -debug:full -nologo -lib:"$(libdir)"
+else
 MCSFLAGS= -debug+ -debug:full -nologo
+endif
 nunitaspdir = $(libdir)
 nunitasp_SCRIPTS = NUnitAsp.dll
 
 EXTRA_DIST = $(local_sources) NUnitAsp.csproj
 CLEANFILES = NUnitAsp.dll
-
-htmldtd = $(srcdir)/Sgml/Html.dtd
 
 asptesterdir_sources = \
 	./AspTester/AspControlTester.cs \
@@ -53,8 +55,16 @@ nunitasp_sources = \
 	$(sgmldir_sources) \
 	$(local_sources)
 
+htmldtd = $(srcdir)/Sgml/Html.dtd
+
+if PLATFORM_WIN32
+files=$(subst /,\\,$(nunitasp_sources))
+else
+files=$(nunitasp_sources)
+endif
+
 NUnitAsp.dll: $(nunitasp_sources)
-	$(MCS) $(MCSFLAGS) -r System.Web.dll -r NUnit.Framework.dll \
-		-resource:$(htmldtd),NUnit.Extensions.Asp.Sgml.Html.dtd \
-		-target:library -out:$@ $^
+	$(MCS) $(MCSFLAGS) -r:System.Web.dll -r:NUnit.Framework.dll \
+		-resource:"$(htmldtd)",NUnit.Extensions.Asp.Sgml.Html.dtd \
+		-target:library -out:$@ $(files)
 

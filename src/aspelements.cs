@@ -85,6 +85,7 @@ public enum TagType
 	INLINECODE,
 	CLOSING,
 	SERVEROBJECT,
+	PROPERTYTAG,
 	NOTYET
 }
 
@@ -412,6 +413,7 @@ public class ServerObjectTag : Tag
 public class HtmlControlTag : Tag
 {
 	private Type control_type;
+	private bool is_container;
 
 	private static Hashtable controls;
 	private static Hashtable inputTypes;
@@ -424,7 +426,7 @@ public class HtmlControlTag : Tag
 		controls.Add ("A", typeof (HtmlAnchor));
 		controls.Add ("BUTTON", typeof (HtmlButton));
 		controls.Add ("FORM", typeof (HtmlForm));
-		controls.Add ("IMAGE", typeof (HtmlImage));
+		controls.Add ("IMG", typeof (HtmlImage));
 		controls.Add ("INPUT", "INPUT");
 		controls.Add ("SELECT", typeof (HtmlSelect));
 		controls.Add ("TABLE", typeof (HtmlTable));
@@ -473,6 +475,7 @@ public class HtmlControlTag : Tag
 			control_type = (Type) controls [tag];
 			if (control_type == null)
 				control_type = typeof (HtmlGenericControl);
+			is_container = (0 != String.Compare (tag, "img", true));
 		} else {
 			string type_value = (string) attributes ["TYPE"];
 			if (type_value== null)
@@ -482,6 +485,7 @@ public class HtmlControlTag : Tag
 			//TODO: what does MS with this one?
 			if (control_type == null)
 				throw new ArgumentException ("Unknown input type -> " + type_value);
+			is_container = false;
 		}
 	}
 
@@ -493,6 +497,11 @@ public class HtmlControlTag : Tag
 	public string ControlID
 	{
 		get { return (string) attributes ["ID"]; }
+	}
+
+	public bool IsContainer
+	{
+		get { return is_container; }
 	}
 
 	public override string ToString ()
@@ -507,6 +516,21 @@ public class HtmlControlTag : Tag
 	}
 }
 
+public enum ChildrenKind
+{
+	NONE,
+	/* 
+	 * Children must be ASP.NET server controls. Literal text is passed as LiteralControl.
+	 * Child controls and text are added using AddParsedSubObject ().
+	 */
+	CONTROLS, 
+	/*
+	 * Children must correspond to properties of the parent control. No literal text allowed.
+	 */
+	PROPERTIES
+}
+
+// TODO: support for ControlBuilderAttribute that may be used in custom controls
 public class Component : Tag
 {
 	private Type type;
@@ -514,8 +538,9 @@ public class Component : Tag
 	private string control_type;
 	private bool is_close_tag;
 	private bool allow_children;
+	private ChildrenKind children_kind;
 
-	private static bool GuessAllowChildren (Type type)
+	private static ChildrenKind GuessChildrenKind (Type type)
 	{
 		object [] custom_atts = type.GetCustomAttributes (true);
 		foreach (object custom_att in custom_atts){
@@ -527,14 +552,17 @@ public class Component : Tag
 				ParseChildrenAttribute pca = custom_att as ParseChildrenAttribute;
 				/* this property will be true for all controls derived from WebControls. */
 				if (pca.ChildrenAsProperties == false)
-					return false;
+					return ChildrenKind.CONTROLS;
+				else
+					return ChildrenKind.PROPERTIES;
 			}
 		}
 
-		/* 
-		 * Once ChildrenAsProperties is true, ensure that the underlying collection
-		 * allows adding controls 
-		 */
+		return ChildrenKind.NONE;
+	}
+
+	private static bool GuessAllowChildren (Type type)
+	{
 		PropertyInfo controls = type.GetProperty ("Controls");
 		MethodInfo getm = controls.GetGetMethod ();
 		object control_instance = Activator.CreateInstance (type);
@@ -549,6 +577,7 @@ public class Component : Tag
 		this.is_close_tag = input_tag is CloseTag;
 		this.type = type;
 		this.allow_children = GuessAllowChildren (type);
+		this.children_kind = GuessChildrenKind (type);
 		int pos = input_tag.TagID.IndexOf (':');
 		alias = tag.Substring (0, pos);
 		control_type = tag.Substring (pos + 1);
@@ -575,11 +604,47 @@ public class Component : Tag
 	{
 		get { return allow_children; }
 	}
+
+	public ChildrenKind ChildrenKind
+	{
+		get { return children_kind; }	
+	}
+		
 	public override string ToString ()
 	{
 		return type.ToString () + " Alias: " + alias + " ID: " + (string) attributes ["id"];
 	}
 }
-	
+
+public class PropertyTag : Tag
+{
+	private Type type;
+	private string name;
+
+	public PropertyTag (Tag tag, Type type, string name)
+		: base (tag)
+	{
+		tagType = TagType.PROPERTYTAG;
+		SetNewID ();
+		this.name = name;
+		this.type = type;
+	}
+
+	public Type PropertyType
+	{
+		get { return type; }
+	}
+
+	public string PropertyID
+	{
+		get { return (string) attributes ["ID"]; }
+	}
+
+	public string PropertyName
+	{
+		get { return name; }
+	}
+}
+
 }
 

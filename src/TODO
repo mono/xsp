@@ -11,9 +11,3 @@ TODO List
 	* Support <!xxx type tags.
 	
 
-	Controls
-	---------
-	* Support properties between open/close control tag (see details of
-	the syntax in doc/syntax-controls.txt)
-
-

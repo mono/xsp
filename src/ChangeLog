@@ -1,5 +1,23 @@
 2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* TODO: removed task.
+
+	* Makefile: added System.Drawing.dll
+
+	* aspelements.cs: added PropertyTag class.
+	(HtmlControlTag): added IsContainer property.
+	(ComponentTag): added ChildrenKind property.
+
+	* generator.cs: check whether a control allows or not other elements
+	inside it and the type of the elements if allowed.
+	(AddPropertyCode): added support for Color properties.
+	(NewPropertyFunction): new Function. Output code for inner tag 
+	properties inside component tags.
+	(ProcessHtmlTag): new function. Manages simple tags and check if they
+	are properties of the current control.
+
+2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* aspelements.cs: added ParseChildAttribute testing for
 	Component.GuessAllowChildren ().
 

@@ -13,6 +13,8 @@ namespace Mono.ASP
 {
 	using System;
 	using System.Collections;
+	using System.ComponentModel;
+	using System.Drawing;
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
@@ -122,7 +124,8 @@ public class Generator
 	private StringBuilder current_function;
 	private Stack functions;
 	private Stack openedControlTags;
-	private Stack childrenAllowed;
+	private Stack childrenKind;
+	private Stack controlTypes;
 	private bool parse_ok;
 	private bool has_form_tag;
 
@@ -156,8 +159,9 @@ public class Generator
 		prolog = new StringBuilder ();
 		declarations = new StringBuilder ();
 		openedControlTags = new Stack ();
-		childrenAllowed = new Stack ();
-		childrenAllowed.Push (true);
+		childrenKind = new Stack ();
+		childrenKind.Push (ChildrenKind.CONTROLS);
+		controlTypes = new Stack ();
 		script = new StringBuilder ();
 		constructor = new StringBuilder ();
 		init_funcs = new StringBuilder ();
@@ -315,7 +319,7 @@ public class Generator
 	private void ProcessPlainText ()
 	{
 		PlainText asis;
-		if (!(bool) childrenAllowed.Peek ()){
+		if ((ChildrenKind) childrenKind.Peek () != ChildrenKind.CONTROLS){
 			asis = (PlainText) elements.Current;
 			string result = asis.Text.Trim ();
 			if (result != ""){
@@ -357,14 +361,18 @@ public class Generator
 		return enum_type.ToString () + "." + nested_types [0].Name;
 	}
 	
-	private void CreateNewFunction (string tag_id, string control_id, string control_type, bool allow_children)
+	private void CreateNewControlFunction (string tag_id,
+					       string control_id,
+					       Type control_type,
+					       ChildrenKind children_kind)
 	{
-		if (!(bool) childrenAllowed.Peek ()){
+		if ((ChildrenKind) childrenKind.Peek () != ChildrenKind.CONTROLS){
 			string prev_tag_id = (string) openedControlTags.Pop ();
 			throw new ApplicationException ("Child controls not allowed for " + prev_tag_id);
 		}
 					
-		childrenAllowed.Push (allow_children);
+		childrenKind.Push (children_kind);
+		controlTypes.Push (control_type);
 		StringBuilder func_code = new StringBuilder ();
 		current_function = func_code;
 		if (0 == String.Compare (tag_id, "form", true)){
@@ -374,7 +382,7 @@ public class Generator
 		}
 		openedControlTags.Push (control_id);
 		openedControlTags.Push (tag_id);
-		bool is_generic = control_type.EndsWith ("GenericControl");
+		bool is_generic = control_type ==  typeof (System.Web.UI.HtmlControls.HtmlGenericControl);
 		functions.Push (current_function);
 		current_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl{0} ()\n" +
 						"\t\t{{\n\t\t\t{1} __ctrl;\n\n\t\t\t__ctrl = new {1} ({2});\n" + 
@@ -450,7 +458,8 @@ public class Generator
 			try {
 				value = Int64.Parse (att); //FIXME: should use the culture specified in Page
 			} catch (Exception){
-				throw new ApplicationException (att + " is not a valid signed number or is out of range.");
+				throw new ApplicationException (att + " is not a valid signed number " + 
+								"or is out of range.");
 			}
 
 			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
@@ -462,11 +471,26 @@ public class Generator
 			try {
 				value = UInt64.Parse (att); //FIXME: should use the culture specified in Page
 			} catch (Exception){
-				throw new ApplicationException (att + " is not a valid unsigned number or is out of range.");
+				throw new ApplicationException (att + " is not a valid unsigned number " + 
+								"or is out of range.");
 			}
 
 			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
 		}
+		else if (prop_type == typeof (System.Drawing.Color)){
+			Color c;
+			try {
+				c = (Color) TypeDescriptor.GetConverter (typeof (Color)).ConvertFromString (att);
+			} catch (Exception e){
+				throw new ApplicationException ("Color " + att + " is not a valid color.", e);
+			}
+
+			//TODO: use known color names for KnownColor and SystemColor and Color.FromArgb ()
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = (System.Drawing.Color) " + 
+						       "System.ComponentModel.TypeDescriptor.GetConverter " + 
+						       "(typeof (System.Drawing.Color))." + 
+						       "ConvertFromString (\"{1}\");;\n", var_name, att);
+		}	
 		else {
 			throw new ApplicationException ("Unsupported type in property: " + 
 							prop_type.ToString ());
@@ -482,7 +506,7 @@ public class Generator
 		ArrayList processed = new ArrayList ();
 
 		foreach (string id in att.Keys){
-			if (0 == String.Compare (id, "runat", true))
+			if (0 == String.Compare (id, "runat", true) || 0 == String.Compare (id, "id", true))
 				continue;
 
 			if (id.Length > 2 && id.Substring (0, 2).ToUpper () == "ON"){
@@ -553,12 +577,12 @@ public class Generator
 						id, Escape ((string) att [id]));
 		}
 
-		if ((bool) childrenAllowed.Peek ())
+		if ((ChildrenKind) childrenKind.Peek () == ChildrenKind.CONTROLS)
 			current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
 						 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
 	
-	private bool FinishFunction (string tag_id)
+	private bool FinishControlFunction (string tag_id)
 	{
 		if (functions.Count == 0)
 			throw new ApplicationException ("Unbalanced open/close tags");
@@ -579,8 +603,13 @@ public class Generator
 		current_function.AppendFormat ("\t\t\tthis.__BuildControl{0} ();\n\t\t\t__parser." +
 						"AddParsedSubObject (this.{0});\n\n", control_id);
 		init_funcs.Append (old_function);
-		if (childrenAllowed.Count > 1) // Avoid getting an empty stack for unbalanced open/close tags
-			childrenAllowed.Pop ();
+		 // Avoid getting empty stacks for unbalanced open/close tags
+		if (childrenKind.Count > 1)
+			childrenKind.Pop ();
+
+		if (controlTypes.Count > 0)
+			controlTypes.Pop ();
+
 		return true;
 	}
 
@@ -605,36 +634,37 @@ public class Generator
 			if (element == null)
 				throw new ApplicationException ("Error after " + elements.Current.ToString ());
 
-			if (element is CloseTag){
+			if (element is CloseTag)
 				elements.MoveNext ();
-			}
 			return;
 		}
 		
-		string controlType = html_ctrl.ControlType.ToString ();
+		Type controlType = html_ctrl.ControlType;
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", controlType, html_ctrl.ControlID);
 
-		CreateNewFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, true); 
+		ChildrenKind children_kind = html_ctrl.IsContainer ? ChildrenKind.CONTROLS : ChildrenKind.NONE;
+		CreateNewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind); 
 		AddCodeForAttributes (html_ctrl.ControlType, html_ctrl.Attributes);
 
 		if (!html_ctrl.SelfClosing)
 			JustDoIt ();
 		else
-			FinishFunction (html_ctrl.TagID);
+			FinishControlFunction (html_ctrl.TagID);
 	}
 
 	private void ProcessComponent ()
 	{
 		Component component = (Component) elements.Current;
-		string component_type = component.ComponentType.ToString ();
+		Type component_type = component.ComponentType;
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", component_type, component.ControlID);
 
-		CreateNewFunction (component.TagID, component.ControlID, component_type, component.AllowChildren); 
+		CreateNewControlFunction (component.TagID, component.ControlID, component_type,
+					  component.ChildrenKind); 
 		AddCodeForAttributes (component.ComponentType, component.Attributes);
 		if (!component.SelfClosing)
 			JustDoIt ();
 		else
-			FinishFunction (component.TagID);
+			FinishControlFunction (component.TagID);
 	}
 
 	private void ProcessServerObjectTag ()
@@ -645,7 +675,81 @@ public class Generator
 					  "if (this.cached{1} == null)\n\t\t\t\t\tthis.cached{1} = " + 
 					  "new {0} ();\n\t\t\t\treturn cached{1};\n\t\t\t}}\n\t\t}}\n\n",
 					  obj.ObjectClass, obj.ObjectID);
+	}
 
+	private void NewPropertyFunction (PropertyTag tag)
+	{
+		StringBuilder func_code = new StringBuilder ();
+		current_function = func_code;
+		functions.Push (current_function);
+		string prop_id = tag.PropertyID;
+		Type prop_type = tag.PropertyType;
+		// begin function
+		current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} ({1} __ctrl)\n" +
+						"\t\t{{\n", prop_id, prop_type);
+		
+		// Add property initialization code
+		PropertyInfo [] subprop_info = prop_type.GetProperties ();
+		TagAttributes att = tag.Attributes;
+
+		string subprop_name = null;
+		foreach (string id in att.Keys){
+			if (0 == String.Compare (id, "runat", true) || 0 == String.Compare (id, "id", true))
+				continue;
+			foreach (PropertyInfo subprop in subprop_info){
+				if (0 == String.Compare (subprop.Name, id, true)){
+					AddPropertyCode (subprop.PropertyType, subprop.Name, (string) att [id]);
+					subprop_name = subprop.Name;
+					break;
+				}
+			}
+
+			if (subprop_name == null)
+				throw new ApplicationException ("Property " + tag.TagID + " does not have " + 
+								"a " + id + " subproperty.");
+		}
+
+		// Finish function
+		current_function.Append ("\n\t\t}\n\n");
+		init_funcs.Append (current_function);
+		functions.Pop ();
+		current_function = (StringBuilder) functions.Peek ();
+		current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} (__ctrl.{1});\n",
+						prop_id, tag.PropertyName);
+	}
+	
+	private void ProcessHtmlTag ()
+	{
+		Tag tag = (Tag) elements.Current;
+		ChildrenKind child_kind = (ChildrenKind) childrenKind.Peek ();
+		if (child_kind == ChildrenKind.NONE){
+			string tag_id = (string) openedControlTags.Pop ();
+			throw new ApplicationException (tag + " not allowed inside " + tag_id);
+		}
+					
+		if (controlTypes.Count == 0 || child_kind == ChildrenKind.CONTROLS){
+			elements.Current = new PlainText (((Tag) elements.Current).PlainHtml);
+			ProcessPlainText ();
+			return;
+		}
+
+		// Now child_kind should be PROPERTIES, so only allow tag_id == property
+		Type control_type = (Type) controlTypes.Peek ();
+		PropertyInfo [] prop_info = control_type.GetProperties ();
+		bool is_processed = false;
+		foreach (PropertyInfo prop in prop_info){
+			if (0 == String.Compare (prop.Name, tag.TagID, true)){
+				PropertyTag prop_tag = new PropertyTag (tag, prop.PropertyType, prop.Name);
+				NewPropertyFunction (prop_tag);
+				is_processed = true;
+				break;
+			}
+		}
+		
+		if (!is_processed){
+			string tag_id = (string) openedControlTags.Pop ();
+			throw new ApplicationException (tag.TagID + " is not a property of " + control_type);
+		}
 	}
 
 	private Tag Map (Tag tag)
@@ -678,7 +782,7 @@ public class Generator
 	private void ProcessCloseTag ()
 	{
 		CloseTag close_tag = (CloseTag) elements.Current;
-		if (FinishFunction (close_tag.TagID))
+		if (FinishControlFunction (close_tag.TagID))
 				return;
 
 		elements.Current = new PlainText (close_tag.PlainHtml);
@@ -689,6 +793,7 @@ public class Generator
 	{
 		JustDoIt ();
 		End ();
+		parse_ok = true;
 	}
 	
 	private void JustDoIt ()
@@ -711,16 +816,12 @@ public class Generator
 					ProcessCloseTag ();
 				else if (elements.Current is ServerObjectTag)
 					ProcessServerObjectTag ();
-				else {
-					if (elements.Current is Tag)
-						elements.Current = new PlainText (((Tag) elements.Current).PlainHtml);
-
+				else if (elements.Current is Tag)
+					ProcessHtmlTag ();
+				else
 					ProcessPlainText ();
-				}
 			}
 		}
-
-		parse_ok = true;
 	}
 
 	private void End ()
@@ -790,11 +891,6 @@ public class Generator
 		current_function.Append ("\t\t}\n\n");
 		init_funcs.Append (current_function);
 		functions.Pop ();
-	}
-
-	private void error (string msg)
-	{
-		Console.WriteLine ("Error: " + msg);
 	}
 }
 

@@ -1,5 +1,6 @@
 CSC=csc.exe
-CSCFLAGS=/nologo /debug+ /debug:full  /optimize /r:System.Web.dll
+CSCFLAGS=/nologo /debug+ /debug:full /optimize $(REFS)
+REFS= /r:System.Web.dll /r:System.Drawing.dll
 
 SOURCES = asp-parser.cs asp-tokenizer.cs aspelements.cs driver.cs generator.cs
 TARGET= xsp.exe

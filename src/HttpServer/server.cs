@@ -341,8 +341,10 @@ class MyWorkerRequest
 				return;
 			}
 			idx = line.IndexOf (':');
-			if (idx == -1 || idx == line.Length - 1)
+			if (idx == -1 || idx == line.Length - 1){
 				Console.WriteLine ("Ignoring request header: " + line);
+				continue;
+			}
 			string key = line.Substring (0, idx);
 			string value = line.Substring (idx + 1);
 			headers.Add (key, value);

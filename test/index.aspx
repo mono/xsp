@@ -9,7 +9,7 @@
 <a href="http://www.go-mono.com"><img src="mono.png" alt="http://www.go-mono.com"></a>
 <p>Here are some ASP.NET examples:</p>
 <%
-DirectoryInfo dir = new DirectoryInfo (MapPath ("/"));
+DirectoryInfo dir = new DirectoryInfo (Path.GetDirectoryName (Request.PhysicalPath));
 FileInfo[] files = dir.GetFiles ();
 StringBuilder sb = new StringBuilder ();
 Hashtable styles = new Hashtable ();

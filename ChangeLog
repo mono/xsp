@@ -1,3 +1,9 @@
+2003-10-05  Pedro Martínez Juliá  <yoros@wanadoo.es>
+
+	* test/index.aspx: change directory where files are searched because
+	if test directory is not the root directory of the server, the index
+	page will have other files.
+
 2003-10-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:

@@ -1,2 +1,2 @@
 
-SUBDIRS = asp_state
+SUBDIRS = asp_state dbsessmgr

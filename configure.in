@@ -28,5 +28,7 @@ AC_OUTPUT([Makefile
         tools/Makefile
         tools/asp_state/Makefile
         tools/asp_state/AssemblyInfo.cs
+        tools/dbsessmgr/Makefile
+        tools/dbsessmgr/AssemblyInfo.cs
 	test/Makefile])
 

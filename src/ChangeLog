@@ -1,3 +1,10 @@
+2002-06-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* driver.cs: changed program name literal.
+
+	* generator.cs: forgot to add ListItemCollection to its container.
+	Don't output code for setting ID if the component is a ListItem.
+
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* TODO: updated.

@@ -19,7 +19,7 @@ public class Driver {
 
 	static void help ()
 	{
-		Console.WriteLine ("Usage: aspparser filename [filename ...]\n");
+		Console.WriteLine ("Usage: xsp filename [filename ...]\n");
 	}
 	
 	public static void Main (string [] args){

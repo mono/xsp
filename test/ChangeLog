@@ -1,3 +1,7 @@
+2002-06-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web_listbox.aspx: new file rendered ok.
+
 2002-06-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web_table.aspx: New file. Renders Table, TableRow and TableCell.

@@ -967,10 +967,13 @@ public class Generator
 			old_function.Append ("\n\t\t}\n\n");
 			string parsed = "";
 			string ctrl_name = "ctrl";
+			/*
+			 * This seems to be wrong.
 			if (controls.PeekChildKind () == ChildrenKind.CONTROLS){
 				parsed = "ParsedSubObject";
 				ctrl_name = "parser";
 			}
+			*/
 
 			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n" +
 						       "\t\t\t__{1}.Add{2} (this.{0});\n\n",
@@ -987,7 +990,8 @@ public class Generator
 
 			controls.Pop ();
 			control_id = controls.PeekControlID ();
-			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n", control_id);
+			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
+						       "AddParsedSubObject (this.{0});\n\n", control_id);
 		}
 		else {
 			old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
@@ -1092,7 +1096,8 @@ public class Generator
 		NewControlFunction (component.TagID, component.ControlID, component_type,
 				    component.ChildrenKind, component.DefaultPropertyName); 
 
-		current_function.AppendFormat ("\t\t\t__ctrl.ID = \"{0}\";\n", component.ControlID);
+		if (component_type.IsSubclassOf (typeof (System.Web.UI.Control)))
+			current_function.AppendFormat ("\t\t\t__ctrl.ID = \"{0}\";\n", component.ControlID);
 
 		AddCodeForAttributes (component.ComponentType, component.Attributes);
 		if (component.ChildrenKind == ChildrenKind.LISTITEM)

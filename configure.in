@@ -25,5 +25,7 @@ AC_OUTPUT([Makefile
 	server/AssemblyInfo.cs
 	server/AssemblyInfoModMono.cs
 	server/Makefile
+        tools/Makefile
+        tools/asp_state/Makefile
 	test/Makefile])
 

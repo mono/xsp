@@ -1,2 +1,2 @@
-SUBDIRS=doc server test
+SUBDIRS=doc server test tools
 

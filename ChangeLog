@@ -1,3 +1,15 @@
+2003-11-24  Jackson Harper <jackson@ximian.com)
+
+	* tools:
+	* tools/Makefile.am: Add tools directory, this will contain, umm tools.
+	* tools/asp_state:
+	* tools/asp_state/asp_state.cs:
+	* tools/asp_state/Makefile.in:
+	* tools/asp_state/AssemblyInfo.cs.in:
+	* tools/asp_state/asp_state.exe.config:An ASP.NET State server.
+	* Makefile.am:
+	* configure.in: Add tools to the build.
+	
 2003-11-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoRequest.cs: cache the result of the first (and unique)

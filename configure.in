@@ -34,5 +34,7 @@ AC_OUTPUT([Makefile
         tools/nunitasp/source/Makefile
         tools/nunitasp/source/NUnitAsp/Makefile
         tools/nunitasp/source/NUnitAspTest/Makefile
+        nunit-tests/Makefile
+        nunit-tests/standalone/Makefile
 	test/Makefile])
 

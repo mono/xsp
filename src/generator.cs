@@ -115,6 +115,7 @@ class ControlStack
 {
 	private Stack controls;
 	private ControlStackData top;
+	private Type last_container_type;
 
 	class ControlStackData 
 	{
@@ -150,14 +151,32 @@ class ControlStack
 		controls = new Stack ();
 	}
 
+	private void SetContainerType (Type type)
+	{
+		if (type != typeof (System.Web.UI.Control) &&
+		    !type.IsSubclassOf (typeof (System.Web.UI.Control)))
+			return;
+		
+		if (type == typeof (System.Web.UI.WebControls.DataList))
+			last_container_type = typeof (System.Web.UI.WebControls.DataListItem);
+		else if (type == typeof (System.Web.UI.WebControls.DataGrid))
+			last_container_type = typeof (System.Web.UI.WebControls.DataGridItem);
+		else if (type == typeof (System.Web.UI.WebControls.Repeater))
+			last_container_type = typeof (System.Web.UI.WebControls.RepeaterItem);
+		else 
+			last_container_type = type;
+	}
+
 	public void Push (Type controlType,
 			  string controlID,
 			  string tagID,
 			  ChildrenKind childKind,
 			  string defaultPropertyName)
 	{
-		if (controlType != null)
+		if (controlType != null){
 			AddChild ();
+			SetContainerType (controlType);
+		}
 		top = new ControlStackData (controlType, controlID, tagID, childKind, defaultPropertyName);
 		controls.Push (top);
 	}
@@ -198,6 +217,11 @@ class ControlStack
 	{
 		if (top != null)
 			top.childrenNumber++;
+	}
+	
+	public Type Container
+	{
+		get { return last_container_type; }
 	}
 	
 	public int Count
@@ -250,7 +274,7 @@ public class Generator
 	private void Init ()
 	{
 		controls = new ControlStack ();
-		controls.Push (null, null, null, ChildrenKind.CONTROLS, null);
+		controls.Push (typeof (System.Web.UI.Control), null, null, ChildrenKind.CONTROLS, null);
 		prolog = new StringBuilder ();
 		declarations = new StringBuilder ();
 		script = new StringBuilder ();
@@ -1071,6 +1095,53 @@ public class Generator
 		ProcessPlainText ();
 	}
 
+	private void ProcessDataBindingLiteral ()
+	{
+		DataBindingTag dataBinding = (DataBindingTag) elements.Current;
+		string actual_value = dataBinding.Data.Trim ();
+		if (actual_value == "")
+			throw new ApplicationException ("Empty data binding tag.");
+
+		if (controls.PeekChildKind () != ChildrenKind.CONTROLS)
+			throw new ApplicationException ("Data bound content not allowed for " + 
+							controls.PeekTagID ());
+
+		StringBuilder db_function = new StringBuilder ();
+		string control_id = Tag.GetDefaultID ();
+		string control_type_string = "System.Web.UI.DataBoundLiteralControl";
+		declarations.AppendFormat ("\t\tprotected {0} {1};\n", control_type_string, control_id);
+		// Build the control
+		db_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl_{0} ()\n" +
+					  "\t\t{{\n\t\t\t{1} __ctrl;\n\n" +
+					  "\t\t\t__ctrl = new {1} (0, 1);\n" + 
+					  "\t\t\tthis.{0} = __ctrl;\n" +
+					  "\t\t\t__ctrl.DataBinding += new System.EventHandler " + 
+					  "(this.__DataBind_{0});\n" +
+					  "\t\t\treturn __ctrl;\n"+
+					  "\t\t}}\n\n",
+					  control_id, control_type_string);
+		// DataBinding handler
+		db_function.AppendFormat ("\t\tpublic void __DataBind_{0} (object sender, " + 
+					  "System.EventArgs e) {{\n" +
+					  "\t\t\t{1} Container;\n" +
+					  "\t\t\t{2} target;\n" +
+					  "\t\t\ttarget = ({2}) sender;\n" +
+					  "\t\t\tContainer = ({1}) target.BindingContainer;\n" +
+					  "\t\t\ttarget.SetDataBoundString (0, System.Convert." +
+					  "ToString ({3}));\n" +
+					  "\t\t}}\n\n",
+					  control_id, controls.Container, control_type_string,
+					  actual_value);
+
+		init_funcs.Append (db_function);
+		current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
+					       "AddParsedSubObject (this.{0});\n\n", control_id);
+	}
+
+	private void ProcessCodeRenderTag ()
+	{
+	}
+	
 	public void ProcessElements ()
 	{
 		JustDoIt ();
@@ -1088,6 +1159,10 @@ public class Generator
 				ProcessDirective ();
 			} else if (element is PlainText){
 				ProcessPlainText ();
+			} else if (element is DataBindingTag){
+				ProcessDataBindingLiteral ();
+			} else if (element is CodeRenderTag){
+				ProcessCodeRenderTag ();
 			} else {
 				elements.Current = Map ((Tag) element);
 				if (elements.Current is HtmlControlTag)

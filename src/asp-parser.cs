@@ -129,11 +129,14 @@ class AspParser {
 				return new Directive (id, attributes);
 			}
 
-			if (eat ('=')){
-				//FIXME: get var name
-			}
-			//FIXME: Code render block
-			return null;
+			bool varname = eat ('=');
+			bool databinding = !varname && eat ('#');
+			tokenizer.Verbatim = true;
+			string inside_tags = get_verbatim (tokenizer.get_token (), "%>");
+			tokenizer.Verbatim = false;
+			if (databinding)
+				return new DataBindingTag (inside_tags);
+			return new CodeRenderTag (varname, inside_tags);
 		case '/':
 			if (!eat (Token.IDENTIFIER))
 				error ("expecting TAGNAME");
@@ -181,6 +184,7 @@ class AspParser {
 				if (eat (Token.ATTVALUE)){
 					attributes.Add (id, tokenizer.value);
 				} else {
+					//TODO: support data binding syntax without quotes
 					error ("expected ATTVALUE");
 					return null;
 				}
@@ -201,6 +205,12 @@ class AspParser {
 	{
 		StringBuilder vb_text = new StringBuilder ();
 		int i = 0;
+
+		if (tokenizer.value.Length > 1){
+			// May be we have a put_back token that is not a single character
+			vb_text.Append (tokenizer.value);
+			token = tokenizer.get_token ();
+		}
 
 		while (token != Token.EOF){
 			if (Char.ToUpper ((char) token) == end [i]){

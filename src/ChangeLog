@@ -1,3 +1,13 @@
+2002-05-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* asp-tokenizer.cs: re-added a '#' removed by mistake.
+	
+	* aspelements.cs: added new classes: CodeRenderTag and DataBindingTag.
+
+	* asp-parser.cs: support CodeRenderTag y DataBindingTag.
+
+	* generator.cs: support data binding inside literal control.
+
 2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* asp-tokenizer.cs: some cleanup and report correctly line/column

@@ -86,6 +86,8 @@ public enum TagType
 	CLOSING,
 	SERVEROBJECT,
 	PROPERTYTAG,
+	CODERENDER,
+	DATABINDING,
 	NOTYET
 }
 
@@ -689,6 +691,55 @@ public class PropertyTag : Tag
 	{
 		get { return name; }
 	}
+}
+
+public class CodeRenderTag : Tag
+{
+	private string code;
+	private bool isVarName;
+
+	public CodeRenderTag (bool isVarName, string code) : base ("", null, false)
+	{
+		tagType = TagType.CODERENDER;
+		this.isVarName = isVarName;
+		this.code = code;
+	}
+
+	public string Code
+	{
+		get { return code; }
+	}
+
+	public bool IsVarName
+	{
+		get { return isVarName; }
+	}
+
+	public string AsText
+	{
+		get { return "<%" + (IsVarName ? "=" : "") + Code + "%>"; }
+	}	
+}
+
+public class DataBindingTag : Tag
+{
+	private string data;
+
+	public DataBindingTag (string data) : base ("", null, false)
+	{
+		tagType = TagType.DATABINDING;
+		this.data = data;
+	}
+
+	public string Data
+	{
+		get { return data; }
+	}
+
+	public string AsText
+	{
+		get { return "<%#" + Data + "%>"; }
+	}	
 }
 
 }

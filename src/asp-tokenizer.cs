@@ -142,7 +142,7 @@ class AspTokenizer {
 				return c;
 			}
 
-			if (inTag && "%@=/!".IndexOf ((char) c) != -1){
+			if (inTag && "%@#=/!".IndexOf ((char) c) != -1){
 				sb.Append ((char) c);
 				return c;
 			}

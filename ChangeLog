@@ -1,3 +1,9 @@
+2005-01-26  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* configure.in: Added masterpages test directory.
+	* test/2.0/masterpages: New master page tests.
+	* test/2.0/menu/menu1.aspx: Updated.
+
 2005-01-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs: if the headers have not been sent and

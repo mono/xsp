@@ -1,3 +1,7 @@
+2003-08-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* AssemblyInfo.cs: updated version number.
+
 2003-08-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs: write the correct number of bytes when flushing

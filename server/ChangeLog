@@ -1,3 +1,8 @@
+2003-02-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: when running under MS runtime, closing 'stream'
+	is required too.
+
 2003-02-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MonoWorkerRequest.cs: fixed buglet in GetAppPath.

@@ -160,6 +160,7 @@ namespace Mono.ASPNET
 		public override void CloseConnection ()
 		{
 			WebTrace.WriteLine ("CloseConnection()");
+			stream.Close ();
 			client.Close ();
 		}
 

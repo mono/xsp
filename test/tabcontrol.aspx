@@ -140,7 +140,7 @@
 <hr>
 </center>
 <form runat="server">
-<asp:Label id="msg" />
+<asp:Label id="msg" runat="server" />
 <table>
 <tbody>
 <tr>

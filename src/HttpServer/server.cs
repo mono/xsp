@@ -433,6 +433,20 @@ public class Server
 		Environment.Exit (1);
 	}
 
+	private static void RunOneFile (string file_name)
+	{
+		StringReader fake_input = new StringReader ("get " + file_name + " http/1.0");
+		HtmlTextWriter output = new HtmlTextWriter (Console.Out);
+		try {
+			MyWorkerRequest proc = new MyWorkerRequest (fake_input, output);
+			proc.ProcessRequest ();
+			output.Flush ();
+		} catch (Exception e) {
+			Console.WriteLine ("Caught exception in processing request.");
+			Console.WriteLine (e.ToString ());
+		}
+	}
+	
 	public static int Main (string [] args)
 	{
 		if (args.Length == 0 || args.Length > 3)
@@ -441,8 +455,17 @@ public class Server
 		int port = 80;
 		bool useMonoClasses_set = false;
 		bool port_set = false;
+		bool console_set = false;
+		string file_name = "";
 		foreach (string arg in args){
-			if (!useMonoClasses_set && 0 == String.Compare (arg, "--usemonoclasses")){
+			if (console_set){
+				file_name = arg;
+				break;
+			}
+			else if (!console_set && 0 == String.Compare (arg, "--file")){
+				console_set = true;
+			}
+			else if (!useMonoClasses_set && 0 == String.Compare (arg, "--usemonoclasses")){
 				useMonoClasses = true;
 				useMonoClasses_set = true;
 			}
@@ -464,11 +487,19 @@ public class Server
 			Directory.CreateDirectory ("output");
 		}
 
-		Console.WriteLine ("Remember that you should rerun the server if you change\n" + 
-				   "the aspx file!");
+		if (console_set){
+			if (file_name == "")
+				Usage ();
+			RunOneFile (file_name);
+		}
+		else {
+			
+			Console.WriteLine ("Remember that you should rerun the server if you change\n" + 
+					   "the aspx file!");
 
-		Server server = new Server (port);
-		server.Start ();
+			Server server = new Server (port);
+			server.Start ();
+		}
 		return 0;
 	}
 }

@@ -1,5 +1,11 @@
 2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server.cs: added --file command line option. If supplied, the next
+	argument must be a .aspx file which will be rendered to HTML on
+	console.
+
+2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* Makefile: reference a local copy of mono System.Web.dll
 	depending on DEBUGMONOSW environment variable to allow xsp.exe and
 	server.exe use our System.Web.dll.

@@ -24,7 +24,6 @@ namespace Mono.ASPNET
 {
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
-		Socket client;
 		IApplicationHost appHost;
 		Stream stream;
 		string verb;
@@ -40,6 +39,7 @@ namespace Mono.ASPNET
 		byte [] inputBuffer;
 		int inputLength;
 		int position;
+		EndPoint remoteEP;
 		
 		static byte [] error500;
 
@@ -94,103 +94,30 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public XSPWorkerRequest (Socket client, IApplicationHost appHost)
+		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost, EndPoint remoteEP,
+					 RequestData rdata)
 			: base (appHost)
 		{
-			if (client == null)
-				throw new ArgumentNullException ("client");
+			if (ns == null)
+				throw new ArgumentNullException ("ns");
 
-			this.client = client;
 			this.appHost = appHost;
-			stream = new NetworkStream (client, false);
+			this.remoteEP = remoteEP;
+			stream = ns;
+			verb = rdata.Verb;
+			path = rdata.Path;
+			protocol = rdata.Protocol;
+			queryString = rdata.QueryString;
+			headers = rdata.Headers;
 			responseHeaders = new StringBuilder ();
 			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
-		}
-
-		void FillBuffer ()
-		{
-			inputBuffer = new byte [2048];
-			inputLength = stream.Read (inputBuffer, 0, 2048);
-			position = 0;
-		}
-
-		int ReadInputByte ()
-		{
-			if (inputBuffer == null)
-				FillBuffer ();
-
-			if (position >= inputLength)
-				return stream.ReadByte ();
-
-			return (int) inputBuffer [position++];
-		}
-
-		int ReadInput (byte [] buffer, int offset, int size)
-		{
-			if (inputBuffer == null)
-				FillBuffer ();
-
-			int length = inputLength - position;
-			if (length > 0) {
-				if (length > size)
-					length = size;
-
-				Buffer.BlockCopy (inputBuffer, position, buffer, offset, length);
-				position += length;
-				offset += length;
-				size -= length;
-				if (size == 0)
-					return length;
-			}
-
-			return (length + stream.Read (buffer, offset, size));
-		}
-
-		string ReadLine ()
-		{
-			bool foundCR = false;
-			StringBuilder text = new StringBuilder ();
-
-			while (true) {
-				int c = ReadInputByte ();
-
-				if (c == -1) {				// end of stream
-					if (text.Length == 0)
-						return null;
-
-					if (foundCR)
-						text.Length--;
-
-					break;
-				}
-
-				if (c == '\n') {			// newline
-					if ((text.Length > 0) && (text [text.Length - 1] == '\r'))
-						text.Length--;
-
-					foundCR = false;
-					break;
-				} else if (foundCR) {
-					text.Length--;
-					break;
-				}
-
-				if (c == '\r')
-					foundCR = true;
-					
-
-				text.Append ((char) c);
-			}
-
-			return text.ToString ();
 		}
 
 		public override void CloseConnection ()
 		{
 			WebTrace.WriteLine ("CloseConnection()");
 			stream.Close ();
-			client.Close ();
 		}
 
 		public override void FlushResponse (bool finalFlush)
@@ -337,9 +264,7 @@ namespace Mono.ASPNET
 		public override string GetRemoteAddress ()
 		{
 			WebTrace.WriteLine ("GetRemoteAddress()");
-			IPEndPoint ep = (IPEndPoint) client.RemoteEndPoint;
-
-			return ep.Address.ToString ();
+			return ((IPEndPoint) remoteEP).Address.ToString ();
 		}
 
 		public override string GetRemoteName ()
@@ -359,9 +284,7 @@ namespace Mono.ASPNET
 		public override int GetRemotePort ()
 		{
 			WebTrace.WriteLine ("GetRemotePort()");
-			IPEndPoint ep = (IPEndPoint) client.RemoteEndPoint;
-
-			return ep.Port;
+			return ((IPEndPoint) remoteEP).Port;
 		}
 
 
@@ -447,89 +370,37 @@ namespace Mono.ASPNET
 			stream.Write (b, 0, b.Length);
 		}
 
-		private bool GetRequestLine ()
-		{
-			string req = ReadLine ();
-			if (req == null)
-				return false;
-
-			req = req.Trim ();
-			string [] s = req.Split (' ');
-
-			switch (s.Length) {
-			case 2:
-				verb = s [0].Trim ();
-				path = s [1].Trim ();
-				break;
-			case 3:
-				verb = s [0].Trim ();
-				path = s [1].Trim ();
-				protocol = s [2].Trim ();
-				break;
-			default:
-				return false;
-			}
-
-			int qmark = path.IndexOf ('?');
-			if (qmark != -1) {
-				queryString = path.Substring (qmark + 1);
-				path = path.Substring (0, qmark);
-			}
-
-			if (path.StartsWith ("/~/")) {
-				// Not sure about this. It makes request such us /~/dir/file work
-				path = path.Substring (2);
-			}
-
-			return true;
-		}
-
-		private bool GetRequestHeaders ()
-		{
-			string line;
-			headers = new Hashtable ();
-			
-			while ((line = ReadLine ()) != null && line.Length > 0) {
-				int colon = line.IndexOf (':');
-				if (colon == -1 || line.Length < colon + 2)
-					return false;
-				
-				string key = line.Substring (0, colon);
-				string value = line.Substring (colon + 1).Trim ();
-				headers [key] = value;
-			}
-
-			return true;	
-		}
-
 		protected override bool GetRequestData ()
 		{
-			try {
-				if (!GetRequestLine ())
-					throw new Exception ("Error reading request line");
-
-				if (protocol == null) {
-					protocol = "HTTP/1.0";
-				} else 	if (!GetRequestHeaders ()) {
-					throw new Exception ("Error getting headers");
-				}
-
-				WebTrace.WriteLine ("verb: " + verb);
-				WebTrace.WriteLine ("path: " + path);
-				WebTrace.WriteLine ("queryString: " + queryString);
-				WebTrace.WriteLine ("protocol: " + protocol);
-				if (headers != null) {
-					foreach (string key in headers.Keys)
-						WebTrace.WriteLine (key + ": " + headers [key]);
-				}
-			} catch (Exception) {
-				SendStatus (500, "Server error");
-				SendResponseFromMemory (error500, error500.Length);
-				FlushResponse (true);
-				return false;
-			}
-			
 			return TryDirectory ();
+		}
+
+		void FillBuffer ()
+		{
+			inputBuffer = new byte [2048];
+			inputLength = stream.Read (inputBuffer, 0, 2048);
+			position = 0;
+		}
+
+		int ReadInput (byte [] buffer, int offset, int size)
+		{
+			if (inputBuffer == null)
+				FillBuffer ();
+
+			int length = inputLength - position;
+			if (length > 0) {
+				if (length > size)
+					length = size;
+
+				Buffer.BlockCopy (inputBuffer, position, buffer, offset, length);
+				position += length;
+				offset += length;
+				size -= length;
+				if (size == 0)
+					return length;
+			}
+
+			return (length + stream.Read (buffer, offset, size));
 		}
 
 		public override int ReadEntityBody (byte [] buffer, int size)
@@ -566,6 +437,5 @@ namespace Mono.ASPNET
 				responseHeaders.AppendFormat ("{0}: {1}\r\n", name, value);
 		}
 	}
-
 }
 

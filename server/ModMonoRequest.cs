@@ -6,7 +6,7 @@
  * 	Gonzalo Paniagua Javier
  *
  * Copyright (c) 2002 Daniel Lopez Ridruejo.
- *           (c) 2002 Ximian, Inc.
+ *           (c) 2002,2003 Ximian, Inc.
  *           All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,21 +88,19 @@ namespace Mono.ASPNET
 		GET_CLIENT_BLOCK,
 		SET_STATUS_LINE,
 		SET_STATUS_CODE,
-		ALIAS_MATCHES,
+		DECLINE_REQUEST,
 		LAST_COMMAND
 	}
 
-	public class ModMonoRequest
+	public class ModMonoRequest : MarshalByRefObject
 	{
-		Socket sock;
 		BinaryReader reader;
 		BinaryWriter writer;
 		NetworkStream st;
 
-		public ModMonoRequest (Socket sock)
+		public ModMonoRequest (NetworkStream ns)
 		{
-			this.sock = sock;
-			st = new NetworkStream (sock, false);
+			st = ns;
 			reader = new BinaryReader (st);
 			writer = new BinaryWriter (st);
 		}
@@ -120,7 +118,6 @@ namespace Mono.ASPNET
 		
 		void SendSimpleCommand (Cmd cmd)
 		{
-			WriteDebug ("SendSimpleCommand -> Available: {0}", sock.Available);
 			int b = (int) cmd;
 			WriteDebug ("Escribo cmd: {0} {1}", b, cmd);
 			writer.Write (b);
@@ -139,7 +136,6 @@ namespace Mono.ASPNET
 
 		string ReadString ()
 		{
-			WriteDebug ("ReadString -> Available: {0}", sock.Available);
 			int size = reader.ReadInt32 ();
 			byte [] buf = new byte [size];
 			string s;
@@ -156,13 +152,19 @@ namespace Mono.ASPNET
 
 		void WriteString (string s)
 		{
-			WriteDebug ("WriteString -> Available: {0}", sock.Available);
 			WriteDebug ("envio string: {0} {1}", s.Length, s);
 			writer.Write (Encoding.Default.GetByteCount (s));
 			writer.Write (Encoding.Default.GetBytes (s));
 			WriteDebug ("Enviada!");
 		}
 		
+		public void Decline ()
+		{
+			WriteDebug ("Decline");
+			SendSimpleCommand (Cmd.DECLINE_REQUEST);
+			ReadEnd ();
+		}
+
 		public string GetProtocol ()
 		{
 			WriteDebug ("GetProtocol");
@@ -204,23 +206,6 @@ namespace Mono.ASPNET
 			WriteString (name);
 			ReadEnd ();
 			return ReadString ();
-		}
-
-		public string RemovePrefix (string uri, string appPrefix)
-		{
-			WriteDebug ("RemovePrefix (uri = {0}, appPrefix = {1})", uri, appPrefix);
-			if (uri == appPrefix)
-				return "/";
-
-			SendSimpleCommand (Cmd.ALIAS_MATCHES);
-			WriteString (uri);
-			WriteString (appPrefix);
-			ReadEnd ();
-			int l = reader.ReadInt32 ();
-			if (l == 0)
-				return uri;
-
-			return uri.Substring (l);
 		}
 
 		public string GetServerVariable (string name)

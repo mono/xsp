@@ -4,9 +4,10 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
-// (C) 2002 Ximian, Inc (http://www.ximian.com)
+// (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
 //
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -21,10 +22,17 @@ using Mono.Posix;
 
 namespace Mono.ASPNET
 {
+	[Serializable]
 	class Worker
 	{
 		IApplicationHost host;
-		Socket client;
+		EndPoint remoteEP;
+		NetworkStream ns;
+		RequestData rdata;
+#if MODMONO_SERVER
+		ModMonoRequest modRequest;
+#endif
+
 		static byte [] error500;
 
 		static Worker ()
@@ -39,36 +47,68 @@ namespace Mono.ASPNET
 		
 		public Worker (Socket client, IApplicationHost host)
 		{
-			this.client = client;
+			ns = new NetworkStream (client, false);
 			this.host = host;
+			remoteEP = client.RemoteEndPoint;
 		}
-		
+
 		public void Run (object state)
 		{
 			try {
-				XSPWorkerRequest mwr = new XSPWorkerRequest (client, host);
-				mwr.ProcessRequest ();
+#if !MODMONO_SERVER
+				InitialWorkerRequest ir = new InitialWorkerRequest (ns);
+				ir.ReadRequestData ();
+				rdata = ir.RequestData;
+				host = host.GetApplicationForPath (rdata.Path, true);
+#else
+				
+				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
+				host = host.GetApplicationForPath (mwr.GetUriPath (), false);
+				modRequest = mwr.Request;
+				if (host == null) {
+					mwr.Decline ();
+					return;
+				}
+#endif
+				CrossAppDomainDelegate pr = new CrossAppDomainDelegate (ProcessRequest);
+				host.Domain.DoCallBack (pr);
 			} catch (Exception e) {
 				Console.WriteLine (e);
-				try {
-					NetworkStream ns = new NetworkStream (client, false);
-					ns.Write (error500, 0, error500.Length);
-					ns.Close ();
-					client.Close ();
-				} catch {}
+				ns.Write (error500, 0, error500.Length);
+			} finally {
+				ns.Close ();
 			}
 		}
+
+		public void ProcessRequest ()
+		{
+#if !MODMONO_SERVER
+			XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host, remoteEP, rdata);
+#else
+			XSPWorkerRequest mwr = new XSPWorkerRequest (modRequest, host);
+#endif
+			if (!mwr.ReadRequestData ())
+				return;
+
+			mwr.ProcessRequest ();
+		}
 	}
-	
+
 	public class XSPApplicationHost : MarshalByRefObject, IApplicationHost
 	{
 		Socket listen_socket;
 		bool started;
 		bool stop;
+#if !MODMONO_SERVER
 		IPEndPoint bindAddress;
+#endif
 		Thread runner;
 		string path;
 		string vpath;
+ 		Hashtable appToDir;
+ 		Hashtable dirToHost;
+ 		object marker = new object ();
+
 #if MODMONO_SERVER
 		string filename;
 #endif
@@ -111,10 +151,38 @@ namespace Mono.ASPNET
 			this.bindAddress = bindAddress;
 		}
 #endif
+
+ 		public void SetApplications (string applications)
+ 		{
+ 			if (applications == null)
+ 				throw new ArgumentNullException ("applications");
+ 
+ 			if (appToDir != null)
+ 				throw new InvalidOperationException ("Already called");
+ 
+ 			appToDir = new Hashtable ();
+ 			dirToHost = new Hashtable ();
+ 			string [] apps = applications.Split (',');
+			Console.WriteLine ("applications: {0}", applications);
+ 			foreach (string str in apps) {
+ 				string [] app = str.Split (':');
+ 				if (app.Length != 2)
+ 					throw new ArgumentException ("Should be something like VPath:realpath");
+ 
+ 				string fp = System.IO.Path.GetFullPath (app [1]);
+ 				Console.WriteLine ("{0} -> {1}", app [0], fp);
+ 				appToDir [app [0]] = fp;
+ 				dirToHost [fp] = marker;
+ 			}
+ 		}
+ 
 		public void Start ()
 		{
 			if (started)
 				throw new InvalidOperationException ("The server is already started.");
+
+ 			if (appToDir == null)
+ 				throw new InvalidOperationException ("SetApplications must be called first");
 
 #if MODMONO_SERVER
 			if (filename == null)
@@ -142,6 +210,7 @@ namespace Mono.ASPNET
 
 			stop = true;	
 			listen_socket.Close ();
+			dirToHost = new Hashtable ();
 			WebTrace.WriteLine ("Server stopped.");
 		}
 
@@ -171,6 +240,47 @@ namespace Mono.ASPNET
 								      baseDirectory);
 		}
 
+		public IApplicationHost GetApplicationForPath (string path, bool defaultToRoot)
+		{
+			IApplicationHost bestFit = null;
+			string [] parts = path.Split ('/');
+			int count = parts.Length;
+			while (count > 0) {
+				string current = String.Join ("/", parts, 0, count);
+				if (current == "")
+					current = "/";
+
+				Console.WriteLine ("current: {0} path: {1}", current, path);
+				string dir = appToDir [current] as string;
+				if (dir != null) {
+					object o = dirToHost [dir];
+					bestFit = o as IApplicationHost;
+					if (o == marker) {
+						o = CreateApplicationHost (current, dir);
+						dirToHost [dir] = o;
+						bestFit = (IApplicationHost) o;
+					}
+					break;
+				} else {
+					Console.WriteLine ("null for {0}", current);
+				}
+				
+				count--;
+			}
+
+			if (defaultToRoot && bestFit == null) {
+				Console.WriteLine ("bestFit es null 1");
+				bestFit = dirToHost [appToDir ["/"]] as IApplicationHost;
+				if (bestFit == null) {
+					Console.WriteLine ("bestFit es null 2");
+					foreach (string key in dirToHost.Keys)
+						Console.WriteLine ("Key: {0} Value: '{1}'", key, dirToHost [key]);
+				}
+			}
+
+			return bestFit;
+		}
+		
 		public string Path {
 			get {
 				if (path == null)
@@ -189,6 +299,9 @@ namespace Mono.ASPNET
 			}
 		}
 
+		public AppDomain Domain {
+			get { return AppDomain.CurrentDomain; }
+		}
 	}
 }
 

@@ -1,3 +1,31 @@
+2003-08-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* IApplicationHost.cs: added 2 methods and 1 property to the
+	interface.
+	
+	* InitialWorkerRequest.cs: used to read the request data before
+	determining which application (if at all) is gonna process it.
+	
+	* Makefile: added new source file.
+
+	* ModMonoRequest.cs: removed AliasMatches and added Decline.
+
+	* ModMonoWorkerRequest.cs: new .ctor and Decline method that
+	tells apache that we won't handle the request.
+	
+	* MonoWorkerRequest.cs: variable renamed.
+
+	* XSPApplicationHost.cs: it can now handle multiple applications.
+	* XSPWorkerRequest.cs: simplified as reading the request data
+	is done in InitialWorkerRequest.
+
+	* xsp.exe.config:
+	* mod-mono-server.exe.config: added MonoApplications default
+	setting.
+
+	* server.cs: updated help and set the applications registered.
+	
+
 2003-08-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPApplicationHost.cs: handle possible exceptions in ProcessRequest.

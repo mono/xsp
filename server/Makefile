@@ -14,6 +14,7 @@ XSP_SOURCES = AssemblyInfo.cs \
 	  XSPApplicationHost.cs \
 	  MonoWorkerRequest.cs \
 	  XSPWorkerRequest.cs \
+	  InitialWorkerRequest.cs \
 	  Tracing.cs \
           server.cs
 	  
@@ -22,6 +23,7 @@ MODMONO_SERVER_SOURCES =  IApplicationHost.cs \
 			  ModMonoRequest.cs \
 			  ModMonoWorkerRequest.cs \
 			  XSPApplicationHost.cs \
+			  InitialWorkerRequest.cs \
 			  Tracing.cs \
 			  server.cs
 
@@ -29,7 +31,6 @@ EXES = xsp.exe mod-mono-server.exe
 all: $(EXES)
 	
 install: $(EXES) global.asax
-	rm -rf test
 	mkdir -p test/bin
 	cp $(EXES) xsp.exe.config mod-mono-server.exe.config global.asax test
 	cp $(EXES) test/bin

@@ -72,13 +72,22 @@ namespace Mono.ASPNET
 		string remoteName;
 		int localPort;
 		int remotePort;
-		string path;
 		ModMonoRequest request;
 
-		public XSPWorkerRequest (Socket client, IApplicationHost appHost)
+		public ModMonoRequest Request {
+			get { return request; }
+		}
+		
+		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost)
 			: base (appHost)
 		{
-			this.request = new ModMonoRequest (client);
+			this.request = new ModMonoRequest (ns);
+		}
+
+		public XSPWorkerRequest (ModMonoRequest request, IApplicationHost appHost)
+			: base (appHost)
+		{
+			this.request = request;
 		}
 
 		protected override bool GetRequestData ()
@@ -197,6 +206,11 @@ namespace Mono.ASPNET
 			return request.GetUri ();
 		}
 
+		public void Decline ()
+		{
+			request.Decline ();
+		}
+		
 		public override string GetFilePath ()
 		{
 			//Docs say it is physical path, but it seems it is the virtual path
@@ -211,7 +225,7 @@ namespace Mono.ASPNET
 
 		public override string MapPath (string path)
 		{
-			return base.MapPath (request.RemovePrefix (path, base.GetAppPath ()));
+			return base.MapPath (path);
 		}
 
 		public override string GetRemoteName ()

@@ -23,45 +23,55 @@ namespace Mono.ASPNET
 #if MODMONO_SERVER
 			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono_unix.");
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    mod-mono-server.exe [--filename file] [--root rootdir] [--virtual virtualdir]");
+			Console.WriteLine ("    mod-mono-server.exe [--root rootdir] [--applications APPS] [--filename file]");
 			Console.WriteLine ();
 			Console.WriteLine ("    --filename file: the unix socket file name.");
 			Console.WriteLine ("                    Default value: /tmp/mod_mono_server");
-			Console.WriteLine ("                    AppSettings key name: FileNameUnix");
-			Console.WriteLine ("    --root rootdir: rootdir is the root directory for the application.");
-			Console.WriteLine ("                    Default value: current directory");
-			Console.WriteLine ("                    AppSettings key name: MonoRootDir");
-			Console.WriteLine ("    --virtual virtualdir: virtualdir is the virtual directory mapped to rootdir.");
-			Console.WriteLine ("                    Default value: /");
-			Console.WriteLine ("                    AppSettings key name: MonoVirtualDir");
-			Console.WriteLine ();
+			Console.WriteLine ("                    AppSettings key name: UnixSocketFileName");
 #else
 			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
 			Console.WriteLine ("minimalistic HTTP server\n");
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    xsp.exe [--port N] [--root rootdir] [--virtual virtualdir]");
+			Console.WriteLine ("    xsp.exe [--root rootdir] [--applications APPS] [--virtual virtualdir]");
+			Console.WriteLine ("            [--port N] [--address addr]");
 			Console.WriteLine ();
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
 			Console.WriteLine ("                    Default value: 8080");
 			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
+			Console.WriteLine ();
 			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
 			Console.WriteLine ("                    Default value: 0.0.0.0");
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
-			Console.WriteLine ("    --root rootdir: rootdir is the root directory for the application.");
-			Console.WriteLine ("                    Default value: current directory");
-			Console.WriteLine ("                    AppSettings key name: MonoRootDir");
-			Console.WriteLine ("    --virtual virtualdir: virtualdir is the virtual directory mapped to rootdir.");
-			Console.WriteLine ("                    Default value: /");
-			Console.WriteLine ("                    AppSettings key name: MonoVirtualDir");
-			Console.WriteLine ();
 #endif
+			Console.WriteLine ();
+			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
+			Console.WriteLine ("                    anything else.");
+			Console.WriteLine ("                    Default value: current directory.");
+			Console.WriteLine ();
+			Console.WriteLine ("    --applications APPS: a semicolon separated list of virtual directory and");
+			Console.WriteLine ("                    real directory for all the applications we want to manage");
+			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
+			Console.WriteLine ("                    by a colon.");
+			Console.WriteLine ("                    Samples: /:.");
+			Console.WriteLine ("                           the virtual / is mapped to the current directory.");
+			Console.WriteLine ();
+			Console.WriteLine ("                            /blog:../myblog");
+			Console.WriteLine ("                           the virtual /blog is mapped to ../myblog");
+			Console.WriteLine ();
+			Console.WriteLine ("                            /:.;/blog:../myblog");
+			Console.WriteLine ("                           Two applications like the above ones are handled.");
+			Console.WriteLine ("                    Default value: /:.");
+
+			Console.WriteLine ();
 		}
 		
 		public static int Main (string [] args)
 		{
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
-			string virtualDir = ConfigurationSettings.AppSettings ["MonoServerVirtualDir"];
+			string apps = ConfigurationSettings.AppSettings ["MonoApplications"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
+			if (apps == null)
+				apps = "/:.";
 #if MODMONO_SERVER
 			string filename = ConfigurationSettings.AppSettings ["UnixSocketFileName"];
 #else
@@ -95,8 +105,8 @@ namespace Mono.ASPNET
 				case "--root":
 					rootDir = args [++i];
 					break;
-				case "--virtual":
-					virtualDir = args [++i];
+				case "--applications":
+					apps = args [++i];
 					break;
 				case "--help":
 					ShowHelp ();
@@ -116,12 +126,6 @@ namespace Mono.ASPNET
 				return 1;
 			}
 #endif
-			
-			if (virtualDir == null || virtualDir == "")
-				virtualDir = "/";
-			else if (virtualDir [0] != '/')
-				virtualDir = "/" + virtualDir;
-
 			if (rootDir != null && rootDir != "")
 				Environment.CurrentDirectory = rootDir;
 
@@ -129,7 +133,8 @@ namespace Mono.ASPNET
 			
 			Type type = typeof (XSPApplicationHost);
 			XSPApplicationHost host;
-			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, virtualDir, rootDir);
+			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, "/", rootDir);
+			host.SetApplications (apps);
 
 #if MODMONO_SERVER
 			host.SetListenFile (filename);
@@ -141,7 +146,6 @@ namespace Mono.ASPNET
 #endif
 			
 			Console.WriteLine ("Root directory: {0}", rootDir);
-			Console.WriteLine ("Virtual directory: {0}", virtualDir);
 
 			host.Start ();
 

@@ -96,8 +96,7 @@ namespace Mono.ASPNET
 	
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
-		IApplicationHost appHost;
-		ArrayList response;
+		IApplicationHost appHostBase;
 		Encoding encoding;
 		string mappedPath;
 		byte [] queryStringBytes;
@@ -108,8 +107,7 @@ namespace Mono.ASPNET
 			if (appHost == null)
 				throw new ArgumentNullException ("appHost");
 
-			this.appHost = appHost;
-			response = new ArrayList ();
+			appHostBase = appHost;
 		}
 
 		public event MapPathEventHandler MapPathEvent;
@@ -127,12 +125,12 @@ namespace Mono.ASPNET
 
 		public override string GetAppPath ()
 		{
-			return appHost.VPath;
+			return appHostBase.VPath;
 		}
 
 		public override string GetAppPathTranslated ()
 		{
-			return appHost.Path;
+			return appHostBase.Path;
 		}
 
 		public override string GetFilePathTranslated ()
@@ -204,29 +202,31 @@ namespace Mono.ASPNET
 			if (eventResult != null)
 				return eventResult;
 
-			if (path == null || path.Length == 0 || path == appHost.VPath)
-				return appHost.Path.Replace ('/', Path.DirectorySeparatorChar);
+			if (path == null || path.Length == 0 || path == appHostBase.VPath)
+				return appHostBase.Path.Replace ('/', Path.DirectorySeparatorChar);
 
 			if (path [0] == '~' && path.Length > 2 && path [1] == '/')
 				path = path.Substring (1);
 
-			int len = appHost.VPath.Length;
-			if (path.StartsWith (appHost.VPath + "/"))
+			int len = appHostBase.VPath.Length;
+			if (path.StartsWith (appHostBase.VPath + "/"))
 				path = path.Substring (len + 1);
 
 			if (path.Length > 0 && path [0] == '/')
 				path = path.Substring (1);
 
-			return Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
+			return Path.Combine (appHostBase.Path, path.Replace ('/', Path.DirectorySeparatorChar));
 		}
 
 		protected abstract bool GetRequestData ();
 
+		public bool ReadRequestData ()
+		{
+			return GetRequestData ();
+		}
+
 		public void ProcessRequest ()
 		{
-			if (!GetRequestData ())
-				return;
-
 			HttpRuntime.ProcessRequest (this);
 		}
 

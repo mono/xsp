@@ -3,7 +3,7 @@ EXES= src/xsp.exe src/HttpServer/server.exe src/HttpServer/redirector.sh
 all: 
 	(cd src && make)
 
-install: all custom_controls
+install: all
 	-mkdir rundir
 	-mkdir rundir/output
 	cp $(EXES) rundir/

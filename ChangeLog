@@ -1,6 +1,14 @@
 2003-12-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:
+	* nunit-tests/Makefile.am:
+	* nunit-tests/standalone/Makefile.in:
+	* nunit-tests/standalone/bug51682-1.aspx:
+	* nunit-tests/standalone/bug51682-1.cs: added first standalone test.
+
+2003-12-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in:
 	* tools/Makefile.am: added nunitasp to the build.
 
 2003-12-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>

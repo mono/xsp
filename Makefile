@@ -1,8 +1,8 @@
-EXES= src/xsp.exe src/HttpServer/server.exe src/HttpServer/redirector.sh
+EXES= src/xsp.exe src/HttpServer/server.exe
 TESTS= test/*.aspx test/*.png test/*.xml
 
 all: 
-	(cd src && make)
+	make -C src
 
 install: all
 	-mkdir rundir
@@ -19,7 +19,7 @@ install: all
 	@echo Enjoy!
 
 clean:
-	(cd src && make clean)
+	make -C src clean
 
 uninstall:
 	rm -rf rundir

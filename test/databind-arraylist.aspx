@@ -19,7 +19,7 @@
 	</script>
 </head>
 <body>
-	<object id="optionList" runat="server" class="System.Collections.ArrayList" />
+	<object id="optionsList" runat="server" class="System.Collections.ArrayList" />
 	<h3>Data binding using an array list</h3>
 	<form id="form" runat="server">     
 		<asp:DropDownList id="list" runat="server" autopostback="true" />

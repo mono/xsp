@@ -1,3 +1,7 @@
+2002-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs: Process works now!
+
 2002-07-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* generator.cs: added 'output' directory to assembly name.

@@ -1,3 +1,15 @@
+2002-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* databind-arraylist.aspx: fixed variable name.
+
+	* htmlimage.aspx:
+	* htmlinputimage.aspx:
+	* tabcontrol2.aspx:
+	* web_adrotator.xml:
+	* web_hyperlink.aspx:
+	* web_image.aspx:
+	* web_imagebutton.aspx: modify the img url. Ximian site changed.
+
 2002-09-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* index.aspx: now we have a working Path...

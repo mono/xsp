@@ -1,3 +1,8 @@
+2002-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: Process works now!
+	* redirector.sh: no longer needed. Removed.
+
 2002-07-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server.cs: lynx sends Accept 2 times!!!

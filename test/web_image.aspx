@@ -8,7 +8,7 @@
 <asp:Image id="im" runat="server"
 	AlternateText="Yes, again the dancing monkey"
 	ImageAlign="left"
-	ImageUrl="http://www.ximian.com/images/logo_ximian.gif"/>
+	ImageUrl="http://www.ximian.com/images/index/button-top.gif"/>
 </form>
 </body>
 </html>

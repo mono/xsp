@@ -15,12 +15,12 @@ SOURCES = asp-parser.cs \
 all: xsp.exe subdirs
 
 subdirs:
-	(cd HttpServer && make)
+	make -C HttpServer
 
 xsp.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) /out:$@ $^
 
 clean:
-	(cd HttpServer && make clean)
+	make -C HttpServer clean
 	rm -f xsp.exe *~ *.pdb 
 

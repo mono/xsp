@@ -217,18 +217,6 @@ class PageFactory
 			Console.WriteLine ("Output goes to {0}", output_file);
 			Console.WriteLine ("Script file is {0}", script_file);
 			Process proc = new Process ();
-#if MONO
-			proc.StartInfo.FileName = "redirector.sh";
-			proc.StartInfo.Arguments = exe + " " + output_file + " " + arguments;
-			proc.Start ();
-			proc.WaitForExit ();
-			int result = proc.ExitCode;
-			proc.Close ();
-
-			StreamWriter bat_output = new StreamWriter (File.Create (script_file));
-			bat_output.Write ("redirector.sh" + " " + exe + " " + output_file + " " + arguments);
-			bat_output.Close ();
-#else
 			proc.StartInfo.FileName = exe;
 			proc.StartInfo.Arguments = arguments;
 			proc.StartInfo.UseShellExecute = false;
@@ -245,7 +233,6 @@ class PageFactory
 			StreamWriter bat_output = new StreamWriter (File.Create (script_file));
 			bat_output.Write (exe + " " + arguments);
 			bat_output.Close ();
-#endif
 
 			return (result == 0);
 		}
@@ -740,6 +727,8 @@ class MyWorkerRequest
 			SendData ();
 		} catch (Exception e) {
 			Console.WriteLine ("Caught exception rendering page:\n" + e.ToString ());
+			if (e is TargetInvocationException)
+				Console.WriteLine (e.InnerException.ToString ());
 			HttpHelpers.RenderErrorPage (output, 500, "Internal Server Error",
 						     "The server failed to render '" + fileName + "'");
 		}

@@ -13,7 +13,7 @@
 <body>
 <form runat="server">
 <asp:ImageButton id="imgButton" AlternateText="Image button" 
-OnClick="Clicked" ImageUrl="http://www.go-mono.com/images/mono.gif" 
+OnClick="Clicked" ImageUrl="http://www.ximian.com/images/index/button-top.gif" 
 ImageAlign="left" runat="server"/>
 </form>
 </body>

@@ -1724,18 +1724,6 @@ public class Generator
 	private static bool RunProcess (string exe, string arguments, string output_file, string script_file)
 	{
 		Process proc = new Process ();
-#if MONO
-		proc.StartInfo.FileName = "redirector.sh";
-		proc.StartInfo.Arguments = exe + " " + output_file + " " + arguments;
-		proc.Start ();
-		proc.WaitForExit ();
-		int result = proc.ExitCode;
-		proc.Close ();
-
-		StreamWriter bat_output = new StreamWriter (File.Create (script_file));
-		bat_output.Write ("./redirector.sh" + " " + exe + " " + output_file + " " + arguments);
-		bat_output.Close ();
-#else
 		proc.StartInfo.FileName = exe;
 		proc.StartInfo.Arguments = arguments;
 		proc.StartInfo.UseShellExecute = false;
@@ -1752,7 +1740,6 @@ public class Generator
 		StreamWriter bat_output = new StreamWriter (File.Create (script_file));
 		bat_output.Write (exe + " " + arguments);
 		bat_output.Close ();
-#endif
 
 		return (result == 0);
 	}

@@ -1,13 +1,21 @@
+
+2002-07-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: use Page.GetViewStateString and update the hash table with
+	the new state if compiled with --define MONO.
+
+	* ChangeLog: remove path from previous entry.
+
 2002-07-04  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
-	* HttpServer/Makefile: added conditional compilation to use mcs (make 
+	* Makefile: added conditional compilation to use mcs (make 
 	MONO=0).
 
-	* HttpServer/README: some lines about unix setup.
+	* README: some lines about unix setup.
 
-	* HttpServer/redirector.sh: shell script used to redirect output.
+	* redirector.sh: shell script used to redirect output.
 
-	* HttpServer/server.cs: some conditional compilation to choose between
+	* server.cs: some conditional compilation to choose between
 	mono/mcs and MS runtime.
 
 2002-07-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>

@@ -98,8 +98,7 @@ class PageFactory
 			if (GetBuildOptions (file_content) == false)
 				return null;
 
-			Page page = GetInstance ();
-			return page;
+			return GetInstance ();
 		}
 
 		private static bool Xsp (string fileName, string csFileName)
@@ -229,7 +228,7 @@ class PageFactory
 			}
 
 			Console.WriteLine ("Loaded type: {0}", page_type);
-			return (Page) Activator.CreateInstance (page_type);
+			return Activator.CreateInstance (page_type) as Page;
 		}
 
 		private bool Compile (string csName, string dllName)
@@ -283,12 +282,21 @@ class PageFactory
 
 		PageBuilder builder = new PageBuilder (fileName);
 		Page page = builder.Build ();
-		if (page != null){
-			string state = page.GetTypeHashCode ().ToString ();
-			loadedPages.Add (state, page);
-		}
+#if MONO
+		if (page != null)
+			loadedPages.Add (page.GetViewStateString (), page);
+#endif
 
 		return page;
+	}
+
+	public static void UpdateHash (string old_state, string new_state)
+	{
+		if (!(loadedPages.ContainsKey (old_state)))
+			return;
+		Page page = (Page) loadedPages [old_state];
+		loadedPages.Remove (old_state);
+		loadedPages.Add (new_state, page);
 	}
 
 }
@@ -326,13 +334,20 @@ class MyWorkerRequest
 			return;
 
 		Page page = PageFactory.GetPage (fileName, query_options);
+#if MONO
+		string old_view_state = page.GetViewStateString ();
+#endif
 
 		if (page == null){
 			Console.WriteLine ("Error creating the instace of the generated class.");
 			return;
 		}
 
-		SetupPage (page);
+		RenderPage (page);
+#if MONO
+		string new_view_state = page.GetViewStateString ();
+		PageFactory.UpdateHash (old_view_state, new_view_state);
+#endif
 	}
 	
 	private void GetRequestMethod ()
@@ -382,9 +397,10 @@ class MyWorkerRequest
 				headers.Add ("Host", "127.0.0.1");
 				return;
 			}
+
 			idx = line.IndexOf (':');
 			if (idx == -1 || idx == line.Length - 1){
-				Console.WriteLine ("Ignoring request header: " + line);
+				Console.Error.WriteLine ("idx: {0} Ignoring request header: {1}", idx, line);
 				continue;
 			}
 			string key = line.Substring (0, idx);
@@ -426,7 +442,7 @@ class MyWorkerRequest
 		Console.WriteLine ("File name: {0}", fileName);
 	}
 	
-	private void SetupPage (Page page)
+	private void RenderPage (Page page)
 	{
 		HttpRequest request = new HttpRequest (fileName, "http://127.0.0.1/" + fileName, 
 						       query_options);
@@ -593,7 +609,7 @@ public class Server
 #if MONO
 		get { return (!useMonoClasses ? "System.Web.dll" : ".\\System.Web.dll"); }
 #else
-		get { return (!useMonoClasses ? "System.Web" : ".\\System.Web"); }
+		get { return (!useMonoClasses ? "System.Web.dll" : ".\\System.Web.dll"); }
 #endif
 	}
 

@@ -1,3 +1,7 @@
+2004-11-24 Alp Toker <alp@atoker.com>
+
+  * server/XSPApplicationHost.cs: remove slash
+
 2004-11-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/MonoWorkerRequest.cs:

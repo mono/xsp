@@ -4,9 +4,9 @@
 </head>
 <body>
 <form runat="server">
-<asp:Table>
-<asp:TableRow>
-<asp:TableCell>
+<asp:Table runat='server'>
+<asp:TableRow runat='server'>
+<asp:TableCell runat='server'>
 TEST
 </asp:TableCell>
 </asp:TableRow>

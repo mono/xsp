@@ -384,6 +384,11 @@ namespace Mono.ASPNET
 					break;
 			}
 		}
+
+		public override object InitializeLifetimeService ()
+		{
+			return null;
+		}
 	}
 	
 	public class VPathToHost

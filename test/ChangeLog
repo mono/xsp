@@ -1,5 +1,12 @@
 2002-07-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* tabcontrol2.aspx: page to test tabcontrol2.cs
+
+	* tabcontrol2.cs: almost the same as tabcontrol1, but this one handles
+	postback events an stores a ControlCollection associatted to each tab.
+
+2002-07-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* tabcontrol.aspx: sample using a user control that allows modifying
 	its properties and display the resulting control.
 

@@ -36,8 +36,6 @@ AC_OUTPUT([
 	doc/dbsessmgr.1
         doc/asp_state.1
 	doc/Makefile
-        nunit-tests/Makefile
-        nunit-tests/standalone/Makefile
 	scripts/Makefile
 	server/AssemblyInfo.cs
 	server/AssemblyInfoModMono.cs
@@ -49,14 +47,5 @@ AC_OUTPUT([
         tools/asp_state/AssemblyInfo.cs
         tools/dbsessmgr/Makefile
         tools/dbsessmgr/AssemblyInfo.cs
-        tools/nunitasp/Makefile
-        tools/nunitasp/source/Makefile
-        tools/nunitasp/source/NUnitAsp/Makefile
-        tools/nunitasp/source/NUnitAsp/AspTester/Makefile
-        tools/nunitasp/source/NUnitAsp/HtmlTester/Makefile
-        tools/nunitasp/source/NUnitAsp/Sgml/Makefile
-        tools/nunitasp/source/NUnitAspTest/Makefile
-        tools/nunitasp/source/NUnitAspTest/AspTester/Makefile
-        tools/nunitasp/source/NUnitAspTest/HtmlTester/Makefile
 ])
 

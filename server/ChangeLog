@@ -1,3 +1,7 @@
+2003-02-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* MonoWorkerRequest.cs: fixed buglet in GetAppPath.
+
 2003-02-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: removed installation of server.exe.config.

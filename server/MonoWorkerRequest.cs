@@ -94,9 +94,6 @@ namespace Mono.ASPNET
 
 		public override string GetAppPath ()
 		{
-			if (appHost.VPath == "/")
-				return "";
-
 			return appHost.VPath;
 		}
 

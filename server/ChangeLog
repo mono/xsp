@@ -1,3 +1,7 @@
+2003-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: fixed GetUnknownHeaders.
+
 2003-06-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs: reverted latest Ben's patch as it causes an

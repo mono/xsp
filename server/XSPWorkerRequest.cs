@@ -262,7 +262,7 @@ namespace Mono.ASPNET
 				ArrayList pairs = new ArrayList ();
 				for (int i = 0; i < count; i++) {
 					int index = HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]);
-					if (index == -1)
+					if (index != -1)
 						continue;
 					pairs.Add (new string [] { keys [i], values [i]});
 				}

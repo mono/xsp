@@ -83,7 +83,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
 			Console.WriteLine ();
-			Console.WriteLine ("    --version: displays version information and exists.");
+			Console.WriteLine ("    --version: displays version information and exits.");
 
 			Console.WriteLine ();
 		}
@@ -157,6 +157,13 @@ namespace Mono.ASPNET
 				port = Convert.ToUInt16 (oport);
 			} catch (Exception) {
 				Console.WriteLine ("The value given for the listen port is not valid: " + oport);
+				return 1;
+			}
+
+			try {
+				IPAddress.Parse (ip);
+			} catch (Exception) {
+				Console.WriteLine ("The value given for the address is not valid: " + ip);
 				return 1;
 			}
 #endif

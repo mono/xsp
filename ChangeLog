@@ -1,3 +1,8 @@
+2003-12-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/server.cs: beutified error on --address argument. Fixes bug
+	#52208.
+
 2003-12-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:

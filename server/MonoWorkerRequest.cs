@@ -93,6 +93,7 @@ namespace Mono.ASPNET
 	}
 
 	public delegate void MapPathEventHandler (object sender, MapPathEventArgs args);
+	public delegate void EndOfRequestHandler (MonoWorkerRequest request);
 	
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
@@ -112,6 +113,7 @@ namespace Mono.ASPNET
 		}
 
 		public event MapPathEventHandler MapPathEvent;
+		public event EndOfRequestHandler EndOfRequestEvent;
 		
 		string HostPath {
 			get { 
@@ -251,6 +253,12 @@ namespace Mono.ASPNET
 		public void ProcessRequest ()
 		{
 			HttpRuntime.ProcessRequest (this);
+		}
+
+		public override void EndOfRequest ()
+		{
+			if (EndOfRequestEvent != null)
+				EndOfRequestEvent (this);
 		}
 
 		public override void SendCalculatedContentLength (int contentLength)

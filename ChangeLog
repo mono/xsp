@@ -1,3 +1,12 @@
+2003-11-26  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: added EndOfRequestEvent and invoke it
+	in the override of EndOfRequest.
+
+	* server/XSPApplicationHost.cs: use the new event and close the socket
+	when notified of request end. This makes xsp work under heavy load too,
+	when HttpRuntime.ProcessRequest returns inmediately.
+
 2003-11-24  Jackson Harper <jackson@ximian.com>
 
 	* tools/asp_state/asp_state.exe.config: Use same port as MS, load

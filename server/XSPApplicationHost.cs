@@ -57,7 +57,7 @@ namespace Mono.ASPNET
 		[NonSerialized] XSPApplicationServer server;
 		IApplicationHost host;
 		NetworkStream ns;
-		bool requestFinished;
+		EndOfRequestHandler endOfRequest;
 #if MODMONO_SERVER
 		ModMonoRequest modRequest;
 #else
@@ -68,6 +68,7 @@ namespace Mono.ASPNET
 
 		public Worker (Socket client, EndPoint localEP, XSPApplicationServer server)
 		{
+			endOfRequest = new EndOfRequestHandler (EndOfRequest);
 			ns = new NetworkStream (client, true);
 			this.server = server;
 #if !MODMONO_SERVER
@@ -110,10 +111,6 @@ namespace Mono.ASPNET
 				try {
 					byte [] error = HttpErrors.ServerError ();
 					ns.Write (error, 0, error.Length);
-				} catch {}
-			} finally {
-				requestFinished = true;
-				try {
 					ns.Close ();
 				} catch {}
 			}
@@ -127,11 +124,19 @@ namespace Mono.ASPNET
 			XSPWorkerRequest mwr = new XSPWorkerRequest (modRequest, host);
 #endif
 			if (!mwr.ReadRequestData ()) {
-				requestFinished = true;
+				EndOfRequest (mwr);
 				return;
 			}
-
+			
+			mwr.EndOfRequestEvent += endOfRequest;
 			mwr.ProcessRequest ();
+		}
+
+		public void EndOfRequest (MonoWorkerRequest mwr)
+		{
+			try {
+				ns.Close ();
+			} catch {}
 		}
 	}
 

@@ -79,8 +79,11 @@ behavior.
 .I \-\-version
 Displays version information and exits.
 .TP
-.I --help
+.I \-\-help
 Shows the list of options and exits.
+.TP
+.I \-\-verbose
+Prints extra messages. Useful for debugging.
 .SH AUTHORS
 The Mono XSP server was written by Gonzalo Paniagua Javier
 (gonzalo@ximian.com).

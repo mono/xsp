@@ -161,6 +161,17 @@ class AspTokenizer {
 				return (c != -1) ? Token.TEXT : Token.EOF;
 			}
 
+			if (inTag && current_token == '='){
+				sb.Append ((char) c);
+				while ((c = sr.Peek ()) != -1) {
+					if (!is_identifier_part_character ((char) c) && c != '+')
+						break;
+					sb.Append ((char) read_char ());
+				}
+
+				return Token.ATTVALUE;
+			}
+
 			if (inTag && is_identifier_start_character ((char) c)){
 				sb.Append ((char) c);
 				while ((c = sr.Peek ()) != -1) {
@@ -171,9 +182,6 @@ class AspTokenizer {
 
 				if (current_token == '@' && Directive.IsDirectiveID (sb.ToString ()))
 					return Token.DIRECTIVE;
-
-				if (current_token == '=')
-					return Token.ATTVALUE;
 
 				return Token.IDENTIFIER;
 			}

@@ -1,3 +1,14 @@
+2002-05-30  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* asp-parser.cs: fixed comments parsing.
+
+	* asp-tokenizer.cs: special case attribute values without quotes.
+
+	* aspelements.cs: (Component) don't allow children when the tag is
+	self closing.
+
+	* generator.cs: added GetCode (). Added class name to build options.
+
 2002-05-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* aspelements.cs: (TagAttributes) perform a case insensitive search

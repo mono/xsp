@@ -629,8 +629,10 @@ public class Component : Tag
 		this.type = type;
 		this.defaultPropertyName = "";
 		this.allow_children = GuessAllowChildren (type);
-		if (type == typeof (System.Web.UI.WebControls.DataGridColumn) ||
-		    type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)))
+		if (input_tag.SelfClosing)
+			this.children_kind = ChildrenKind.NONE;
+		else if (type == typeof (System.Web.UI.WebControls.DataGridColumn) ||
+		    	 type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)))
 			this.children_kind = ChildrenKind.PROPERTIES; // Columns lack 'Controls' property
 		else if (type == typeof (System.Web.UI.WebControls.ListItem))
 			this.children_kind = ChildrenKind.CONTROLS;

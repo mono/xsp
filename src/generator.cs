@@ -384,19 +384,25 @@ public class Generator
 					"(System.Web.UI.IParserAccessor) __ctrl;\n\n");
 	}
 
+	public StringReader GetCode ()
+	{
+		if (!parse_ok)
+			throw new ApplicationException ("You gotta call ProcessElements () first!");
+
+		StringBuilder code = new StringBuilder ();
+		for (int i = 0; i < parts.Length; i++)
+			code.Append ((StringBuilder) parts [i]);
+
+		return new StringReader (code.ToString ());
+	}
+
 	public void Print ()
 	{
 		if (!parse_ok){
 			Console.WriteLine ("//Warning!!!: Elements not correctly parsed.");
 		}
 
-		int i;
-		StringBuilder code_chunk;
-		
-		for (i = 0; i < parts.Length; i++){
-			code_chunk = (StringBuilder) parts [i];
-			Console.Write (code_chunk.ToString ());
-		}
+		Console.Write (GetCode ().ReadToEnd ());
 	}
 
 	// Regex.Escape () make some illegal escape sequences for a C# source.
@@ -519,6 +525,7 @@ public class Generator
 		}
 		
 		asis = (PlainText) elements.Current;
+			
 		string escaped_text = Escape (asis.Text);
 		current_function.AppendFormat ("\t\t\t__parser.AddParsedSubObject (" + 
 					       "new System.Web.UI.LiteralControl (\"{0}\"));\n",
@@ -1363,6 +1370,8 @@ public class Generator
 
 	private void End ()
 	{
+		buildOptions.AppendFormat ("//<class name=\"{0}\"/>\n", className);
+		buildOptions.Append ("\n");
 		classDecl = "\tpublic class " + className + " : " + parent + interfaces + " {\n"; 
 		prolog.Append ("\n" + classDecl);
 		declarations.Append (

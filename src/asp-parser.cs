@@ -89,11 +89,12 @@ class AspParser {
 				element = get_tag ();
 				if (element == null)
 					error ();
-				elements.Add (element);
 				if (!(element is Tag)){
 					AddPlainText (((PlainText) element).Text);
 					continue;
 				}
+
+				elements.Add (element);
 
 				tag_element = element as Tag;
 				tag = tag_element.TagID.ToUpper ();
@@ -147,12 +148,12 @@ class AspParser {
 		case '!':
 			if (eat (Token.DOUBLEDASH)){
 				tokenizer.Verbatim = true;
-				string comment = get_verbatim ('-', "-->");
+				string comment = get_verbatim (Token.DOUBLEDASH, "-->");
 				tokenizer.Verbatim = false;
 				if (comment == null)
 					error ("Unfinished HTML comment");
 
-				return new PlainText ("<!-" + comment + "-->");
+				return new PlainText ("<!" + comment + "-->");
 			} else {
 				//FIXME
 				//  <!DOCTYPE...

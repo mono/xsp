@@ -6,15 +6,15 @@
 		if (!Page.IsValid)
 			return;
 
-		int val;
+		double val;
 		try {
-			val = Int32.Parse (degrees.Text);
+			val = Double.Parse (degrees.Text);
 		} catch (Exception) {
 			result.Text = "<font color=\"red\">Invalid number in degrees</font>";
 			return;
 		}
 
-		int kval;
+		double kval;
 		switch (fromScale.SelectedIndex) {
 		case 0:
 			kval = val + 373;
@@ -53,7 +53,7 @@
 								val,
 								fromScale.Value,
 								toScale.Value,
-								kval);
+								Math.Round (kval, 3));
 	}
 </script>
 <head>

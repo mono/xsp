@@ -161,7 +161,8 @@ class AspTokenizer {
 				return (c != -1) ? Token.TEXT : Token.EOF;
 			}
 
-			if (inTag && current_token == '='){
+			if (inTag && current_token == '=' && 
+			    (is_identifier_part_character ((char) c) || c == '+')){
 				sb.Append ((char) c);
 				while ((c = sr.Peek ()) != -1) {
 					if (!is_identifier_part_character ((char) c) && c != '+')

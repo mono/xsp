@@ -1,4 +1,5 @@
 <%@ language="C#" %>
+<%@ Import namespace="System.IO" %>
 <html>
 <head>
 <title>Welcome to Mono XSP!</title>

@@ -8,7 +8,7 @@
 <a href="http://www.go-mono.com"><img src="mono.png" alt="http://www.go-mono.com"></a>
 <p>Here are some ASP.NET examples:</p>
 <%
-DirectoryInfo dir = new DirectoryInfo ("");
+DirectoryInfo dir = new DirectoryInfo (".");
 FileInfo[] files = dir.GetFiles ();
 for (int i=0; i < files.Length; i++) {
 	string FileName = Path.GetFileName(files[i].FullName);

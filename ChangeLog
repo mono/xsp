@@ -1,3 +1,7 @@
+2004-09-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: added AM_MKDIR_P to make automake 1.8 happier.
+
 2004-08-31 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: don't set the socket timeout for

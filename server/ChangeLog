@@ -1,0 +1,13 @@
+2002-10-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* ChangeLog:
+	* Makefile:
+	* MonoApplicationHost.cs:
+	* MonoWorkerRequest.cs:
+	* global.asax:
+	* index.aspx:
+	* server.cs:
+	* web.config: new web server that uses ASP.NET hosting capabilities.
+	It works with MS runtime and will be used to debug our classes from
+	now on. xsp/src/* is now obsoleted and will stop working some time soon.
+

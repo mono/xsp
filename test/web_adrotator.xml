@@ -4,5 +4,9 @@
 <ImageUrl>http://www.ximian.com/images/index/button-top.gif</ImageUrl>
 <NavigateUrl>http://www.ximian.com</NavigateUrl>
 </Ad>
+<Ad>
+<AlternateText>Mono</AlternateText>
+<ImageUrl>http://www.go-mono.com/images/mono-new.gif</ImageUrl>
+<NavigateUrl>http://www.go-mono.com</NavigateUrl>
+</Ad>
 </Advertisements>
-

@@ -1,3 +1,11 @@
+2002-06-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web_adrotator.aspx:
+	* web_hyperlink.aspx:
+	* web_image.aspx: new tests that render fine with our System.Web.
+
+	* web_adrotator.xml: needed by web_adrotator.aspx.
+
 2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* htmltable.aspx:

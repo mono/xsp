@@ -1,3 +1,8 @@
+2005-03-18 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/InitialWorkerRequest.cs: prevent empty lines before the
+	actual request from causing an error. Fixes bug #73048.
+
 2005-03-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoApplicationHost.cs: don't print the exception to apache

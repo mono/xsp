@@ -178,14 +178,23 @@ namespace Mono.ASPNET
 		{
 			string req = null;
 			try {
-				req = ReadLine ();
+				while (true) {
+					req = ReadLine ();
+					if (req == null) {
+						gotSomeInput = false;
+						return false;
+					}
+
+					req = req.Trim ();
+					// Ignore empty lines before the actual request.
+					if (req != "")
+						break;
+				}
 			} catch {
+				gotSomeInput = false;
+				return false;
 			}
 
-			if (req == null)
-				return false;
-
-			req = req.Trim ();
 			string [] s = req.Split (' ');
 
 			switch (s.Length) {

@@ -22,8 +22,8 @@ fi
 if test "x$GMCS" != "xno" ; then
 	AC_MSG_CHECKING([whether gmcs is actually able to compile...])
 
-	tmpin=`mktemp`
-	tmpout=`mktemp`
+	tmpin=`mktemp -t in.XXXXXX`
+	tmpout=`mktemp out.XXXXXX`
 
 	echo "class Foo { public static void Main() {} }" > $tmpin
 

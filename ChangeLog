@@ -1,3 +1,7 @@
+2005-02-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: mktemp failed on *BSD.
+
 2005-02-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoApplicationHost.cs:

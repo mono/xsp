@@ -233,7 +233,7 @@ namespace Mono.ASPNET
 		public override int GetLocalPort ()
 		{
 			WebTrace.WriteLine ("GetLocalPort()");
-			return ((IPEndPoint) remoteEP).Port;
+			return ((IPEndPoint) localEP).Port;
 		}
 
 		public override string GetPathInfo ()

@@ -51,6 +51,7 @@ namespace Mono.ASPNET
 		byte [] inputBuffer;
 		int inputLength;
 		int position;
+		const int BSize = 1024 * 32;
 		
 		public InitialWorkerRequest (NetworkStream ns)
 		{
@@ -62,8 +63,8 @@ namespace Mono.ASPNET
 
 		void FillBuffer ()
 		{
-			inputBuffer = new byte [2048];
-			inputLength = stream.Read (inputBuffer, 0, 2048);
+			inputBuffer = new byte [BSize];
+			inputLength = stream.Read (inputBuffer, 0, BSize);
 			position = 0;
 		}
 

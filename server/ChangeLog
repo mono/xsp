@@ -1,3 +1,12 @@
+2003-08-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* InitialWorkerRequest.cs: fixed bugs 47937 and 47938.
+
+	* XSPApplicationHost.cs: close the socket when finished.
+
+	* XSPWorkerRequest.cs: small fixes in ReadEntityBody. Removed the 302
+	redirection, handle it faking the path.
+
 2003-08-26  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPApplicationHost.cs: infinite lifetime for XSPApplicationHost.

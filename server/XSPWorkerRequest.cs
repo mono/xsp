@@ -334,6 +334,7 @@ namespace Mono.ASPNET
 			if (!Directory.Exists (localPath))
 				return true;
 
+			string oldPath = path;
 			if (!path.EndsWith ("/"))
 				path += "/";
 
@@ -348,24 +349,9 @@ namespace Mono.ASPNET
 			}
 
 			if (!catOne)
-				return true;
+				path = oldPath;
 
-			if (queryString != null && queryString != "")
-				path += "?" + queryString;
-
-			SendStatus (302, "Moved");
-			WriteString (status);
-			WriteString ("Location: " + path + "\r\n");
-			WriteString ("Content-Type: text/html\r\n");
-			string page = "<html><head><title>Object moved</title></head>" + 
-				      "<body><h1>Object Moved</h1>Document moved <a href=\"" +
-				      path + "\">here</a></body>";
-
-			WriteString ("Content-Length: " + page.Length + "\r\n\r\n");
-			WriteString (page);
-			headersSent = true;
-			FlushResponse (true);
-			return false;
+			return true;
 		}
 
 		void WriteString (string s)
@@ -379,18 +365,8 @@ namespace Mono.ASPNET
 			return TryDirectory ();
 		}
 
-		void FillBuffer ()
-		{
-			inputBuffer = new byte [2048];
-			inputLength = stream.Read (inputBuffer, 0, 2048);
-			position = 0;
-		}
-
 		int ReadInput (byte [] buffer, int offset, int size)
 		{
-			if (inputBuffer == null)
-				FillBuffer ();
-
 			int length = inputLength - position;
 			if (length > 0) {
 				if (length > size)
@@ -410,7 +386,7 @@ namespace Mono.ASPNET
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
 			WebTrace.WriteLine ("ReadEntityBody()");
-			if (buffer == null || size == 0)
+			if (size == 0)
 				return 0;
 
 			return ReadInput (buffer, 0, size);

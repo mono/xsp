@@ -48,7 +48,7 @@ namespace Mono.ASPNET
 		
 		public Worker (Socket client, IApplicationHost host)
 		{
-			ns = new NetworkStream (client, false);
+			ns = new NetworkStream (client, true);
 			this.host = host;
 			remoteEP = client.RemoteEndPoint;
 		}

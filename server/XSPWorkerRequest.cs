@@ -32,6 +32,7 @@ using System;
 using System.Collections;
 using System.Configuration;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -66,6 +67,7 @@ namespace Mono.ASPNET
 		int requestId;
 		XSPRequestBroker requestBroker;
 		bool keepAlive;
+		bool haveContentLength;
 		
 		static string serverHeader;
 
@@ -299,8 +301,12 @@ namespace Mono.ASPNET
 			try {
 				if (!headersSent) {
 					responseHeaders.Insert (0, status);
-					if (!sentConnection)
+					if (!sentConnection) {
+						if (!haveContentLength)
+							keepAlive = false;
+
 						AddConnectionHeader ();
+					}
 
 					responseHeaders.Append ("\r\n");
 					byte [] headerBytes = Encoding.GetBytes (responseHeaders.ToString ());
@@ -606,12 +612,16 @@ namespace Mono.ASPNET
 		public override void SendUnknownResponseHeader (string name, string value)
 		{
 			WebTrace.WriteLine ("SendUnknownResponseHeader (" + name + ", " + value + ")");
-			if (String.Compare (name, "connection", true) == 0) {
+			if (String.Compare (name, "connection", true, CultureInfo.InvariantCulture) == 0) {
 				sentConnection = true;
 				if (value.ToLower ().IndexOf ("keep-alive") == -1) {
 					keepAlive = false;
 				}
 			}
+
+			if (!sentConnection && !haveContentLength &&
+			     String.Compare (name, "Content-Length", true, CultureInfo.InvariantCulture) == 0)
+				haveContentLength = true;
 
 			if (!headersSent) {
 				responseHeaders.Append (name);
@@ -622,3 +632,4 @@ namespace Mono.ASPNET
 		}
 	}
 }
+

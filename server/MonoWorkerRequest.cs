@@ -169,7 +169,7 @@ namespace Mono.ASPNET
 			WebTrace.WriteLine ("GetQueryStringRawBytes()");
 			if (queryString == null)
 				return null;
-			return Encoding.Default.GetBytes (queryString);
+			return encoding.GetBytes (queryString);
 		}
 
 		public override string GetRawUrl ()
@@ -385,7 +385,7 @@ namespace Mono.ASPNET
 			if ((read = input.ReadBlock (chars, 0, size)) == 0)
 				return 0;
 
-			byte [] bytes = Encoding.Default.GetBytes (chars, 0, read);
+			byte [] bytes = encoding.GetBytes (chars, 0, read);
 			bytes.CopyTo (buffer, 0);
 			return bytes.Length;
 		}

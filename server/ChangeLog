@@ -1,3 +1,8 @@
+2002-10-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* MonoWorkerRequest.cs: use a default encoding without markers.
+	* server.cs: Trace output goes to Console.Out.
+
 2002-10-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: added Tracing.cs

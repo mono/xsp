@@ -68,6 +68,9 @@
 	src/
 		Source files for the parser/generator and test server.
 		OBSOLETED!!!
+	
+	TESTED	We'll be updating this file with controls and applications out
+		there in the web that we test and work fine.
 
 		
 Maintainer: gonzalo@ximian.com

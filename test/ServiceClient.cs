@@ -8,7 +8,7 @@ namespace WebServiceTest
 		{
 			Console.WriteLine ("Testing simple web service");
 			TestService s = new TestService ();
-			if (args.Length>0)
+			if (args.Length > 0)
 				s.Url = "http://" + args [0] + "/TestService.asmx";
 			for (int n=0; n<10; n++)
 			{
@@ -21,6 +21,8 @@ namespace WebServiceTest
 
 			Console.WriteLine ("Testing converter service");
 			ConverterService cs = new ConverterService ();
+			if (args.Length > 0)
+				cs.Url = "http://" + args [0] + "/ConverterService.asmx";
 
 /*			try
 			{

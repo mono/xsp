@@ -1,3 +1,15 @@
+2004-07-07 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoApplicationHost.cs:
+	* server/ModMonoWorkerRequest.cs:
+	* server/ModMonoRequest.cs: removed unused method/options and the
+	ack sent back after writing something. Unified setting status code
+	and message into 1 single command.
+ 
+2004-06-30 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Released 1.0.
+
 2004-06-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in: 0.15.99.

@@ -65,14 +65,10 @@ namespace Mono.ASPNET
 	enum Cmd
 	{
 		FIRST_COMMAND,
-		GET_REQUEST_LINE = 0,
-		SEND_FROM_MEMORY,
-		GET_PATH_INFO,
+		SEND_FROM_MEMORY = 0,
 		GET_SERVER_VARIABLE,
-		GET_PATH_TRANSLATED,
 		GET_SERVER_PORT,
 		SET_RESPONSE_HEADER,
-		GET_FILENAME,
 		GET_REMOTE_ADDRESS,
 		GET_LOCAL_ADDRESS,
 		GET_REMOTE_PORT,
@@ -83,8 +79,7 @@ namespace Mono.ASPNET
 		SHOULD_CLIENT_BLOCK,
 		SETUP_CLIENT_BLOCK,
 		GET_CLIENT_BLOCK,
-		SET_STATUS_LINE,
-		SET_STATUS_CODE,
+		SET_STATUS,
 		DECLINE_REQUEST,
 		LAST_COMMAND
 	}
@@ -137,13 +132,6 @@ namespace Mono.ASPNET
 			writer.Write (b);
 		}
 
-		void ReadEnd ()
-		{
-			byte b = reader.ReadByte ();
-			if (b != 0)
-				throw new Exception ("Protocol violation or error");
-		}
-
 		string ReadString ()
 		{
 			int size = reader.ReadInt32 ();
@@ -168,7 +156,6 @@ namespace Mono.ASPNET
 		public void Decline ()
 		{
 			SendSimpleCommand (Cmd.DECLINE_REQUEST);
-			ReadEnd ();
 		}
 
 		public string GetProtocol ()
@@ -186,7 +173,6 @@ namespace Mono.ASPNET
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
 			writer.Write (data, position, length);
-			ReadEnd ();
 		}
 
 		public void SetResponseHeader (string name, string value)
@@ -194,7 +180,6 @@ namespace Mono.ASPNET
 			SendSimpleCommand (Cmd.SET_RESPONSE_HEADER);
 			WriteString (name);
 			WriteString (value);
-			ReadEnd ();
 		}
 
 		public string [] GetAllHeaders ()
@@ -226,7 +211,6 @@ namespace Mono.ASPNET
 
 			SendSimpleCommand (Cmd.GET_SERVER_VARIABLE);
 			WriteString (name);
-			ReadEnd ();
 			o = ReadString ();
 			serverVariables [name] = o;
 
@@ -236,14 +220,6 @@ namespace Mono.ASPNET
 		public string GetUri ()
 		{
 			return uri;
-		}
-
-		public string GetFileName ()
-		{
-			// Not used!
-			SendSimpleCommand (Cmd.GET_FILENAME);
-			ReadEnd ();
-			return ReadString ();
 		}
 
 		public string GetQueryString ()
@@ -259,7 +235,6 @@ namespace Mono.ASPNET
 				return serverPort;
 
 			SendSimpleCommand (Cmd.GET_SERVER_PORT);
-			ReadEnd ();
 			serverPort = reader.ReadInt32 ();
 			return serverPort;
 		}
@@ -270,7 +245,6 @@ namespace Mono.ASPNET
 				return remoteAddress;
 
 			SendSimpleCommand (Cmd.GET_REMOTE_ADDRESS);
-			ReadEnd ();
 			remoteAddress = ReadString ();
 			return remoteAddress;
 		}
@@ -281,7 +255,6 @@ namespace Mono.ASPNET
 				return remoteName;
 
 			SendSimpleCommand (Cmd.GET_REMOTE_NAME);
-			ReadEnd ();
 			remoteName = ReadString ();
 			return remoteName;
 		}
@@ -292,7 +265,6 @@ namespace Mono.ASPNET
 				return localAddress;
 
 			SendSimpleCommand (Cmd.GET_LOCAL_ADDRESS);
-			ReadEnd ();
 			localAddress = ReadString ();
 			return localAddress;
 		}
@@ -303,7 +275,6 @@ namespace Mono.ASPNET
 				return localPort;
 
 			SendSimpleCommand (Cmd.GET_LOCAL_PORT);
-			ReadEnd ();
 			localPort = reader.ReadInt32 ();
 			return localPort;
 		}
@@ -314,7 +285,6 @@ namespace Mono.ASPNET
 				return remotePort;
 
 			SendSimpleCommand (Cmd.GET_REMOTE_PORT);
-			ReadEnd ();
 			remotePort = reader.ReadInt32 ();
 			return remotePort;
 		}
@@ -322,13 +292,11 @@ namespace Mono.ASPNET
 		public void Flush ()
 		{
 			SendSimpleCommand (Cmd.FLUSH);
-			ReadEnd ();
 		}
 
 		public void Close ()
 		{
 			SendSimpleCommand (Cmd.CLOSE);
-			ReadEnd ();
 		}
 
 		public int SetupClientBlock ()
@@ -338,7 +306,6 @@ namespace Mono.ASPNET
 
 			setupClientBlockCalled = true;
 			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
-			ReadEnd ();
 			int i = reader.ReadInt32 ();
 			clientBlock = i;
 			return i;
@@ -347,7 +314,6 @@ namespace Mono.ASPNET
 		public bool ShouldClientBlock () 
 		{
 			SendSimpleCommand (Cmd.SHOULD_CLIENT_BLOCK);
-			ReadEnd ();
 			int i = reader.ReadInt32 ();
 			return (i == 0);
 		} 
@@ -359,7 +325,6 @@ namespace Mono.ASPNET
 			
 			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK);
 			writer.Write (size);
-			ReadEnd ();
 			int i = reader.ReadInt32 ();
 			if (i > size)
 				throw new Exception ("Houston...");
@@ -369,12 +334,9 @@ namespace Mono.ASPNET
 
 		public void SetStatusCodeLine (int code, string status)
 		{
-			SendSimpleCommand (Cmd.SET_STATUS_CODE);
+			SendSimpleCommand (Cmd.SET_STATUS);
 			writer.Write (code);
-			ReadEnd ();
-			SendSimpleCommand (Cmd.SET_STATUS_LINE);
 			WriteString (status);
-			ReadEnd ();
 		}
 	}
 }

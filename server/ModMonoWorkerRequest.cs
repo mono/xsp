@@ -143,7 +143,11 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public ModMonoWorkerRequest (int requestId, ModMonoRequestBroker requestBroker, IApplicationHost appHost, string verb, string path, string queryString, string protocol, string localAddress, int serverPort, string remoteAddress, int remotePort, string remoteName, string[] headers, string[] headerValues)
+		public ModMonoWorkerRequest (int requestId, ModMonoRequestBroker requestBroker,
+					IApplicationHost appHost, string verb, string path,
+					string queryString, string protocol, string localAddress,
+					int serverPort, string remoteAddress, int remotePort,
+					string remoteName, string[] headers, string[] headerValues)
 			: base (appHost)
 		{
 			this.requestId = requestId;

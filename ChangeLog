@@ -1,5 +1,10 @@
 2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* tools/nunitasp/source/NUnitAspTest/Makefile.am: fixed distcheck and
+	don't install NUnitAspTest.dll.
+
+2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* INSTALL: added note on building using CSC.
 
 	* test/mod-mono-server.exe.config:

@@ -7,7 +7,7 @@ MCSFLAGS= -debug+ -debug:full -nologo -lib:../NUnitAsp
 endif
 
 nunitasptestdir = $(libdir)
-nunitasptest_SCRIPTS = NUnitAspTest.dll
+noinst_SCRIPTS = NUnitAspTest.dll
 
 EXTRA_DIST = $(local_sources) NUnitAspTest.csproj
 CLEANFILES = NUnitAspTest.dll
@@ -15,34 +15,34 @@ CLEANFILES = NUnitAspTest.dll
 # 
 
 asptesterdir_sources = \
-	./AspTester/ButtonTest.cs \
-	./AspTester/CheckBoxTest.cs \
-	./AspTester/DataGridTest.cs \
-	./AspTester/DropDownListTest.cs \
-	./AspTester/ImageButtonTest.cs \
-	./AspTester/LabelTest.cs \
-	./AspTester/LinkButtonTest.cs \
-	./AspTester/ListBoxTest.cs \
-	./AspTester/ListControlTest.cs \
-	./AspTester/ListItemCollectionTest.cs \
-	./AspTester/RadioButtonTest.cs \
-	./AspTester/TextBoxTest.cs \
-	./AspTester/UserControlTest.cs \
-	./AspTester/ValidationSummaryTest.cs
+	$(srcdir)/AspTester/ButtonTest.cs \
+	$(srcdir)/AspTester/CheckBoxTest.cs \
+	$(srcdir)/AspTester/DataGridTest.cs \
+	$(srcdir)/AspTester/DropDownListTest.cs \
+	$(srcdir)/AspTester/ImageButtonTest.cs \
+	$(srcdir)/AspTester/LabelTest.cs \
+	$(srcdir)/AspTester/LinkButtonTest.cs \
+	$(srcdir)/AspTester/ListBoxTest.cs \
+	$(srcdir)/AspTester/ListControlTest.cs \
+	$(srcdir)/AspTester/ListItemCollectionTest.cs \
+	$(srcdir)/AspTester/RadioButtonTest.cs \
+	$(srcdir)/AspTester/TextBoxTest.cs \
+	$(srcdir)/AspTester/UserControlTest.cs \
+	$(srcdir)/AspTester/ValidationSummaryTest.cs
 
 htmltesterdir_sources = \
-	./HtmlTester/AnchorTest.cs \
-	./HtmlTester/HtmlInputCheckBoxTest.cs
+	$(srcdir)/HtmlTester/AnchorTest.cs \
+	$(srcdir)/HtmlTester/HtmlInputCheckBoxTest.cs
 
 local_sources = \
-	./AssemblyInfo.cs \
-	./HttpClientCredentialsTest.cs \
-	./HttpClientTest.cs \
-	./NUnitAspTestCase.cs \
-	./ParserTest.cs \
-	./PerformanceTest.cs \
-	./SetupTest.cs \
-	./WebAssertionTest.cs
+	$(srcdir)/AssemblyInfo.cs \
+	$(srcdir)/HttpClientCredentialsTest.cs \
+	$(srcdir)/HttpClientTest.cs \
+	$(srcdir)/NUnitAspTestCase.cs \
+	$(srcdir)/ParserTest.cs \
+	$(srcdir)/PerformanceTest.cs \
+	$(srcdir)/SetupTest.cs \
+	$(srcdir)/WebAssertionTest.cs
 
 nunitasptest_sources = \
 	$(local_sources) \

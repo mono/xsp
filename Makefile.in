@@ -2,6 +2,7 @@ SUBDIRS = server test doc
 NAME_VERSION=@PACKAGE_NAME@-@PACKAGE_VERSION@
 DIST_DIR="@abs_top_builddir@/$(NAME_VERSION)"
 TARFILE=$(NAME_VERSION).tar.gz
+PREFIX=@prefix@
 TEST_DIR=$(DESTDIR)$(PREFIX)/share/doc/xsp/test
 
 .PHONY: all install clean uninstall dist
@@ -22,7 +23,7 @@ install: all
 	@echo "        $(TEST_DIR)"
 	@echo ""
 	@echo "  You can try them with the following command: "
-	@echo "        mono xsp.exe --root $(TESTDIR)"
+	@echo "        mono xsp.exe --root $(TEST_DIR)"
 	@echo ""
 
 clean uninstall:

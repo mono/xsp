@@ -764,7 +764,7 @@ class MyWorkerRequest
 		HttpHelpers.SendHeader (output, "Content-Type", GetContentType ());
 		string content = outputBuffer.ToString ();
 		HttpHelpers.SendHeader (output, "Content-Length", content.Length.ToString ());
-		output.Write ("\r\n");
+		output.Write ("\r\n\r\n");
 		output.Write (content);
 	}
 

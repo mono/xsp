@@ -15,6 +15,7 @@ namespace Mono.ASP
 	using System.Collections;
 	using System.Reflection;
 	using System.Text;
+	using System.Web.UI;
 	using System.Web.UI.HtmlControls;
 	using System.Web.UI.WebControls;
 	
@@ -516,11 +517,29 @@ public class Component : Tag
 
 	private static bool GuessAllowChildren (Type type)
 	{
-		object o = Activator.CreateInstance (type);
+		object [] custom_atts = type.GetCustomAttributes (true);
+		foreach (object custom_att in custom_atts){
+			if (custom_att is ParseChildrenAttribute){
+				/* FIXME
+				 * When adding full support for custom controls, we gotta
+				 * bear in mind the pca.DefaultProperty value
+				 */
+				ParseChildrenAttribute pca = custom_att as ParseChildrenAttribute;
+				/* this property will be true for all controls derived from WebControls. */
+				if (pca.ChildrenAsProperties == false)
+					return false;
+			}
+		}
+
+		/* 
+		 * Once ChildrenAsProperties is true, ensure that the underlying collection
+		 * allows adding controls 
+		 */
 		PropertyInfo controls = type.GetProperty ("Controls");
 		MethodInfo getm = controls.GetGetMethod ();
-		object cc = getm.Invoke (o, null);
-		return (!(cc is System.Web.UI.EmptyControlCollection));
+		object control_instance = Activator.CreateInstance (type);
+		object control_collection = getm.Invoke (control_instance, null);
+		return (!(control_collection is System.Web.UI.EmptyControlCollection));
 	}
 	
 	public Component (Tag input_tag, Type type) :

@@ -1,5 +1,10 @@
 2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* aspelements.cs: added ParseChildAttribute testing for
+	Component.GuessAllowChildren ().
+
+2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* aspelements.cs:
 	(ServerObjectTag): new class for <object ...>.
 	(Component): determine whether the component allows children or not.

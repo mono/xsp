@@ -207,6 +207,7 @@ namespace Mono.ASPNET
 		ApplicationServer server;
 		public LingeringNetworkStream Stream;
 		ModMonoRequest modRequest;
+		bool closed;
 
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
@@ -240,12 +241,16 @@ namespace Mono.ASPNET
 				VPathToHost vapp = server.GetApplicationForPath (vhost, port, rr.GetUriPath (), false);
 				if (vapp == null) {
 					rr.NotFound (); // No app to handle the request
+					Stream.Close ();
+					Stream = null;
 					return;
 				}
 
 				ModMonoApplicationHost host = (ModMonoApplicationHost) vapp.AppHost;
 				if (host == null) {
 					rr.Decline ();
+					Stream.Close ();
+					Stream = null;
 					return;
 				}
 				modRequest = rr.Request;
@@ -271,6 +276,7 @@ namespace Mono.ASPNET
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();
+					Stream = null;
 				} catch {}
 
 				if (broker != null && requestId != -1)
@@ -290,7 +296,19 @@ namespace Mono.ASPNET
 		
 		public void Close ()
 		{
-			modRequest.Close ();
+			if (closed)
+				return;
+
+			closed = true;
+			try {
+				modRequest.Close ();
+			} catch {} // ignore any error
+			try {
+				if (Stream != null) {
+					Stream.Close ();
+					Stream = null;
+				}
+			} catch {}
 		}
 		
 		public void Flush ()

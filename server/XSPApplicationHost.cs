@@ -231,9 +231,12 @@ namespace Mono.ASPNET
 				try {
 					ir.ReadRequestData ();
 				} catch (Exception ex) {
-					byte [] badReq = HttpErrors.BadRequest ();
-                                        Write (badReq, 0, badReq.Length);
-                                        throw ex;
+					if (ir.GotSomeInput) {
+						byte [] badReq = HttpErrors.BadRequest ();
+						Write (badReq, 0, badReq.Length);
+					}
+
+					throw ex;
 				}
 
 				RequestData rdata = ir.RequestData;

@@ -79,6 +79,7 @@ namespace Mono.ASPNET
 		string protocol;
 		string pathInfo;
 		NetworkStream stream;
+		bool gotSomeInput;
 
 		byte [] inputBuffer;
 		int inputLength;
@@ -117,6 +118,8 @@ namespace Mono.ASPNET
 			inputLength = stream.Read (inputBuffer, 0, BSize);
 			if (inputLength == 0) // Socket closed
 				throw new IOException ("socket closed");
+
+			gotSomeInput = true;
 			position = 0;
 		}
 
@@ -272,6 +275,10 @@ namespace Mono.ASPNET
 			if (protocol == null) {
 				protocol = "HTTP/1.0";
 			}
+		}
+
+		public bool GotSomeInput {
+			get { return gotSomeInput; }
 		}
 
 		public RequestData RequestData {

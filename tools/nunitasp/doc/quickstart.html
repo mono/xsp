@@ -1,0 +1,217 @@
+<html>
+  <head>
+    <title>NUnitAsp - ASP.NET unit testing - Quick Start Guide</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <style type="text/css">
+      .highlight {
+        background-color: yellow;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="title">NUnitAsp
+    <br /><small>ASP.NET unit testing</small></p>
+
+    <table class="layout">
+      <tr>
+        <td>
+          <div class="menu">
+            <p><a href="download.html"><b>Download</b></a></p>
+            <p>
+              <a href="index.html">Overview</a>
+              <br /><a href="documentation.html">Documentation</a>
+              <br /><a href="support.html">Support</a>
+              <br /><a href="consulting.html">Coaching</a>
+            </p>
+            <p><a href="contribute.html">Contribute</a></p>
+            <p><a href="http://sourceforge.net/projects/nunitasp/"><img src=
+            "http://sourceforge.net/sflogo.php?group_id=49940" width="88" height="31" border="0" alt="SourceForge Logo" /></a></p>
+          </div>
+        </td>
+        <td>
+          <div class="content">
+            <h1>Quick Start Guide</h1>
+
+            <p>This guide contains a brief description of NUnitAsp and how to use it.  It assumes that you're familiar with NUnit, ASP.NET, and unit testing.  It also assumes that you're comfortable with a high-level explanation and can look up the <a href="api/index.html">API details</a> for yourself.  If you prefer a more detailed explanation, see the <a href="tutorial/index.html">NUnitAsp Tutorial</a> instead.</p>
+
+            <p>The examples in this guide are written in C#.  NUnitAsp will work with other .NET languages, but we don't provide examples for them.  If you would like us to include examples for your favorite language, we welcome <a href="contribute.html">contributions</a>.</p>
+
+            <h2>About NUnitAsp</h2>
+
+            <p>NUnitAsp is a class library for use within your NUnit tests.  It provides NUnit with the ability to download, parse, and manipulate ASP.NET web pages.</p>
+
+            <p>With NUnitASP, your tests don't need to know how ASP.NET renders controls into HTML. Instead, you can rely on the NUnitASP library to do this for you, keeping your test code simple and clean.  For example, your tests don't need to know that a DataGrid control renders as an HTML table.  You can rely on NUnitASP to handle the details.  This gives you the freedom to focus on functionality questions, like whether the DataGrid holds the expected values.</p>
+
+            <p>When you use NUnitAsp, you'll create NUnit test fixtures and test cases as normal.  Each test case will consist of three parts.  The first part sets up the test by instantiating "Tester" objects that know how to parse ASP.NET.  The second part loads the page from the web server, and the third part performs the test by using and making assertions about the testers.</p>
+
+            <p class="code">
+              <span class="keyword">public void</span> TestExample()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;<span class="comment">// First, instantiate "Tester" objects:</span>
+              <br />&nbsp;&nbsp;&nbsp;LabelTester label = <span class="keyword">new</span> LabelTester("textLabel", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;LinkButtonTester link = <span class="keyword">new</span> LinkButtonTester("linkButton", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;<span class="comment">// Second, visit the page being tested:</span>
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/example/example.aspx");
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;<span class="comment">// Third, use tester objects to test the page:</span>
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("Not clicked.", label.Text);
+              <br />&nbsp;&nbsp;&nbsp;link.Click();
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("Clicked once.", label.Text);
+              <br />&nbsp;&nbsp;&nbsp;link.Click();
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("Clicked twice.", label.Text);
+              <br />}
+            </p>
+
+            <h2>An NUnitAsp Test Fixture</h2>
+
+            <p>Every NUnitAsp test fixture follows the following basic pattern.  NUnit will automatically find the tests when you load their DLL.  Replace the parts that are <span class="highlight">highlighted</span>.</p>
+
+            <p class="code">
+              <span class="keyword">using</span> System;
+              <br /><span class="keyword">using</span> NUnit.Framework;
+              <br /><span class="keyword">using</span> NUnit.Extensions.Asp;
+              <br /><span class="keyword">using</span> NUnit.Extensions.Asp.AspTester;
+              <br />
+              <br /><span class="keyword">namespace</span> <span class="highlight">example.namespace</span>
+              <br />{
+              <br />&nbsp;&nbsp;[TestFixture]
+              <br />&nbsp;&nbsp;<span class="keyword">public class</span> <span class="highlight">ExampleTestFixture</span> : WebFormTestCase
+              <br />&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;[Test]
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> void <span class="highlight">TestExample</span>()
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"><span class="highlight">// Your test here</span></span>
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;}
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;[Test]
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> void <span class="highlight">TestExample2</span>()
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"><span class="highlight">// Your second test here</span></span>
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;}
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"><span class="highlight">// etc...</span></span>
+              <br />
+              <br />&nbsp;&nbsp;}
+              <br />}
+            </p>
+
+            <h2>About WebFormTestCase</h2>
+
+            <p>NUnitAsp test fixtures extend WebFormTestCase.  It provides a number of <a href="api/NUnit.Extensions.Asp.WebFormTestCaseMembers.html">useful asserts</a>, which I recommend reviewing.  It also provides the Browser property.</p>
+
+            <p>The Browser object represents the NUnitAsp web browser.  You'll use it to load your page in order to start testing it.  Browser is important, but in most of your tests, you'll use it for just one thing:</p>
+
+            <p class="code">Browser.GetPage("http://localhost/example/example.aspx");</p>
+
+            <p>The Browser property on WebFormTestCase is what you'll typically use, but the object itself is an instance of HttpClient, an NUnitAsp class.  You might find yourself using HttpClient's <a href="api/NUnit.Extensions.Asp.HttpClientMembers.html">other capabilities</a> occasionally.  HttpClient's <a href="api/NUnit.Extensions.Asp.HttpClient.CurrentPageText.html">CurrentPageText</a> property can be particularly useful.  Use it to help debug: dump the text of the current page to the console, and then look at NUnit's "Standard Out" tab to see what the problem is.</p>
+
+            <p class="code">Console.WriteLine(Browser.CurrentPageText);</p>
+
+            <h2>About Tester Objects</h2>
+
+            <p>Tester objects form the core of NUnitAsp.  Each instantiated tester object represents exactly one ASP.NET control in your web page.  With a tester object, you can manipulate the ASP.NET control as if you were actually receiving an .aspx page (rather than some badly mangled HTML).</p>
+
+            <p class="code">
+              AssertEquals("Not clicked.", label.Text);
+              <br />link.Click();
+              <br />AssertEquals("Clicked once.", label.Text);
+              <br />link.Click();
+              <br />AssertEquals("Clicked twice.", label.Text);
+            </p>
+
+            <p>In the above example, both "label" and "link" are testers.  "Label" is an instance of a the LabelTester tester and "link" is an instance of the LinkButtonTester.  As you can see from the example, the tester allows you to directly manipulate the underlying controls.  You can read the text from the label and you can click the link button.</p>
+
+            <p>In order to use a tester object, you must first instantiate it.  Provide the ID of the control you want to test and a tester for the control it's embedded in.</p>
+
+            <p class="code">
+              LabelTester label = <span class="keyword">new</span> LabelTester("textLabel", CurrentWebForm);
+              <br />LinkButtonTester link = <span class="keyword">new</span> LabelTester("textLabel", CurrentWebForm);
+            </p>
+
+            <p>The first parameter is the ID of the control.  You specified the ID in your ASP.NET code.  The second parameter is the container for the control.  This confuses a lot of people.  If you have simple pages, you can safely ignore it.  Just use "CurrentWebForm."</p>
+
+            <p>For information about which controls are supported, see the <a href="api/index.html">API documentation</a>.  Testers for web controls are in the <a href="api/NUnit.Extensions.Asp.AspTester.html">AspTester</a> namespace and testers for HTML controls are in the <a href="api/NUnit.Extensions.Asp.HtmlTester.html">HtmlTester</a> namespace.</p>
+
+            <h2>User Controls, Data Grids, and Other Control Nesting</h2>
+
+            <p>If you have complex web site, you'll often need to specify a value for testers' container.  If you have a control contained within another control, pass the tester for containing control as the second parameter of the constructor.</p>
+
+            <p>For example, if you're testing a link button that's in a user control, you'll need a UserControlTester.  When you construct the LinkButtonTester, you'll pass in the UserControlTester as the container:</p>
+
+            <p class="code">
+              <span class="comment">// Example: Link button in a user control</span>
+              <br />UserControlTester control = <span class="keyword">new</span> UserControlTester("control", CurrentWebPage);
+              <br />LinkButtonTester button = <span class="keyword">new</span> LinkButtonTester("button", control);
+              <br />
+              <br />button.Click();
+            </p>
+
+            <p>Data grids are another example of control nesting.  They're even trickier than user controls, because the controls aren't nested directly in the data grid; they're nested in a <em>row</em> of the data grid.  You have to tell NUnitAsp that the control is in a row that's in the data grid:</p>
+
+            <p class="code">
+              <span class="comment">// Example: Checkbox in row 3 of a data grid</span>
+              <br />DataGridTester grid = <span class="keyword">new</span> DataGridTester("grid", control);
+              <br />DataGridTester.Row row3 = <span class="keyword">new</span> DataGridTester.Row(3, grid);
+              <br />CheckBoxTester checkbox = <span class="keyword">new</span> CheckBoxTester("checkbox", row3);
+              <br />
+              <br />checkbox.Checked = <span class="keyword">true</span>;
+            </p>
+
+            <p>The above code can be compressed a bit:</p>
+
+            <p class="code">
+              <span class="comment">// Example: Checkbox in row 3 of a data grid (alternate style)</span>
+              <br />DataGridTester grid = <span class="keyword">new</span> DataGridTester("grid", control);
+              <br />CheckBoxTester checkbox = <span class="keyword">new</span> CheckBoxTester("checkbox", grid.GetRow(2)); <span class="comment">// '2' is not a typo; this style is zero-based</span>
+              <br />
+              <br />checkbox.Checked = <span class="keyword">true</span>;
+            </p>
+
+            <h2>SetUp And TearDown</h2>
+
+            <p>A standard feature of NUnit is the ability to perform pre-test and post-test actions with the [SetUp] and [TearDown] attributes.  Those actions work a little bit differently than normal in NUnitAsp.  This is a flaw in NUnitAsp that we intend to fix some day.</p>
+
+            <p>In NUnitAsp, the [SetUp] and [TearDown] attributes are already used by WebFormTestCase.  Using them again in a your own test fixture will cause NUnit to ignore the code in WebFormTestCase.  This prevents important set-up code from running.  Fortunately for your sanity, NUnitAsp will throw an exception explaining the problem if you accidently use one of these inappropriately.</p>
+
+            <p>Because [SetUp] and [TearDown] are not available, NUnitAsp uses the old NUnit 1.x approach of overriding SetUp() and TearDown() methods instead.</p>
+
+            <p class="code">
+              <span class="comment">// <b>Don't</b> do this:</span>
+              <br /><strike>[SetUp]
+              <br />public void MySetUp() {
+              <br />&nbsp;&nbsp;<span class="comment">// set-up code here</span>
+              <br />}
+              <br />
+              <br />[TearDown]
+              <br />public void MyTearDown() {
+              <br />&nbsp;&nbsp;<span class="comment">// tear-down code here</span>
+              <br />}
+              </strike>
+              <br />
+              <br /><span class="comment">// Do this instead:</span>
+              <br />protected override void SetUp() {
+              <br />&nbsp;&nbsp;<span class="comment">// set-up code here</span>
+              <br />}
+              <br />
+              <br />protected override void TearDown() {
+              <br />&nbsp;&nbsp;<span class="comment">// tear-down code here</span>
+              <br />}
+            </p>
+
+            <h2>Conclusion</h2>
+
+            <p>NUnitAsp is meant to make it easy for you to test your ASP.NET applications.  The basic structure of each test is to instantiate tester objects, get a web page with the Browser object, and then manipulate and assert the page by using the testers.</p>
+
+            <p>As you work, remember NUnitAsp's primary "gotcha:" override SetUp() and TearDown() instead of using the [SetUp] and [TearDown] attributes.</p>
+
+            <p>We welcome your feedback on NUnitAsp.  Please send email to the NUnitAsp <a href="http://sourceforge.net/mail/?group_id=49940">mailing list</a>.</p>
+
+            <p class="end">by Jim Shore.  Last updated for v1.4.</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <title>NUnitAsp - ASP.NET unit testing - Migration Guide</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <p class="title">NUnitAsp
+    <br /><small>ASP.NET unit testing</small></p>
+
+    <table class="layout">
+      <tr>
+        <td>
+          <div class="menu">
+            <p><a href="download.html"><b>Download</b></a></p>
+            <p>
+              <a href="index.html">Overview</a>
+              <br /><a href="documentation.html">Documentation</a>
+              <br /><a href="support.html">Support</a>
+              <br /><a href="consulting.html">Coaching</a>
+            </p>
+            <p><a href="contribute.html">Contribute</p>
+            <p><A href="http://sourceforge.net/projects/nunitasp/"><IMG src=
+            "http://sourceforge.net/sflogo.php?group_id=49940" width="88" height="31" border="0" alt="SourceForge Logo"></A></p>
+          </div>
+        </td>
+        <td>
+          <div class="content">
+            <h1>Migration Guide</h1>
+
+            <p>With version 1.2.1, NUnitAsp migrated from NUnit 1.x to NUnit 2.0.  NUnit 2.0 offers many improvements over NUnit 1.x, but it isn't backwards compatible.  Users who wish to use newer versions of NUnitAsp must upgrade.</p>
+
+            <p>Fortunately, we've made every effort to ease the pain of transition.  Migrating to NUnitAsp for NUnit 2.0 is extremely easy.  We would have liked to make it completely seamless, but the NUnit 2.0 architecture didn't allow that.</p>
+
+            <p>There's only two steps to follow when upgrading to NUnit 2.0:</p>
+
+            <ol>
+              <li>Upgrade to NUnitAsp 1.2.1 or later.</li>
+              <li>Modify your test fixture constructors.</li>
+            </ol>
+
+            <p>If your existing test fixture constructors don't have any code, you can simply delete them:</p>
+
+            <p class="code">
+              <span class="demph">public class ExampleTest {</span>
+              <span class="emph"><br />&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> ExampleTest(<span class="keyword">string</span> name) : <span class="keyword">base</span>(name) {
+              <br />&nbsp;&nbsp;&nbsp;}</span>
+              <span class="demph"><br />&nbsp;&nbsp;&nbsp;...
+              <br />}</span>
+            </p>
+
+            <p>Becomes:</p>
+
+            <p class="code">
+              <span class="demph">public class ExampleTest {
+              <br />&nbsp;&nbsp;&nbsp;...
+              <br />}</span>
+            </p>
+
+            <p>If your constructor <em>does</em> have code, just remove the parameter:</p>
+
+            <p class="code">
+              <span class="demph">public class ExampleTest {</span>
+              <span class="emph"><br />&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> ExampleTest(<span class="keyword">string</span> name) : <span class="keyword">base</span>(name) {</span>
+              <span class="demph"><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DoSomething();
+              <br />&nbsp;&nbsp;&nbsp;}
+              <br />&nbsp;&nbsp;&nbsp;...
+              <br />}</span>
+            </p>
+
+            <p>Becomes:</p>
+
+            <p class="code">
+              <span class="demph">public class ExampleTest {</span>
+              <span class="emph"><br />&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> ExampleTest() {</span>
+              <span class="demph"><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DoSomething();
+              <br />&nbsp;&nbsp;&nbsp;}
+              <br />&nbsp;&nbsp;&nbsp;...
+              <br />}</span>
+            </p>
+
+
+            <h2>Using NUnit 2.0 with NUnitAsp</h2>
+
+            <p>Because NUnitAsp uses a base class test fixture, WebFormTestCase, NUnitAsp test fixtures are more like NUnit 1.x text fixtures than regular NUnit 2.x test fixtures:</p>
+
+            <ul>
+              <li>Override SetUp() rather than using the [SetUp] attribute.</li>
+              <li>Override TearDown() rather than using the [TearDown] attribute.</li>
+              <li>Use of the [TestFixture] attribute is optional, but recommended.</li>
+            </ul>
+
+            <p class="end">Last updated for v1.4.</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

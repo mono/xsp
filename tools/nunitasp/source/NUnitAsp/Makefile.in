@@ -1,0 +1,85 @@
+MCS=@MCS@
+MCSFLAGS+= -debug+ -debug:full -nologo
+MKINSTALLDIRS=@top_builddir@mkinstalldirs 
+DISTFILES=Makefile.in \
+	 $(DIR_SOURCES) \
+	  NUnitAsp.csproj
+
+# 
+NUNITASP_REFERENCES= System.Web NUnit.Framework
+REFS= $(addsuffix .dll, $(addprefix -r:, $(NUNITASP_REFERENCES)))
+
+ASPTESTERDIR_SOURCES = \
+	./AspTester/AspControlTester.cs \
+	./AspTester/ButtonTester.cs \
+	./AspTester/CheckBoxTester.cs \
+	./AspTester/DataGridTester.cs \
+	./AspTester/DropDownListTester.cs \
+	./AspTester/ImageButtonTester.cs \
+	./AspTester/LabelTester.cs \
+	./AspTester/LinkButtonTester.cs \
+	./AspTester/ListBoxTester.cs \
+	./AspTester/ListControlTester.cs \
+	./AspTester/ListItemCollectionTester.cs \
+	./AspTester/ListItemTester.cs \
+	./AspTester/PanelTester.cs \
+	./AspTester/RadioButtonTester.cs \
+	./AspTester/TextBoxTester.cs \
+	./AspTester/UserControlTester.cs \
+	./AspTester/ValidationSummaryTester.cs
+
+HTMLTESTERDIR_SOURCES = \
+	./HtmlTester/AnchorTester.cs \
+	./HtmlTester/HtmlControlTester.cs \
+	./HtmlTester/HtmlInputCheckBoxTester.cs
+
+SGMLDIR_SOURCES = \
+	./Sgml/SgmlParser.cs \
+	./Sgml/SgmlReader.cs
+
+DIR_SOURCES =  \
+	./AssemblyInfo.cs \
+	./ControlTester.cs \
+	./HttpClient.cs \
+	./Tester.cs \
+	./WebAssertion.cs \
+	./WebForm.cs \
+	./WebFormTestCase.cs \
+	./WebPage.cs
+
+NUNITASP_SOURCES = \
+	$(ASPTESTERDIR_SOURCES) \
+	$(HTMLTESTERDIR_SOURCES) \
+	$(SGMLDIR_SOURCES) \
+	$(DIR_SOURCES)
+
+DLLNAME = NUnitAsp.dll
+LOCAL_LIB_DIR=$(DESTDIR)@prefix@/lib
+
+.PHONY: all install clean uninstall trace
+
+all: $(DLLNAME)
+
+install: $(DLLNAME)
+	$(MKINSTALLDIRS) $(LOCAL_LIB_DIR)
+	cp $(DLLNAME) $(LOCAL_LIB_DIR)
+
+$(DLLNAME): $(NUNITASP_SOURCES)
+	$(MCS) $(MCSFLAGS) $(REFS) -target:library -out:$@ $^
+
+clean:
+	rm -f $(DLLNAME) *~ *.pdb
+
+uninstall:
+	-test -d $(LOCAL_LIB_DIR) && cd $(LOCAL_LIB_DIR) && rm -f $(DLLNAME)
+
+distdir:
+	$(MKINSTALLDIRS) $(distdir)
+	$(MKINSTALLDIRS) $(distdir)/AspTester
+	$(MKINSTALLDIRS) $(distdir)/HtmlTester
+	$(MKINSTALLDIRS) $(distdir)/Sgml
+	cp $(DISTFILES) $(distdir)
+	cp $(ASPTESTERDIR_SOURCES) $(distdir)/AspTester
+	cp $(HTMLTESTERDIR_SOURCES) $(distdir)/HtmlTester
+	cp $(SGMLDIR_SOURCES) $(distdir)/Sgml
+

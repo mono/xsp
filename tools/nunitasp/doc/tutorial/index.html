@@ -1,0 +1,977 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+  <meta http-equiv="Content-Style-Type" content="text/css">
+    <title>NUnitAsp - ASP.NET unit testing: Tutorial</title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+  </head>
+  <body>
+    <p class="title">NUnitAsp
+    <br /><small>ASP.NET unit testing</small></p>
+
+    <table class="layout">
+      <tr>
+        <td>
+          <div class="menu">
+            <p><a href="../download.html"><b>Download</b></a></p>
+            <p>
+              <a href="../index.html">Overview</a>
+              <br /><a href="../documentation.html">Documentation</a>
+              <br /><a href="../support.html">Support</a>
+              <br /><a href="../consulting.html">Coaching</a>
+            </p>
+            <p><a href="../contribute.html">Contribute</a></p>
+            <p><A href="http://sourceforge.net/projects/nunitasp/"><IMG src=
+            "http://sourceforge.net/sflogo.php?group_id=49940" width="88" height="31" style="border:0px" alt="SourceForge Logo"></A></p>
+          </div>
+        </td>
+        <td>
+          <div class="content">
+            <h1>Test-Driven Development with NUnitAsp
+            <br /><small>The NUnitAsp Tutorial</small></h1>
+
+            <p>NUnitAsp is based on the principle that testing web pages should use the same concepts as creating them. When you use NUnitAsp, you use classes and IDs similar to those you used when creating the web page you are testing.</p>
+
+            <p>In this tutorial, we'll walk you through the process of creating a simple one-page web application and tests. We assume you have some experience with ASP.NET and that you're using Visual Studio .NET (VS.NET) and Internet Information Server (IIS). The source for the "Guestbook" solution we create in this tutorial is located in the \sample directory of the NUnitAsp download. You can use the source as reference, but the tutorial doesn't discuss how to configure the files in the \sample directory to run. Instead, it assumes you will create your own solution and projects as you work through the tutorial.</p>
+
+            <p>Advanced users may get started more quickly by jumping straight to the <a href="../quickstart.html">QuickStart Guide</a>.</p>
+
+
+            <h2>About the Sample Application</h2>
+
+            <p>The application we'll be creating in this tutorial is a simple on-line guest book.  It allows users to enter a name and comment, which is then displayed on the page.</p>
+
+            <div class="figure">
+              <img src="sample-app.jpeg" alt="Figure" />
+              <br />Functionally complete application
+            </div>
+
+
+            <h2>Create a Test Project</h2>
+
+            <div class="figure" style="float:right">
+              <img src="create-project.gif" alt="Figure" />
+              <br />Create a project
+            </div>
+
+            <p>Start by creating a class library project to contain your tests. We created a Visual Studio .NET solution named "GuestBook" and a C# class library project named "GuestBookTests."  Create a text fixture class that describes what you're testing.  We used "GuestBookTest."  Finally, add references to the NUnitAsp and NUnit frameworks.  NUnitAsp.dll is in the \bin directory of the NUnitAsp download and nunit.framework.dll is in the \bin directory of your NUnit install. The NUnitASP framework appears in the VS.NET References tree as "NUnitASP." The NUnit framework appears as "nunit.framework."</p>
+
+            <p>Once your project and text fixture class have been created, modify your class to extend WebFormTestCase.  WebFormTestCase provides a "Browser" property for loading web pages.  It also provides some handy extra assertions.</p>
+
+            <p>To simplify the code, you'll need to include two common NUnitAsp namespaces, NUnit.Extensions.Asp and NUnit.Extensions.Asp.AspTester, with "using" lines.</p>
+
+            <p>We're almost ready to try it out.  The last thing we need is a test.  The simplest possible test is an empty test, so add a public method that starts with the word "Test" and has no body. We named our empty test "TestNothing."</p>
+
+            <div class="code">
+              <span class="keyword">using</span> System;
+              <br /><span class="keyword">using</span> NUnit.Extensions.Asp;
+              <br /><span class="keyword">using</span> NUnit.Extensions.Asp.AspTester;
+              <br />
+              <br /><span class="keyword">namespace</span> GuestBookTests
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">public class</span> GuestBookTest :
+              WebFormTestCase
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public void</span> TestNothing()
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+              <br />&nbsp;&nbsp;&nbsp;}
+              <br />}
+            </div>
+
+            <p>Compile the project. Now you have a working test!  Admittedly, it doesn't do much.  We'll expand it later.  For now, let's run it to make sure everything is set up properly.</p>
+
+            <h2>Run the First Test</h2>
+
+            <p>An easy way to run the tests is to start the nunit-gui.exe application and keep it open while debugging, using Alt-Tab to switch between nunit-gui.exe and VS.NET.
+
+            <p>The nunit-gui.exe application monitors the currently loaded test assembly and reloads it automatically when it changes. This means you can keep an instance of nunit-gui.exe open and then run tests simply by clicking "Run," regardless of how you have changed your test assembly.</p>
+
+            <p>To use this method, start nunit-gui.exe separately from VS.NET. You can find nunit-gui.exe in the \bin directory of your NUnit install. Then, in nunit-gui.exe, open your test assembly using the "Open..." menu item (or drag the test assembly into the nunit-gui.exe window). Now you can make changes to your test assembly in VS.NET, use Alt-Tab to switch to nunit-gui.exe, and click "Run" to run the updated tests.</p>
+
+            <p>Now click the "Run" button in nunit-gui.exe.  You'll see this screen:</p>
+
+            <div class="figure">
+              <img src="run-nunit.gif" alt="Run the tests" />
+            </div>
+
+            <h2>Create a Real Test</h2>
+
+            <p>Now we're ready to start testing our application. That's right, we're going to write our tests <i>first</i>.  It's a style of programming called "Test-Driven Development," and it's part of the Extreme Programming methodology that programs like NUnit were created to support.  In test-driven development, you create tests for features that you want, then write production code to make the tests pass.  By doing so, you increase test coverage and reduce the amount of unnecessary production code.
+
+            <p>In our case, the feature we want is a guest book.  Testing every aspect of a guest book would take far too long, but we can test to see if the web page even exists.  That's a broad test, but we can refine from there.  We don't want to take too long between running tests&mdash;the goal is to check our code frequently so we always know we're on the right track.
+
+            <p>First we'll modify our empty test to load the Web page we're going to write.  WebFormTestCase, our parent class, provides a "Browser" property for getting web pages. Call "Browser.GetPage(<i>web page url</i>)" to load the page.  We also changed the name of the test to something a little more meaningful.</p>
+
+            <div class="code">
+              <span class="keyword">public void</span> TestLayout()
+              <br>{
+              <br>&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br>}
+            </div>
+
+            <div class="figure" style="float:right">
+              <img src="create-webproject.gif" alt="Figure"/>
+              <br />Create a web project
+            </div>
+
+            <p>Now compile the test (Ctrl+Shift+B), switch to nunit-gui.exe, and run the test. It will fail, because the page doesn't exist yet, but we want to run it anyway. The reason is so that we find out immediately if things aren't working the way we expect. The sooner we know about problems, the easier it is to fix them. When testing with NUnitAsp (and NUnit), get into the habit of writing a small test, watching it fail, writing a few lines of code, watching the test pass, then refactoring. You should repeat this cycle every few minutes. If you do, you'll never get into a situation where you spend a lot of time debugging, and your code quality will remain high.</p>
+
+            <p>The test fails, as expected, so now we want to make it pass. Create a web project and the corresponding page. In our case, we created "GuestBook" as our web project and "GuestBook.aspx" as our web page. This page is at <a href="http://localhost/GuestBook/Guestbook.aspx">http://localhost/GuestBook/Guestbook.aspx</a> if you've set up a virtual directory for it.</p>
+
+            <p>Now, when you run the test, it passes.
+
+            <p>(If you receive a 401 Access Denied error, check your security settings. For example, try enabling anonymous access for the GuestBook virtual directory, and make sure the IUSR_<i>machinename</i> user has read access to the directory.)</p>
+
+
+
+            <h2>Test the Layout</h2>
+
+            <p>The next thing we'll test is the layout of our page.  We don't test the look of our web page&mdash;we don't want to have to update our tests every time someone changes a font&mdash;but we do test the functionality.  The first step towards doing this is just making sure the right components are on the page.</p>
+
+            <p>First, create a rough sketch showing the page to be created.  No need to be fancy: this is just something for us to refer back to as we work, not formal documentation.  In our guest book application, we want four components: a text field for entering a name (called "name"), a text field for entering a comment (called "comments"), a button to save the data in the guest book (called "save"), and a datagrid for displaying what people have entered (called "book").</p>
+
+            <div class="figure">
+              <img src="screen-sketch.gif" alt="Hand-drawn sketch of screen layout"/>
+            </div>
+
+            <p>To test these components, we have to create NUnitAsp "tester" objects.  A tester is an object that corresponds to an ASP.NET control you want to test.  You can instantiate the tester at any time&mdash;even before the page is loaded, if you like.  When you instantiate it, you tell the tester the name of the ASP.NET control it's supposed to test and which control it's located on.  Since we're going to test four controls on our guest book, we need to create four tester objects.</p>
+
+            <div class="code">
+              <span class="demph">public void TestLayout()
+              <br />{</span>
+              <br /><span class="emph">&nbsp;&nbsp;&nbsp;TextBoxTester name = <span class="keyword">new</span> TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = <span class="keyword">new</span> TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = <span class="keyword">new</span> ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = <span class="keyword">new</span> DataGridTester("book", CurrentWebForm);</span>
+              <br />
+              <span class="demph"><br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br>}</span>
+            </div>
+
+            <p>Let's take a closer look at the first declaration:</p>
+
+
+              <table>
+                <tr>
+                  <th>Code Fragment</th>
+                  <th>Meaning</th>
+                </tr>
+                <tr>
+                  <td><code><b>TextBoxTester name = <span class="keyword">new</span> TextBoxTester</b><span class="demph">("name", CurrentWebForm);</span></code></td><td>The object named "name" will test a text box.</td>
+                </tr>
+                <tr>
+                  <td><code><span class="demph">TextBoxTester name = new TextBoxTester(</span><b>"name"</b><span class="demph">, CurrentWebForm);</span></code></td>
+                  <td>The ASP.NET ID  of the text box is "name."</td>
+                </tr>
+                <tr>
+                  <td><code><span class="demph">TextBoxTester name = new TextBoxTester("name", </span><b>CurrentWebForm</b><span class="demph">);</span></code></td>
+                  <td>Look for the control on the web form currently loaded by the browser.</td>
+                </tr>
+              </table>
+
+
+            <p>Now that we have the testers, we can assert that their controls are visible on the page.</p>
+
+            <div class="code">
+              <span class="demph">public void TestLayout()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester name = new TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = new TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = new ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = new DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");</span>
+              <br />
+              <br /><span class="emph">&nbsp;&nbsp;&nbsp;AssertVisibility(name, <span class="keyword">true</span>);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(comments, <span class="keyword">true</span>);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(save, <span class="keyword">true</span>);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(book, <span class="keyword">true</span>);</span>
+              <span class="demph"><br>}</span>
+            </div>
+
+            <p>We've just told NUnitAsp to assert that the four controls are visible on the page. Again, looking at the first line of code:</p>
+
+
+              <table>
+                <tr>
+                  <th>Code Fragment</th>
+                  <th>Meaning</th>
+                </tr>
+                <tr>
+                  <td><code><b>AssertVisibility</b><span class="demph">(name, true);</span></code></td>
+                  <td>Call the method in WebFormTestCase that checks control visibility.</td>
+                </tr>
+                <tr>
+                  <td><code><span class="demph">AssertVisibility(</span><b>name</b><span class="demph">, true);</span></code></td>
+                  <td>Check the visibility using the "name" tester.  The tester knows its control is a TextBox whose ID is "name."</td>
+                </tr>
+                <tr>
+                  <td><code><span class="demph">AssertVisibility(name, </span><b><span class="keyword">true</span>);</b></code></td>
+                  <td>The control should be visible.</td>
+                </tr>
+              </table>
+
+
+            <p>We're ready to run the test.  We expect it to fail: we asserted that several controls were visible, but they're not.  When we run the test, it does:</p>
+
+            <blockquote>
+              <code class="error">TestLayout: name control should be visible (HTML ID: name; ASP location: TextBoxTester 'name' in web form 'GuestBook')</code>
+            </blockquote>
+
+            <p>This error message is in two parts.  The first part tells us what failed (the 'name' control wasn't visible, as we expected).  The second part, in parentheses, helps us track down the exact control that failed.</p>
+
+            <p>NUnitAsp always tells you the name of the control in two ways.  First, it gives you the HTML ID of the control.  This ID corresponds to the ID the control has when you use "View Source" in your browser.  It's handy when you're looking at HTML: you can usually just do a "find" and type in the HTML ID to find your HTML-ized control.  If it's visible, that is!</p>
+
+            <p>The second way NUnitAsp tells you about the control is with the ASP.NET location.  It tells you the location of the control that failed, the control that it's in, the control that <i>that</i> control is in, etc., up to the name of the web form.  This information is handy when you're looking at ASP.NET code.</p>
+
+            <p>In this simple example, all that information seems redundant.  However, in ASP.NET, controls can be nested within other controls.  The ID you give a control in ASP.NET can change into a completely different ID in HTML.  The information in the error message helps you track down all the information you need to solve problems.</p>
+
+            <p>Let's make the tests pass by adding the four controls.  We won't worry about looks just yet.</p>
+
+            <div class="html">
+              &lt;form id=&quot;GuestBook&quot; method=&quot;post&quot; runat=&quot;server&quot;&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:TextBox ID=&quot;name&quot; Runat=&quot;server&quot;&gt;&lt;/asp:TextBox&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:TextBox ID=&quot;comments&quot; Runat=&quot;server&quot;&gt;&lt;/asp:TextBox&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:Button ID=&quot;save&quot; RunAt=&quot;server&quot; Text=&quot;Save&quot;&gt;&lt;/asp:Button&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:DataGrid ID=&quot;book&quot; RunAt=&quot;server&quot;&gt;&lt;/asp:DataGrid&gt;
+              <br />&lt;/form&gt;
+            </div>
+
+            <p>Now run the test again.  It still didn't pass!  The data grid wasn't visible.  This is a perfect example of why we run the tests so often.  Sometimes we get surprised.</p>
+
+            <p>The data grid probably didn't show up because we haven't put any data in it yet.  Well, after thinking about it, that's actually the behavior we want... when there's no data, don't display any results.  Let's update the test to reflect this.</p>
+
+            <div class="code">
+              <span class="demph">public void TestLayout()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester name = new TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = new TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = new ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = new DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(name, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(comments, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(save, true);</span>
+              <br /><span class="emph">&nbsp;&nbsp;&nbsp;AssertVisibility(book, <span class="keyword">false</span>);</span>
+              <span class="demph"><br>}</span>
+            </div>
+            <p>Now the tests pass.</p>
+
+            <h2>Test a Little Bit of Behavior</h2>
+
+            <p>We have a web page, but it doesn't do anything yet.  The next thing we want to see is that entering something updates the guest book.  Naturally, we start by writing a test.</p>
+
+            <div class="code">
+              <span class="demph">public void TestLayout()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester name = new TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = new TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = new ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = new DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(name, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(comments, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(save, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(book, false);
+              <br />}
+              <br /></span>
+              <br /><span class="emph">public void TestSave()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester name = <span class="keyword">new</span> TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = <span class="keyword">new</span> TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = <span class="keyword">new</span> ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = <span class="keyword">new</span> DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Seuss&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />}</span>
+            </div>
+
+            <p>We've created a new test named "TestSave."  It's has the same tester set up and page load that the "TestLayout" method does, but then it does something different: it assigns values to the web page and presses the "Save" button.</p>
+
+              <table>
+                <tr>
+                  <th>Code Fragment</th>
+                  <th>Meaning</th>
+                </tr>
+                <tr>
+                  <td><code>name.Text = &quot;Dr. Seuss&quot;;</code></td><td>Set the text of the "name" text box to "Dr. Seuss".</td>
+                </tr>
+                <tr>
+                  <td><code>comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;</code></td><td>Set the text of the "comments" text box.</td>
+                </tr>
+                <tr>
+                  <td><code>save.Click();</code></td>
+                  <td>Click the "Save" button.</td>
+                </tr>
+              </table>
+
+            <p>Stop and take another look at the code.  This is the heart of what NUnitAsp is all about.  Although the test isn't actually working with an ASP.NET page&mdash;the page is raw HTML, like any rendered ASP.NET page&mdash;you can manipulate the controls on it with simple ASP.NET-like properties and methods. Pretty cool, and very easy. To write a test like this without NUnitASP, you would have to know how ASP.NET renders each control to HTML, and then you'd have to manage that complexity every time you examined or set a control on the page. NUnitASP abstracts this complexity away from you, enabling you to use ASP.NET-like syntax rather than worrying about how each control appears in rendered HTML.</p>
+
+            <p>Run the test.  It passes, unsurprisingly.  We're filling in the text and clicking "Save," but we're not actually asserting anything.  Let's fix that.  We'll start by asserting that the name and comment fields are reset to be blank after you save.</p>
+
+            <div class="code">
+              <span class="demph">public void TestSave()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester name = new TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = new TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = new ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = new DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Seuss&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();</span>
+              <br />
+              <span class="emph"><br />&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);</span>
+              <span class="demph"><br />}</span>
+            </div>
+
+            <p>The AssertEquals method is just a standard NUnit assertion, but here's the breakdown in case you're not familiar with it:</p>
+
+            <table>
+              <tr>
+                <th>Code Fragment</th>
+                <th>Meaning</th>
+              </tr>
+              <tr>
+                <td><code><span class="emph">AssertEquals</span><span class="demph">(&quot;name&quot;, &quot;&quot;, name.Text);</span></code></td><td>Assert that two objects are equal.</td>
+              </tr>
+              <tr>
+                <td><code><span class="demph">AssertEquals(</span><span class="emph">&quot;name&quot;</span><span class="demph">, &quot;&quot;, name.Text);</span></code></td><td>The text to use in the failure message.</td>
+              </tr>
+              <tr>
+                <td><code><span class="demph">AssertEquals(&quot;name&quot;, </span><span class="emph">&quot;&quot;</span><span class="demph">, name.Text);</span></code></td><td>The expected results (an empty string).</td>
+              </tr>
+              <tr>
+                <td><code><span class="demph">AssertEquals(&quot;name&quot;, &quot;&quot;, </span><span class="emph">name.Text</span><span class="demph">);</span></code></td><td>The actual results (the text in the "name" text box).</td>
+              </tr>
+            </table>
+
+            <p>When you run the test, it fails!</p>
+
+            <blockquote>
+              <code class="error">TestSave : name
+              String lengths differ. Expected length=0, but was length=9.
+              Strings differ at index 0.
+
+              expected: &lt;&gt;
+              but was: &lt;Dr. Seuss&gt;
+              ---------^
+              </code>
+            </blockquote>
+
+            <p>Were you surprised?  I was.  I had forgotten that the default behavior in ASP.NET is to preserve the values of its controls.  For now, let's fix the problem by adding some code to the web page's code-behind to always initialize the text boxes to be blank. (If you wonder about this code, you're on to something. Keep reading.)</p>
+
+            <div class="code">
+              <span class="keyword">private void </span>Page_Load(<span class="keyword">object</span> sender, System.EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;name.Text = "";
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = "";
+              <br />}
+            </div>
+
+            <p>Run the tests and see that they pass now.</p>
+
+            <p>Notice how similar the code-behind is to the tests?  That's intentional.  NUnitAsp will generally have the same methods on its testers that are on real ASP.NET objects.</p>
+
+            <p>Now for the meat of the test.  We want to assert that the "book" data grid is populated with the user's name and comments.  Since checking the contents of a data grid is a common need, NUnitASP includes functionality to make this easy.</p>
+
+            <p>NUnitAsp allows you to treat a data grid as an array of cells.  More accurately, it enables you to treat a data grid as an array of string arrays.  The string arrays in the outer array correspond to the rows of the data grid, and the strings in the inner arrays correspond to the cells of the data grid.  This is best illustrated by an example.  A string array that looks like this:</p>
+
+            <div class="code">
+              <span class="keyword">string</span>[][] expected = <span class="keyword">new string</span>[][]
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">new string</span>[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"},
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">new string</span>[] {"Dr. Freud", "Nice slip you have there."}
+              <br />};
+            </div>
+
+            <p>Corresponds to a data grid table that looks like this:</p>
+
+            <table>
+              <tr>
+                <td>Dr. Seuss</td>
+                <td>One Guest, Two Guest!  Guest Book, Best Book!</td>
+              </tr>
+              <tr>
+                <td>Dr. Freud</td>
+                <td>Nice slip you have there.</td>
+              </tr>
+            </table>
+
+            <p>Unsurprisingly, DataGridTester has a method that returns the data grid's contents in an array in exactly this format.  WebFormTestCase also provides several assertion methods that allow you to assert things about the contents of this kind of array.  We'll use this functionality to assert that the guest book contains Dr. Seuss's comments after he presses the "Save" button. Note that we're only testing a single entry here, which means we only have one row, so our assertion array only has one outer element.</p>
+
+            <div class="code">
+              <span class="demph">public void TestSave()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester name = new TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = new TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = new ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = new DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br />&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Seuss&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);</span>
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;<span class="emph"><span class="keyword">string</span>[][] expected = <span class="keyword">new string</span>[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">new string</span>[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);</span>
+              <span class="demph"><br />}</span>
+            </div>
+
+            <p>If you run the tests now, you see that the save test fails because NUnitASP can't find a control named "book".</p>
+
+            <p>Remember when we changed the TestLayout test to succeed when the "book" element wasn't visible, because it didn't yet hold any data? TestSave is failing right now for a similar reason, except that we now want the grid to be visible, and to contain the information we've entered in the text boxes. Since we haven't added any functionality to the page to update the data grid when we click "Save," the data grid is still not visible.</p>
+
+            <h2>Implement a Little Bit of Behavior</h2>
+
+            <p>To fix this problem, let's add functionality to the page that updates the data grid with the information we enter when we click "Save." We already have the test that will show when we've implemented it correctly&mdash;now it's just a matter of writing the code that makes the test pass.  As before, we're going to do it in very small pieces.</p>
+
+            <p>The test is complaining that the book isn't showing up when we click the "Save" button, right?  So the simplest thing we can do to get this to pass is to put some data in the guest book DataGrid when the Save button is clicked.  It doesn't have to be the right data yet... we're trying to take very small steps.</p>
+
+            <p>The first thing to do is to make the "Save" button call a method when it's clicked.  To do that, we add the "OnClick" attribute.</p>
+
+            <div class="html">
+              <span class="demph">
+              &lt;form id=&quot;GuestBook&quot; method=&quot;post&quot; runat=&quot;server&quot;&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:TextBox ID=&quot;name&quot; Runat=&quot;server&quot;&gt;&lt;/asp:TextBox&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:TextBox ID=&quot;comments&quot; Runat=&quot;server&quot;&gt;&lt;/asp:TextBox&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:Button ID=&quot;save&quot; RunAt=&quot;server&quot; Text=&quot;Save&quot; </span><span class="emph">OnClick=&quot;Save_Clicked&quot;</span><span class="demph">&gt;&lt;/asp:Button&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:DataGrid ID=&quot;book&quot; RunAt=&quot;server&quot;&gt;&lt;/asp:DataGrid&gt;
+              <br />&lt;/form&gt;
+              </span>
+            </div>
+
+            <p>And then we run the tests.  We know they're going to fail, but we want to see an error saying that the Save_Clicked() method doesn't exist.  That way we know we set this up properly.</p>
+
+            <p>Unfortunately, when ASP.NET discovers that we're trying to call a method that doesn't exist, it displays an error message rather than a regular web page.  NUnitAsp doesn't realize what's going on and causes every test to fail with a strange error message:</p>
+
+            <blockquote>
+              <code class="error">TestLayout : server returned error (status code: 500). HTML copied to standard output.</code>
+            </blockquote>
+
+            <p>When you see this error message from NUnitAsp, it's your clue that ASP.NET threw an exception.  Look at the "Standard Out" tab of the NUnit GUI to see the HTML page it made to describe the problem, or use a web browser to manually reproduce your test.</p>
+
+            <p>In this case, when we look at the error, we see that it was a compilation error: "CS0117: 'ASP.GuestBook_aspx' does not contain a definition for 'Save_Clicked'".  Exactly what we expected.</p>
+
+            <p>In order to get rid of the compilation error, we create a Save_Clicked() method.  I can never remember exactly how to declare event methods like Save_Clicked, so I cheat and use Page_Load as a template, with one exception: the method needs to be protected, not private, because we're referencing it from the ASP.NET page.  (It's protected because the ASP.NET page gets compiled into a class that extends our code-behind.)</p>
+
+            <p>After doing this, we run our tests again, and they're back to normal.  They're not passing, because we still aren't doing anything to cause the guest book DataGrid to appear, but we've resolved the compilation error.</p>
+
+            <p>Now we need to get the book to appear.  When I wrote the tutorial, I couldn't remember how DataGrid worked, so I just typed "book." into Visual Studio and scrolled through the list of methods.  DataSource looked appropriate, so I assigned an array to it, then ran the tests.  It worked!</p>
+
+            <div class="code">
+              <span class="keyword">protected void</span> Save_Clicked(<span class="keyword">object</span> sender, EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;book.DataSource = <span class="keyword">new string</span>[] {"foo"};
+              <br />&nbsp;&nbsp;&nbsp;book.DataBind();
+              <br />}
+            </div>
+
+            <p>Unfortunately, the tests still aren't passing.  We're a little bit closer&mdash;the guest book is being displayed now&mdash;but the test expects to see Dr. Suess, not "foo".</p>
+
+            <p>A little bit of experimentation shows that arrays aren't going to get us a two-column data grid.  We need something a little more sophisticated.  So at this point, I took a few moments to research how DataGrid worked.  I learned that I could use DataTable and DataRow to achieve the result I was looking for.  With this knowledge, I hard-coded the right answer and got the test to pass.</p>
+
+            <div class="code">
+              <span class="demph">protected void Save_Clicked(object sender, EventArgs e)
+              <br />{</span><span class="emph">
+              <br />&nbsp;&nbsp;&nbsp;DataTable table = <span class="keyword">new</span> DataTable();
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(<span class="keyword">new</span> DataColumn("Name", <span class="keyword">typeof</span>(<span class="keyword">string</span>)));
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(<span class="keyword">new</span> DataColumn("Comments", <span class="keyword">typeof</span>(<span class="keyword">string</span>)));
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;DataRow row = table.NewRow();
+              <br />&nbsp;&nbsp;&nbsp;row["Name"] = "Dr. Seuss";
+              <br />&nbsp;&nbsp;&nbsp;row["Comments"] = "One Guest, Two Guest!  Guest Book, Best Book!";
+              <br />&nbsp;&nbsp;&nbsp;table.Rows.Add(row);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;book.DataSource = table;
+              <br /></span><span class="demph">&nbsp;&nbsp;&nbsp;book.DataBind();
+              <br />}</span>
+            </div>
+
+            <h2>Refactor (with a note about SetUp)</h2>
+
+            <p>Some of you right now are rolling your eyes in disbelief.  The code above is obviously not good enough.  How could I possibly be happy with it?  Easy: I'm not!  We're now at the third and most important stage of the test-driven development cycle: Refactoring.</p>
+
+            <p>When a programming example is broken down into step-by-step detail, as in this tutorial, it takes a lot of time to read and follow along.  But if you had been implementing this yourself, only a few minutes would have passed.  Since it's been so long, though, let me refresh your memory as to what's happened.</p>
+
+            <p>First, we wrote a small little test to support some new behavior.  Then we wrote a small little bit of code to make the test pass.  We wrote in the simplest way we could to get the test passing quickly.</p>
+
+            <p>If you write code this way all the time, always taking the simplest, easiest approach, you'll end up with a disjointed mess.  Indeed, if you look at our code so far, it's not very good.  And we've only implemented one little feature!  The key to preventing the mess is to refactor each time you get a test to pass.</p>
+
+            <p>Refactoring is to big a topic for me to cover here, so if you're not familiar with refactoring, check out Martin Fowler's <a href="http://www.refactoring.com">Refactoring website</a>, or search the web for more information.  To summarize, refactoring is changing the design of your code without changing its functionality, using small, predictable steps.</p>
+
+            <p>You decide what to refactor by looking for "code smells:" areas where the design of the code is poor.  One of the easiest code smells to spot is duplication.  If you have the same concept in multiple places, there's probably a design problem.  Fixing this one issue aggressively whenever you see it will do a lot to keep your design quality high.</p>
+
+            <p>So, looking at our code, where's the duplication?  The first is easy to spot: it's in our tests.  We have the exact same set up code in both of our tests.</p>
+
+            <div class="code">
+              <span class="demph">public void TestLayout()
+              <br />{
+              <br /></span><span class="emph">&nbsp;&nbsp;&nbsp;TextBoxTester name = <span class="keyword">new</span> TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = <span class="keyword">new</span> TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = <span class="keyword">new</span> ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = <span class="keyword">new</span> DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");
+              <br />
+              <br /></span><span class="demph">&nbsp;&nbsp;&nbsp;AssertVisibility(name, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(comments, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(save, true);
+              <br />&nbsp;&nbsp;&nbsp;AssertVisibility(book, false);
+              <br />}
+              <br />
+              <br />public void TestSave()
+              <br />{
+              <br /></span><span class="emph">&nbsp;&nbsp;&nbsp;TextBoxTester name = <span class="keyword">new</span> TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;TextBoxTester comments = <span class="keyword">new</span> TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;ButtonTester save = <span class="keyword">new</span> ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;DataGridTester book = <span class="keyword">new</span> DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/GuestBook/GuestBook.aspx");              <br />
+              <br /></span><span class="demph">&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Seuss&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;string[][] expected = new string[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />}</span>
+            </div>
+
+            <p>We want to refactor this so its in only one place.  Normally, we would put the common code in a single method and call that method from both tests.  But NUnit provides another facility for us: the SetUp() method.  This is a method that is automatically called before each test, and is exactly what we need.</p>
+
+            <p>In the interest of saving space, I haven't included all of the steps I used when I refactored.  First I took the common code out of one method, moved it to SetUp(), and ran the tests.  They passed.  (As they always should when you refactor, since you're not changing functionality.)  Then I took the common code out of the second method and ran the tests again, which passed again.  The final code looks like this:</p>
+
+            <div class="code">
+              <span class="demph">[TestFixture]
+              <br />public class GuestBookTest : WebFormTestCase
+              <br />{</span><span class="emph">
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">private</span> TextBoxTester name;
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">private</span> TextBoxTester comments;
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">private</span> ButtonTester save;
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">private</span> DataGridTester book;
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">protected override void</span> SetUp()
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name = <span class="keyword">new</span> TextBoxTester("name", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comments = <span class="keyword">new</span> TextBoxTester("comments", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;save = <span class="keyword">new</span> ButtonTester("save", CurrentWebForm);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;book = <span class="keyword">new</span> DataGridTester("book", CurrentWebForm);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Browser.GetPage("http://localhost/NUnitAsp/sample/tutorial/GuestBook/GuestBook.aspx");
+              <br />&nbsp;&nbsp;&nbsp;}</span><span class="demph">
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;[Test]
+              <br />&nbsp;&nbsp;&nbsp;public void TestLayout()
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertVisibility(name, true);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertVisibility(comments, true);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertVisibility(save, true);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertVisibility(book, false);
+              <br />&nbsp;&nbsp;&nbsp;}
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;[Test]
+              <br />&nbsp;&nbsp;&nbsp;public void TestSave()
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name.Text = "Dr. Seuss";
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comments.Text = "One Guest, Two Guest!  Guest Book, Best Book!";
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string[][] expected = new string[][]
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />&nbsp;&nbsp;&nbsp;}
+              <br />}
+            </div>
+
+            <p>Readers familiar with NUnit will notice that we're not using the [SetUp] attribute.  We're using a "protected override void SetUp" method instead.  That's a quirk of the way NUnitAsp is put together.  We're already using [SetUp] in NUnitAsp, so you can't use it yourself.  Use the "protected override void SetUp" method will yield the same results.  If you use [SetUp] with NUnitAsp, you'll get an exception.</p>
+
+            <h2>Refactor More (with a note about debugging)</h2>
+
+            <p>The duplication in the tests was obvious because the code was identical.  The rule on duplication, though, isn't just duplication of code: it's duplication of concepts.  If you have the same concept&mdash;the same knowledge&mdash;in two different parts of your program, it may be a target for refactoring.</p>
+
+            <p>The knowledge that we've duplicated is the knowledge of what's supposed to be in the guest book.  It's in the test:
+
+            <div class="code">
+              <span class="demph">public void TestSave()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;name.Text = "Dr. Seuss";
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = "One Guest, Two Guest!  Guest Book, Best Book!";
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">string[][] expected = <span class="keyword">new</span> string[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">new</span> string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;};</span><span class="demph">
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />&nbsp;&nbsp;&nbsp;}
+              <br />}</span>
+            </div>
+
+            <p>And it's in the production code:</p>
+
+            <div class="code">
+              <span class="demph">protected void Save_Clicked(object sender, EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;DataTable table = new DataTable();
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Name", typeof(string)));
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Comments", typeof(string)));
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;DataRow row = table.NewRow();
+              <br /></span><span class="emph">&nbsp;&nbsp;&nbsp;row["Name"] = "Dr. Seuss";
+              <br />&nbsp;&nbsp;&nbsp;row["Comments"] = "One Guest, Two Guest!  Guest Book, Best Book!";</span><span class="demph">
+              <br />&nbsp;&nbsp;&nbsp;table.Rows.Add(row);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;book.DataSource = table;
+              <br /></span><span class="demph">&nbsp;&nbsp;&nbsp;book.DataBind();
+              <br />}</span>
+            </div>
+
+            <p>This isn't direct duplication of code, but it is duplication of a concept, and needs to be removed.  It's easy:</p>
+
+            <div class="code">
+              <span class="demph">protected void Save_Clicked(object sender, EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;DataTable table = new DataTable();
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Name", typeof(string)));
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Comments", typeof(string)));
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;DataRow row = table.NewRow();
+              <br />&nbsp;&nbsp;&nbsp;row["Name"] = </span><span class="emph">name.Text</span><span class="demph">;
+              <br />&nbsp;&nbsp;&nbsp;row["Comments"] = </span><span class="emph">comments.Text</span><span class="demph">
+              <br />&nbsp;&nbsp;&nbsp;table.Rows.Add(row);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;book.DataSource = table;
+              <br /></span><span class="demph">&nbsp;&nbsp;&nbsp;book.DataBind();
+              <br />}</span>
+            </div>
+
+            <p>At least, it seemed easy.  When I first wrote this code, it didn't pass.  The name and comments were blank.  I scratched my head for a bit, then broke out the debugger.  (If the answer seems obvious to you, realize that I took a break for about a year between writing the first and second halves of this tutorial!)</p>
+
+            <p>In order to debug an NUnitAsp test, you need to understand that NUnitAsp and ASP.NET are running in two separate processes.  Your test code and your production code are actually two entirely separate programs.  The only way they communicate is through the web server.  Furthermore, the NUnit GUI (which runs your test code) is a standalone process!  It doesn't run inside of Visual Studio by default.</p>
+
+            <p>So if you set a breakpoint and run your tests, nothing will happen.  Visual Studio doesn't know about the processes that you're running.  It's easy to fix: just pull down the "Debug" menu and select "Processes."  You'll see a window that has a table labeled "Available Processes."  To use breakpoints in your ASP.NET production code, select "aspnet_wp.exe" and click the "Attach" button.  To use breakpoints in your NUnit and NUnitAsp test code, select "nunit-gui.exe" and click the "Attach" button.  You can attach to both if you want.</p>
+
+            <p>Take a moment to try this out now.  Set some breakpoints in different parts of your code and run your tests.  Experiment with attaching to the two processes and see how the debugger treats your breakpoints differently.</p>
+
+            <p>Once I experimented with the debugger for a few minutes, I realized why the test was failing.  Earlier, to get a test to pass, I had reset the name and comment in the Page_Load method.</p>
+
+            <div class="code">
+              <span class="keyword">private void </span>Page_Load(<span class="keyword">object</span> sender, System.EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;name.Text = "";
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = "";
+              <br />}
+            </div>
+
+            <p>Page_Load is called every time the page is loaded, before my Save_Click method is called.  So by the time the program gets to Save_Click, my name ane comments have been reset!  I needed to move that code to a better spot.  Fortunately, there's an obvious spot: the end of the Save_Click method.</p>
+
+            <div class="code">
+              <span class="demph">private void Page_Load(object sender, System.EventArgs e)
+              <br />{
+              <br />}
+              <br />
+              <br />protected void Save_Clicked(object sender, EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;DataTable table = new DataTable();
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Name", typeof(string)));
+              <br />&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Comments", typeof(string)));
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;DataRow row = table.NewRow();
+              <br />&nbsp;&nbsp;&nbsp;row["Name"] = name.Text;
+              <br />&nbsp;&nbsp;&nbsp;row["Comments"] = comments.Text;
+              <br />&nbsp;&nbsp;&nbsp;table.Rows.Add(row);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;book.DataSource = table;
+              <br />&nbsp;&nbsp;&nbsp;book.DataBind();
+              <br />
+              <br /></span><span class="emph">&nbsp;&nbsp;&nbsp;name.Text = "";
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = "";</span><span class="demph">
+              <br />}</span>
+            </div>
+
+            <p>The tests pass, and now the code is clean.  Time to add some more functionality.</p>
+
+            <h2>Test a Little Bit More Functionality</h2>
+
+            <p>If you play with our guest book manually, you'll see that it's not quite where we want it to be.  Every time you hit the save button, the guest book is replaced.  That's not what we want.  We want a new row to be added with each click of the save button.  Naturally, the first thing we do is write a test.</p>
+
+            <div class="code">
+              public void TestSaveTwoItems()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Seuss&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Freud&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;That's quite a slip you have there.&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">string</span>[][] expected = <span class="keyword">new string</span>[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">new string</span>[] {&quot;Dr. Seuss&quot;, &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;}
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">new string</span>[] {&quot;Dr. Freud&quot;, &quot;That's quite a slip you have there.&quot;}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />}
+            </div>
+
+            <p>Again, we're doing the simplest thing we can to get the test working, even though it means duplicating some code from TestSave.  We know we're going to come back in refactor in just a few minutes.</p>
+
+            <h2>Implement a Little Bit More Functionality</h2>
+
+            <p>The test fails, as expected.  To get it to pass, we have to get our DataTable to persist across multiple invocations.  We'll use the user's session for that.</p>
+
+            <p>(Storing it in the session isn't really correct, as it doesn't allow multiple people to access the same guest book.  But this tutorial is too long already.)</p>
+
+            <div class="code">
+              <span class="demph">protected void Save_Clicked(object sender, EventArgs e)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">DataTable table = (DataTable)Session["GuestBookData"];
+              <br />&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (table == <span class="keyword">null</span>)
+              <br />&nbsp;&nbsp;&nbsp;{</span><span class="demph">
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DataTable table = new DataTable();
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Name", typeof(string)));
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;table.Columns.Add(new DataColumn("Comments", typeof(string)));
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">}</span><span class="demph">
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;DataRow row = table.NewRow();
+              <br />&nbsp;&nbsp;&nbsp;row["Name"] = name.Text;
+              <br />&nbsp;&nbsp;&nbsp;row["Comments"] = comments.Text;
+              <br />&nbsp;&nbsp;&nbsp;table.Rows.Add(row);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;book.DataSource = table;
+              <br />&nbsp;&nbsp;&nbsp;book.DataBind();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">Session["GuestBookData"] = table;</span><span class="demph">
+              <br />&nbsp;&nbsp;&nbsp;name.Text = "";
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = "";
+              <br />}</span>
+            </div>
+
+            <h2>Refactor</h2>
+
+            <p>Again, in our desire to get the functionality implemented, we left some bad code behind.  That's okay... we knew we were doing it, but we didn't mind, because we knew we were going to refactor.  The code smell is duplication, and it's in the tests again.  This time, we're duplicating code that enters a name into the guest book.</p>
+
+            <div class="code">
+              <span class="demph">[Test]
+              <br />public void TestSave()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">name.Text = "Dr. Seuss";
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = "One Guest, Two Guest!  Guest Book, Best Book!";
+              <br />&nbsp;&nbsp;&nbsp;save.Click();</span><span class="demph">
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;string[][] expected = new string[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />}
+              <br />
+              <br />[Test]
+              <br />public void TestSaveTwoItems()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">name.Text = &quot;Dr. Seuss&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;One Guest, Two Guest!  Guest Book, Best Book!&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;name.Text = &quot;Dr. Freud&quot;;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = &quot;That's quite a slip you have there.&quot;;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();</span><span class="demph">
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;string[][] expected = new string[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Freud", "That's quite a slip you have there."}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />}</span>
+            </div>
+
+            <p>That code is easily factored out.</p>
+
+            <div class="code">
+              <span class="demph">[Test]
+              <br />public void TestSave()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">SignGuestBook("Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!");</span><span class="demph">
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("name", "", name.Text);
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("comments", "", comments.Text);
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;string[][] expected = new string[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />}
+              <br />
+              <br />[Test]
+              <br />public void TestSaveTwoItems()
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">SignGuestBook("Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!");</span><span class="demph">
+              <br />&nbsp;&nbsp;&nbsp;</span><span class="emph">SignGuestBook("Dr. Freud", "That's quite a slip you have there.");</span><span class="demph">
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;string[][] expected = new string[][]
+              <br />&nbsp;&nbsp;&nbsp;{
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Seuss", "One Guest, Two Guest!  Guest Book, Best Book!"}
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new string[] {"Dr. Freud", "That's quite a slip you have there."}
+              <br />&nbsp;&nbsp;&nbsp;};
+              <br />&nbsp;&nbsp;&nbsp;AssertEquals("book", expected, book.TrimmedCells);
+              <br />}</span><span class="emph">
+              <br />
+              <br /><span class="keyword">private void</span> SignGuestBook(<span class="keyword">string</span> nameToSign, <span class="keyword">string</span> commentToSign)
+              <br />{
+              <br />&nbsp;&nbsp;&nbsp;name.Text = nameToSign;
+              <br />&nbsp;&nbsp;&nbsp;comments.Text = commentToSign;
+              <br />&nbsp;&nbsp;&nbsp;save.Click();
+              <br />}
+
+            </div>
+
+            <p>There's still a little duplication between the assertions and the test setup, but not so much that the code would be clearer if we refactored it.  If additional tests showed that the duplication kept occuring, then I probably would refactor it, too.  We're done.</p>
+
+            <h2>Test Boundary Conditions</h2>
+
+            <p>Well, we're not really done.  It's true that the program is doing what we set out to do.  But it's only handling the basic case.  What happens when we throw bad data at it?  The correct way to find out is to write tests for these things.</p>
+
+            <p>I'm going to leave these tests as an exercise for you to do on your own.  There's several tests that you could write.  I would write tests for empty fields.  What do we want to happen if the user clicks save but hasn't filled in his name?  What if he filled in his name, but not a comment?  What happens if the user comes back to the page after leaving it?</p>
+
+            <p>And if you're not thinking about security, give yourself a good shaking.  What happens when a user enters HTML into one of these fields?  What do we want to happen?  Write a test for those cases.</p>
+
+            <p>Questions about these sorts of boundary conditions will come up as you're writing the main line of your code.  Don't let them distract you, but don't forget them, either.  Once you have the main case working, start writing tests for the boundary conditions.  Brainstorm and let them all come out.  By this time, your test fixture has probably been refactored a few times, so adding lots of tests for obscure cases should be easy.  Some of them might pass right away; others will require you to update your production code.</p>
+
+            <h2>Make it Pretty</h2>
+
+            <p>After you've tested your functionality and boundary conditions, pat yourself on the back.  You've got a good, solid piece of code.  Now you get to do the fun part: making it look pretty!</p>
+
+            <p>This part is the easiest.  You don't have to write any more code: just tweak and play with the look of the page to your heart's content.  As long as you don't change ID's, NUnitAsp doesn't mind if you move components around.  Run the tests every so often to make sure you didn't accidently break anything.</p>
+
+            <p>For our guest book, I didn't get very fancy.  I just made sure the components lined up decently and had appropriate headers.</p>
+
+            <div class="html">
+              &lt;form id="GuestBook" method="post" runat="server"&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;p&gt;&lt;b&gt;Guest Book:&lt;/b&gt;&lt;/p&gt;
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&lt;u&gt;Enter your name:&lt;/u&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;table&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;tr&gt;&lt;td&gt;Name:&lt;/td&gt;&lt;td&gt;&lt;asp:textbox id="name" Runat="server"&gt;&lt;/asp:textbox&gt;&lt;/td&gt;&lt;/tr&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;tr&gt;&lt;td&gt;Comments:&lt;/td&gt;&lt;td&gt;&lt;asp:TextBox ID="comments" Runat="server"&gt;&lt;/asp:TextBox&gt;&lt;/td&gt;&lt;/tr&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;/table&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:Button ID="save" Runat="server" Text="Save" OnClick="Save_Clicked"&gt;&lt;/asp:Button&gt;
+              <br />
+              <br />&nbsp;&nbsp;&nbsp;&lt;br /&gt;&lt;br /&gt;&lt;u&gt;Previous Guests:&lt;/u&gt;
+              <br />&nbsp;&nbsp;&nbsp;&lt;asp:DataGrid id="book" runat="server"&gt;&lt;/asp:DataGrid&gt;
+              <br />&lt;/form&gt;
+            </div>
+
+            <h2>Conclusion</h2>
+
+            <p>As you start writing your own tests with NUnitAsp, try following the pattern used in this tutorial.  To write this tutorial, I simply wrote down what I did while creating the sample application.  Other than the limited scope of the application, nothing about this tutorial is simplified.  Experienced test-driven development programmers really do run tests every couple of minutes, even when they know the results.  Once you get used to it, it evolves into a predictable rhythm:</p>
+
+            <blockquote>
+              Write test...
+              <br />...watch test fail.
+              <br />Write code...
+              <br />...watch test pass.
+              <br />Refactor...
+              <br />...watch test pass.
+              <br />Write test...
+              <br />...watch test fail.
+              <br />Write code...
+              <br />...watch test pass.
+              <br />Refactor...
+              <br />...watch test pass.
+              <br />Write test...
+              <br />...watch test fail.
+              <br />Write code...
+              <br />...watch test pass.
+              <br />Refactor...
+              <br />...watch test pass.
+            </blockquote>
+
+            <p>Every so often, the rhythm will be broken.  A test will fail when it shouldn't, or fail for the wrong reason, or even pass when it shouldn't.  If you've been running tests every few minutes, then the defect is in the last few minutes' work... it only takes a few seconds to figure out your mistake.  If you haven't been running tests often, though, you'll have to spend a lot more time debugging.
+
+            <p>These are the steps I really do follow when creating new web pages:</p>
+
+            <ul>
+              <li>Create a test class.</li>
+              <li>Create an empty test.
+              <br /><i>(Watch test pass)</i></li>
+              <li>Modify the test to navigate to the web page.
+              <br /><i>(Watch test fail)</i></li>
+              <li>Create the web page.
+              <br /><i>(Watch test pass)</i></li>
+              <li>Test the layout.
+              <br /><i>(Watch test fail)</i></li>
+              <li>Add controls to the web page.
+              <br /><i>(Watch test pass)</i></li>
+              <li>Repeat the following until all desired behavior is present:
+                <ul>
+                  <li>Test a small amount of behavior
+                  <br /><i>(Watch test fail)</i></li>
+                  <li>Implement a small amount of behavior
+                  <br /><i>(Watch test pass)</i></li>
+                  <li>Refactor
+                  <br /><i>(Watch test pass)</i></li>
+                </ul>
+              </li>
+              <li>Repeat the following until all boundary conditions are handled:
+                <ul>
+                  <li>Test a single boundary condition
+                  <br /><i>(Watch test fail)</i></li>
+                  <li>Fix a single boundary condition
+                  <br /><i>(Watch test pass)</i></li>
+                  <li>Refactor
+                  <br /><i>(Watch test pass)</i></li>
+                </ul>
+              <li>Make it pretty.</li>
+            </ul>
+
+            <p>Test-driven development is a relaxing, low-risk approach to software development.  Once you get used to it, it's fast and reliable.  Follow the pattern above, and you'll spend more time adding features and less time fixing defects.</p>
+
+            <p>Now you're ready to do your own test-driven development with NUnitAsp!  Before you get started, be sure to review the <a href="../quickstart.html">Quick-Start Guide</a>.  It consolidates the information in this tutorial and includes a few more details.</p>
+
+            <p class="end">
+              by Jim Shore with Andrew Enfield
+              <br />Last updated for v1.4.
+            </p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

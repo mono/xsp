@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <title>NUnitAsp FAQ</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <p class="title">NUnitAsp
+    <br /><small>ASP.NET unit testing</small></p>
+
+    <table class="layout">
+      <tr>
+        <td>
+          <div class="menu">
+            <p><a href="download.html"><b>Download</b></a></p>
+            <p>
+              <a href="index.html">Overview</a>
+              <br /><a href="documentation.html">Documentation</a>
+              <br /><a href="support.html">Support</a>
+              <br /><a href="consulting.html">Coaching</a>
+            </p>
+            <p><a href="contribute.html">Contribute</p>
+            <p><A href="http://sourceforge.net/projects/nunitasp/"><IMG src=
+            "http://sourceforge.net/sflogo.php?group_id=49940" width="88" height="31" border="0" alt="SourceForge Logo"></A></p>
+          </div>
+        </td>
+        <td>
+          <div class="content">
+
+            <h1>Frequently Asked Questions</h1>
+
+            <p>The NUnitAsp team sees frequently asked questions as indicators of problems with NUnitAsp.  We strive to eliminate FAQs by improving NUnitAsp itself.  So this isn't the best place to start for general information about NUnitAsp.  For an overview, see the <a href="quickstart.html">NUnitAsp QuickStart Guide</a>.  For a detailed tutorial, see the <a href="tutorial/index.html">NUnitAsp Tutorial</a>.  For installation issues, see the <a href="installation.html">Installation Guide</a>.  NUnitAsp is available for download at the <a href="http://nunitasp.sourceforge.net">NUnitAsp web site</a>.</p>
+
+
+            <h2>Q: When I try to compile NUnitAsp in VS.NET, I get a &quot;cryptographic failure&quot; error.  What's wrong?</h2>
+
+            <p>A: The NUnitAsp DLL is <em>strong-named,</em> which means it must be signed by a cryptographic key.  If you try to compile without a key, you'll get this error message:
+
+            <p class="code">Cryptographic failure while signing assembly 'C:\projects\NUnitAsp\source\NUnitAsp\obj\Debug\NUnitAsp.dll' -- 'The key container name 'NUnitAsp' does not exist'</p>
+
+            <p>We don't include a key in the distribution, but the NUnitAsp build script automatically generates the correct kind of key for you.  Open a Visual Studio .NET command prompt and type 'nant' in the root NUnitAsp directory to run it.  You only need to do this the first time you compile.</p>
+
+
+            <h2>Q: When I try to compile NUnitAsp with NAnt, the build says &quot;External program returned errors&quot;.  What's wrong?</h2>
+
+            <p>A: In order to sign the NUnitAsp DLL, the build uses a program called "sn.exe".  If it's not available, your build will fail with this error:
+
+            <p class="code">keypair:
+              <br />[exec] sn -k NUnitAsp.snk
+              <br />
+              <br />BUILD FAILED
+              <br />E:\devtools\nunitasp\NUnitAsp.build(50,4): External program returned errors, see  build log for details.
+              <br />Try 'nant -help' for more information
+            </p>
+
+            <p>To correct this, make sure sn.exe is in your path or in the DotNetToolDir environment variable path.  If you don't have a DotNetToolDir environment variable, the build script will set it to a default, but this may be wrong.  Make sure it's set properly.</p>
+
+
+            <h2>Q: When will NUnitAsp stop requiring XHTML?</h2>
+
+            <p>A: <b>Done!</b> As of version 1.4, NUnitAsp no longer requires XHTML.
+
+
+            <h2>Q: When will NUnitAsp support NUnit v2.1?</h2>
+
+            <p>A: That's planned for version 1.4.1, soon after the release of 1.4.</p>
+
+
+            <h2>Q: When will NUnitAsp support Visual Studio .NET 2003?</h2>
+
+            <p>A: Binaries will be included in version 1.4.1.  The NUnitAsp solution will remain on the original version of Visual Studio .NET unless someone sends me a complementary copy of VS.NET 2003.  (Microsoft: hint, hint.)</p>
+
+
+            <p class="end">Last updated for v1.4.</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+  </body>
+</html>

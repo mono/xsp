@@ -1,0 +1,140 @@
+body {
+	font-family: Verdana, sans-serif;
+	font-size: 12px;
+	background: white;
+	color: black;
+}
+
+a:link		{ color: blue; }
+a:visited	{ color: purple }
+a:active	{ color: red; }
+a:hover		{ color: red; }
+
+h1 {
+	font-size: 1.5em;
+	font-weight: bold;
+	margin-top: 0;
+	text-align: center;
+	margin-bottom: 1em;
+}
+
+h2 {
+	font-size: 1.2em;
+	font-weight: bold;
+	margin-top: 1.5em;
+	margin-bottom: -0.25em;
+}
+
+table {
+	font-size: 12px;
+}
+
+.content table {
+	border-collapse: collapse;
+	margin-left: 3em;
+	margin-right: 3em;
+}
+
+th {
+	text-align: left;
+	text-decoration: underline;
+	font-variant: small-caps;
+	padding-right: 1em;
+}
+
+td {
+	vertical-align: top;
+}
+
+.content td {
+	text-align: left;
+	border: 0.1em solid grey;
+	padding: 0.25em 1em 0.25em 0.25em;
+}
+
+code {
+	font-family: monospace;
+	text-align: left;
+}
+
+li {
+	text-align: left;
+}
+
+.title {
+	font-size: 1.9em;
+	font-weight: bold;
+	text-align: center;
+}
+
+.menu {
+	font-size: 1.1em;
+	white-space: nowrap;
+	float: left;
+	margin-right: 1em;
+}
+
+.content {
+	text-align: justify;
+	float: left;
+}
+
+.code, .html {
+	text-align: left;
+	font-family: monospace;
+	margin: 1.5em 5em 1.5em 5em;
+	border: 1px dashed black;
+	padding: 0.5em;
+	background-color: #FFFFCC;
+}
+
+.emph {
+	font-weight: bold;
+}
+
+.demph {
+	color: grey;
+}
+
+.error {
+	background-color: red;
+	color: white;
+	padding: 0.2em;
+}
+
+.figure {
+	margin: 0em 1em 0em 1em;
+	font-size: .8em;
+}
+
+.keyword {
+	color: blue;
+}
+
+.comment {
+	color: green;
+}
+
+.asp {
+	color: black;
+	background-color: yellow;
+}
+
+.literal {
+	color: blue;
+}
+
+.tag {
+	color: brown;
+}
+
+.attribute {
+	color: red;
+}
+
+.end {
+	margin-top: 3em;
+	border-top: 1px solid black;
+	padding-top: 0.5em;	
+	font-size: 0.75em;
+}

@@ -1,0 +1,84 @@
+Changes in NUnitAsp 1.4:
+Produced by Jim Shore and Levi Khatskevitch.
+* Updated installation guide in response to user comments.  Credit to Jim Shore.
+* Added support for https: protocol.  Credit to Daniel Granath.
+* Added support for basic authentication.  Credit to Daniel Granath.
+* Added support for cookies with expiration date.  Credit to Rich Tebb.
+* Added support for defining user languages.  Credit to Rich Tebb.
+* Added HtmlInputCheckBoxTester.  Credit to Andrew Enfield.
+* Added ImageButtonTester.  Credit to Clifton F. Vaughn.
+* Added support for sorting data grids.  Credit to Clifton F. Vaughn and Jim Shore.
+* Fixed HTML in tutorial.  Credit to Dominique Plante.
+* Fixed nested controls to work with .NET v1.1.  Credit to Levi Khatskevitch.
+* Clarified action to take when parse error occurs.  Credit to Jim Shore.
+* Added Enabled and Disabled properties to appropriate controls.  Credit to Levi Khatskevitch.
+* Added Text property to ButtonTester.  Credit to Levi Khatskevitch.
+* Added support for Windows Integrated authentication (NTLM). Credit to Mark Smithson.
+* Added CurrentUrl property to Browser.  Credit to Jim Shore.
+* Added Cookies property to Browser.  Credit to Levi Khatskevitch.
+* Detection of infinite redirection loops.  Credit to Levi Khatskevitch.
+* Fixed exception when clicking buttons inside UserControl.  Credit to Levi Khatskevitch.
+* CheckBoxTester.Checked can now be set to false.  Credit to Simon Jackson.
+* Added Text property to CheckBoxTester.  Credit to Levi Khatskevitch.
+* Removed all XHTML and DTD requirements.  Credit to Chris Lovett, Simon Jackson and Levi Khatskevitch.
+* Added run-time exception to correct mis-use of DataGridTester as a container.  Credit to Jim Shore.
+* Finished tutorial.  Credit to Jim Shore.
+* Added support for List display mode in ValidationSummaryTester.  Credit to Leonardo Susatyo.
+* Fixed common error: list.Items.FindByText("My Text").Selected = True.  Credit to Levi Khatskevitch.
+* Added multi-select capable ListBoxTester class.  Credit to Levi Khatskevitch.
+* Updated API documentation and made it part of build.  Credit to John Sobolewski and Jim Shore.
+
+(Note: Jim Shore was known as Jim Little before the release of version 1.4.)
+
+
+Changes in NUnitAsp 1.3:
+Produced by Jim Little.
+* Browser.ElapsedServerTime now works.  Credit to Jim Little.
+* Added support for multiline text boxes.  Credit to "(luKa)."
+* Updated installation guide for error caused by XMLSpy.  Credit to Peter Wijntjes.
+* Many improvements to tutorial, including update for NUnit 2.0.  Credit to Andrew Enfield.
+* Trimmed number of third-party files included in distribution.  Credit to Jim Little.
+* Fixed defect which caused NUnitAsp to forget that checkboxes were checked.  Credit to Jim Little.
+* Significantly reduced XHTML requirement.  Credit to Rick Currence.
+* Rewrote Quick-Start Guide.  Credit to Jim Little.
+* Added run-time exception to explain common problem with [SetUp] attribute.  Credit to Jim Little. 
+
+
+Changes in NUnitAsp 1.2.1:
+Produced by Jim Little.
+* NUnit 2.0 support.  Credit to R. Owen Rogers, Drew Noakes, and Jim Little.
+* NUnit 2.0 migration guide.  Credit to Jim Little.
+* Compilation FAQ question.  Credit to Jim Little.
+* Minor documentation fixes.  Credit to Jim Little.
+
+
+Changes in NUnitAsp 1.2:
+Produced by Jim Little.
+* Documentation.  Lots of it. Credit to Jim Little.
+* Added support for pop-up windows in AnchorTester.  Credit to Jacob Lawlor.
+* 404 errors no longer occur when retrieving links to document fragments (http://foo.com/index.html#name).  The fragment link is ignored and the main page is retrieved.  Credit to Jim Little.
+* Fixed attribute parsing so it ignores case.  Credit to Jim Little.
+* Added support for changing browser user-agent.  Credit to Jim Little.
+* Pages are no longer parsed unless strictly necessary.  Credit to Jim Little.
+* Cleaned up build and distribution.  All necessary files are now included.  Credit to Jim Little.
+* API documentation.  Credit to Mitchel Burns.
+
+
+Changes in NUnitAsp 1.1:
+Produced by Jim Little.
+* Changes not recorded in detail.  Sorry.
+* Added Anchor, DropDownList, and ValidationSummary.  Credit to Jim Little.
+* Minor changes to usability.  Credit to Jim Little.
+* Fixed a few defects.  Credit to Jim Little.
+
+
+Changes in NUnitAsp 1.0:
+Produced by Jim Little.
+* Added concept of testers and ASP.NET parsing.  Credit to Jim Little.
+* Set up SourceForge site and CVS repository.  Credit to Brian Knowles.
+* Created automated build.  Credit to Brian Knowles and Jim Little.
+
+
+Initial version (not released):
+Produced by Brian Knowles.
+* Supported HTTP and basic GET/POST.

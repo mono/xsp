@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitAsp", "source\NUnitAsp\NUnitAsp.csproj", "{5D5FCC6A-44FE-4A25-8F20-B95E904866B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitAspTest", "source\NUnitAspTest\NUnitAspTest.csproj", "{9B344403-AB76-4420-BA97-115A147F7B7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitAspTestPages", "http://localhost/NUnitAsp/source/NUnitAspTestPages/NUnitAspTestPages.csproj", "{7D7986CC-8D3D-433E-94EC-35D753E894DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{5D5FCC6A-44FE-4A25-8F20-B95E904866B0}.Debug.ActiveCfg = Debug|.NET
+		{5D5FCC6A-44FE-4A25-8F20-B95E904866B0}.Debug.Build.0 = Debug|.NET
+		{5D5FCC6A-44FE-4A25-8F20-B95E904866B0}.Release.ActiveCfg = Release|.NET
+		{5D5FCC6A-44FE-4A25-8F20-B95E904866B0}.Release.Build.0 = Release|.NET
+		{9B344403-AB76-4420-BA97-115A147F7B7D}.Debug.ActiveCfg = Debug|.NET
+		{9B344403-AB76-4420-BA97-115A147F7B7D}.Debug.Build.0 = Debug|.NET
+		{9B344403-AB76-4420-BA97-115A147F7B7D}.Release.ActiveCfg = Release|.NET
+		{9B344403-AB76-4420-BA97-115A147F7B7D}.Release.Build.0 = Release|.NET
+		{7D7986CC-8D3D-433E-94EC-35D753E894DC}.Debug.ActiveCfg = Debug|.NET
+		{7D7986CC-8D3D-433E-94EC-35D753E894DC}.Debug.Build.0 = Debug|.NET
+		{7D7986CC-8D3D-433E-94EC-35D753E894DC}.Release.ActiveCfg = Release|.NET
+		{7D7986CC-8D3D-433E-94EC-35D753E894DC}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

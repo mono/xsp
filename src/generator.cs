@@ -503,6 +503,48 @@ public class Generator
 		}
 	}
 
+	private bool ProcessProperties (PropertyInfo prop, string id, TagAttributes att)
+	{
+		bool is_processed = false;
+
+		if (0 == String.Compare (prop.Name, id, true)){
+			AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id]);
+			is_processed = true;
+		}
+		else if (prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
+			 id.IndexOf ('-') != -1){
+			string prop_field = id.Replace ("-", ".");
+			string [] parts = prop_field.Split (new char [] {'.'});
+			if (parts.Length != 2 || 
+			    0 != String.Compare (prop.Name, parts [0], true))
+				return false;
+
+			PropertyInfo [] subprops = prop.PropertyType.GetProperties ();
+			foreach (PropertyInfo subprop in subprops){
+				if (0 != String.Compare (subprop.Name, parts [1], true))
+					return false;
+
+				bool is_bool = subprop.PropertyType == typeof (bool);
+				if (!is_bool && att == null){
+					att [id] = ""; // Font-Size -> Font-Size="" as html
+					return false;
+				}
+
+				string value;
+				if (att == null && is_bool)
+					value = "true"; // Font-Bold <=> Font-Bold="true"
+				else
+					value = (string) att [id];
+
+				AddPropertyCode (subprop.PropertyType,
+						 prop.Name + "." + subprop.Name,
+						 value);
+				is_processed = true;
+			}
+		}
+
+		return is_processed;
+	}
 	
 	private void AddCodeForAttributes (Type type, TagAttributes att)
 	{
@@ -534,43 +576,9 @@ public class Generator
 			} 
 
 			foreach (PropertyInfo prop in prop_info){
-				if (0 == String.Compare (prop.Name, id, true)){
-					AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id]);
-					is_processed = true;
+				is_processed = ProcessProperties (prop, id, att);
+				if (is_processed)
 					break;
-				}
-				else if (prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
-					 id.IndexOf ('-') != -1){
-					string prop_field = id.Replace ("-", ".");
-					string [] parts = prop_field.Split (new char [] {'.'});
-					if (parts.Length != 2 || 
-					    0 != String.Compare (prop.Name, parts [0], true))
-						continue;
-
-					PropertyInfo [] subprops = prop.PropertyType.GetProperties ();
-					foreach (PropertyInfo subprop in subprops){
-						if (0 != String.Compare (subprop.Name, parts [1], true))
-							continue;
-
-						bool is_bool = subprop.PropertyType == typeof (bool);
-						if (!is_bool && att == null){
-							att [id] = ""; // Font-Size -> Font-Size="" as html
-							break;
-						}
-
-						string value;
-						if (att == null && is_bool)
-							value = "true"; // Font-Bold <=> Font-Bold="true"
-						else
-							value = (string) att [id];
-
-						AddPropertyCode (subprop.PropertyType,
-								 prop.Name + "." + subprop.Name,
-								 value);
-						is_processed = true;
-						break;
-					}
-				}
 			}
 
 			if (is_processed){
@@ -725,9 +733,11 @@ public class Generator
 		foreach (string id in att.Keys){
 			if (0 == String.Compare (id, "runat", true) || 0 == String.Compare (id, "id", true))
 				continue;
+
+			bool is_processed = false;
 			foreach (PropertyInfo subprop in subprop_info){
-				if (0 == String.Compare (subprop.Name, id, true)){
-					AddPropertyCode (subprop.PropertyType, subprop.Name, (string) att [id]);
+				is_processed = ProcessProperties (subprop, id, att);
+				if (is_processed){
 					subprop_name = subprop.Name;
 					break;
 				}
@@ -744,6 +754,28 @@ public class Generator
 		current_function = (StringBuilder) functions.Peek ();
 		current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} (__ctrl.{1});\n",
 						prop_id, tag.PropertyName);
+
+		if (!tag.SelfClosing){
+			// Next tag should be the closing tag
+			childrenKind.Push (ChildrenKind.NONE);
+			bool closing_tag_found = false;
+			Element elem;
+			while (!closing_tag_found && elements.MoveNext ()){
+				elem = (Element) elements.Current;
+				if (elem is PlainText)
+					ProcessPlainText ();
+				else if (!(elem is CloseTag))
+					throw new ApplicationException ("Tag " + tag.TagID + 
+									" not properly closed.");
+				else
+					closing_tag_found = true;
+			}
+
+			if (!closing_tag_found)
+				throw new ApplicationException ("Tag " + tag.TagID + " not properly closed.");
+
+			childrenKind.Pop ();
+		}
 	}
 
 	// This one just opens the function. Closing is performed in FinishControlFunction ()

@@ -1,3 +1,8 @@
+2002-05-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs: support Style properties for style tags (i.e., things
+	like Font-Size inside a style tag which is a property of a control).
+
 2002-05-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* aspelements.cs: added some checks for null. New ChildKind DBCOLUMNS

@@ -94,13 +94,13 @@ class CacheData
 
 class PageFactory
 {
-	class PageBuilder
+	public class PageBuilder
 	{
 		private StringBuilder cscOptions;
 		private string fileName;
 		private string csFileName;
 		private string className;
-		private static char dirSeparator = Path.DirectorySeparatorChar;
+		public static char dirSeparator = Path.DirectorySeparatorChar;
 		private static Hashtable cachedData = new Hashtable ();
 		private static Random rnd_file = new Random ();
 
@@ -126,7 +126,7 @@ class PageFactory
 		public PageBuilder (string fileName)
 		{
 			this.fileName = fileName;
-			csFileName = fileName.Replace (".aspx", ".cs");
+			csFileName = "xsp_" + Path.GetFileName (fileName).Replace (".aspx", ".cs");
 
 			cscOptions = new StringBuilder ();
 #if MONO
@@ -179,7 +179,7 @@ class PageFactory
 					return null;
 
 				dll = "output" + dirSeparator;
-				dll += rnd_file.Next () + fileName.Replace (".aspx", ".dll");
+				dll += rnd_file.Next () + Path.GetFileName (fileName).Replace (".aspx", ".dll");
 				if (Compile (csFileName, dll) == true){
 					cached = new CacheData (fileName,
 								dll,
@@ -200,15 +200,14 @@ class PageFactory
 #if MONO
 			return RunProcess ("mono", 
 					   "xsp.exe " + fileName, 
-					   "output" + dirSeparator + csFileName, 
-					   "output" + dirSeparator + "xsp_" + fileName + 
+					   GeneratedXspFileName (fileName),
+					   "output" + dirSeparator + "xsp_" + Path.GetFileName (fileName) + 
 					   ".sh");
 #else
 			return RunProcess ("xsp", 
 					   fileName, 
-					   "output" + dirSeparator + csFileName, 
-					   "output" + dirSeparator + "xsp_" + fileName + 
-					   ".bat");
+					   GeneratedXspFileName (fileName),
+					   "output" + dirSeparator + "xsp_" + fileName + ".bat");
 #endif
 		}
 
@@ -305,7 +304,7 @@ class PageFactory
 			return line.Substring (begin + att_start.Length, end);
 		}
 		
-		private Page GetInstance (CacheData cached)
+		private static Page GetInstance (CacheData cached)
 		{
 			return cached.CreateInstance () as Page;
 		}
@@ -332,6 +331,19 @@ class PageFactory
 	}
 
 	private static Hashtable loadedPages = new Hashtable ();
+
+
+	public static string CompilationOutputFileName (string fileName)
+	{
+		string name = "xsp_" + Path.GetFileName (fileName).Replace (".aspx", ".txt");
+		return "output" + PageBuilder.dirSeparator + "output_from_compilation_" + name;
+	}
+
+	public static string GeneratedXspFileName (string fileName)
+	{
+		string name = Path.GetFileName (fileName).Replace (".aspx", ".cs");
+		return "output" + PageBuilder.dirSeparator + "xsp_" + name;
+	}
 
 	private PageFactory ()
 	{
@@ -382,11 +394,108 @@ class PageFactory
 
 }
 
+class HttpHelpers
+{
+	public static void SendStatus (TextWriter writer, int code, string message)
+	{
+		writer.Write ("HTTP/1.0 " + code + " " + message + "\r\n");
+	}
+
+	public static void SendHeader (TextWriter writer, string title, string data)
+	{
+		writer.Write (title + ": " + data + "\r\n");
+	}
+	
+	public static void RenderErrorPage (TextWriter writer, int code, string description, string message)
+	{
+		/*
+		HttpResponse response = new HttpResponse (output);
+		response.StatusCode = code;
+		response.StatusDescription = message;
+		response.ContentType = "text/html";
+		string content = String.Format ("<html>\n<title>Error {0}: {1}</title>\n<body>" + 
+						"<h2>Error {0}: {1}</h2><p>{2}\n</body>\n</html>\n",
+						code, message, description);
+		response.Write (content);
+		response.End ();
+		*/
+
+		SendStatus (writer, code, message);
+		SendHeader (writer, "Content-Type", "text/html");
+		string content = String.Format ("<html>\n<title>Error {0}: {1}</title>\n<body>" + 
+						"<h2>Error {0}: {1}</h2><p>{2}\n</body>\n</html>\n",
+						code, description, message);
+		SendHeader (writer, "Content-Length", content.Length.ToString ());
+		writer.Write ("\r\n");
+		writer.Write (content);
+	}
+
+	private static void WriteFormattedSource (TextWriter writer, string source)
+	{
+		StringReader reader = new StringReader (source);
+		string line;
+		int lineno = 1;
+		while ((line = reader.ReadLine ()) != null){
+			writer.WriteLine ("line " + lineno + ": " + HttpUtility.HtmlEncode (line));
+			lineno++;
+		}
+		reader.Close ();
+	}
+
+	public static void SendDebugPage (TextWriter writer, string fileName)
+	{
+		string xspOutput = PageFactory.GeneratedXspFileName (fileName);
+		if (!File.Exists (xspOutput)) {
+			RenderErrorPage (writer, 500, "Internal Server Error", "Couldn't run xsp.exe");
+			return;
+		}
+		
+		string compilationOutput = PageFactory.CompilationOutputFileName (fileName);
+		Console.WriteLine (compilationOutput);
+		if (!File.Exists (compilationOutput)) {
+			RenderErrorPage (writer, 500, "Internal Server Error", "xsp.exe failed to generate code");
+			return;
+		}
+
+		StreamReader csReader = new StreamReader (File.Open (xspOutput, FileMode.Open));
+		string csContent = csReader.ReadToEnd ();
+		csReader.Close ();
+
+		StreamReader compilationReader = new StreamReader (File.Open (compilationOutput, FileMode.Open));
+		string compilationContent = compilationReader.ReadToEnd ();
+		compilationReader.Close ();
+
+		StringWriter output = new StringWriter ();
+		output.WriteLine ("<html>\n<title>Compilation failed</title>\n<body>");
+		output.WriteLine ("<h2>Compilation failed</h2>");
+		output.WriteLine ("The output from the compiler is:<p>");
+		output.WriteLine ("<table summary=\"\" bgcolor=\"#FFFFCC\">\n<tr>\n<td>");
+		output.WriteLine ("<code><pre>");
+		output.WriteLine (HttpUtility.HtmlEncode (compilationContent));
+		output.WriteLine ("</pre></code>\n</td></tr></table><p>");
+		output.WriteLine ("<b>Compilation source code:</b><p>\n");
+		output.WriteLine ("<table summary=\"\" bgcolor=\"#FFFFCC\"><tr><td><code><pre>");
+		WriteFormattedSource (output, csContent);
+		output.WriteLine ("</pre></code></td></tr></table>");
+		output.WriteLine ("</body>\n</html>");
+
+		SendStatus (writer, 200, "OK");
+		SendHeader (writer, "Content-Type", "text/html");
+		string content = output.ToString ();
+		output.Close ();
+		SendHeader (writer, "Content-Length", content.Length.ToString ());
+		writer.Write ("\r\n");
+		writer.Write (content);
+	}
+}
+
 class MyWorkerRequest
 {
 	private string fileName;
+	private string fileOnDisk;
 	private TextReader input;
 	private TextWriter output;
+	private TextWriter outputBuffer;
 
 	private string method;
 	private string query;
@@ -394,7 +503,23 @@ class MyWorkerRequest
 	private string query_options = "";
 	private int post_size;
 	private MyCapabilities headers;
+	private static Hashtable mimeHash;
+	private static char dirSeparator = Path.DirectorySeparatorChar;
 
+	static MyWorkerRequest ()
+	{
+		mimeHash = new Hashtable (new CaseInsensitiveHashCodeProvider (),
+					  new CaseInsensitiveComparer ());
+		mimeHash.Add ("jpg", "image/jpeg");
+		mimeHash.Add ("png", "image/png");
+		mimeHash.Add ("css", "text/css");
+		mimeHash.Add ("aspx", "text/html");
+		mimeHash.Add ("htm", "text/html");
+		mimeHash.Add ("html", "text/html");
+		mimeHash.Add ("txt", "text/plain");
+		mimeHash.Add ("xml", "text/xml");
+	}
+	
 	private MyWorkerRequest ()
 	{
 	}
@@ -406,27 +531,65 @@ class MyWorkerRequest
 
 		this.input = input;
 		this.output = output;
+		outputBuffer = new StringWriter ();
 	}
 
+	public void RenderErrorPage (int code, string message, string description)
+	{
+		HttpHelpers.RenderErrorPage (output, code, message, description);
+	}
+	
 	public void ProcessRequest ()
 	{
 		GetRequestData ();
-		if (!fileName.EndsWith (".aspx"))
-			return;
-
-		Page page = PageFactory.GetPage (fileName, query_options);
-		if (page == null){
-			Console.WriteLine ("Error creating the instace of the generated class.");
+		if (fileName.IndexOf ("..") != -1){
+			RenderErrorPage (400, "Bad request", ".. not allowed in request");
 			return;
 		}
-#if MONO
-		string old_view_state = page.GetViewStateString ();
-#endif
+
+		fileOnDisk = fileName;
+		if (dirSeparator != '/')
+			fileOnDisk.Replace ('/', dirSeparator);
+
+		if (!File.Exists (fileOnDisk)){
+			RenderErrorPage (404, "Not Found", "File '" + fileName + "' not found.");
+			return;
+		}
+
+		if (!fileName.EndsWith (".aspx")){
+			ProcessRequestNonASPX ();
+			return;
+		}
+
+		Page page = PageFactory.GetPage (fileOnDisk, query_options);
+		if (page == null){
+			HttpHelpers.SendDebugPage (output, fileOnDisk);
+			return;
+		}
 		RenderPage (page);
 #if MONO
 		string new_view_state = page.GetViewStateString ();
 		PageFactory.UpdateHash (page, new_view_state);
 #endif
+	}
+	
+	void ProcessRequestNonASPX ()
+	{
+		Stream fileInput = File.Open (fileOnDisk, FileMode.Open); //FIXME
+		byte [] fileContent = new byte [8192];
+		int offset = 0;
+		int count = fileContent.Length;
+		Decoder decoder = Encoding.UTF8.GetDecoder ();
+		while ((count = fileInput.Read (fileContent, offset, count)) != 0) {
+			char [] chars = new char [decoder.GetCharCount (fileContent, 0, count)];
+			decoder.GetChars (fileContent, 0, count, chars, 0);
+			offset += count;
+			outputBuffer.Write (chars);
+			chars = null;
+		}
+
+		fileInput.Close ();
+		SendData ();
 	}
 	
 	private void GetRequestMethod ()
@@ -508,7 +671,6 @@ class MyWorkerRequest
 		GetCapabilities ();
 		GetQueryOptions ();
 
-		// Yes, only /file.aspx or file.aspx is allowed by now.
 		if (query [0] == '/')
 			fileName = query.Substring (1);
 		else
@@ -527,8 +689,39 @@ class MyWorkerRequest
 		request.Browser = headers;
 		request.RequestType = method;
 
-		HttpResponse response = new HttpResponse (output);
-		page.ProcessRequest (new HttpContext (request, response));
+		HttpResponse response = new HttpResponse (outputBuffer);
+		try {
+			page.ProcessRequest (new HttpContext (request, response));
+			SendData ();
+		} catch (Exception e) {
+			Console.WriteLine ("Caught exception rendering page:\n" + e.ToString ());
+			HttpHelpers.RenderErrorPage (output, 500, "Internal Server Error",
+						     "The server failed to render '" + fileName + "'");
+		}
+	}
+
+	private void SendData ()
+	{
+		HttpHelpers.SendStatus (output, 200, "OK");
+		HttpHelpers.SendHeader (output, "Host", "127.0.0.1"); // FIXME
+		HttpHelpers.SendHeader (output, "Content-Type", GetContentType ());
+		string content = outputBuffer.ToString ();
+		HttpHelpers.SendHeader (output, "Content-Length", content.Length.ToString ());
+		output.Write ("\r\n");
+		output.Write (content);
+	}
+
+	private string GetContentType ()
+	{
+		int lastDot = fileName.LastIndexOf ('.');
+		if (lastDot == -1 || lastDot + 1 == fileName.Length)
+			return "application/octet-stream";
+
+		string suffix = fileName.Substring (lastDot + 1).ToUpper ();
+		string contentType = mimeHash [suffix] as string;
+		if (contentType == null)
+			contentType = "application/octet-stream";
+		return contentType;
 	}
 
 }
@@ -552,7 +745,7 @@ class Worker
 			proc.ProcessRequest ();
 		} catch (Exception e) {
 			Console.WriteLine ("Caught exception in Worker.Run");
-			Console.WriteLine (e.ToString ());
+			Console.WriteLine (e.ToString () + "\n" + e.StackTrace);
 			output.WriteLine ("<html>\n<title>Error</title>\n<body>\n<pre>\n" + e.ToString () +
 					  "\n</pre>\n</body>\n</html>\n");
 		}

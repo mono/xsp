@@ -1,3 +1,10 @@
+2002-07-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: added support for a few MIME types, send some headers in
+	the response, now it also serves non-aspx files, some improvements to
+	error page generation, including compiler error and generated source
+	listing.
+
 2002-07-11  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* server.cs: now uses AppDomain to load generated classes and recreates

@@ -71,7 +71,7 @@ directory DIR. Files must have '.webapp' extension.
 AppSettings key name: MonoApplicationsConfigDir
 .TP
 .I \-\-applications APPS
-A semicolon separated list of virtual directory and real directory for all the
+A comma separated list of virtual directory and real directory for all the
 applications we want to manage with this server. The virtual and real dirs. are
 separated by a colon. The default value is '/:.'.
 .TP

@@ -403,7 +403,7 @@ namespace Mono.ASPNET
 			ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 		}
 
-		public void RemoveSocket (Socket sock)
+		public void CloseSocket (Socket sock)
 		{
 			spool.RemoveReadSocket (sock);
 		}

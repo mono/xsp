@@ -154,7 +154,7 @@ namespace Mono.ASPNET
 			this.pathInfo = pathInfo;
 			this.protocol = protocol;
 			if (protocol == "HTTP/1.1") {
-				protocol = "HTTP/1.0";	// Only 1.0 supported by xsp standalone.
+				this.protocol = "HTTP/1.0";	// Only 1.0 supported by xsp standalone.
 				keepAlive = true;
 			}
 

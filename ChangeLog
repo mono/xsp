@@ -1,6 +1,12 @@
+2004-12-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: this typo prevented the underlying
+	sys.web from knowing the real http version used. If you've seen stack
+	traces showing ChunkStream when running *xsp*, that's over now.
+
 2004-11-24 Alp Toker <alp@atoker.com>
 
-  * server/XSPApplicationHost.cs: remove slash
+	* server/XSPApplicationHost.cs: remove slash.
 
 2004-11-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

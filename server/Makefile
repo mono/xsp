@@ -23,7 +23,7 @@ install: server.exe web.config global.asax
 	mkdir -p test/bin
 	cp server.exe server.exe.config web.config global.asax test
 	cp server.exe test/bin
-	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx ../test/*.xml ../test/*.xsl ../test/*.png test
+	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx ../test/*.xml ../test/*.xsl ../test/*.png ../test/*.inc test
 	cp ../test/*.dll test/bin
 
 server.exe: $(SOURCES)

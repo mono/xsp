@@ -430,8 +430,7 @@ namespace Mono.ASPNET
 			if (buffer == null || size == 0)
 				return 0;
 
-			byte [] bytes = new byte [size];
-			return stream.Read (bytes, 0, size);
+			return stream.Read (buffer, 0, size);
 		}
 
 		public override void SendResponseFromMemory (byte [] data, int length)

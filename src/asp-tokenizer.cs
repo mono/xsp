@@ -177,6 +177,9 @@ class AspTokenizer {
 
 				return Token.IDENTIFIER;
 			}
+
+			if (!Char.IsWhiteSpace ((char) c))
+				return c;
 		}
 
 		return Token.EOF;

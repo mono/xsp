@@ -1,3 +1,15 @@
+2002-05-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: some Makefile love.
+
+	* asp-tokenizer.cs: if the character is not an identifier start nor
+	white space, return it.
+
+	* aspelements.cs: Trim for code in CodeRenderTag and data in 
+	DataBindingTag.
+	
+	* generator.cs: added support for code render tags.
+
 2002-05-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* aspelements.cs:

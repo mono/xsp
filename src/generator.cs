@@ -18,6 +18,7 @@ namespace Mono.ASP
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
+	using System.Text.RegularExpressions;
 	using System.Web.UI.WebControls;
 
 class Foundry
@@ -126,6 +127,8 @@ class ControlStack
 		public int childrenNumber;
 		public Type container;
 		public StringBuilder dataBindFunction;
+		public StringBuilder codeRenderFunction;
+		public bool useCodeRender;
 
 		public ControlStackData (Type controlType,
 					 string controlID,
@@ -233,12 +236,23 @@ class ControlStack
 		if (top != null)
 			top.childrenNumber++;
 	}
-	
+
 	public bool HasDataBindFunction ()
 	{
 		if (top.dataBindFunction == null || top.dataBindFunction.Length == 0)
 			return false;
 		return true;
+	}
+	
+	public bool UseCodeRender
+	{
+		get {
+			if (top.codeRenderFunction == null || top.codeRenderFunction.Length == 0)
+				return false;
+			return top.useCodeRender;
+		}
+
+		set { top.useCodeRender= value; }
 	}
 	
 	public Type Container
@@ -255,10 +269,30 @@ class ControlStack
 		}
 	}
 
+	public StringBuilder CodeRenderFunction
+	{
+		get {
+			if (top.codeRenderFunction == null)
+				top.codeRenderFunction = new StringBuilder ();
+			return top.codeRenderFunction;
+		}
+	}
+
+	public int ChildIndex
+	{
+		get { return top.childrenNumber - 1; }
+	}
+	
 	public int Count
 	{
 		get { return controls.Count; }
 	}
+
+	public override string ToString ()
+	{
+		return top.ToString () + " " + top.useCodeRender;
+	}
+		
 }
 
 public class Generator
@@ -305,7 +339,7 @@ public class Generator
 	private void Init ()
 	{
 		controls = new ControlStack ();
-		controls.Push (typeof (System.Web.UI.Control), null, null, ChildrenKind.CONTROLS, null);
+		controls.Push (typeof (System.Web.UI.Control), "Root", null, ChildrenKind.CONTROLS, null);
 		prolog = new StringBuilder ();
 		declarations = new StringBuilder ();
 		script = new StringBuilder ();
@@ -363,7 +397,7 @@ public class Generator
 		}
 	}
 
-	// Regexp.Escape () make some illegal escape sequences for a C# source.
+	// Regex.Escape () make some illegal escape sequences for a C# source.
 	private string Escape (string input)
 	{
 		string output = input.Replace ("\\", "\\\\");
@@ -468,10 +502,12 @@ public class Generator
 		}
 		
 		asis = (PlainText) elements.Current;
+		string escaped_text = Escape (asis.Text);
 		current_function.AppendFormat ("\t\t\t__parser.AddParsedSubObject (" + 
 					       "new System.Web.UI.LiteralControl (\"{0}\"));\n",
-					       Escape (asis.Text));
-		controls.AddChild ();
+					       escaped_text);
+		StringBuilder codeRenderFunction = controls.CodeRenderFunction;
+		codeRenderFunction.AppendFormat ("\t\t\t__output.Write (\"{0}\");\n", escaped_text);
 	}
 
 	private string EnumValueNameToString (Type enum_type, string value_name)
@@ -807,6 +843,39 @@ public class Generator
 						 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
 	
+	private void AddCodeRenderControl (StringBuilder function, int index)
+	{
+		function.AppendFormat ("\t\t\tparameterContainer.Controls [{0}]." + 
+				       "RenderControl (__output);\n", index);
+	}
+
+	private void AddRenderMethodDelegate (StringBuilder function, string control_id)
+	{
+		function.AppendFormat ("\t\t\t__ctrl.SetRenderMethodDelegate (new System.Web." + 
+				       "UI.RenderMethod (this.__Render_{0}));\n", control_id);
+	}
+
+	private void AddCodeRenderFunction (string codeRender, string control_id)
+	{
+		StringBuilder codeRenderFunction = new StringBuilder ();
+		codeRenderFunction.AppendFormat ("\t\tprivate void __Render_{0} " + 
+						 "(System.Web.UI.HtmlTextWriter __output, " + 
+						 "System.Web.UI.Control parameterContainer)\n" +
+						 "\t\t{{\n", control_id);
+		codeRenderFunction.Append (codeRender);
+		codeRenderFunction.Append ("\t\t}\n\n");
+		init_funcs.Append (codeRenderFunction);
+	}
+
+	private void RemoveLiterals (StringBuilder function)
+	{
+		string no_literals = Regex.Replace (function.ToString (),
+						    @"\t\t\t__parser.AddParsedSubObject \(" + 
+						    @"new System.Web.UI.LiteralControl \(.+\);\n", "");
+		function.Length = 0;
+		function.Append (no_literals);
+	}
+
 	private bool FinishControlFunction (string tag_id)
 	{
 		if (functions.Count == 0)
@@ -829,6 +898,10 @@ public class Generator
 		if (hasDataBindFunction)
 			old_function.AppendFormat ("\t\t\t__ctrl.DataBinding += new System.EventHandler " +
 						   "(this.__DataBind_{0});\n", control_id);
+
+		bool useCodeRender = controls.UseCodeRender;
+		if (useCodeRender)
+			AddRenderMethodDelegate (old_function, control_id);
 		
 		if (control_type == typeof (System.Web.UI.ITemplate)){
 			old_function.Append ("\n\t\t}\n\n");
@@ -868,15 +941,24 @@ public class Generator
 						       "AddParsedSubObject (this.{0});\n\n", control_id);
 		}
 
+		if (useCodeRender)
+			RemoveLiterals (old_function);
+
 		init_funcs.Append (old_function);
+		if (useCodeRender)
+			AddCodeRenderFunction (controls.CodeRenderFunction.ToString (), control_id);
+		
 		if (hasDataBindFunction){
 			StringBuilder db_function = controls.DataBindFunction;
 			db_function.Append ("\t\t}\n\n");
 			init_funcs.Append (db_function);
 		}
+
 		// Avoid getting empty stacks for unbalanced open/close tags
-		if (controls.Count > 1)
+		if (controls.Count > 1){
 			controls.Pop ();
+			AddCodeRenderControl (controls.CodeRenderFunction, controls.ChildIndex);
+		}
 
 		return true;
 	}
@@ -1171,7 +1253,7 @@ public class Generator
 	private void ProcessDataBindingLiteral ()
 	{
 		DataBindingTag dataBinding = (DataBindingTag) elements.Current;
-		string actual_value = dataBinding.Data.Trim ();
+		string actual_value = dataBinding.Data;
 		if (actual_value == "")
 			throw new ApplicationException ("Empty data binding tag.");
 
@@ -1213,6 +1295,14 @@ public class Generator
 
 	private void ProcessCodeRenderTag ()
 	{
+		CodeRenderTag code_tag = (CodeRenderTag) elements.Current;
+
+		controls.UseCodeRender = true;
+		if (code_tag.IsVarName)
+			controls.CodeRenderFunction.AppendFormat ("\t\t\t__output.Write ({0});\n",
+								  code_tag.Code);
+		else
+			controls.CodeRenderFunction.AppendFormat ("\t\t\t{0}\n", code_tag.Code);
 	}
 	
 	public void ProcessElements ()
@@ -1312,15 +1402,24 @@ public class Generator
 			old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
 			init_funcs.Append (old_function);
 			control_id = controls.PeekControlID ();
-			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
-							"AddParsedSubObject (this.{0});\n\n", control_id);
+			FinishControlFunction (control_id);
 			controls.AddChild ();
 			old_function = (StringBuilder) functions.Pop ();
 			current_function = (StringBuilder) functions.Peek ();
 			controls.Pop ();
 		}
+
+		bool useCodeRender = controls.UseCodeRender;
+		if (useCodeRender){
+			RemoveLiterals (current_function);
+			AddRenderMethodDelegate (current_function, controls.PeekControlID ());
+		}
+		
 		current_function.Append ("\t\t}\n\n");
 		init_funcs.Append (current_function);
+		if (useCodeRender)
+			AddCodeRenderFunction (controls.CodeRenderFunction.ToString (), controls.PeekControlID ());
+
 		functions.Pop ();
 	}
 }

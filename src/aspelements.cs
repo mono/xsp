@@ -710,7 +710,7 @@ public class CodeRenderTag : Tag
 	{
 		tagType = TagType.CODERENDER;
 		this.isVarName = isVarName;
-		this.code = code;
+		this.code = code.Trim ();
 	}
 
 	public string Code
@@ -736,7 +736,7 @@ public class DataBindingTag : Tag
 	public DataBindingTag (string data) : base ("", null, false)
 	{
 		tagType = TagType.DATABINDING;
-		this.data = data;
+		this.data = data.Trim ();
 	}
 
 	public string Data

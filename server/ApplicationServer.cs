@@ -273,7 +273,8 @@ namespace Mono.ASPNET
 			Socket client;
 			int w;
 			while (!stop){
-				Socket.Select (wSockets, null, null, 500 * 1000); // 500ms
+				w = wSockets.Count;
+				Socket.Select (wSockets, null, null, (w == 1) ? -1 : 1000 * 1000); // 1s
 				w = wSockets.Count;
 				for (int i = 0; i < w; i++) {
 					Socket s = (Socket) wSockets [i];
@@ -282,7 +283,7 @@ namespace Mono.ASPNET
 						WebTrace.WriteLine ("Accepted connection.");
 						SetSocketOptions (client);
 						allSockets.Add (client);
-						timeouts [client] = 0;
+						timeouts [client] = DateTime.Now;
 						continue;
 					}
 
@@ -293,22 +294,29 @@ namespace Mono.ASPNET
 				}
 
 				w = timeouts.Count;
-				Socket [] socks_timeout = new Socket [w];
-				timeouts.Keys.CopyTo (socks_timeout, 0);
-				foreach (Socket k in socks_timeout) {
-					int n = (int) timeouts [k];
-					if (n >= 30) {
-						k.Close ();
-						allSockets.Remove (k);
-						timeouts.Remove (k);
-						continue;
+				if (w > 0) {
+					Socket [] socks_timeout = new Socket [w];
+					timeouts.Keys.CopyTo (socks_timeout, 0);
+					DateTime now = DateTime.Now;
+					foreach (Socket k in socks_timeout) {
+						DateTime atime = (DateTime) timeouts [k];
+						TimeSpan diff = now - atime;
+						if (diff.TotalMilliseconds > 15 * 1000) {
+							k.Close ();
+							allSockets.Remove (k);
+							timeouts.Remove (k);
+							continue;
+						}
 					}
-					
-					timeouts [k] = ++n;
 				}
 				
 				wSockets.Clear ();
-				wSockets.AddRange (allSockets);
+				if (allSockets.Count == 1) {
+					// shortcut, no foreach
+					wSockets.Add (listen_socket);
+				} else {
+					wSockets.AddRange (allSockets);
+				}
 			}
 
 			started = false;

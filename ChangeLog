@@ -1,3 +1,9 @@
+2004-07-29 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: 1.0.1.
+	* server/ApplicationServer.cs: don't timeout in Select when we only have
+	the listener socket. Use real times for timeout.
+
 2004-07-28 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: increased the backlog for listen, set

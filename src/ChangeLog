@@ -1,3 +1,12 @@
+2002-05-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* aspelements.cs: 
+	(Tag): new function to test if the control ID is automatically asigned.
+	(Component): added support for ListItem.
+
+	* generator.cs: unified stack for types, ids,... Added support for
+	ListItem tags inside list controls.
+
 2002-05-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* generator.cs: better generated code for colors.

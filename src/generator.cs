@@ -111,6 +111,91 @@ class ArrayListWrapper
 	}
 }
 
+class ControlStack
+{
+	private Stack controls;
+	private ControlStackData top;
+
+	struct ControlStackData 
+	{
+		public Type controlType;
+		public string controlID;
+		public string tagID;
+		public ChildrenKind childKind;
+		public string defaultPropertyName;
+
+		public ControlStackData (Type controlType,
+					 string controlID,
+					 string tagID,
+					 ChildrenKind childKind,
+					 string defaultPropertyName)
+		{
+			this.controlType = controlType;
+			this.controlID = controlID;
+			this.tagID = tagID;
+			this.childKind = childKind;
+			this.defaultPropertyName = defaultPropertyName;
+		}
+
+		public override string ToString ()
+		{
+			return controlType + " " + controlID + " " + tagID + " " + childKind;
+		}
+	}
+	
+	public ControlStack ()
+	{
+		controls = new Stack ();
+	}
+
+	public void Push (Type controlType,
+			  string controlID,
+			  string tagID,
+			  ChildrenKind childKind,
+			  string defaultPropertyName)
+	{
+		top = new ControlStackData (controlType, controlID, tagID, childKind, defaultPropertyName);
+		controls.Push (top);
+	}
+
+	public void Pop ()
+	{
+		controls.Pop ();
+		if (controls.Count != 0)
+			top = (ControlStackData) controls.Peek ();
+	}
+
+	public Type PeekType ()
+	{
+		return top.controlType;
+	}
+
+	public string PeekControlID ()
+	{
+		return top.controlID;
+	}
+
+	public string PeekTagID ()
+	{
+		return top.tagID;
+	}
+
+	public ChildrenKind PeekChildKind ()
+	{
+		return top.childKind;
+	}
+
+	public string PeekDefaultPropertyName ()
+	{
+		return top.defaultPropertyName;
+	}
+
+	public int Count
+	{
+		get { return controls.Count; }
+	}
+}
+
 public class Generator
 {
 	private object [] parts;
@@ -123,9 +208,7 @@ public class Generator
 	private StringBuilder epilog;
 	private StringBuilder current_function;
 	private Stack functions;
-	private Stack openedControlTags;
-	private Stack childrenKind;
-	private Stack controlTypes;
+	private ControlStack controls;
 	private bool parse_ok;
 	private bool has_form_tag;
 
@@ -156,12 +239,10 @@ public class Generator
 
 	private void Init ()
 	{
+		controls = new ControlStack ();
+		controls.Push (null, null, null, ChildrenKind.CONTROLS, null);
 		prolog = new StringBuilder ();
 		declarations = new StringBuilder ();
-		openedControlTags = new Stack ();
-		childrenKind = new Stack ();
-		childrenKind.Push (ChildrenKind.CONTROLS);
-		controlTypes = new Stack ();
 		script = new StringBuilder ();
 		constructor = new StringBuilder ();
 		init_funcs = new StringBuilder ();
@@ -310,28 +391,23 @@ public class Generator
 		}
 	}
 
-	private void ControlTreeAddEscaped (string text)
-	{
-		current_function.AppendFormat ("\t\t\t__parser.AddParsedSubObject (" + 
-				"new System.Web.UI.LiteralControl (\"{0}\"));\n", Escape (text));
-	}
-
 	private void ProcessPlainText ()
 	{
 		PlainText asis;
-		ChildrenKind children_kind = (ChildrenKind) childrenKind.Peek ();
-		if (children_kind != ChildrenKind.CONTROLS){
+		if (controls.PeekChildKind () != ChildrenKind.CONTROLS){
 			asis = (PlainText) elements.Current;
 			string result = asis.Text.Trim ();
 			if (result != ""){
-				string tag_id = (string) openedControlTags.Pop ();
+				string tag_id = controls.PeekTagID ();
 				throw new ApplicationException ("Literal content not allowed for " + tag_id);
 			}
 			return;
 		}
 		
 		asis = (PlainText) elements.Current;
-		ControlTreeAddEscaped (asis.Text);
+		current_function.AppendFormat ("\t\t\t__parser.AddParsedSubObject (" + 
+					       "new System.Web.UI.LiteralControl (\"{0}\"));\n",
+					       Escape (asis.Text));
 	}
 
 	private string EnumValueNameToString (Type enum_type, string value_name)
@@ -359,26 +435,30 @@ public class Generator
 	private void NewControlFunction (string tag_id,
 					 string control_id,
 					 Type control_type,
-					 ChildrenKind children_kind)
+					 ChildrenKind children_kind,
+					 string defaultPropertyName)
 	{
-		ChildrenKind prev_children_kind = (ChildrenKind) childrenKind.Peek ();
+		ChildrenKind prev_children_kind = controls.PeekChildKind ();
 		if (prev_children_kind != ChildrenKind.CONTROLS &&
-		    prev_children_kind != ChildrenKind.DBCOLUMNS){
-			string prev_tag_id = (string) openedControlTags.Pop ();
+		    prev_children_kind != ChildrenKind.DBCOLUMNS &&
+		    prev_children_kind != ChildrenKind.LISTITEM){
+			string prev_tag_id = controls.PeekTagID ();
 			throw new ApplicationException ("Child controls not allowed for " + prev_tag_id);
 		}
 
 		if (prev_children_kind == ChildrenKind.DBCOLUMNS &&
 		    control_type != typeof (System.Web.UI.WebControls.DataGridColumn) &&
-		    !control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn))){
-			string prev_tag_id = (string) openedControlTags.Pop ();
-			throw new ApplicationException ("Inside " + prev_tag_id + " only " + 
+		    !control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)))
+			throw new ApplicationException ("Inside " + controls.PeekTagID () + " only " + 
 							"System.Web.UI.WebControls.DataGridColum " + 
 							"objects are allowed");
-		}
+		else if (prev_children_kind == ChildrenKind.LISTITEM &&
+			 control_type != typeof (System.Web.UI.WebControls.ListItem))
+			throw new ApplicationException ("Inside " + controls.PeekTagID () + " only " + 
+							"System.Web.UI.WebControls.ListItem " + 
+							"objects are allowed");
+	
 					
-		childrenKind.Push (children_kind);
-		controlTypes.Push (control_type);
 		StringBuilder func_code = new StringBuilder ();
 		current_function = func_code;
 		if (0 == String.Compare (tag_id, "form", true)){
@@ -386,14 +466,21 @@ public class Generator
 				throw new ApplicationException ("Only one form server tag allowed.");
 			has_form_tag = true;
 		}
-		openedControlTags.Push (control_id);
-		openedControlTags.Push (tag_id);
+
+		controls.Push (control_type, control_id, tag_id, children_kind, defaultPropertyName);
 		bool is_generic = control_type ==  typeof (System.Web.UI.HtmlControls.HtmlGenericControl);
 		functions.Push (current_function);
-		current_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl_{0} ()\n" +
-						"\t\t{{\n\t\t\t{1} __ctrl;\n\n\t\t\t__ctrl = new {1} ({2});\n" + 
-						"\t\t\tthis.{0} = __ctrl;\n", control_id, control_type,
-						(is_generic? "\"" + tag_id + "\"" : ""));
+		if (control_type != typeof (System.Web.UI.WebControls.ListItem))
+			current_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl_" +
+							"{0} ()\n\t\t{{\n\t\t\t{1} __ctrl;\n\n\t\t\t__ctrl" +
+							" = new {1} ({2});\n\t\t\tthis.{0} = __ctrl;\n",
+							control_id, control_type,
+							(is_generic? "\"" + tag_id + "\"" : ""));
+		else
+			current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} ()\n\t\t{{" +
+							"\n\t\t\t{1} __ctrl;\n\t\t\t__ctrl = new {1} ();" +
+							"\n\t\t\tthis.{0} = __ctrl;\n",
+							control_id, control_type);
 	}
 	
 	/*
@@ -597,7 +684,7 @@ public class Generator
 						id, Escape ((string) att [id]));
 		}
 
-		if ((ChildrenKind) childrenKind.Peek () == ChildrenKind.CONTROLS)
+		if (controls.PeekChildKind () == ChildrenKind.CONTROLS)
 			current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
 						 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
@@ -607,19 +694,18 @@ public class Generator
 		if (functions.Count == 0)
 			throw new ApplicationException ("Unbalanced open/close tags");
 
-		if (openedControlTags.Count == 0)
+		if (controls.Count == 0)
 			return false;
 
-		string saved_id = (string) openedControlTags.Peek ();
+		string saved_id = controls.PeekTagID ();
 		if (0 != String.Compare (saved_id, tag_id, true))
 			return false;
 
-		openedControlTags.Pop ();
 		StringBuilder old_function = (StringBuilder) functions.Pop ();
 		current_function = (StringBuilder) functions.Peek ();
 
-		string control_id = (string) openedControlTags.Pop ();
-		Type control_type = (Type) controlTypes.Peek ();
+		string control_id = controls.PeekControlID ();
+		Type control_type = controls.PeekType ();
 		
 		if (control_type == typeof (System.Web.UI.ITemplate)){
 			old_function.Append ("\n\t\t}\n\n");
@@ -634,10 +720,24 @@ public class Generator
 							control_id, saved_id);
 		}
 		else if (control_type == typeof (System.Web.UI.WebControls.DataGridColumn) ||
-			 control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn))){
+			 control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)) ||
+			 control_type == typeof (System.Web.UI.WebControls.ListItem)){
 			old_function.Append ("\n\t\t}\n\n");
-			current_function.AppendFormat ("\t\t\tthis.BuildControl_{0} ();\n" +
+			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n" +
 						       "\t\t\t__ctrl.Add (this.{0});\n\n", control_id);
+		}
+		else if (controls.PeekChildKind () == ChildrenKind.LISTITEM){
+			old_function.Append ("\n\t\t}\n\n");
+			init_funcs.Append (old_function); // Closes the BuildList function
+			old_function = (StringBuilder) functions.Pop ();
+			current_function = (StringBuilder) functions.Peek ();
+			old_function.AppendFormat ("\n\t\t\tthis.__BuildControl_{0} (__ctrl.{1});\n\t\t\t" +
+						   "return __ctrl;\n\t\t}}\n\n",
+						   control_id, controls.PeekDefaultPropertyName ());
+
+			controls.Pop ();
+			control_id = controls.PeekControlID ();
+			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n", control_id);
 		}
 		else {
 			old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
@@ -646,12 +746,9 @@ public class Generator
 		}
 
 		init_funcs.Append (old_function);
-		 // Avoid getting empty stacks for unbalanced open/close tags
-		if (childrenKind.Count > 1)
-			childrenKind.Pop ();
-
-		if (controlTypes.Count > 0)
-			controlTypes.Pop ();
+		// Avoid getting empty stacks for unbalanced open/close tags
+		if (controls.Count > 1)
+			controls.Pop ();
 
 		return true;
 	}
@@ -685,14 +782,37 @@ public class Generator
 		Type controlType = html_ctrl.ControlType;
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", controlType, html_ctrl.ControlID);
 
-		ChildrenKind children_kind = html_ctrl.IsContainer ? ChildrenKind.CONTROLS : ChildrenKind.NONE;
-		NewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind); 
+		ChildrenKind children_kind = html_ctrl.IsContainer ? ChildrenKind.CONTROLS :
+								     ChildrenKind.NONE;
+		NewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind, null); 
+
+		if (!html_ctrl.HasDefaultID)
+			current_function.AppendFormat ("\t\t\tthis.ID = \"{0}\";\n", html_ctrl.ControlID);
+
 		AddCodeForAttributes (html_ctrl.ControlType, html_ctrl.Attributes);
 
 		if (!html_ctrl.SelfClosing)
 			JustDoIt ();
 		else
 			FinishControlFunction (html_ctrl.TagID);
+	}
+
+	// Closing is performed in FinishControlFunction ()
+	private void NewBuildListFunction (Component component)
+	{
+		string control_id = Tag.GetDefaultID ();
+
+		controls.Push (component.ComponentType,
+			       control_id, 
+			       component.TagID, 
+			       ChildrenKind.LISTITEM, 
+			       component.DefaultPropertyName);
+
+		current_function = new StringBuilder ();
+		functions.Push (current_function);
+		current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} " +
+						"(System.Web.UI.WebControls.ListItemCollection __ctrl)\n" +
+						"\t\t{{\n", control_id);
 	}
 
 	private void ProcessComponent ()
@@ -702,8 +822,15 @@ public class Generator
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", component_type, component.ControlID);
 
 		NewControlFunction (component.TagID, component.ControlID, component_type,
-					  component.ChildrenKind); 
+				    component.ChildrenKind, component.DefaultPropertyName); 
+
+		if (!component.HasDefaultID)
+			current_function.AppendFormat ("\t\t\tthis.ID = \"{0}\";\n", component.ControlID);
+
 		AddCodeForAttributes (component.ComponentType, component.Attributes);
+		if (component.ChildrenKind == ChildrenKind.LISTITEM)
+			NewBuildListFunction (component);
+
 		if (!component.SelfClosing)
 			JustDoIt ();
 		else
@@ -763,7 +890,7 @@ public class Generator
 
 		if (!tag.SelfClosing){
 			// Next tag should be the closing tag
-			childrenKind.Push (ChildrenKind.NONE);
+			controls.Push (null, null, null, ChildrenKind.NONE, null);
 			bool closing_tag_found = false;
 			Element elem;
 			while (!closing_tag_found && elements.MoveNext ()){
@@ -780,7 +907,7 @@ public class Generator
 			if (!closing_tag_found)
 				throw new ApplicationException ("Tag " + tag.TagID + " not properly closed.");
 
-			childrenKind.Pop ();
+			controls.Pop ();
 		}
 	}
 
@@ -796,10 +923,7 @@ public class Generator
 		Type prop_type = tag.PropertyType;
 		string tag_id = tag.PropertyName; // Real property name used in FinishControlFunction
 
-		childrenKind.Push (ChildrenKind.CONTROLS);
-		controlTypes.Push (prop_type);
-		openedControlTags.Push (prop_id);
-		openedControlTags.Push (tag_id);
+		controls.Push (prop_type, prop_id, tag_id, ChildrenKind.CONTROLS, null);
 		current_function = new StringBuilder ();
 		functions.Push (current_function);
 		current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} " +
@@ -821,10 +945,7 @@ public class Generator
 		Type prop_type = tag.PropertyType;
 		string tag_id = tag.PropertyName; // Real property name used in FinishControlFunction
 
-		childrenKind.Push (ChildrenKind.DBCOLUMNS);
-		controlTypes.Push (prop_type);
-		openedControlTags.Push (prop_id);
-		openedControlTags.Push (tag_id);
+		controls.Push (prop_type, prop_id, tag_id, ChildrenKind.DBCOLUMNS, null);
 		current_function = new StringBuilder ();
 		functions.Push (current_function);
 		current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} " +
@@ -849,20 +970,20 @@ public class Generator
 	private void ProcessHtmlTag ()
 	{
 		Tag tag = (Tag) elements.Current;
-		ChildrenKind child_kind = (ChildrenKind) childrenKind.Peek ();
+		ChildrenKind child_kind = controls.PeekChildKind ();
 		if (child_kind == ChildrenKind.NONE){
-			string tag_id = (string) openedControlTags.Pop ();
+			string tag_id = controls.PeekTagID ();
 			throw new ApplicationException (tag + " not allowed inside " + tag_id);
 		}
 					
-		if (controlTypes.Count == 0 || child_kind == ChildrenKind.CONTROLS){
+		if (child_kind == ChildrenKind.CONTROLS){
 			elements.Current = new PlainText (((Tag) elements.Current).PlainHtml);
 			ProcessPlainText ();
 			return;
 		}
 
 		// Now child_kind should be PROPERTIES, so only allow tag_id == property
-		Type control_type = (Type) controlTypes.Peek ();
+		Type control_type = controls.PeekType ();
 		PropertyInfo [] prop_info = control_type.GetProperties ();
 		bool is_processed = false;
 		foreach (PropertyInfo prop in prop_info){
@@ -875,7 +996,7 @@ public class Generator
 		}
 		
 		if (!is_processed){
-			string tag_id = (string) openedControlTags.Pop ();
+			string tag_id = controls.PeekTagID ();
 			throw new ApplicationException (tag.TagID + " is not a property of " + control_type);
 		}
 	}
@@ -1009,14 +1130,14 @@ public class Generator
 		StringBuilder old_function = current_function;
 		string control_id;
 		while (functions.Count > 1){
-			openedControlTags.Pop (); // Contains the TagID
 			old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
 			init_funcs.Append (old_function);
-			control_id = (string) openedControlTags.Pop ();
+			control_id = controls.PeekControlID ();
 			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
 							"AddParsedSubObject (this.{0});\n\n", control_id);
 			old_function = (StringBuilder) functions.Pop ();
 			current_function = (StringBuilder) functions.Peek ();
+			controls.Pop ();
 		}
 		current_function.Append ("\t\t}\n\n");
 		init_funcs.Append (current_function);

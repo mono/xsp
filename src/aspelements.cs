@@ -199,6 +199,7 @@ public class Tag : Element
 	protected TagType tagType;
 	protected TagAttributes attributes;
 	protected bool self_closing;
+	protected bool hasDefaultID;
 	private static int ctrlNumber = 1;
 
 	internal Tag (Tag other) :
@@ -217,6 +218,7 @@ public class Tag : Element
 		this.attributes = attributes;
 		this.tagType = TagType.NOTYET;
 		this.self_closing = self_closing;
+		this.hasDefaultID = false;
 	}
 	
 	public string TagID
@@ -271,11 +273,22 @@ public class Tag : Element
 		return TagID + " " + Attributes + " " + self_closing;
 	}
 
+	public bool HasDefaultID
+	{
+		get { return hasDefaultID; }
+	}
+	
 	protected void SetNewID ()
 	{
 		if (attributes == null)
 			attributes = new TagAttributes ();
-		attributes.Add ("ID", "_control" + ctrlNumber++);
+		attributes.Add ("ID", GetDefaultID ());
+		hasDefaultID = true;
+	}
+
+	public static string GetDefaultID ()
+	{
+		return "_control" + ctrlNumber++;
 	}
 }
 
@@ -287,7 +300,8 @@ public class CloseTag : Tag
 	}
 }
 
-public class Directive : Tag {
+public class Directive : Tag
+{
 	private static Hashtable directivesHash;
 	private static string [] page_atts = {  "AspCompat", "AutoEventWireup ", "Buffer", "ClassName",
 						"ClientTarget", "CodePage", "CompilerOptions", "ContentType",
@@ -534,7 +548,11 @@ public enum ChildrenKind
 	 * Special case used inside <columns>...</columns>
 	 * Only allow DataGridColumn and derived classes.
 	 */
-	DBCOLUMNS
+	DBCOLUMNS,
+	/*
+	 * Special case for list controls (ListBox, DropDownList...)
+	 */
+	LISTITEM
 }
 
 // TODO: support for ControlBuilderAttribute that may be used in custom controls
@@ -546,8 +564,9 @@ public class Component : Tag
 	private bool is_close_tag;
 	private bool allow_children;
 	private ChildrenKind children_kind;
+	private string defaultPropertyName;
 
-	private static ChildrenKind GuessChildrenKind (Type type)
+	private ChildrenKind GuessChildrenKind (Type type)
 	{
 		object [] custom_atts = type.GetCustomAttributes (true);
 		foreach (object custom_att in custom_atts){
@@ -557,11 +576,14 @@ public class Component : Tag
 				 * bear in mind the pca.DefaultProperty value
 				 */
 				ParseChildrenAttribute pca = custom_att as ParseChildrenAttribute;
+				defaultPropertyName = pca.DefaultProperty;
 				/* this property will be true for all controls derived from WebControls. */
 				if (pca.ChildrenAsProperties == false)
 					return ChildrenKind.CONTROLS;
-				else
+				else if (defaultPropertyName == "")
 					return ChildrenKind.PROPERTIES;
+				else
+					return ChildrenKind.LISTITEM;
 			}
 		}
 
@@ -585,13 +607,15 @@ public class Component : Tag
 		tagType = TagType.SERVERCONTROL;
 		this.is_close_tag = input_tag is CloseTag;
 		this.type = type;
+		this.defaultPropertyName = "";
 		this.allow_children = GuessAllowChildren (type);
-		if (type != typeof (System.Web.UI.WebControls.DataGridColumn) &&
-		    !type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)))
-			this.children_kind = GuessChildrenKind (type);
+		if (type == typeof (System.Web.UI.WebControls.DataGridColumn) ||
+		    type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)))
+			this.children_kind = ChildrenKind.PROPERTIES; // Columns lack 'Controls' property
+		else if (type == typeof (System.Web.UI.WebControls.ListItem))
+			this.children_kind = ChildrenKind.CONTROLS;
 		else
-			this.children_kind = ChildrenKind.PROPERTIES; // Special case because columns don't have a
-								      // 'Controls' property
+			this.children_kind = GuessChildrenKind (type);
 
 		int pos = input_tag.TagID.IndexOf (':');
 		alias = tag.Substring (0, pos);
@@ -624,6 +648,12 @@ public class Component : Tag
 	{
 		get { return children_kind; }	
 	}
+
+	public string DefaultPropertyName
+	{
+		get { return defaultPropertyName; }	
+	}
+		
 		
 	public override string ToString ()
 	{

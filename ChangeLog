@@ -1,3 +1,11 @@
+2004-07-30 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: fix host matching in presence of *.
+	Closes bug #61275.
+
+	* server/ModMonoWorkerRequest.cs: don't duplicate the slash when setting
+	a default file name that we know is not present.
+
 2004-07-29 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in: 1.0.1.

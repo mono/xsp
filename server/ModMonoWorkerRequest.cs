@@ -225,7 +225,7 @@ namespace Mono.ASPNET
 				pathInfo = "";
 				return true;
 			} else if (path [path.Length - 1] == '/') {
-				path = path + "/" + indexFiles [0];
+				path = path + indexFiles [0];
 			}
 
 			// Yes, MS only looks for the '.'. Try setting a handler

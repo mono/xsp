@@ -380,10 +380,11 @@ namespace Mono.ASPNET
 
 			this.realPath = realPath;
 			this.AppHost = null;
-			if (vhost != null && vhost.Length != 0 && vhost [0] == '*') {
+
+			if (vhost != null && this.vhost.Length != 0 && this.vhost [0] == '*') {
 				haveWildcard = true;
-				if (vhost.Length > 2 && vhost [1] == '.')
-					vhost = vhost.Substring (2);
+				if (this.vhost.Length > 2 && this.vhost [1] == '.')
+					this.vhost = this.vhost.Substring (2);
 			}
 		}
 
@@ -411,15 +412,24 @@ namespace Mono.ASPNET
 
 			if (vhost != null && this.vhost != null) {
 				int length = this.vhost.Length;
+				string lwrvhost = vhost.ToLower (CultureInfo.InvariantCulture);
 				if (haveWildcard) {
 					if (this.vhost == "*")
 						return true;
 
-					length = vhost.Length;
-				}
+					if (length > vhost.Length)
+						return false;
 
-				if (length != vhost.Length ||
-					!this.vhost.EndsWith (vhost.ToLower (CultureInfo.InvariantCulture))) {
+					if (length == vhost.Length && this.vhost != lwrvhost)
+						return false;
+
+					if (vhost [vhost.Length - length - 1] != '.')
+						return false;
+
+					if (!lwrvhost.EndsWith (this.vhost))
+						return false;
+
+				} else if (this.vhost != lwrvhost) {
 					return false;
 				}
 			}

@@ -1,3 +1,14 @@
+2004-12-10  Raja R Harinath  <rharinath@novell.com>
+
+	* doc/Makefile.am (mod-mono-server.1): Fix non-srcdir build.
+	* scripts/Makefile.am ($(bin_SCRIPTS)): Likewise.
+	* server/Makefile.am (xsp_only): Remove AssemblyInfo.cs.in.
+	(xsp_build_sources): Add AssemblyInfo.cs.
+	(modmono_only): Remove AssemblyInfoModMono.cs.in.
+	(modmono_build_sources): Add AssemblyInfoModMono.cs.
+	(EXTRA_DIST): Add AssemblyInfo.cs.in and AssemblyInfoModMono.cs.in.
+	(xsp.exe, mod-mono-server.exe): Remove GNU-makeism.
+
 2004-12-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPApplicationHost.cs: don't print IOExceptions caused by

@@ -10,7 +10,7 @@ REWRITE = sed \
 	-e 's,@''plat_bindir@,$(plat_bindir),g'		\
 	-e 's,@''exe_file@,$@.exe,g'
 
-$(bin_SCRIPTS): script.in Makefile.am
-	$(REWRITE) $(srcdir)/$< > $@.tmp
+$(bin_SCRIPTS): $(srcdir)/script.in Makefile.am
+	$(REWRITE) $(srcdir)/script.in > $@.tmp
 	mv $@.tmp $@
 

@@ -1,5 +1,10 @@
 2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* monodoc.ashx: added this file that contains a couple of directives
+	plus monodoc/browser/website-handler.cs. Yeah! BenM rules.
+
+2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* index.aspx: also list .ashx files.
 	* webhandler.ashx: added new sample.
 

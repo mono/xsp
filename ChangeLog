@@ -1,3 +1,8 @@
+2004-09-12 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: make the server socket non-blocking and
+	ignore any exception on Accept.
+
 2004-09-12 Ben Maurer  <bmaurer@ximian.com>
 
 	* server/server.cs: allow for clean exit (workaround)

@@ -232,6 +232,7 @@ namespace Mono.ASPNET
  				
 			listen_socket = webSource.CreateSocket ();
 			listen_socket.Listen (500);
+			listen_socket.Blocking = false;
 			runner = new Thread (new ThreadStart (RunServer));
 			runner.IsBackground = bgThread;
 			runner.Start ();
@@ -285,7 +286,11 @@ namespace Mono.ASPNET
 				for (int i = 0; i < w; i++) {
 					Socket s = (Socket) wSockets [i];
 					if (s == listen_socket) {
-						client = s.Accept ();
+						try {
+							client = s.Accept ();
+						} catch (Exception e) {
+							continue;
+						}
 						WebTrace.WriteLine ("Accepted connection.");
 						SetSocketOptions (client);
 						allSockets.Add (client);

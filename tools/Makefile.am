@@ -1,2 +1,2 @@
 
-SUBDIRS = asp_state dbsessmgr
+SUBDIRS = asp_state dbsessmgr nunitasp

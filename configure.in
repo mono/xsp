@@ -1,6 +1,6 @@
 AC_PREREQ(2.57)
 AC_INIT(server/server.cs)
-AM_INIT_AUTOMAKE(xsp, 0.8)
+AM_INIT_AUTOMAKE(xsp, 0.8.99)
 AM_MAINTAINER_MODE
 
 AC_PROG_INSTALL
@@ -30,5 +30,9 @@ AC_OUTPUT([Makefile
         tools/asp_state/AssemblyInfo.cs
         tools/dbsessmgr/Makefile
         tools/dbsessmgr/AssemblyInfo.cs
+        tools/nunitasp/Makefile
+        tools/nunitasp/source/Makefile
+        tools/nunitasp/source/NUnitAsp/Makefile
+        tools/nunitasp/source/NUnitAspTest/Makefile
 	test/Makefile])
 

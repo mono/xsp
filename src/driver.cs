@@ -36,7 +36,7 @@ public class Driver {
 			ap = new AspParser (args [i], input);
 			ap.parse ();
 			al = ap.Elements;
-			Generator gen = new Generator (args [i], al);
+			Generator gen = new Generator (Path.GetFileName (args [i]), al);
 			gen.ProcessElements ();
 			if (args.Length >= i + 1 || args [i + 1] != "no")
 				gen.Print ();

@@ -115,7 +115,6 @@ class ControlStack
 {
 	private Stack controls;
 	private ControlStackData top;
-	private Type last_container_type;
 
 	class ControlStackData 
 	{
@@ -125,18 +124,21 @@ class ControlStack
 		public ChildrenKind childKind;
 		public string defaultPropertyName;
 		public int childrenNumber;
+		public Type container;
 
 		public ControlStackData (Type controlType,
 					 string controlID,
 					 string tagID,
 					 ChildrenKind childKind,
-					 string defaultPropertyName)
+					 string defaultPropertyName,
+					 Type container)
 		{
 			this.controlType = controlType;
 			this.controlID = controlID;
 			this.tagID = tagID;
 			this.childKind = childKind;
 			this.defaultPropertyName = defaultPropertyName;
+			this.container = container;
 			childrenNumber = 0;
 		}
 
@@ -151,20 +153,23 @@ class ControlStack
 		controls = new Stack ();
 	}
 
-	private void SetContainerType (Type type)
+	private Type GetContainerType (Type type)
 	{
 		if (type != typeof (System.Web.UI.Control) &&
 		    !type.IsSubclassOf (typeof (System.Web.UI.Control)))
-			return;
+			return null;
 		
+		Type container_type;
 		if (type == typeof (System.Web.UI.WebControls.DataList))
-			last_container_type = typeof (System.Web.UI.WebControls.DataListItem);
+			container_type = typeof (System.Web.UI.WebControls.DataListItem);
 		else if (type == typeof (System.Web.UI.WebControls.DataGrid))
-			last_container_type = typeof (System.Web.UI.WebControls.DataGridItem);
+			container_type = typeof (System.Web.UI.WebControls.DataGridItem);
 		else if (type == typeof (System.Web.UI.WebControls.Repeater))
-			last_container_type = typeof (System.Web.UI.WebControls.RepeaterItem);
+			container_type = typeof (System.Web.UI.WebControls.RepeaterItem);
 		else 
-			last_container_type = type;
+			container_type = type;
+
+		return container_type;
 	}
 
 	public void Push (Type controlType,
@@ -173,11 +178,17 @@ class ControlStack
 			  ChildrenKind childKind,
 			  string defaultPropertyName)
 	{
+		Type container_type = null;
 		if (controlType != null){
 			AddChild ();
-			SetContainerType (controlType);
+			container_type = GetContainerType (controlType);
 		}
-		top = new ControlStackData (controlType, controlID, tagID, childKind, defaultPropertyName);
+		top = new ControlStackData (controlType,
+					    controlID,
+					    tagID,
+					    childKind,
+					    defaultPropertyName,
+					    container_type);
 		controls.Push (top);
 	}
 
@@ -221,7 +232,7 @@ class ControlStack
 	
 	public Type Container
 	{
-		get { return last_container_type; }
+		get { return top.container; }
 	}
 	
 	public int Count

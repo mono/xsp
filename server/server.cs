@@ -311,8 +311,6 @@ namespace Mono.ASPNET
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();
 					server.Stop ();
-					// workaround for 65533
-					Environment.Exit (0);
 				}
 			} catch (Exception e) {
 				Console.WriteLine ("Error: {0}", e.Message);

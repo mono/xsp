@@ -288,7 +288,17 @@ namespace Mono.ASPNET
 			int w;
 			while (!stop){
 				w = wSockets.Count;
-				Socket.Select (wSockets, null, null, (w == 1) ? -1 : 1000 * 1000); // 1s
+				// A bug on MS (or is it just me?) makes the following select return immediately
+				// when there's only one socket (the listen socket) in the array:
+				//   Socket.Select (wSockets, null, null, (w == 1) ? -1 : 1000 * 1000); // 1s
+				// so i have to do this for the MS runtime not to hung all the CPU.
+				if  (w > 1) {
+					Socket.Select (wSockets, null, null, 1000 * 1000); // 1s
+				} else {
+					listen_socket.Poll (-1, SelectMode.SelectRead);
+					// wSockets already contains listen_socket.
+				}
+
 				w = wSockets.Count;
 				for (int i = 0; i < w; i++) {
 					Socket s = (Socket) wSockets [i];

@@ -1,3 +1,13 @@
+2004-11-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: workaround a bug in MS socket Select
+	implementation.
+	* server/server.cs: undo workaround for bug #65533.
+
+2004-10-29 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Released 1.0.4.
+
 2004-10-29 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPApplicationHost.cs: redirect on directories that are not

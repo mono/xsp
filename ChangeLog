@@ -13,7 +13,7 @@
 
 	* server/MonoWorkerRequest.cs:
 	* server/ModMonoWorkerRequest.cs:
-	* server/XSPWorkerRequest.cs: RequestId is not part of
+	* server/XSPWorkerRequest.cs: RequestId is now part of
 	MonoWorkerRequest interface.
 
 2004-08-17 Gonzalo Paniagua Javier <gonzalo@ximian.com>

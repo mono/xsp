@@ -10,7 +10,8 @@ REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
 SOURCES = server.cs \
 	  MonoApplicationHost.cs \
 	  MonoWorkerRequest.cs \
-	  Tracing.cs
+	  Tracing.cs \
+	  AssemblyInfo.cs
 
 all: server.exe
 	

@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Web;
@@ -22,7 +23,6 @@ namespace Mono.ASPNET
 {
 	public class MonoWorkerRequest : SimpleWorkerRequest
 	{
-		const string VERSION = "0.2";
 		TcpClient client;
 		MonoApplicationHost appHost;
 		TextReader input;
@@ -36,9 +36,22 @@ namespace Mono.ASPNET
 		bool headersSent;
 		StringBuilder responseHeaders;
 		string status;
-		string platform;
 		ArrayList response;
 		static Encoding encoding = new UTF8Encoding (false);
+		static string serverHeader;
+
+		static MonoWorkerRequest ()
+		{
+			Assembly assembly = Assembly.GetExecutingAssembly ();
+			string title = "Mono-XSP Server";
+			string version = assembly.GetName ().Version.ToString ();
+			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
+			if (att.Length > 0)
+				title = ((AssemblyTitleAttribute) att [0]).Title;
+
+			serverHeader = String.Format ("Server: {0}/{1} {2}\r\n",
+						      title, version, Environment.OSVersion.Platform);
+		}
 
 		public MonoWorkerRequest (TcpClient client, MonoApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
@@ -56,21 +69,6 @@ namespace Mono.ASPNET
 			responseHeaders = new StringBuilder ();
 			response = new ArrayList ();
 			status = "HTTP/1.0 200 OK\r\n";
-
-			switch (Path.DirectorySeparatorChar) {
-			case '/':
-				platform = " (Unix)";
-				break;
-			case '\\':
-				platform = " (Win32)";
-				break;
-			default:
-				/* unknown platform */
-				platform = "";
-				break;
-			}
-
-			platform = "Server: Mono-XSP/" + VERSION + platform + "\r\n";
 		}
 
 		public override void CloseConnection ()
@@ -85,7 +83,7 @@ namespace Mono.ASPNET
 			try {
 				WebTrace.WriteLine ("FlushResponse({0}), {1}", finalFlush, headersSent);
 				if (!headersSent) {
-					responseHeaders.Insert (0, platform);
+					responseHeaders.Insert (0, serverHeader);
 					responseHeaders.Insert (0, status);
 					responseHeaders.Append ("\r\n");
 					byte [] b = encoding.GetBytes (responseHeaders.ToString ());
@@ -108,6 +106,9 @@ namespace Mono.ASPNET
 		public override string GetAppPath ()
 		{
 			WebTrace.WriteLine ("GetAppPath()");
+			if (appHost.VPath == "/")
+				return "";
+
 			return appHost.VPath;
 		}
 
@@ -127,8 +128,7 @@ namespace Mono.ASPNET
 		public override string GetFilePathTranslated ()
 		{
 			WebTrace.WriteLine ("GetFilePathTranslated()");
-			//FIXME: bear in mind virtual directory
-			return Path.Combine (appHost.Path, path.Substring (1).Replace ('/', Path.DirectorySeparatorChar));
+			return MapPath (path);
 		}
 
 		public override string GetHttpVerbName ()
@@ -296,7 +296,17 @@ namespace Mono.ASPNET
 			if (path == null || path.Length == 0 || path == "/")
 				return appHost.Path.Replace ('/', Path.DirectorySeparatorChar);
 
-			return Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
+			if (path [0] == '~' && path.Length > 1 && path [1] == '/') {
+				path = path.Substring (2);
+			} else if (path.IndexOf ("/~/") == 0) {
+				// Not sure about this. It makes request such us /~/dir/file work
+				path = path.Substring (3);
+			} else if (path [0] == '/' && path.Length > 1) {
+				path = path.Substring (1);
+			}
+				
+			path =  Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
+			return path;
 		}
 
 		public void ProcessRequest ()

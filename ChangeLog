@@ -1,3 +1,9 @@
+2005-01-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: if the headers have not been sent and
+	someone closes the connection, don't try to reuse it. Discovered thanks
+	to buggy user code.
+
 2005-01-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: locks in SocketPool. Fixes bug #70388.

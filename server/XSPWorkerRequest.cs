@@ -272,7 +272,9 @@ namespace Mono.ASPNET
 		{
 			WebTrace.WriteLine ("CloseConnection()");
 			if (requestBroker != null) {
-				requestBroker.Close (requestId, keepAlive);
+				// We check for headersSent as broken user code might call
+				// CloseConnection at an early stage.
+				requestBroker.Close (requestId, (headersSent ? keepAlive : false));
 				requestBroker = null;
 				FreeMemoryStream (response);
 				response = null;

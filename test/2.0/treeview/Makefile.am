@@ -14,8 +14,7 @@ samplesbindir = $(datadir)/doc/xsp/test/bin
 samplesbin_SCRIPTS = treeview.dll
 
 EXTRA_DIST = $(testfiles) \
-	         $(treeview_src) \
-			 $(images_DATA)
+	         $(treeview_src)
 
 CLEANFILES = $(samplesbin_SCRIPTS)
 
@@ -23,12 +22,13 @@ treeview.dll: $(treeview_build)
 	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
 
 dist-hook:
-	mkdir $(distdir)/TreeLineImages
+	$(mkinstalldirs) $(distdir)/TreeLineImages
 	cp -p $(srcdir)/TreeLineImages/*gif $(distdir)/TreeLineImages
 
 install-data-hook:
-	mkdir $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
+	$(mkinstalldirs) $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
 	cp $(srcdir)/TreeLineImages/*gif $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
 
-uninstall-data-hook:
+uninstall-hook:
 	rm $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages/*gif
+

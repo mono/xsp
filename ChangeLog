@@ -1,7 +1,17 @@
+2004-04-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* NEWS:
+	* ChangeLog: updated.
+
+	* server/ModMonoWorkerRequest.cs: fixed buglet that made unknown headers
+	not pass from mod_mono to System.Web. Shame on me.
+
 2004-04-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: fixed PathInfo for mod_mono. Smells
 	like a new release.
+
+	Released 0.11.
 
 2004-04-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
@@ -9,6 +19,8 @@
 	* server/ModMonoRequest.cs:
 	* server/ModMonoWorkerRequest.cs: marshal 2 string arrays instead of
 	a Hashtable for request headers.
+
+	Released 0.10.
 
 2004-04-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

@@ -337,7 +337,7 @@ namespace Mono.ASPNET
 				int count = keys.Length;
 				ArrayList pairs = new ArrayList ();
 				for (int i = 0; i < count; i++) {
-					if (HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]) == -1)
+					if (HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]) != -1)
 						continue;
 
 					pairs.Add (new string [] { keys [i], values [i]});

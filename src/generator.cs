@@ -78,7 +78,7 @@ class ArrayListWrapper {
 
 	public ArrayListWrapper (ArrayList list){
 		this.list = list;
-		index = 0;
+		index = -1;
 	}
 
 	public object Current {
@@ -124,6 +124,7 @@ public class Generator {
 	private string interfaces;
 	private string parent;
 	private string fullPath;
+	private static string enableSessionStateLiteral =  ", System.Web.SessionState.IRequiresSessionState";
 
 	public Generator (string filename, ArrayList elements)
 	{
@@ -131,13 +132,12 @@ public class Generator {
 			throw new ArgumentNullException ();
 
 		this.elements = new ArrayListWrapper (elements);
-		this.className = filename.Replace ('.', '_');
+		this.className = filename.Replace ('.', '_'); // Overridden by @ Page classname
 		this.fullPath = Path.GetFullPath (filename);
+		//FIXME: get them from directives
 		this.parent = "System.Web.UI.Page";
-		 //FIXME: get it from directives
-		this.interfaces = ", System.Web.SessionState.IRequiresSessionState";
-		 //FIXME: codebehind...
-		this.classDecl = "\tpublic class " + className + " : " + parent + interfaces + " {\n"; 
+		//
+		this.interfaces = enableSessionStateLiteral;
 		Init ();
 	}
 
@@ -179,55 +179,11 @@ public class Generator {
 			      "\tusing System.Web.UI.WebControls;\n" + 
 			      "\tusing System.Web.UI.HtmlControls;\n");
 
-
 		declarations.Append ("\t\tprivate static int __autoHandlers;\n");
 
 		current_function.Append ("\t\tprivate void __BuildControlTree (System.Web.UI.Control __ctrl)\n\t\t{\n" + 
 					"\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
 					"(System.Web.UI.IParserAccessor) __ctrl;\n\n");
-
-		// adds the constructor
-		constructor.AppendFormat (
-			"\t\tpublic {0} ()\n\t\t{{\n" + 
-			"\t\t\tSystem.Collections.ArrayList dependencies;\n\n" +
-			"\t\t\tif (ASP.{0}.__intialized == false){{\n" + 
-			"\t\t\t\tdependencies = new System.Collections.ArrayList ();\n" +
-			"\t\t\t\tdependencies.Add (@\"{1}\");\n" +
-			"\t\t\t\tASP.{0}.__fileDependencies = dependencies;\n" +
-			"\t\t\t\tASP.{0}.__intialized = true;\n" +
-			"\t\t\t}}\n" +
-			"\t\t}}\n\n", className, fullPath);
-         
-		//FIXME: add AutoHandlers: don't know what for...yet!
-		constructor.AppendFormat (
-			"\t\tprotected override int AutoHandlers\n\t\t{{\n" +
-			"\t\t\tget {{ return ASP.{0}.__autoHandlers; }}\n" +
-			"\t\t\tset {{ ASP.{0}.__autoHandlers = value; }}\n" +
-			"\t\t}}\n\n", className);
-
-		//FIXME: add ApplicationInstance: don't know what for...yet!
-		constructor.Append (
-			"\t\tprotected System.Web.HttpApplication ApplicationInstance\n\t\t{\n" +
-			"\t\t\tget { return (System.Web.HttpApplication) this.Context.ApplicationInstance; }\n" +
-			"\t\t}\n\n");
-		//FIXME: add TemplateSourceDirectory: don't know what for...yet!
-		//FIXME: it should be the path from the root where the file resides
-		constructor.Append (
-			"\t\tpublic override string TemplateSourceDirectory\n\t\t{\n" +
-			"\t\t\tget { return \"/dummypath\"; }\n" +
-			"\t\t}\n\n");
-
-		Random rnd = new Random ();
-		epilog.AppendFormat (
-			"\n" +
-			"\t\tprotected override void FrameworkInitialize ()\n\t\t{{\n" +
-			"\t\t\tthis.__BuildControlTree (this);\n" +
-			"\t\t\tthis.FileDependencies = ASP.{0}.__fileDependencies;\n" +
-			"\t\t\tthis.EnableViewStateMac = true;\n" +
-			"\t\t}}\n\n" + 
-			"\t\tpublic override int GetTypeHashCode ()\n\t\t{{\n" +
-			"\t\t\treturn {1};\n" +
-			"\t\t}}\n\t}}\n}}\n", className, rnd.Next ());
 	}
 
 	public void Print ()
@@ -257,6 +213,23 @@ public class Generator {
 		return output;
 	}
 	
+	private void PageDirective (TagAttributes att)
+	{
+		if (att ["ClassName"] != null)
+			this.className = (string) att ["classname"];
+
+		if (att ["EnableSessionState"] != null){
+			string est = (string) att ["EnableSessionState"];
+			if (0 == String.Compare (est, "false"))
+				interfaces = interfaces.Replace (enableSessionStateLiteral, "");
+			else if (0 != String.Compare (est, "true"))
+				throw new ApplicationException ("EnableSessionState in Page directive not set to " +
+								"a correct value: " + est);
+
+		}
+		//FIXME: add support for more attributes.
+	}
+
 	private void RegisterDirective (TagAttributes att)
 	{
 		string tag_prefix = (string) (att ["tagprefix"] == null ?  "" : att ["tagprefix"]);
@@ -298,6 +271,9 @@ public class Generator {
 			return;
 
 		switch (directive.TagID.ToUpper ()){
+			case "PAGE":
+				PageDirective (att);
+				break;
 			case "IMPORT":
 				foreach (string key in att.Keys){
 					if (0 == String.Compare (key, "NAMESPACE", true)){
@@ -307,6 +283,10 @@ public class Generator {
 						break;
 					}
 				}
+				break;
+			case "IMPLEMENTS":
+				string iface = (string) att ["interface"];
+				interfaces += ", " + iface;
 				break;
 			case "REGISTER":
 				RegisterDirective (att);
@@ -592,10 +572,54 @@ public class Generator {
 
 	private void End ()
 	{
+		classDecl = "\tpublic class " + className + " : " + parent + interfaces + " {\n"; 
 		prolog.Append ("\n" + classDecl);
 		declarations.Append (
 			"\t\tprivate static bool __intialized = false;\n\n" +
 			"\t\tprivate static System.Collections.ArrayList __fileDependencies;\n\n");
+
+		// adds the constructor
+		constructor.AppendFormat (
+			"\t\tpublic {0} ()\n\t\t{{\n" + 
+			"\t\t\tSystem.Collections.ArrayList dependencies;\n\n" +
+			"\t\t\tif (ASP.{0}.__intialized == false){{\n" + 
+			"\t\t\t\tdependencies = new System.Collections.ArrayList ();\n" +
+			"\t\t\t\tdependencies.Add (@\"{1}\");\n" +
+			"\t\t\t\tASP.{0}.__fileDependencies = dependencies;\n" +
+			"\t\t\t\tASP.{0}.__intialized = true;\n" +
+			"\t\t\t}}\n" +
+			"\t\t}}\n\n", className, fullPath);
+         
+		//FIXME: add AutoHandlers: don't know what for...yet!
+		constructor.AppendFormat (
+			"\t\tprotected override int AutoHandlers\n\t\t{{\n" +
+			"\t\t\tget {{ return ASP.{0}.__autoHandlers; }}\n" +
+			"\t\t\tset {{ ASP.{0}.__autoHandlers = value; }}\n" +
+			"\t\t}}\n\n", className);
+
+		//FIXME: add ApplicationInstance: don't know what for...yet!
+		constructor.Append (
+			"\t\tprotected System.Web.HttpApplication ApplicationInstance\n\t\t{\n" +
+			"\t\t\tget { return (System.Web.HttpApplication) this.Context.ApplicationInstance; }\n" +
+			"\t\t}\n\n");
+		//FIXME: add TemplateSourceDirectory: don't know what for...yet!
+		//FIXME: it should be the path from the root where the file resides
+		constructor.Append (
+			"\t\tpublic override string TemplateSourceDirectory\n\t\t{\n" +
+			"\t\t\tget { return \"/dummypath\"; }\n" +
+			"\t\t}\n\n");
+
+		Random rnd = new Random ();
+		epilog.AppendFormat (
+			"\n" +
+			"\t\tprotected override void FrameworkInitialize ()\n\t\t{{\n" +
+			"\t\t\tthis.__BuildControlTree (this);\n" +
+			"\t\t\tthis.FileDependencies = ASP.{0}.__fileDependencies;\n" +
+			"\t\t\tthis.EnableViewStateMac = true;\n" +
+			"\t\t}}\n\n" + 
+			"\t\tpublic override int GetTypeHashCode ()\n\t\t{{\n" +
+			"\t\t\treturn {1};\n" +
+			"\t\t}}\n\t}}\n}}\n", className, rnd.Next ());
 
 		// Closes the currently opened tags
 		StringBuilder old_function = current_function;

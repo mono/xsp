@@ -194,6 +194,26 @@ public class CloseTag : Tag {
 
 public class Directive : Tag {
 	private static Hashtable directivesHash;
+	private static string [] page_atts = {  "AspCompat", "AutoEventWireup ", "Buffer", "ClassName",
+						"ClientTarget", "CodePage", "CompilerOptions", "ContentType",
+						"Culture", "Debug", "Description", "EnableSessionState",
+						"EnableViewState", "EnableViewStateMac", "ErrorPage",
+						"Explicit", "Inherits", "Language", "LCID",
+						"ResponseEncoding", "Src", "SmartNavigation", "Strict",
+						"Trace", "TraceMode", "Transaction", "UICulture",
+						"WarningLevel" };
+
+	private static string [] control_atts = { "AutoEventWireup", "ClassName", "CompilerOptions", "Debug",
+						"Description", "EnableViewState", "Explicit", "Inherits",
+						"Language", "Strict", "Src", "WarningLevel" };
+
+	private static string [] import_atts = { "namespace" };
+	private static string [] implements_atts = { "interface" };
+	private static string [] assembly_atts = { "name", "src" };
+	private static string [] register_atts = { "tagprefix", "tagname", "Namespace", "Src", "Assembly" };
+	private static string [] outputcache_atts = { "Duration", "Location", "VaryByControl", 
+						      "VaryByCustom", "VaryByHeader", "VaryByParam" };
+	private static string [] reference_atts = { "page", "control" };
 
 	static Directive ()
 	{
@@ -202,24 +222,63 @@ public class Directive : Tag {
 	
 	private static void InitHash ()
 	{
-		directivesHash = new Hashtable (new CaseInsensitiveHashCodeProvider (),
-						new CaseInsensitiveComparer ()); 
+		CaseInsensitiveHashCodeProvider provider = new CaseInsensitiveHashCodeProvider ();
+		CaseInsensitiveComparer comparer =  new CaseInsensitiveComparer ();
 
-		//TODO: look for a more appropiate container instead of Hashtable
-		directivesHash.Add ("PAGE", null);
-		directivesHash.Add ("CONTROL", null);
-		directivesHash.Add ("IMPORT", null);
-		directivesHash.Add ("IMPLEMENTS", null);
-		directivesHash.Add ("REGISTER", null);
-		directivesHash.Add ("ASSEMBLY", null);
-		directivesHash.Add ("OUTPUTCACHE", null);
-		directivesHash.Add ("REFERENCE", null);
+		directivesHash = new Hashtable (provider, comparer); 
+
+		// Use Hashtable 'cause is O(1) in Contains (ArrayList is O(n))
+		Hashtable valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in page_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("PAGE", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in control_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("CONTROL", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in import_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("IMPORT", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in implements_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("IMPLEMENTS", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in register_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("REGISTER", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in assembly_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("ASSEMBLY", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in outputcache_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("OUTPUTCACHE", valid_attributes);
+
+		valid_attributes = new Hashtable (provider, comparer);
+		foreach (string att in reference_atts) valid_attributes.Add (att, null);
+		directivesHash.Add ("REFERENCE", valid_attributes);
 	}
 	
 	public Directive (string tag, TagAttributes attributes) :
-	       base (tag.ToUpper (), attributes, true)
+	       base (tag, attributes, true)
 	{
+		CheckAttributes ();
 		tagType = TagType.DIRECTIVE;
+	}
+
+	private void CheckAttributes ()
+	{
+		Hashtable atts;
+		if (!(directivesHash [tag] is Hashtable))
+			throw new ApplicationException ("Unknown directive: " + tag);
+
+		atts = (Hashtable) directivesHash [tag];
+		foreach (string att in attributes.Keys){
+			if (!atts.Contains (att))
+				throw new ApplicationException ("Attribute " + att + " not valid for tag " + tag);
+		}
 	}
 
 	public static bool IsDirectiveID (string id)
@@ -298,7 +357,7 @@ public class HtmlControlTag : Tag {
 	{
 		tagType = TagType.HTMLCONTROL; 
 		if (!(controls [tag] is string)){
-			control_type = (Type) controls [tag.ToUpper ()];
+			control_type = (Type) controls [tag];
 			if (control_type == null)
 				control_type = typeof (HtmlGenericControl);
 		} else {

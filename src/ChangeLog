@@ -1,3 +1,8 @@
+2002-05-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* aspelements.cs: check for valid attributes in directives.
+	* generator.cs: added support for some directives and attributes.
+
 2002-05-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	Import.

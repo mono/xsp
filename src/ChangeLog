@@ -1,3 +1,8 @@
+2002-07-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs: 
+	(ProcessProperties): process subproperties of Style and derived classes.
+
 2002-07-05  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* Makefile:

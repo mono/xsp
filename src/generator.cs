@@ -798,28 +798,33 @@ public class Generator
 
 	private bool ProcessProperties (PropertyInfo prop, string id, TagAttributes att)
 	{
-		bool is_processed = false;
-		bool isDataBound = att.IsDataBound ((string) att [id]);
+		int hyphen = id.IndexOf ('-');
 
-		if (prop.CanWrite == false)
+		if (hyphen == -1 && prop.CanWrite == false)
 			return false;
 
+		bool is_processed = false;
+		bool isDataBound = att.IsDataBound ((string) att [id]);
+		Type type = prop.PropertyType;
+		Type style = typeof (System.Web.UI.WebControls.Style);
+		Type fontinfo = typeof (System.Web.UI.WebControls.FontInfo);
+
 		if (0 == String.Compare (prop.Name, id, true)){
-			AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id], isDataBound);
+			AddPropertyCode (type, prop.Name, (string) att [id], isDataBound);
 			is_processed = true;
-		}
-		else if (prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
-			 id.IndexOf ('-') != -1){
+		} else if ((type == fontinfo || type == style || type.IsSubclassOf (style)) && hyphen != -1){
 			string prop_field = id.Replace ("-", ".");
 			string [] parts = prop_field.Split (new char [] {'.'});
-			if (parts.Length != 2 || 
-			    0 != String.Compare (prop.Name, parts [0], true))
+			if (parts.Length != 2 || 0 != String.Compare (prop.Name, parts [0], true))
 				return false;
 
-			PropertyInfo [] subprops = prop.PropertyType.GetProperties ();
+			PropertyInfo [] subprops = type.GetProperties ();
 			foreach (PropertyInfo subprop in subprops){
 				if (0 != String.Compare (subprop.Name, parts [1], true))
 					continue;
+
+				if (subprop.CanWrite == false)
+					return false;
 
 				bool is_bool = subprop.PropertyType == typeof (bool);
 				if (!is_bool && att == null){

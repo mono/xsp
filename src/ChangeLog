@@ -1,5 +1,12 @@
 2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* asp-tokenizer.cs: a little more freedom for unquoted attribute
+	values.
+
+	* asp-parser.cs: recognize <!DOCTYPE tag as comment.
+
+2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* aspelements.cs: added OPTION to ChildrenKind enum.
 
 	* generator.cs: special case for HtmlSelect and <option> tags. Options

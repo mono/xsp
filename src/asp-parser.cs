@@ -146,19 +146,18 @@ class AspParser {
 				error ("expecting '>'");
 			return new CloseTag (id);
 		case '!':
-			if (eat (Token.DOUBLEDASH)){
-				tokenizer.Verbatim = true;
-				string comment = get_verbatim (Token.DOUBLEDASH, "-->");
-				tokenizer.Verbatim = false;
-				if (comment == null)
-					error ("Unfinished HTML comment");
+			bool double_dash = eat (Token.DOUBLEDASH);
+			if (double_dash)
+				tokenizer.put_back ();
 
-				return new PlainText ("<!" + comment + "-->");
-			} else {
-				//FIXME
-				//  <!DOCTYPE...
-			}
-			return null;
+			tokenizer.Verbatim = true;
+			string end = double_dash ? "-->" : ">";
+			string comment = get_verbatim (tokenizer.get_token (), end);
+			tokenizer.Verbatim = false;
+			if (comment == null)
+				error ("Unfinished HTML comment/DTD");
+
+			return new PlainText ("<!" + comment + end);
 		case Token.IDENTIFIER:
 			id = tokenizer.value;
 			Tag tag = new Tag (id, get_attributes (), eat ('/'));

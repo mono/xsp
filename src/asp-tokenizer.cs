@@ -142,7 +142,12 @@ class AspTokenizer {
 				return c;
 			}
 
-			if (inTag && "%@#=/!".IndexOf ((char) c) != -1){
+			if (current_token == '<' && "%/!".IndexOf ((char) c) != -1){
+				sb.Append ((char) c);
+				return c;
+			}
+
+			if (inTag && current_token == '%' && "@#=".IndexOf ((char) c) != -1){
 				sb.Append ((char) c);
 				return c;
 			}
@@ -161,11 +166,10 @@ class AspTokenizer {
 				return (c != -1) ? Token.TEXT : Token.EOF;
 			}
 
-			if (inTag && current_token == '=' && 
-			    (is_identifier_part_character ((char) c) || c == '+')){
+			if (inTag && current_token == '=' && !Char.IsWhiteSpace ((char) c)){ 
 				sb.Append ((char) c);
 				while ((c = sr.Peek ()) != -1) {
-					if (!is_identifier_part_character ((char) c) && c != '+')
+					if (Char.IsWhiteSpace ((char) c) || c == '/' || c == '>')
 						break;
 					sb.Append ((char) read_char ());
 				}

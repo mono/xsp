@@ -23,9 +23,38 @@ using Mono.Posix;
 
 namespace Mono.ASPNET
 {
+	class HttpErrors
+	{
+		static byte [] error500;
+
+		static HttpErrors ()
+		{
+			string s = "HTTP/1.0 500 Server error\n\n" +
+				   "<html><head><title>500 Server Error</title><body><h1>Server error</h1>\n" +
+				   "Your client sent a request that was not understood by this server.\n" +
+				   "</body></html>\n";
+			error500 = Encoding.Default.GetBytes (s);
+		}
+
+		public static byte [] NotFound (string uri)
+		{
+			string s = String.Format ("<html><head><title>404 Not Found</title></head>\n" +
+				"<body><h1>Not Found</h1>The requested URL {0} was not found on this " +
+				"server.<p>\n</body></html>\n", uri);
+
+			return Encoding.ASCII.GetBytes (s);
+		}
+
+		public static byte [] ServerError ()
+		{
+			return error500;
+		}
+	}
+
 	[Serializable]
 	class Worker
 	{
+		[NonSerialized] XSPApplicationServer server;
 		IApplicationHost host;
 		NetworkStream ns;
 		bool requestFinished;
@@ -37,22 +66,10 @@ namespace Mono.ASPNET
 		EndPoint localEP;
 #endif
 
-		static byte [] error500;
-
-		static Worker ()
-		{
-			string s = "HTTP/1.0 500 Server error\n\n" +
-				   "<html><body><h1>500 Server error</h1>\n" +
-				   "Your client sent a request that was not understood by this server.\n" +
-				   "</body></html>\n";
-			
-			error500 = Encoding.Default.GetBytes (s);
-		}
-		
-		public Worker (Socket client, EndPoint localEP, IApplicationHost host)
+		public Worker (Socket client, EndPoint localEP, XSPApplicationServer server)
 		{
 			ns = new NetworkStream (client, true);
-			this.host = host;
+			this.server = server;
 #if !MODMONO_SERVER
 			try {
 				remoteEP = client.RemoteEndPoint;
@@ -71,11 +88,16 @@ namespace Mono.ASPNET
 				InitialWorkerRequest ir = new InitialWorkerRequest (ns);
 				ir.ReadRequestData ();
 				rdata = ir.RequestData;
-				host = host.GetApplicationForPath (rdata.Path, true);
+				host = server.GetApplicationForPath (rdata.Path, true);
+				if (host == null) {
+					byte [] nf = HttpErrors.NotFound (rdata.Path);
+					ns.Write (nf, 0, nf.Length);
+					return;
+				}
 #else
 				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
 				mwr.ReadRequestData ();
-				host = host.GetApplicationForPath (mwr.GetUriPath (), false);
+				host = server.GetApplicationForPath (mwr.GetUriPath (), false);
 				if (host == null) {
 					mwr.Decline ();
 					return;
@@ -87,7 +109,8 @@ namespace Mono.ASPNET
 			} catch (Exception e) {
 				Console.WriteLine (e);
 				try {
-					ns.Write (error500, 0, error500.Length);
+					byte [] error = HttpErrors.ServerError ();
+					ns.Write (error, 0, error.Length);
 				} catch {}
 			} finally {
 				requestFinished = true;
@@ -115,6 +138,39 @@ namespace Mono.ASPNET
 
 	public class XSPApplicationHost : MarshalByRefObject, IApplicationHost
 	{
+		string path;
+		string vpath;
+
+		public override object InitializeLifetimeService ()
+		{
+			return null; // who wants to live forever?
+		}
+		
+		public string Path {
+			get {
+				if (path == null)
+					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
+
+				return path;
+			}
+		}
+
+		public string VPath {
+			get {
+				if (vpath == null)
+					vpath =  AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
+
+				return vpath;
+			}
+		}
+
+		public AppDomain Domain {
+			get { return AppDomain.CurrentDomain; }
+		}
+	}
+
+	public class XSPApplicationServer
+	{
 		Socket listen_socket;
 		bool started;
 		bool stop;
@@ -122,8 +178,6 @@ namespace Mono.ASPNET
 		IPEndPoint bindAddress;
 #endif
 		Thread runner;
-		string path;
-		string vpath;
  		Hashtable appToDir;
  		Hashtable dirToHost;
  		object marker = new object ();
@@ -132,12 +186,13 @@ namespace Mono.ASPNET
 		string filename;
 #endif
 
-		public XSPApplicationHost ()
+		public XSPApplicationServer (string applications)
 		{
 #if MODMONO_SERVER
 #else
 			SetListenAddress (80);
 #endif
+			SetApplications (applications);
 		}
 
 #if MODMONO_SERVER
@@ -179,6 +234,9 @@ namespace Mono.ASPNET
  			if (appToDir != null)
  				throw new InvalidOperationException ("Already called");
  
+ 			if (applications == "")
+				return;
+
  			appToDir = new Hashtable ();
  			dirToHost = new Hashtable ();
  			string [] apps = applications.Split (',');
@@ -248,11 +306,6 @@ namespace Mono.ASPNET
 			started = false;
 		}
 
-		object IApplicationHost.CreateApplicationHost (string virtualPath, string baseDirectory)
-		{
-			return CreateApplicationHost (virtualPath, baseDirectory);
-		}
-
 		public static object CreateApplicationHost (string virtualPath, string baseDirectory)
 		{
 			return ApplicationHost.CreateApplicationHost (typeof (XSPApplicationHost),
@@ -273,12 +326,14 @@ namespace Mono.ASPNET
 				//Console.WriteLine ("current: {0} path: {1}", current, path);
 				string dir = appToDir [current] as string;
 				if (dir != null) {
-					object o = dirToHost [dir];
-					bestFit = o as IApplicationHost;
-					if (o == marker) {
-						o = CreateApplicationHost (current, dir);
-						dirToHost [dir] = o;
-						bestFit = (IApplicationHost) o;
+					lock (dirToHost) {
+						object o = dirToHost [dir];
+						bestFit = o as IApplicationHost;
+						if (o == marker) {
+							o = CreateApplicationHost (current, dir);
+							dirToHost [dir] = o;
+							bestFit = (IApplicationHost) o;
+						}
 					}
 					break;
 				} else {
@@ -290,7 +345,8 @@ namespace Mono.ASPNET
 
 			if (defaultToRoot && bestFit == null) {
 				//Console.WriteLine ("bestFit es null 1");
-				bestFit = dirToHost [appToDir ["/"]] as IApplicationHost;
+				if (appToDir.ContainsKey ("/"))
+					bestFit = dirToHost [appToDir ["/"]] as IApplicationHost;
 				/*
 				if (bestFit == null) {
 					Console.WriteLine ("bestFit es null 2");
@@ -301,33 +357,6 @@ namespace Mono.ASPNET
 			}
 
 			return bestFit;
-		}
-		
-		public override object InitializeLifetimeService ()
-		{
-			return null; // who wants to live forever?
-		}
-		
-		public string Path {
-			get {
-				if (path == null)
-					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
-
-				return path;
-			}
-		}
-
-		public string VPath {
-			get {
-				if (vpath == null)
-					vpath =  AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
-
-				return vpath;
-			}
-		}
-
-		public AppDomain Domain {
-			get { return AppDomain.CurrentDomain; }
 		}
 	}
 }

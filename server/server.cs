@@ -166,15 +166,12 @@ namespace Mono.ASPNET
 			rootDir = Directory.GetCurrentDirectory ();
 			
 			Type type = typeof (XSPApplicationHost);
-			XSPApplicationHost host;
-			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, "/", rootDir);
-			host.SetApplications (apps);
-
+			XSPApplicationServer server =  new XSPApplicationServer (apps);
 #if MODMONO_SERVER
-			host.SetListenFile (filename);
+			server.SetListenFile (filename);
 			Console.WriteLine ("Listening on: {0}", filename);
 #else
-			host.SetListenAddress (IPAddress.Parse (ip), port);
+			server.SetListenAddress (IPAddress.Parse (ip), port);
 			Console.WriteLine ("Listening on port: {0}", port);
 			Console.WriteLine ("Listening on address: {0}", ip);
 #endif
@@ -183,7 +180,7 @@ namespace Mono.ASPNET
 
 			ManualResetEvent evt = null;
 			try {
-				host.Start ();
+				server.Start ();
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();

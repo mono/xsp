@@ -1,3 +1,17 @@
+2003-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/IApplicationHost.cs: reduced to the minimum.
+
+	* server/ModMonoRequest.cs: removed unused Hashtable and make the
+	headers hashtable case insensitive.
+
+	* server/XSPApplicationHost.cs: new class HttpErrors. Splitted
+	XSPApplicationHost. Now there's a XSPApplicationServer which does the
+	server work and creates the XSPApplicationHosts. Lock when adding new
+	applications to dirToHost (thanks Lluis!)
+	
+	* server/server.cs: use XSPApplicationServer.
+
 2003-10-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/InitialWorkerRequest.cs: reduced up to the minimum needed

@@ -93,9 +93,6 @@ namespace Mono.ASPNET
 	{
 		BinaryReader reader;
 		BinaryWriter writer;
-		Hashtable reqHeaders = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
-							CaseInsensitiveComparer.Default);
-
 		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
 							   CaseInsensitiveComparer.Default);
 		string verb;
@@ -126,7 +123,8 @@ namespace Mono.ASPNET
 			queryString = ReadString ();
 			protocol = ReadString ();
 			int nheaders = reader.ReadInt32 ();
-			headers = new Hashtable ();
+			headers = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
+						 CaseInsensitiveComparer.Default);
 			for (int i = 0; i < nheaders; i++) {
 				string key = ReadString ();
 				headers [key] = ReadString ();

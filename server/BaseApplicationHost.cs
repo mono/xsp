@@ -8,6 +8,7 @@
 // (C) Copyright 2004 Novell, Inc
 //
 using System;
+using System.Web;
 
 namespace Mono.ASPNET
 {
@@ -23,6 +24,11 @@ namespace Mono.ASPNET
 		{
 			endOfRequest = new EndOfRequestHandler (EndOfRequest);
 			AppDomain.CurrentDomain.DomainUnload += new EventHandler (OnUnload);
+		}
+
+		public void Unload ()
+		{
+			HttpRuntime.UnloadAppDomain ();
 		}
 
 		public void OnUnload (object o, EventArgs args)

@@ -19,6 +19,7 @@ namespace Mono.ASPNET
 		AppDomain Domain { get; }	
 		IRequestBroker RequestBroker { get; set; }
 		ApplicationServer Server { get; set; }
+		void Unload ();
 	}
 	
 	public interface IRequestBroker

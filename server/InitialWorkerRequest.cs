@@ -145,6 +145,8 @@ namespace Mono.ASPNET
 					
 
 				text.Append ((char) c);
+				if (text.Length > 8192)
+					throw new InvalidOperationException ("Input line too long.");
 			}
 
 			return text.ToString ();

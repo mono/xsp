@@ -260,7 +260,6 @@ namespace Mono.ASPNET
 			listen_socket.Close ();
 			UnloadAll ();
 			WebTrace.WriteLine ("Server stopped.");
-			Environment.Exit (0);
 		}
 
 		public void UnloadAll ()
@@ -524,8 +523,10 @@ namespace Mono.ASPNET
 
 		public void UnloadHost ()
 		{
-			if (AppHost != null)
-				AppDomain.Unload (AppHost.Domain);
+			if (AppHost != null) {
+				AppHost.Unload ();
+				Thread.Sleep (2000);
+			}
 
 			AppHost = null;
 		}

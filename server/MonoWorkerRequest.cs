@@ -161,6 +161,28 @@ namespace Mono.ASPNET
 		{
 			return "localhost";
 		}
+		public override string GetServerName ()
+		{
+			string hostHeader = GetKnownRequestHeader(HeaderHost);
+			if (hostHeader == null || hostHeader.Length == 0)
+			{
+				hostHeader = GetLocalAddress();
+			}
+			else
+			{
+				int colonIndex = hostHeader.IndexOf(':');
+				if (colonIndex > 0)
+				{
+					hostHeader = hostHeader.Substring(0, colonIndex);
+				}
+				else if (colonIndex == 0)
+				{
+					hostHeader = GetLocalAddress();
+				}
+			}
+			return hostHeader;
+		}
+
 
 		public override int GetLocalPort ()
 		{

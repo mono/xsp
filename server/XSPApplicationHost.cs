@@ -241,7 +241,7 @@ namespace Mono.ASPNET
 			while (!stop){
 				client = listen_socket.Accept ();
 				WebTrace.WriteLine ("Accepted connection.");
-				Worker worker = new Worker (client, listen_socket.LocalEndPoint, this);
+				Worker worker = new Worker (client, client.LocalEndPoint, this);
 				ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 			}
 

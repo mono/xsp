@@ -43,8 +43,8 @@ namespace Mono.ASPNET
 		EndPoint localEP;
 		EndPoint remoteEP;
 		bool sentConnection;
-		string localAddress;
 		int localPort;
+		string localAddress;
 		
 		static byte [] error500;
 
@@ -124,25 +124,8 @@ namespace Mono.ASPNET
 			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
 			
-			int i = -1;
-			string url = GetKnownRequestHeader (HeaderHost);
-			if (url != null)
-				i = url.LastIndexOf (":");
-
-			if (i == -1) {
-				localPort = 80;
-				localAddress = url;
-			} else {
-				try {
-					localPort = int.Parse (url.Substring (i+1));
-				} catch {
-					// May be we should send a 50x error?
-
-					localPort = 80;
-				}
-
-				localAddress = url.Substring (0, i);
-			}
+			localPort = ((IPEndPoint) localEP).Port;
+			localAddress = ((IPEndPoint) localEP).Address.ToString();
 		}
 
 		void FillBuffer ()
@@ -395,12 +378,6 @@ namespace Mono.ASPNET
 			return ((IPEndPoint) remoteEP).Port;
 		}
 
-
-		public override string GetServerName ()
-		{
-			WebTrace.WriteLine ("GetServerName()");
-			return "localhost";
-		}
 
 		public override string GetServerVariable (string name)
 		{

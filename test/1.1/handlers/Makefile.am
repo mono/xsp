@@ -1,6 +1,7 @@
 authsampledir = $(datadir)/doc/xsp/test/1.1/handlers
 authsample_DATA = \
 		chunked.ashx \
+		empty.ashx \
 		monodoc.ashx \
 		webhandler.ashx
 

@@ -8,6 +8,12 @@
     font-weight: bold
 }
 
+div.normal {
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size: 11px;
+    text-align: left;
+}
+
 .normal {
     font-family: Verdana, Helvetica, sans-serif;
     font-size: 11px;
@@ -71,13 +77,14 @@
 <body>
 <h3>HttpBrowserCapabilities</h3>
 <form runat="server">
+	<div class="normal">User agent: <%= Request.UserAgent %></div><br>
 	<asp:datagrid id="dg" border="1" AutoGenerateColumns="false" EnableViewState="false" runat="server">
 	    <Columns>
 		<asp:BoundColumn HeaderText="Property" DataField="PropertyName"
-			ItemStyle-CssClass="Normal" ItemStyle-Cssclass="normal"
+			ItemStyle-Cssclass="normal"
 			HeaderStyle-HorizontalAlign="Center" HeaderStyle-Cssclass="bold"/>
 		<asp:BoundColumn HeaderText="Value" DataField="PropertyValue"
-			ItemStyle-CssClass="Normal" ItemStyle-Cssclass="normal"
+			ItemStyle-Cssclass="normal"
 			HeaderStyle-HorizontalAlign="Center" HeaderStyle-Cssclass="bold"/>
 	    </Columns>
 	</asp:datagrid>

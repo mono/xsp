@@ -82,6 +82,9 @@ The virtual /blog is mapped to ../myblog
 .B '/:.,/blog:../myblog'
 Two applications like the above ones are handled.
 .TP
+.B myhost.someprovider.net:/blog:../myblog
+The virtual /blog at myhost.someprovider.net is mapped to ../myblog.
+.TP
 .I \-\-nonstop
 This applies only to xsp.exe: by default xsp will stop processing
 requests when the return key is pressed.  Use this to avoid this

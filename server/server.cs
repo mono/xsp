@@ -38,7 +38,7 @@ namespace Mono.ASPNET
 		static void ShowHelp ()
 		{
 #if MODMONO_SERVER
-			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono_unix.");
+			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono.");
 			Console.WriteLine ("Usage is:\n");
 			Console.WriteLine ("    mod-mono-server.exe [--root rootdir] [--applications APPS] [--filename file]");
 			Console.WriteLine ("            [--appconfigdir DIR] [--appconfigfile FILE]");
@@ -78,12 +78,14 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                    '.webapp' extension");
 			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigDir");
 			Console.WriteLine ();
-			Console.WriteLine ("    --applications APPS: This argument is DEPRECATED.");
+			Console.WriteLine ("    --applications APPS:");
 			Console.WriteLine ("                    a comma separated list of virtual directory and");
 			Console.WriteLine ("                    real directory for all the applications we want to manage");
 			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
 			Console.WriteLine ("                    by a colon. Optionally you may specify virtual host name");
 			Console.WriteLine ("                    and a port.");
+			Console.WriteLine ();
+			Console.WriteLine ("                           [[hostname:]port:]VPath:realpath,...");
 			Console.WriteLine ();
 			Console.WriteLine ("                    Samples: /:.");
 			Console.WriteLine ("                           the virtual / is mapped to the current directory.");

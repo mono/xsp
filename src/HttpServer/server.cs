@@ -248,7 +248,14 @@ class MyWorkerRequest
 			return null;
 		}
 
-		return (Page) page_dll.CreateInstance ("ASP." + className);
+		Type page_type = page_dll.GetType ("ASP." + className);
+		if (page_type == null){
+			Console.WriteLine ("Error looking for type ASP." + className);
+			return null;
+		}
+
+		Console.WriteLine ("Loaded type: {0}", page_type);
+		return (Page) Activator.CreateInstance (page_type);
 	}
 
 	private bool Compile (string csName, string dllName)
@@ -408,12 +415,13 @@ public class Server
 
 	public static string SystemWeb
 	{
-		get { return (!useMonoClasses ? "System.Web.dll" : ".\\lib\\System.Web.dll"); }
+		get { return (!useMonoClasses ? "System.Web.dll" : ".\\System.Web.dll"); }
 	}
 
 	public static string SystemDrawing
 	{
-		get { return (!useMonoClasses ? "System.Drawing.dll" : ".\\lib\\System.Drawing.dll"); }
+		//get { return (!useMonoClasses ? "System.Drawing.dll" : ".\\lib\\System.Drawing.dll"); }
+		get { return "System.Drawing.dll"; }
 	}
 
 	private static void Usage ()

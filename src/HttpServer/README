@@ -30,10 +30,9 @@ How to see it working
 * Copy some aspx file to ./testing 
 
 * cd ./testing; ./server PORTNUMBER. 
-Running it for the first time will create 2 directories: 'lib' and 'output'. In
+Running it for the first time will create a directory called 'output'. In
 'output' you will find all the intermediate files between ASPX and HTML and the
-BAT files run from testing directory which create them. 'lib' is only useful
-if you are debugging mono System.Web classes.
+BAT files run from testing directory which create them.
 
 * For real men:
 
@@ -45,10 +44,13 @@ if you are debugging mono System.Web classes.
 
 How to help debugging mono System.Web
 ----------------------------------------
-* Follow the steps in previous section.
+* Set the environment variable DEBUGMONOSW to any value.
 
-* Run make in mcs/class and copy mcs/class/lib/System.Web.dll and
-mcs/class/lib/System.Drawing.dll to ./testing/lib
+* Run make in mcs/class and copy mcs/class/System.Web.dll to ./testing,
+xsp/src and xsp/src/HttpServer.
+
+* Follow the steps in previous section. Now xsp.exe and server.exe
+are using mono's System.Web.
 
 * In directory (folder? :) ./testing run './server --usemonoclasses PORT'.
 
@@ -77,5 +79,4 @@ server on every access to a given page.
 
 
 - Enjoy!
-
 

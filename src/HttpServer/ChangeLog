@@ -1,5 +1,15 @@
 2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* Makefile: reference a local copy of mono System.Web.dll
+	depending on DEBUGMONOSW environment variable to allow xsp.exe and
+	server.exe use our System.Web.dll.
+
+	* README: documented usage of DEBUGMONOSW.
+
+	* server.cs: dll's are now in current directory.
+
+2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server.cs: all the intermediate files now go to ./output directory.
 	Also generates .BAT files containing the commands that the server
 	tries to run. Hopefully, this helps a lot for debugging tasks.

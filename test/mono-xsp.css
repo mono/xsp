@@ -1,0 +1,40 @@
+<!--
+   body { 
+     font-family: "trebuchet ms", lucida, verdana, helvetica; 
+     padding: 0;
+     margin:  0;
+     background-color: #f8f8f4;
+   }
+   body, td, table { font-family: "trebuchet ms", lucida, verdana, helvetica; 
+                     font-size: 14px; }
+
+
+	.title {
+    font-size: 22px;
+    color: #ffffff;
+    font-weight: bolder;
+		border-bottom: 2px solid #dddddd;
+    width: 100%;
+	}
+
+	.subtitle {
+    font-size: 14px;
+    font-weight: bold;
+    color: #dcdedc;
+	}
+
+	pre { font-size: 12px; }
+
+
+  p { margin: 10px; }
+
+  a { color: #72716a; }
+
+
+	.shell { 
+	border-style: solid; background: #000000; color: #bbbbbb;
+	#777777; border-width:
+	1px; padding: 2pt; 
+	margin:15px;
+	}
+// --> 

@@ -1,3 +1,12 @@
+2004-06-15 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/favicon.ico:
+	* test/index.aspx:
+	* test/mono-powered-big.png:
+	* test/mono-xsp.css:
+	* test/monobutton.png:
+	* test/small-icon.png: better appearance. Patch from Antonio Ognio.
+
 2004-06-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPApplicationHost.cs: allow wilcard for vhosts, fixed matching

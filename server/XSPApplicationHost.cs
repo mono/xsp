@@ -275,7 +275,7 @@ namespace Mono.ASPNET
 
 		public bool Match (string vhost, int vport, string vpath)
 		{
-			if (vport != -1 && vport != this.vport)
+			if (vport != -1 && this.vport != -1 && vport != this.vport)
 				return false;
 
 			if (vhost != null && this.vhost != null) {
@@ -499,6 +499,7 @@ namespace Mono.ASPNET
 				}
 
 				if (app.Length >= 4) {
+					// FIXME: support more than one listen port.
 					vport = Convert.ToInt16 (app[pos++]);
 				} else {
 					vport = -1;

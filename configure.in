@@ -1,0 +1,27 @@
+AC_PREREQ(2.57)
+PACKAGE = xsp
+VERSION = 0.5.99
+AC_INIT(NEWS)
+
+AC_PROG_INSTALL
+
+AC_PATH_PROG(CSC, csc, no)
+AC_PATH_PROG(MCS, mcs, no)
+CS="C#"
+if test "x$CSC" = "xno" -a "x$MCS" = "xno"  ; then
+	dnl AC_MSG_ERROR([You need to install a C# compiler])
+	AC_MSG_ERROR([No $CS compiler found])
+fi
+
+if test "x$MCS" = "xno" ; then
+	MCS = $CSC
+fi
+
+echo "$CS compiler: $MCS"
+
+AC_SUBST(MCS)
+AC_CONFIG_FILES([Makefile
+                 doc/Makefile
+                 server/Makefile
+                 test/Makefile])
+AC_OUTPUT

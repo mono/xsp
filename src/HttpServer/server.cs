@@ -496,6 +496,7 @@ class MyWorkerRequest
 	private TextReader input;
 	private TextWriter output;
 	private TextWriter outputBuffer;
+	private HttpResponse response;
 
 	private string method;
 	private string query;
@@ -708,7 +709,7 @@ class MyWorkerRequest
 		request.Browser = headers;
 		request.RequestType = method;
 
-		HttpResponse response = new HttpResponse (outputBuffer);
+		response = new HttpResponse (outputBuffer);
 		try {
 			page.ProcessRequest (new HttpContext (request, response));
 			SendData ();
@@ -721,7 +722,14 @@ class MyWorkerRequest
 
 	private void SendData ()
 	{
-		HttpHelpers.SendStatus (output, 200, "OK");
+		if (response.StatusCode != 302){
+			HttpHelpers.SendStatus (output, 200, "OK");
+		} else {
+			HttpHelpers.SendStatus (output, 302, "Found");
+#if MONO
+			HttpHelpers.SendHeader (output, "Location", response.RedirectLocation);
+#endif
+		}
 		HttpHelpers.SendHeader (output, "Host", "127.0.0.1"); // FIXME
 		HttpHelpers.SendHeader (output, "Content-Type", GetContentType ());
 		string content = outputBuffer.ToString ();

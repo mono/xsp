@@ -1,3 +1,8 @@
+2002-07-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: make Response.Redirect work (this makes controls6.aspx
+	work, though it contained a little typo in Redirect).
+
 2002-07-14  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* server.cs: handle queries with a parameters.

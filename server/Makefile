@@ -25,7 +25,7 @@ install: server.exe web.config global.asax
 	cp server.exe test/bin
 	-test -f server.dbg && cp server.dbg test
 	-test -f server.dbg && cp server.dbg test/bin
-	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png ../test/*.xsl test
+	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png test
 	cp ../test/*.dll test/bin
 
 server.exe: $(SOURCES)

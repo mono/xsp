@@ -1,3 +1,15 @@
+//
+// MyForm.cs: override some methods of HtmlForm to make it work for us when
+// 	      rendering forms.
+//
+// Authors:
+//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//
+// Licensed under the terms of the GNU GPL
+//
+// (C) 2002 Ximian, Inc (http://www.ximian.com)
+//
+
 using System;
 using System.Web.UI;
 

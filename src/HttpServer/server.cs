@@ -88,13 +88,22 @@ class MyWorkerRequest
 		if (!fileName.EndsWith (".aspx"))
 			return;
 
-		Console.WriteLine ("Running xsp...");
-		Xsp ();
-		Console.WriteLine ("Xsp finished...");
-		StreamReader st_file = new StreamReader (File.OpenRead (csFileName));
+		if (Xsp () == false){
+			Console.WriteLine ("Error running xsp. Take a look at the output file.");
+			return;
+		}
+		StreamReader st_file = new StreamReader (File.OpenRead ("output\\" + csFileName));
 		StringReader file_content = new StringReader (st_file.ReadToEnd ()); //FIXME
-		GetBuildOptions (file_content);
+		st_file.Close ();
+		if (GetBuildOptions (file_content) == false)
+			return;
+
 		Page page = Build ();
+		if (page == null){
+			Console.WriteLine ("Error creating the instace of the generated class.");
+			return;
+		}
+
 		SetupPage (page);
 	}
 	
@@ -121,11 +130,39 @@ class MyWorkerRequest
 		csFileName = fileName.Replace (".aspx", ".cs");
 	}
 	
-	private void Xsp ()
+	private bool RunProcess (string exe, string arguments, string output_file, string bat_file)
 	{
-		Process proc = Process.Start ("xsp.bat", fileName + " " + csFileName);
+		Console.WriteLine ("{0} {1}", exe, arguments);
+		Console.WriteLine ("Output goes to {0}", output_file);
+		Console.WriteLine ("Bat file is {0}", bat_file);
+
+		Process proc = new Process ();
+		proc.StartInfo.FileName = exe;
+		proc.StartInfo.Arguments = arguments;
+		proc.StartInfo.UseShellExecute = false;
+		proc.StartInfo.RedirectStandardOutput = true;
+		proc.Start ();
+		string poutput = proc.StandardOutput.ReadToEnd();
 		proc.WaitForExit ();
+		int result = proc.ExitCode;
 		proc.Close ();
+
+		StreamWriter cmd_output = new StreamWriter (File.Create (output_file));
+		cmd_output.Write (poutput);
+		cmd_output.Close ();
+		StreamWriter bat_output = new StreamWriter (File.Create (bat_file));
+		bat_output.Write (exe + " " + arguments);
+		bat_output.Close ();
+
+		return (result == 0);
+	}
+
+	private bool Xsp ()
+	{
+		return RunProcess ("xsp.exe", 
+				   fileName, 
+				   "output\\" + csFileName, 
+				   "output\\xsp_" + fileName + ".bat");
 	}
 
 	private HttpBrowserCapabilities GetCapabilities ()
@@ -136,10 +173,12 @@ class MyWorkerRequest
 		capab.Add ("Referer", "http://127.0.0.1/");
 		capab.Add ("Accept-Language", "es");
 		capab.Add ("Accept-Encoding", "gzip, deflate");
-		capab.Add ("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR 1.0.3705)");
+		capab.Add ("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR" +
+			   " 1.0.3705)");
 		capab.Add ("Host", "127.0.0.1");
 		return capab;
 	}
+
 	private void SetupPage (Page page)
 	{
 		HttpRequest request = new HttpRequest (fileName, "http://127.0.0.1/" + fileName, "");
@@ -164,7 +203,7 @@ class MyWorkerRequest
 		return line.Substring (begin + att_start.Length, end);
 	}
 	
-	private void GetBuildOptions (StringReader genCode)
+	private bool GetBuildOptions (StringReader genCode)
 	{
 		string line;
 		string dll;
@@ -177,57 +216,59 @@ class MyWorkerRequest
 				string src = GetAttributeValue (line, "src");
 				dll = src.Replace (".cs", ".dll"); //FIXME
 				//File.Delete (dll);
-				Compile (src, dll);
+				if (Compile (src, dll) == false){
+					Console.WriteLine ("Error compiling {0}. See the output file.", src);
+					return false;
+				}
 				AddReference (dll.Replace (".dll", ""));
 			}
 			else if (line.StartsWith ("//<reference ")){
 				dll = GetAttributeValue (line, "dll");
 				AddReference (dll);
 			}
-			else
-				throw new ApplicationException ("This is the build option line i get:\n" +
-								line);
+			else {
+				Console.WriteLine ("This is the build option line i get:\n" + line);
+				return false;
+			}
 		}
+
+		return true;
 	}
 
 	private Page Build ()
 	{
-		string dll = fileName.Replace (".aspx", ".dll"); //FIXME
+		string dll = "output\\" + fileName.Replace (".aspx", ".dll");
 		//File.Delete (dll);
-		Compile (fileName.Replace (".aspx", ".cs"), dll);
+		Compile (fileName.Replace (".aspx", ".cs"), dll); // May be this fails cause we are locking 
+								  // the dll
+
 		Assembly page_dll = Assembly.LoadFrom (dll);
-		if (page_dll == null)
-			throw new ApplicationException ("Error loading generated dll: " + dll);
+		if (page_dll == null){
+			Console.WriteLine ("Error loading generated dll: " + dll);
+			return null;
+		}
 
 		return (Page) page_dll.CreateInstance ("ASP." + className);
 	}
 
-	private void Compile (string csName, string dllName)
+	private bool Compile (string csName, string dllName)
 	{
-		string [] args = new string [cscOptions.Count + 1];
+		string [] args = new string [cscOptions.Count + 2];
 		int i = 0;
 		foreach (string option in cscOptions)
 			args [i++] = option;
 
-		args [i] = csName;
+		args [i++] = "/out:" + dllName;
+		args [i] = "output\\" + csName;
 
 		string cmdline = "";
 		foreach (string arg in args)
 			cmdline += " " + arg;
 
-		if (!Server.UseMonoClasses){
-			Console.WriteLine ("Writing compilation command to last_compilation_command.bat");
-			StreamWriter last_command = new StreamWriter (
-							File.Create ("last_compilation_command.bat"));
-			last_command.WriteLine ("csc.exe {0}", cmdline);
-			last_command.Close ();
-		}
-
-		Console.WriteLine ("Running... csc.exe {0}", cmdline);
-		Process proc = Process.Start ("csc.exe", cmdline);
-		proc.WaitForExit ();
-		proc.Close ();
-		Console.WriteLine ("<!-- Finished compilation of {0} -->", csName);
+		string noext = csName.Replace (".cs", "");
+		string output_file = "output\\output_from_compilation_" + noext + ".txt";
+		string bat_file = "output\\last_compilation_" + noext + ".bat";
+		return RunProcess ("csc.exe", cmdline, output_file, bat_file);
 	}
 }
 
@@ -408,6 +449,15 @@ public class Server
 			else
 				Usage ();
 		}
+
+		if (!Directory.Exists ("output")){
+			Console.WriteLine ("Creating directory 'output' where BAT files and \n" + 
+					   "comand output will be stored.");
+			Directory.CreateDirectory ("output");
+		}
+
+		Console.WriteLine ("Remember that you should rerun the server if you change\n" + 
+				   "the aspx file!");
 
 		Server server = new Server (port);
 		server.Start ();

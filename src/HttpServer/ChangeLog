@@ -1,5 +1,13 @@
 2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server.cs: all the intermediate files now go to ./output directory.
+	Also generates .BAT files containing the commands that the server
+	tries to run. Hopefully, this helps a lot for debugging tasks.
+
+	* README: added a couple of lines to document the above changes.
+
+2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* README: documented how to help debugging System.Web.
 
 	* server.cs: added option --usemonoclasses to test our System.Web

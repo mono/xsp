@@ -29,10 +29,11 @@ How to see it working
 
 * Copy some aspx file to ./testing 
 
-* (optional) Verify that 'xsp yourfile.aspx' generates C# code and that csc
-can compile it (reference System.Web.dll and System.Drawing.dll!).
-
-* cd ./testing; ./server PORTNUMBER
+* cd ./testing; ./server PORTNUMBER. 
+Running it for the first time will create 2 directories: 'lib' and 'output'. In
+'output' you will find all the intermediate files between ASPX and HTML and the
+BAT files run from testing directory which create them. 'lib' is only useful
+if you are debugging mono System.Web classes.
 
 * For real men:
 
@@ -45,8 +46,6 @@ can compile it (reference System.Web.dll and System.Drawing.dll!).
 How to help debugging mono System.Web
 ----------------------------------------
 * Follow the steps in previous section.
-
-* Create ./testing/lib
 
 * Run make in mcs/class and copy mcs/class/lib/System.Web.dll and
 mcs/class/lib/System.Drawing.dll to ./testing/lib
@@ -61,9 +60,9 @@ server on every access to a given page.
 	o You get an error saying that xxxxx.dll or one of its dependencies
 	was not found.
 
-		-Run the file last_compilation_command.bat and see if it 
+		-Run the file last_compilation_XXXXXX.bat and see if it 
 		compiles. Probably not. May be a missing class or feature?
-		Go! Implement/fix it!
+		A bug in Xsp? Go! Implement/fix it!
 
 	o You get incorrect HTML rendered on the browser.
 

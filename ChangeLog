@@ -1,3 +1,8 @@
+2004-06-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/Makefile.am: install extensions.dll into test directory so that
+	ServiceClient.exe runs fine.
+
 2004-06-15 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/favicon.ico:

@@ -1020,8 +1020,7 @@ public class Generator
 								     ChildrenKind.NONE;
 		NewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind, null); 
 
-		if (!html_ctrl.HasDefaultID)
-			current_function.AppendFormat ("\t\t\tthis.ID = \"{0}\";\n", html_ctrl.ControlID);
+		current_function.AppendFormat ("\t\t\t__ctrl.ID = \"{0}\";\n", html_ctrl.ControlID);
 
 		AddCodeForAttributes (html_ctrl.ControlType, html_ctrl.Attributes);
 
@@ -1058,8 +1057,7 @@ public class Generator
 		NewControlFunction (component.TagID, component.ControlID, component_type,
 				    component.ChildrenKind, component.DefaultPropertyName); 
 
-		if (!component.HasDefaultID)
-			current_function.AppendFormat ("\t\t\tthis.ID = \"{0}\";\n", component.ControlID);
+		current_function.AppendFormat ("\t\t\t__ctrl.ID = \"{0}\";\n", component.ControlID);
 
 		AddCodeForAttributes (component.ComponentType, component.Attributes);
 		if (component.ChildrenKind == ChildrenKind.LISTITEM)
@@ -1410,6 +1408,8 @@ public class Generator
 			"\t\t}\n\n");
 
 		Random rnd = new Random ();
+		epilog.Append ("\n\t\tpublic override void VerifyRenderingInServerForm (Control control)\n" +
+				"\t\t{\n\t\t}\n\n");
 		epilog.AppendFormat (
 			"\n" +
 			"\t\tprotected override void FrameworkInitialize ()\n\t\t{{\n" +
@@ -1448,6 +1448,7 @@ public class Generator
 
 		functions.Pop ();
 	}
+
 }
 
 }

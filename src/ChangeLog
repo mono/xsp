@@ -1,3 +1,16 @@
+2002-05-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: build MyForm.dll
+	
+	* MyForm.cs: subclass of HtmlForm to override attribute rendering.
+	This avoids failing when trying to render 'action' attribute.
+	
+	* aspelements.cs: use MyHtmlForm from MyForm.dll instead of HtmlForm.
+
+	* generator.cs: correctly set the control ID. Output the code to 
+	generate it always, as MS assigns one internally if it has not one when
+	rendering.
+
 2002-05-30  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* asp-parser.cs: fixed comments parsing.

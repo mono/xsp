@@ -11,13 +11,14 @@ SOURCES = asp-parser.cs \
 
 REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
 
-TARGET= xsp.exe
+all: MyForm.dll xsp.exe
 
-all: $(TARGET)
-
-$(TARGET): $(SOURCES)
+xsp.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) /out:$@ $^
 
+MyForm.dll: MyForm.cs
+	$(CSC) $(CSCFLAGS) /t:library $<
+
 clean:
-	rm -f $(TARGET) *~ *.pdb
+	rm -f MyForm.dll xsp.exe *~ *.pdb 
 

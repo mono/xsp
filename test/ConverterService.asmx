@@ -30,6 +30,7 @@ namespace WebServiceTests
 
 	[Dump]
 	[Encrypt]
+	[WebServiceAttribute (Description="Web service that can make currency conversions")]
 	public class ConverterService : System.Web.Services.WebService
 	{
 		static int userCount = 0;
@@ -53,7 +54,7 @@ namespace WebServiceTests
 			InternalSetCurrencyRate ("MXN", 10.5025 );
 		}
 		
-		[WebMethod]
+		[WebMethod (Description="Registers the user into the system")]
 		[SoapHeaderAttribute ("userInfo", Direction = SoapHeaderDirection.Out)]
 		[TraceExtension]
 		public void Login (string a)
@@ -62,7 +63,7 @@ namespace WebServiceTests
 			userInfo.userId = ++userCount;
 		}
 
-		[WebMethod]
+		[WebMethod (Description="Converts an amount from one currency to another currency")]
 		[SoapHeaderAttribute ("userInfo")]
 		[TraceExtension]
 		public double Convert (string sourceCurrency, string targetCurrency, double value)
@@ -72,7 +73,7 @@ namespace WebServiceTests
 			return usd * GetCurrencyRate (targetCurrency);
 		}
 		
-		[WebMethod]
+		[WebMethod (Description="Returns a list of currency rates")]
 		[SoapHeaderAttribute ("userInfo")]
 		[TraceExtension]
 		public CurrencyInfo[] GetCurrencyInfo ()
@@ -89,7 +90,7 @@ namespace WebServiceTests
 			}
 		}
 		
-		[WebMethod]
+		[WebMethod (Description="Sets the rate of a currency")]
 		[SoapHeaderAttribute ("userInfo")]
 		[TraceExtension]
 		public void SetCurrencyRate (string currency, double rate)
@@ -106,7 +107,7 @@ namespace WebServiceTests
 			}
 		}
 
-		[WebMethod]
+		[WebMethod (Description="Returns the rate of a currency")]
 		[SoapHeaderAttribute ("userInfo")]
 		[TraceExtension]
 		public double GetCurrencyRate (string cname)

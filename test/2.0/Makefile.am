@@ -1,1 +1,1 @@
-SUBDIRS = menu treeview
+SUBDIRS = menu treeview masterpages

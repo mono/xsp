@@ -1,18 +1,11 @@
 <%@ Page Language="c#" %>
 <script runat="server">
 
-    void Menu1_MenuItemClick(Object s, 
-     System.Web.UI.WebControls.MenuEventArgs e)
+    void Menu1_MenuItemClick(Object s, System.Web.UI.WebControls.MenuEventArgs e)
     {
         Label1.Text = "You selected " + e.Item.Text;
 		Page.Header.Metadata ["un"] = "dos";
 		Page.Header.Title = "You selected " + e.Item.Text;
-		
-		Style st = new Style ();
-		st.Width=10;
-		Page.Header.StyleSheet.RegisterStyle (st, null);
-		Page.Header.StyleSheet.RegisterStyle (st, null);
-		Page.Header.StyleSheet.CreateStyleRule (st, "BODY", null);
     }
     
 </script>
@@ -21,9 +14,10 @@
     <title>Simple Menu</title>
 	<META kk="iii">
 </head>
-<body>
+<body style="background-color: #f8f8f4; padding:0; margin:0">
     <form id="form1" runat="server">
-
+	<table width="100%" style="height:100%"><tr>
+	<td style="background: #505050; padding:10px" valign=top>
     <asp:Menu
         id="Menu1"
 		StaticDisplayLevels = "1"
@@ -32,14 +26,19 @@
 		DynamicHorizontalOffset = "5"
 		DynamicVerticalOffset = "0"
 		DynamicHoverStyle-ForeColor = "Green"
-		StaticHoverStyle-BackColor = "Magenta"
-		DynamicMenuStyle-BackColor = "LemonChiffon"
-		DynamicMenuStyle-ForeColor = "gray"
+		StaticHoverStyle-BackColor = "gray"
+		StaticMenuStyle-ForeColor = "white"
 		DynamicSelectedStyle-BackColor = "Red"
         Runat="Server">
-	<DynamicItemTemplate>
-	Item: <%# ((MenuItem)Container.DataItem).Text %>
-	</DynamicItemTemplate>
+	  <DynamicMenuStyle
+		BackColor = "#f8f8f4"
+		ForeColor = "gray"
+		BorderColor="#505050"
+		BorderStyle="Solid"
+		BorderWidth="1" />
+	  <DynamicMenuItemStyle
+		HorizontalPadding="5" 
+		VerticalPadding="3" />  
     <Items>
     <asp:MenuItem Text="Part I">
         <asp:MenuItem Text="Chapter 1" ImageUrl="http://msdn.microsoft.com/msdn-online/shared/graphics/icons/rtg_email.gif"/>
@@ -61,9 +60,14 @@
     <asp:MenuItem Text="Part III"/>
     </Items>
     </asp:Menu>
-
-    <p>&nbsp;</p>
-    <asp:Label ID="Label1" Runat="Server" />
+	</td>
+	<td width="100%">
+    <p align=center>
+    <asp:Label ID="Label1" Runat="Server" >This is a vertical menu sample</asp:Label>
+	</p>
+	</td>
+	</tr>
+	</table>
 	
     </form>
 	<br/>

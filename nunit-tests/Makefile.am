@@ -1,3 +1,0 @@
-SUBDIRS=standalone
-EXTRA_DIST = README
-

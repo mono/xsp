@@ -1,7 +1,7 @@
 MCS=@MCS@
 MCSFLAGS+= -debug+ -debug:full -nologo
 MKINSTALLDIRS=@top_builddir@mkinstalldirs 
-DISTFILES=Makefile.in $(DBSESSMGR_SOURCES_IN)
+DISTFILES=Makefile.in $(DBSESSMGR_SOURCES_IN) dbsessmgr.exe.config
 
 DBSESSMGR_REFERENCES= System.Data
 DBSESSMGR_REFS= $(addsuffix .dll, $(addprefix -r:, $(DBSESSMGR_REFERENCES)))

@@ -1,5 +1,10 @@
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* web_radiobutton.aspx:
+	* web_textbox.aspx: 2 more.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* web_imagebutton.aspx: rendered ok.
 
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>

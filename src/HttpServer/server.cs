@@ -597,6 +597,7 @@ class MyWorkerRequest
 		stream_output.Write (GetContentType ());
 		stream_output.Write ("\r\nContent-Length: ");
 		stream_output.Write (fi.Length.ToString ());
+		stream_output.Write ("\r\n");
 
 		Stream bases = stream_output.BaseStream;
 		Stream fileInput = File.Open (fileOnDisk, FileMode.Open); //FIXME

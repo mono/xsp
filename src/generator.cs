@@ -491,11 +491,17 @@ public class Generator
 				throw new ApplicationException ("Color " + att + " is not a valid color.", e);
 			}
 
-			//TODO: use known color names for KnownColor and SystemColor and Color.FromArgb ()
-			current_function.AppendFormat ("\t\t\t__ctrl.{0} = (System.Drawing.Color) " + 
-						       "System.ComponentModel.TypeDescriptor.GetConverter " + 
-						       "(typeof (System.Drawing.Color))." + 
-						       "ConvertFromString (\"{1}\");\n", var_name, att);
+			// Should i also test for IsSystemColor?
+			// Are KnownColor members in System.Drawing.Color?
+			if (c.IsKnownColor){
+				current_function.AppendFormat ("\t\t\t__ctrl.{0} = System.Drawing.Color." +
+							       "{1};\n", var_name, c.Name);
+			}
+			else {
+				current_function.AppendFormat ("\t\t\t__ctrl.{0} = System.Drawing.Color." +
+							       "FromArgb ({1}, {2}, {3}, {4});\n",
+							       var_name, c.A, c.R, c.G, c.B);
+			}
 		}	
 		else {
 			throw new ApplicationException ("Unsupported type in property: " + 

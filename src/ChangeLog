@@ -1,5 +1,9 @@
 2002-05-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* generator.cs: better generated code for colors.
+
+2002-05-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* generator.cs: support Style properties for style tags (i.e., things
 	like Font-Size inside a style tag which is a property of a control).
 

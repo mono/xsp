@@ -1,5 +1,10 @@
 2005-03-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server/ApplicationServer.cs: prevent premature stop from mod_mono from
+	not doing the clean up. Patch from Rob Lyon.
+
+2005-03-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/server.cs: fix lockfile name generation. Patch by Mike Lasky.
 	Closes bug #73234.
 

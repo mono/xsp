@@ -1,0 +1,698 @@
+2003-09-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* ChangeLog: unified all ChangeLog.
+
+	* NEWS:
+	* INSTALL: updated.
+
+	* Makefile:
+	* doc/Makefile.in:
+	* doc/directives-syntax.txt:
+	* doc/generated-code.txt:
+	* doc/helping.txt:
+	* server/ChangeLog:
+	* server/Makefile:
+	* server/Makefile.in:
+	* server/global.asax:
+	* server/mod-mono-server.exe.config:
+	* server/xsp.exe.config:
+	* test/ChangeLog:
+	* test/Makefile:
+	* test/Makefile.in:
+	* test/global.asax:
+	* test/mod-mono-server.exe.config:
+	* test/xsp.exe.config:
+	* test/authtest/ChangeLog: use auto* stuff forthe build and
+	unified ChangeLog.
+
+	* server/XSPApplicationHost.cs: added a couple of catches.
+
+2003-09-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: added a ISponsor for NetworkStream and don't
+	crash xsp.exe if RemoteEndPoint throws an exception.
+
+2003-09-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs: don't cache the values from mod_mono_unix
+	here...
+	* server/ModMonoRequest.cs: ...and do it here.
+	(GetClientBlock): mark the array as an Out parameter so that the
+	modified array is passed back to the caller by remoting. This fixes
+	POST when using mod_mono_unix.
+
+2003-09-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: don't crash when no Host header is received or
+	if it has an invalid port.
+
+2003-09-14  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* test/DefaultWsdlHelpGenerator.aspx. Added support for C# proxy generation.
+
+2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* test/Added DefaultWsdlHelpGenerator.aspx.
+
+2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* server/XSPWorkerRequest.cs: GetServerName(): reverted previous patch. There
+	was a conflict with previous changes.
+	Also modified implementation of GetLocalAddress(). It should get the
+	value from the request header.
+
+2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* server/XSPWorkerRequest.cs: GetServerName(): return the 
+	  address of the local server.
+
+2003-08-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/InitialWorkerRequest.cs: removed Console...
+	* server/ModMonoRequest.cs: removed debug output.
+
+	* server/ModMonoWorkerRequest.cs: added pathinfo support.
+	* server/MonoWorkerRequest.cs: removed GetRawUrl from here.
+	* server/XSPApplicationHost.cs: read the request data needed to get the Uri.
+
+
+2003-08-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/InitialWorkerRequest.cs: added PathInfo support.
+	
+	* server/MonoWorkerRequest.cs: removed unused GetPathInfo. Don't cache the
+	mapped path as it may change (ie., / -> /index.aspx).
+
+	* server/XSPWorkerRequest.cs: support pathinfo. Works with MS. Always send
+	the 'Connection: close' header. Added support for GetLocal*.
+
+2003-08-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/InitialWorkerRequest.cs: fixed bugs 47937 and 47938.
+
+	* server/XSPApplicationHost.cs: close the socket when finished.
+
+	* server/XSPWorkerRequest.cs: small fixes in ReadEntityBody. Removed the 302
+	redirection, handle it faking the path.
+
+2003-08-26  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: infinite lifetime for XSPApplicationHost.
+
+2003-08-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/InitialWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs: keep the read buffer, its length and the position
+	around (used in POST). Somehow this bug didnn't show up under MS
+	runtime.
+
+	* server/XSPApplicationHost.cs: fixed warning and commented out WriteLines.
+
+2003-08-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/IApplicationHost.cs: added 2 methods and 1 property to the
+	interface.
+	
+	* server/InitialWorkerRequest.cs: used to read the request data before
+	determining which application (if at all) is gonna process it.
+	
+	* server/Makefile: added new source file.
+
+	* server/ModMonoRequest.cs: removed AliasMatches and added Decline.
+
+	* server/ModMonoWorkerRequest.cs: new .ctor and Decline method that
+	tells apache that we won't handle the request.
+	
+	* server/MonoWorkerRequest.cs: variable renamed.
+
+	* server/XSPApplicationHost.cs: it can now handle multiple applications.
+	* server/XSPWorkerRequest.cs: simplified as reading the request data
+	is done in InitialWorkerRequest.
+
+	* server/xsp.exe.config:
+	* server/mod-mono-server.exe.config: added MonoApplications default
+	setting.
+
+	* server/server.cs: updated help and set the applications registered.
+	
+
+2003-08-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: handle possible exceptions in ProcessRequest.
+	* server/XSPWorkerRequest.cs: don't do any check on the verb. If an error
+	happens reading the request or the headers, send a 500 back and
+	terminate.
+
+2003-08-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/AssemblyInfo.cs: updated version number.
+
+2003-08-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: write the correct number of bytes when flushing
+	the response.
+
+2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/monodoc.ashx: added this file that contains a couple of directives
+	plus monodoc/browser/website-handler.cs. Yeah! BenM rules.
+
+2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/index.aspx: also list .ashx files.
+	* test/webhandler.ashx: added new sample.
+
+2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/mod-mono-server.exe.config: New file.
+
+	* server/Makefile:
+	* server/ModMonoRequest.cs: new class that communicate with the new
+	mod_mono_unix apache2 module.
+
+	* server/ModMonoWorkerRequest.cs: HttpWorkerRequest for unix socket.
+
+	* server/server.cs:
+	* server/XSPApplicationHost.cs: updated for new apache2 module.
+
+2003-07-30  Sebastien Pouliot  <spouliot@videotron.ca>
+
+	* test/Makefile: Corrected extensions.dll for csc, error: Options '/out' and '/target' 
+	must appear before source file names
+
+2003-07-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web.config: update to new type/assembly name and make it use gzip by
+	default.
+
+2003-07-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/AcceptEncodingConfig.cs:
+	* server/AcceptEncodingModule.cs:
+	* server/AcceptEncodingSectionHandler.cs:
+	* server/GZipFilter.cs:
+	* server/Makefile: these .cs files have been moved to Mono.Http.dll.
+
+	* server/AssemblyInfo.cs: upgrade version.
+
+2003-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web.config: the new mono.aspnet configuration section has been added
+	and other contents from ../server/web.config file.
+
+2003-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/AcceptEncodingConfig.cs: class to hold the configuration for the
+	filters enabled in web.config.
+
+	* server/AcceptEncodingModule.cs: IHttpModule to plug the filters.
+
+	* server/AcceptEncodingSectionHandler.cs: configuration file section handler
+	for accept-encoding filters.
+
+	* server/GZipFilter.cs: sample filter for gzip encoding.
+
+	* server/Makefile: reference ICSharpCode.SharpZipLib, added new files and
+	renamed executable to xsp.exe
+
+	* server/server.exe.config: removed and renamed to...
+	* server/xsp.exe.config: ...this one.
+	* server/web.config: Removed file. It's been merged with ../test/
+
+2003-07-09  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* test/README: added descrption of web service samples.
+	* test/Makefile: added compilation of extensions and service client.
+	* test/web.config: Copied from the server directory. It includes soap extension configuration.
+	* test/TestService.asmx: New file. A simple test service.
+	* test/ConverterService.asmx: New file. Currency conversion test service.
+	* test/TraceExtension.cs: New file. Trace soap extension.
+	* test/EncryptExtension.cs: New file. A Soap extension that encrypts the info.
+	* test/DumpExtension.cs: New file. Dump soap extension.
+	* test/ServiceClient.cs: New file. Web service test app.
+	* test/ServiceClient.exe.config: New file. Config file for the ServiceClient test app.
+	* test/Reference.cs: New file. Web service client proxy implementation.
+
+2003-07-09  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* server/Makefile: install target: copy web service files.
+
+2003-06-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: reverted latest Ben's patch as it causes an
+	annoying bug when testing under windows.
+
+2003-05-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs:
+	* server/XSPWorkerRequest.cs: support GetRemoteName, GetRemoteAddress and
+	GetRemotePort. Fixes bug #43985.
+
+2003-05-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: when redirecting to an index page, also use the
+	query string. Fixes bug #43598.
+
+2003-05-24  Ben Maurer <bmaurer@users.sourceforge.net>
+	* server/XSPWorkerRequest.cs: Now /foo/ does not redirect to
+	/foo/index.aspx, it just does a Response.Transfer () sort of
+	thing.
+
+2003-05-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/body.inc: New file.
+	* test/header.inc: New file.
+	* test/includetest.aspx: New file.
+
+2003-05-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs:
+	* server/server.cs:
+	* server/server.exe.config:
+	* server/web.config: the index files must be set in the proper AppDomain.
+	Fixes #42309.
+
+2003-05-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/web.config: removed server.exe keys.
+	* server/Makefile: readded server.exe.config.
+
+	* server/XSPWorkerRequest.cs:
+	* server/server.cs:
+	* server/server.exe.config: made the default index files list configurable.
+
+2003-05-03  Pedro Martínez Juliá  <yoros@wanadoo.es>
+
+	* server/server.cs: new options to set listen address.
+
+2003-03-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: added a MapPathEvent that is fired before doing
+	the normal MapPath stuff and can provide alternate mappings.
+
+2003-02-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile: .dbg files are gone.
+
+	* server/MonoWorkerRequest.cs: fixed MapPath to deal with virtual directories.
+	* server/XSPWorkerRequest.cs: some cosmetic changes along with a fix when
+	redirecting to location page.
+
+	* server/server.cs: new options to set the root and virtual directory for the
+	application.
+
+	* server/XSPApplicationHost.cs: keep path and virtual path in instance fields.
+
+2003-02-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_datagrid_command.aspx: added sample that allows deleting rows from
+	a data source.
+
+2003-02-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/authtest/index.aspx:
+	* test/authtest/login.aspx:
+	* test/authtest/web.config: authorization test from http://www.asp.net.
+
+2003-02-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: when running under MS runtime, closing 'stream'
+	is required too.
+
+2003-02-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: fixed buglet in GetAppPath.
+
+2003-02-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile: removed installation of server.exe.config.
+	* server/XSPWorkerRequest.cs: buffered input from the socket.
+	* server/server.exe.config: Removed file. Yahoo!
+	* server/web.config: authentication mode set to Forms.
+
+2003-02-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: fixed ReadEntityBody. Thanks to Brian Ritchie.
+	Don't use a StreamReader to read from the stream cause it may buffer
+	some data. TODO -> now we're using ReadByte to read from the stream.
+	We should use Read and do some buffering.
+
+2003-01-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/dbpage1.aspx:
+	* test/dbpage2.aspx: make the database accessing samples take some
+	parameters from the configuration file to choose the IDbConnection
+	and documented it.
+
+2003-01-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile:
+	* server/server.exe.config:
+	* server/web.config: make the database accessing samples take some
+	parameters from the configuration file to choose the IDbConnection
+	and documented it.
+
+2003-01-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs: moved GetUnknownHeader(s) here.
+
+2003-01-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/IApplicationHost.cs: 
+	* server/MonoWorkerRequest.cs: the same files as in mod_mono. They must be kept
+	in synch.
+
+	* server/XSPApplicationHost.cs: same as previous MonoApplicationHost, but
+	implements IApplicationHost.
+
+	* server/XSPWorkerRequest.cs: it derives now from MonoWorkerRequest. Removed
+	some overrides that are already present in the base class.
+
+	* server/server.cs: use XSPApplicationHost.
+
+	* server/Makefile: added/removed files to SOURCES. Install the .dbg file.
+
+	* server/MonoApplicationHost.cs: Removed file.
+
+	Now mod_mono and xsp share IApplicationHost and MonoWorkerRequest.
+
+2003-01-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: fixed GetRawUrl.
+
+2003-01-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_datagrid.aspx: simple datagrid test.
+
+2003-01-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/registertest.aspx:
+	* test/registertest1.ascx:
+	* test/registertest2.ascx: new test for @ Register directive.
+
+2003-01-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile: also copy .ascx files.
+
+2003-01-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/Makefile: added codebehind1 test.
+	* test/codebehind1.[aspx|cs]: codebehind test by David B. Bitton
+	<david@codenoevil.com>.
+
+2002-12-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: it know handles directory requests either
+	redirecting to a / terminated url for directories or searching for one
+	of the default index files for / terminated urls.
+
+2002-12-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: changes to match recent MapPath fixing in
+	System.Web.
+
+2002-12-13  Juli Mallett  <jmallett@FreeBSD.org>
+
+	* server/Makefile, server/Makefile, src/Makefile: Spell `make' as `$(MAKE)'.
+	* server/README: Fix typo.
+
+2002-12-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/AssemblyInfo.cs: New file.
+	* server/Makefile: added AssemblyInfo.cs.
+	* server/MonoWorkerRequest.cs: create Server header from assembly attributes.
+	Thanks to alp and danmorg. Some path handling fixes and kludges.
+
+2002-12-10  Alp Toker <alp@atoker.com>
+
+	* server/server/MonoWorkerRequest.cs: send a 'Server' HTTP header
+
+2002-12-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/server/Makefile: updated.
+	* server/server/MonoWorkerRequest.cs: give credits to Opless (Simon White).
+	* server/server/server.cs: get the port from a config file.
+	* server/server/server.exe.config: configuration file.
+	* server/server/web.config: added appSettings.
+
+2002-11-24  Daniel Morgan <danmorg@sc.rr.com>
+
+	* test/dbpage1.aspx: modify to dynamically load
+	the Mono.Data.PostgreSqlClient assembly
+	and Connection class
+	Mono.Data.PostgreSqlClient.PgSqlConnection.  This is
+	a temporary solution until global.asax has support for this.
+
+2002-10-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/MonoWorkerRequest.cs: use a default encoding without markers.
+	* server/server.cs: Trace output goes to Console.Out.
+
+2002-10-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile: added Tracing.cs
+
+	* server/MonoApplicationHost.cs: use WebTrace.
+	
+	* server/MonoWorkerRequest.cs: use WebTrace. Also changed FlushResponse. Now
+	it outputs correctly the status and the headers.
+	
+	* server/Tracing.cs: new file. Almost the same as System.Web.Util.WebTrace.
+	It's used to get some output under MS runtime, which disables normal
+	tracing for System.Web.
+
+	* server/server.cs: removed Trace stuff.
+
+2002-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/Makefile: used to build the .cs files for user controls.
+
+2002-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile: added 'trace' target.
+	* server/index.aspx: removed file added by mistake.
+
+2002-10-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ChangeLog:
+	* server/Makefile:
+	* server/MonoApplicationHost.cs:
+	* server/MonoWorkerRequest.cs:
+	* server/global.asax:
+	* server/index.aspx:
+	* server/server.cs:
+	* server/web.config: new web server that uses ASP.NET hosting capabilities.
+	It works with MS runtime and will be used to debug our classes from
+	now on. xsp/src/* is now obsoleted and will stop working some time soon.
+
+2002-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/databind-arraylist.aspx: fixed variable name.
+
+	* test/htmlimage.aspx:
+	* test/htmlinputimage.aspx:
+	* test/tabcontrol2.aspx:
+	* test/web_adrotator.xml:
+	* test/web_hyperlink.aspx:
+	* test/web_image.aspx:
+	* test/web_imagebutton.aspx: modify the img url. Ximian site changed.
+
+2002-09-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/index.aspx: now we have a working Path...
+
+2002-08-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/dbpage2.aspx: fixes to make mcs happy.
+
+2002-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/temperature.aspx: Duncan asked for this temperature converter.
+
+2002-07-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_dropdownlist.aspx: New file.
+
+2002-07-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/mono.png: image for the index page.
+	* test/index.aspx: index.aspx page which shows the list of available .aspx
+	files in the current directory. Contributed by Alp Toker.
+
+	* test/validator1.aspx: first validator test working!
+
+2002-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/dbpage2.aspx: new sample. It uses tabcontrol2 and sets up a page
+	with 4 tabs (Browse, Insert, Update, Delete) for maintenance of a simple
+	PostgreSQL database using ADO.NET.
+
+2002-07-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/tabcontrol.aspx: removed .dll extension from assembly file name.
+
+	* test/tabcontrol2.aspx: now it does not set up the contents of each tab
+	programatically. It uses <Mono:TabContent...>.
+
+	* test/tabcontrol2.cs: added TabContent control. TabContent can contain any
+	control (excluding HtmlForm, of course). Modified Tabs2 to use
+	TabContent and maintaining state of all tabs.
+
+2002-07-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/tabcontrol2.aspx: page to test tabcontrol2.cs
+
+	* test/tabcontrol2.cs: almost the same as tabcontrol1, but this one handles
+	postback events an stores a ControlCollection associatted to each tab.
+
+2002-07-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/tabcontrol.aspx: sample using a user control that allows modifying
+	its properties and display the resulting control.
+
+	* test/tabcontrol.cs: the user control for the above page. It must be
+	compiled and the dll copied to output directory if testing with our
+	test server.
+
+2002-07-06  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* test/dbpage1.aspx: displays data from a database in a Table.
+
+2002-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/server-side-object.aspx: New file.
+
+2002-06-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/session1.aspx: used to play with session tracking.
+
+2002-06-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_repeater.aspx: rendered ok. Includes data binding!
+
+2002-06-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_radiobuttonlist.aspx: another one.
+
+2002-06-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_checkboxlist.aspx: New file. Still have to fix the Name property
+	to assign name attribute depending on parent name.
+
+2002-06-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_listbox.aspx: new file rendered ok.
+
+2002-06-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_table.aspx: New file. Renders Table, TableRow and TableCell.
+
+2002-06-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_panel.aspx: New file.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_radiobutton.aspx:
+	* test/web_textbox.aspx: 2 more.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_imagebutton.aspx: rendered ok.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_linkbutton.aspx: 17 more to go!
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_label.aspx: fixed cut&paste error in title.
+
+	* test/web_literal.aspx:
+	* test/web_placeholder.aspx: New files.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_label.aspx: one more.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_button.aspx:
+	* test/web_checkbox.aspx: another couple rendered ok.
+
+2002-06-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_adrotator.aspx:
+	* test/web_hyperlink.aspx:
+	* test/web_image.aspx: new tests that render fine with our System.Web.
+
+	* test/web_adrotator.xml: needed by web_adrotator.aspx.
+
+2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/htmltable.aspx:
+	* test/htmltextarea.aspx: New files. Rendered ok.
+
+2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/htmlselect.aspx: another one that is rendered by our System.Web.
+
+2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/htmlinputbutton.aspx: New file. Renders fine with our System.Web.
+	* test/htmlinputcheckbox.aspx: another one.
+	* test/htmlinputfile.aspx: another one.
+
+2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/htmlimage.aspx: New file. Renders fine with our System.Web.
+
+2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/htmlanchor.aspx: New file.
+	* test/htmlbutton.aspx: New file.
+	* test/htmlgeneric.aspx: New file.
+
+	These render fine using xsp + server + mono System.Web.
+
+2002-05-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/code-render.aspx: new file.
+
+2002-05-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/databind-attribute.aspx: new file.
+
+2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/databind-template.aspx: added another template (previously, this
+	failed to generate proper code).
+
+2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/databind-template.aspx: new file.
+
+2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/databind-class.aspx: new file.
+
+2002-05-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/listitem.aspx: new file.
+
+2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/calendar.aspx: new file. Style properties inside component.
+
+2002-05-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/README, ChangeLog: changed line ending to unix format.
+
+	* test/databind-arraylist.aspx: added an ArrayList as server object. Also
+	changed to unix format.
+
+2002-05-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	Created directory and added a couple of samples.
+

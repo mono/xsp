@@ -1,7 +1,5 @@
-# Run make CSC=csc if you want debugging on windows.
-# Add CSCFLAGS=/d:TRACE if you want trace support
-CSC=mcs
-CSCFLAGS+= -debug+ -debug:full -nologo
+MCS=@MCS@
+MCSFLAGS+= -debug+ -debug:full -nologo
 
 # 
 XSP_REFERENCES= System.Web
@@ -28,28 +26,29 @@ MODMONO_SERVER_SOURCES =  IApplicationHost.cs \
 			  server.cs
 
 EXES = xsp.exe mod-mono-server.exe
+LOCAL_BIN_DIR=$(DESTDIR)@prefix@/bin
+
+.PHONY: all install clean uninstall trace
+
 all: $(EXES)
 	
-install: $(EXES) global.asax
-	mkdir -p test/bin
-	cp $(EXES) xsp.exe.config mod-mono-server.exe.config global.asax test
-	cp $(EXES) test/bin
-	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx test
-	cp ../test/*.xml ../test/*.xsl ../test/*.png ../test/*.inc test
-	cp ../test/*.ashx test
-	cp ../test/*.dll test/bin
+install: $(EXES)
+	@top_builddir@mkinstalldirs $(LOCAL_BIN_DIR)
+	cp $(EXES) $(LOCAL_BIN_DIR)
 
 xsp.exe: $(XSP_SOURCES)
-	$(CSC) $(CSCFLAGS) $(XSP_REFS) /out:$@ $^
+	$(MCS) $(MCSFLAGS) $(XSP_REFS) /out:$@ $^
 
 mod-mono-server.exe: $(MODMONO_SERVER_SOURCES)
-	$(CSC) $(CSCFLAGS) $(MODMONO_SERVER_REFS) /d:MODMONO_SERVER /out:$@ $^
+	$(MCS) $(MCSFLAGS) $(MODMONO_SERVER_REFS) /d:MODMONO_SERVER /out:$@ $^
 
 trace: 
 	rm -f $(EXES)
-	$(MAKE) -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
+	$(MAKE) MCSFLAGS=/d:WEBTRACE MCS=$(MCS)
 
 clean:
 	rm -f $(EXES) *~ *.pdb
-	rm -rf test
+
+uninstall:
+	-test -d $(LOCAL_BIN_DIR) && cd $(LOCAL_BIN_DIR) && rm -f $(EXES)
 

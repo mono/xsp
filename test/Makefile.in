@@ -1,0 +1,48 @@
+MCS=@MCS@
+
+%.dll: %.cs
+	$(MCS) -r:System.Web.dll -target:library -out:$@ $^
+
+DLLS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll 
+EXES = ServiceClient.exe
+SAMPLES_DIR = $(DESTDIR)@prefix@/share/doc/xsp/test
+
+EVERYTHING = $(DLLS) \
+	     $(EXES) \
+	     *.aspx \
+	     *.ascx \
+	     *.asmx \
+	     *.ashx \
+	     *.config \
+	     *.asax \
+	     *.xml
+
+.PHONY: all install clean uninstall
+
+all: $(DLLS) $(EXES)
+
+install: $(EVERYTHING)
+	@top_builddir@mkinstalldirs $(SAMPLES_DIR)
+	cp $(EVERYTHING) $(SAMPLES_DIR)
+
+uninstall:
+	-test -d $(SAMPLES_DIR) && cd $(SAMPLES_DIR) && rm -f $(EVERYTHING)
+	-rmdir $(SAMPLES_DIR)
+
+tabcontrol.dll: tabcontrol.cs
+
+tabcontrol2.dll: tabcontrol2.cs
+
+codebehind1.dll: codebehind1.cs
+
+extensions.dll: TraceExtension.cs EncryptExtension.cs DumpExtension.cs
+	$(MCS) -r:System.Web.dll -r:System.Web.Services.dll -target:library \
+		-out:$@ $^
+
+ServiceClient.exe: extensions.dll ServiceClient.cs Reference.cs
+	$(MCS) -r:System.Web.dll -r:System.Web.Services.dll -r:extensions.dll \
+		ServiceClient.cs Reference.cs
+	
+clean:
+	rm -f *.dll *~ *.pdb
+

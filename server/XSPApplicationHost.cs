@@ -86,9 +86,13 @@ namespace Mono.ASPNET
 				host.Domain.DoCallBack (pr);
 			} catch (Exception e) {
 				Console.WriteLine (e);
-				ns.Write (error500, 0, error500.Length);
+				try {
+					ns.Write (error500, 0, error500.Length);
+				} catch {}
 			} finally {
-				ns.Close ();
+				try {
+					ns.Close ();
+				} catch {}
 			}
 		}
 

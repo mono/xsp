@@ -3,9 +3,9 @@ Testing XSP
 
 Steps for installing the server:
 
+	./autogen.sh --prefix=/your/install/dir
 	make 
 	make install
-	...and follow the instructions...
 
     You can change the listen port from the default (8080) using the
     configuration file (xsp.exe.config).

@@ -65,7 +65,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                    Default value: current directory.");
 			Console.WriteLine ("                    AppSettings key name: MonoServerRootDir");
 			Console.WriteLine ();
-			Console.WriteLine ("    --applications APPS: a semicolon separated list of virtual directory and");
+			Console.WriteLine ("    --applications APPS: a comma separated list of virtual directory and");
 			Console.WriteLine ("                    real directory for all the applications we want to manage");
 			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
 			Console.WriteLine ("                    by a colon.");
@@ -160,8 +160,14 @@ namespace Mono.ASPNET
 				return 1;
 			}
 #endif
-			if (rootDir != null && rootDir != "")
-				Environment.CurrentDirectory = rootDir;
+			if (rootDir != null && rootDir != "") {
+				try {
+					Environment.CurrentDirectory = rootDir;
+				} catch (Exception e) {
+					Console.WriteLine ("Error: {0}", e.Message);
+					return 1;
+				}
+			}
 
 			rootDir = Directory.GetCurrentDirectory ();
 			

@@ -1,3 +1,12 @@
+2003-11-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* doc/xsp.1: updated.
+
+	* server/AssemblyInfo.cs.in:
+	* server/AssemblyInfoModMono.cs.in: Novell.
+
+	* server/server.cs: handle wrong --root directories.
+
 2003-11-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: no need to create a full WorkerRequest

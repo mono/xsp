@@ -116,10 +116,10 @@ namespace Mono.ASPNET
 			protocol = rdata.Protocol;
 			queryString = rdata.QueryString;
 			inputBuffer = rdata.InputBuffer;
-			inputLength = rdata.InputLength;
-			position = rdata.Position;
+			inputLength = inputBuffer.Length;
+			position = 0;
 
-			headers = rdata.Headers;
+			GetRequestHeaders ();
 			responseHeaders = new StringBuilder ();
 			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
@@ -141,7 +141,79 @@ namespace Mono.ASPNET
 					localPort = 80;
 				}
 
-				localAddress = url.Substring (0,i);
+				localAddress = url.Substring (0, i);
+			}
+		}
+
+		void FillBuffer ()
+		{
+			inputBuffer = new byte [32*1024];
+			inputLength = stream.Read (inputBuffer, 0, 32*1024);
+			position = 0;
+		}
+
+		int ReadInputByte ()
+		{
+			if (inputBuffer == null || position >= inputLength)
+				FillBuffer ();
+
+			return (int) inputBuffer [position++];
+		}
+
+		string ReadLine ()
+		{
+			bool foundCR = false;
+			StringBuilder text = new StringBuilder ();
+
+			while (true) {
+				int c = ReadInputByte ();
+
+				if (c == -1) {				// end of stream
+					if (text.Length == 0)
+						return null;
+
+					if (foundCR)
+						text.Length--;
+
+					break;
+				}
+
+				if (c == '\n') {			// newline
+					if ((text.Length > 0) && (text [text.Length - 1] == '\r'))
+						text.Length--;
+
+					foundCR = false;
+					break;
+				} else if (foundCR) {
+					text.Length--;
+					break;
+				}
+
+				if (c == '\r')
+					foundCR = true;
+					
+
+				text.Append ((char) c);
+			}
+
+			return text.ToString ();
+		}
+
+		void GetRequestHeaders ()
+		{
+			try {
+				string line;
+				headers = new Hashtable ();
+				while ((line = ReadLine ()) != null && line.Length > 0) {
+					int colon = line.IndexOf (':');
+					if (colon == -1 || line.Length < colon + 2)
+						throw new Exception ();
+					string key = line.Substring (0, colon);
+					string value = line.Substring (colon + 1).Trim ();
+					headers [key] = value;
+				}
+			} catch (Exception e) {
+				throw new Exception ("Error reading headers.");
 			}
 		}
 

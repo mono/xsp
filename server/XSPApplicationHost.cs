@@ -23,7 +23,8 @@ using Mono.Posix;
 
 namespace Mono.ASPNET
 {
-	class Worker : MarshalByRefObject, ISponsor
+	[Serializable]
+	class Worker
 	{
 		IApplicationHost host;
 		NetworkStream ns;
@@ -72,7 +73,6 @@ namespace Mono.ASPNET
 				rdata = ir.RequestData;
 				host = host.GetApplicationForPath (rdata.Path, true);
 #else
-				
 				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
 				mwr.ReadRequestData ();
 				host = host.GetApplicationForPath (mwr.GetUriPath (), false);
@@ -104,23 +104,12 @@ namespace Mono.ASPNET
 #else
 			XSPWorkerRequest mwr = new XSPWorkerRequest (modRequest, host);
 #endif
-			ILease l = (ILease) GetLifetimeService ();
-			l.Register (this);
 			if (!mwr.ReadRequestData ()) {
 				requestFinished = true;
 				return;
 			}
 
 			mwr.ProcessRequest ();
-		}
-
-		TimeSpan ISponsor.Renewal (ILease lease)
-		{
-			if (requestFinished) {
-				return TimeSpan.Zero;
-			}
-
-			return new TimeSpan (0, 1, 0);
 		}
 	}
 

@@ -25,19 +25,14 @@ namespace Mono.ASPNET
 		public string PathInfo;
 		public string QueryString;
 		public string Protocol;
-		public Hashtable Headers;
 		public byte [] InputBuffer;
-		public int InputLength;
-		public int Position;
 
-		public RequestData (string verb, string path, string queryString, string protocol,
-				    Hashtable headers)
+		public RequestData (string verb, string path, string queryString, string protocol)
 		{
 			this.Verb = verb;
 			this.Path = path;
 			this.QueryString = queryString;
 			this.Protocol = protocol;
-			this.Headers = headers;
 		}
 
 		public override string ToString ()
@@ -58,7 +53,6 @@ namespace Mono.ASPNET
 		string queryString;
 		string protocol;
 		string pathInfo;
-		Hashtable headers;
 		NetworkStream stream;
 
 		byte [] inputBuffer;
@@ -182,24 +176,6 @@ namespace Mono.ASPNET
 			return true;
 		}
 
-		bool GetRequestHeaders ()
-		{
-			string line;
-			headers = new Hashtable ();
-			
-			while ((line = ReadLine ()) != null && line.Length > 0) {
-				int colon = line.IndexOf (':');
-				if (colon == -1 || line.Length < colon + 2)
-					return false;
-				
-				string key = line.Substring (0, colon);
-				string value = line.Substring (colon + 1).Trim ();
-				headers [key] = value;
-			}
-
-			return true;	
-		}
-
 		public void ReadRequestData ()
 		{
 			if (!GetRequestLine ())
@@ -207,17 +183,15 @@ namespace Mono.ASPNET
 
 			if (protocol == null) {
 				protocol = "HTTP/1.0";
-			} else 	if (!GetRequestHeaders ()) {
-				throw new Exception ("Error getting headers");
 			}
 		}
 
 		public RequestData RequestData {
 			get {
-				RequestData rd = new RequestData (verb, path, queryString, protocol, headers);
-				rd.InputBuffer = inputBuffer;
-				rd.InputLength = inputLength;
-				rd.Position = position;
+				RequestData rd = new RequestData (verb, path, queryString, protocol);
+				byte [] buffer = new byte [inputLength - position];
+				Buffer.BlockCopy (inputBuffer, position, buffer, 0, inputLength - position);
+				rd.InputBuffer = buffer;
 				rd.PathInfo = pathInfo;
 				return rd;
 			}

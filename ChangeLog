@@ -1,3 +1,11 @@
+2003-10-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/InitialWorkerRequest.cs: reduced up to the minimum needed
+	before it's serialized, as suggested by Lluis.
+	* server/XSPApplicationHost.cs: make worker serializable again. Fixes
+	bug #49354.
+	* server/XSPWorkerRequest.cs: read the headers here.
+
 2003-10-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in: output the assemblyinfos too.

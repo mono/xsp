@@ -76,6 +76,9 @@ testfiles = 	browsercaps.aspx \
 		web_adrotator.xml \
 		peopletable.xsl \
 		mono.png \
+		monobutton.png \
+		mono-powered-big.png \
+		small-icon.png \
 		body.inc \
 		header.inc \
 		CompressExtension.cs \

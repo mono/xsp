@@ -198,7 +198,7 @@ namespace Mono.ASPNET
 				}
 
 				byte [] bytes = response.GetBuffer ();
-				stream.Write (bytes, 0, bytes.Length);
+				stream.Write (bytes, 0, (int) response.Length);
 
 				stream.Flush ();
 				response.SetLength (0);

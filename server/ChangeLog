@@ -1,15 +1,20 @@
+2003-08-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: write the correct number of bytes when flushing
+	the response.
+
 2003-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
-	* server/mod-mono-server.exe.config: New file.
+	* mod-mono-server.exe.config: New file.
 
-	* server/Makefile:
-	* server/ModMonoRequest.cs: new class that communicate with the new
+	* Makefile:
+	* ModMonoRequest.cs: new class that communicate with the new
 	mod_mono_unix apache2 module.
 
-	* server/ModMonoWorkerRequest.cs: HttpWorkerRequest for unix socket.
+	* ModMonoWorkerRequest.cs: HttpWorkerRequest for unix socket.
 
-	* server/server.cs:
-	* server/XSPApplicationHost.cs: updated for new apache2 module.
+	* server.cs:
+	* XSPApplicationHost.cs: updated for new apache2 module.
 
 2003-07-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

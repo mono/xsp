@@ -4,35 +4,49 @@ CSC=mcs
 CSCFLAGS+= -debug+ -debug:full -nologo
 
 # 
-REFERENCES= System.Web Mono.Http
-REFS= $(addsuffix .dll, $(addprefix -r:, $(REFERENCES)))
+XSP_REFERENCES= System.Web
+MODMONO_SERVER_REFERENCES= System.Web Mono.Posix
+XSP_REFS= $(addsuffix .dll, $(addprefix -r:, $(XSP_REFERENCES)))
+MODMONO_SERVER_REFS= $(addsuffix .dll, $(addprefix -r:, $(MODMONO_SERVER_REFERENCES)))
 
-SOURCES = AssemblyInfo.cs \
+XSP_SOURCES = AssemblyInfo.cs \
           IApplicationHost.cs \
 	  XSPApplicationHost.cs \
 	  MonoWorkerRequest.cs \
 	  XSPWorkerRequest.cs \
 	  Tracing.cs \
           server.cs
+	  
+MODMONO_SERVER_SOURCES =  IApplicationHost.cs \
+			  MonoWorkerRequest.cs \
+			  ModMonoRequest.cs \
+			  ModMonoWorkerRequest.cs \
+			  XSPApplicationHost.cs \
+			  Tracing.cs \
+			  server.cs
 
-all: xsp.exe
+EXES = xsp.exe mod-mono-server.exe
+all: $(EXES)
 	
-install: xsp.exe global.asax
+install: $(EXES) global.asax
 	rm -rf test
 	mkdir -p test/bin
-	cp xsp.exe xsp.exe.config global.asax test
-	cp xsp.exe test/bin
+	cp $(EXES) xsp.exe.config mod-mono-server.exe.config global.asax test
+	cp $(EXES) test/bin
 	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx ../test/*.xml ../test/*.xsl ../test/*.png ../test/*.inc test
 	cp ../test/*.dll test/bin
 
-xsp.exe: $(SOURCES)
-	$(CSC) $(CSCFLAGS) $(REFS) /out:$@ $^
+xsp.exe: $(XSP_SOURCES)
+	$(CSC) $(CSCFLAGS) $(XSP_REFS) /out:$@ $^
+
+mod-mono-server.exe: $(MODMONO_SERVER_SOURCES)
+	$(CSC) $(CSCFLAGS) $(MODMONO_SERVER_REFS) /d:MODMONO_SERVER /out:$@ $^
 
 trace: 
-	rm -f xsp.exe
+	rm -f $(EXES)
 	$(MAKE) -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
 
 clean:
-	rm -f xsp.exe *~ *.pdb
+	rm -f $(EXES) *~ *.pdb
 	rm -rf test
 

@@ -14,6 +14,9 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+#if MODMONO_SERVER
+using Mono.Posix;
+#endif
 
 namespace Mono.ASPNET
 {
@@ -44,12 +47,27 @@ namespace Mono.ASPNET
 		Thread runner;
 		string path;
 		string vpath;
+#if MODMONO_SERVER
+		string filename;
+#endif
 
 		public XSPApplicationHost ()
 		{
+#if MODMONO_SERVER
+#else
 			SetListenAddress (80);
+#endif
 		}
 
+#if MODMONO_SERVER
+		public void SetListenFile (string filename)
+		{
+			if (filename == null)
+				throw new ArgumentNullException ("filename");
+
+			this.filename = filename;
+		}
+#else
 		public void SetListenAddress (int port)
 		{
 			SetListenAddress (IPAddress.Any, port);
@@ -70,14 +88,24 @@ namespace Mono.ASPNET
 
 			this.bindAddress = bindAddress;
 		}
-
+#endif
 		public void Start ()
 		{
 			if (started)
 				throw new InvalidOperationException ("The server is already started.");
 
+#if MODMONO_SERVER
+			if (filename == null)
+				throw new InvalidOperationException ("filename not set");
+				
+			File.Delete (filename);
+			listen_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+			EndPoint ep = new UnixEndPoint (filename);
+			listen_socket.Bind (ep);
+#else
 			listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (bindAddress);
+#endif
 			listen_socket.Listen (5);
 			runner = new Thread (new ThreadStart (RunServer));
 			runner.Start ();

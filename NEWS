@@ -1,3 +1,10 @@
+July 31, 2003 - Gonzalo Paniagua
+----------------------------------
+
+* From now on, we also generate a mod-mono-server.exe executable that is used
+along with mod_mono_unix to serve ASP.NET pages under apache2.
+
+
 July 24, 2003 - Gonzalo Paniagua
 ----------------------------------
 

@@ -1,0 +1,49 @@
+.\" 
+.\" dbsessmgr manual page
+.\" (c) Copyright 2004 Novell, Inc. 
+.\" Author:
+.\"   Gonzalo Paniagua Javier (gonzalo@ximian.com)
+.\"
+.TH dbsessmgr "1" "28 May 2004" "dbsessmgr @VERSION@" "User Commands"
+.SH NAME 
+dbsessmgr \- session state database manager
+.SH SYNOPSIS
+.B mono dbsessmgr.exe
+[options]
+.SH DESCRIPTION
+dbsessmgr allows you to manage the ASP.NET session state database.
+.SH OPTIONS
+.TP
+.I \-\-clean
+Remove all expired sessions.
+.TP
+.I \-\-remove
+Delete all sessions.
+.TP
+.I \-\-show
+Display session data.
+.SH CONFIGURATION
+You can choose the assembly and type used to connect to your database
+backend and also set the connection string through the configuration
+file, named dbsessmgr.exe.config.
+The configuration shipped by default is:
+
+.nf
+    <appSettings>
+	<add key="DBProviderAssembly"
+	     value="Npgsql"/>
+	<add key="DBConnectionType"
+	     value="Npgsql.NpgsqlConnection"/>
+	<add key="DBConnectionString"
+	     value="SERVER=127.0.0.1;USER ID=monostate;PASSWORD=monostate;dbname=monostate"/>
+    </appSettings>
+.fi
+.SH AUTHORS
+dbsessmgr was written by Jackson Harper (jackson@ximian.com).
+.SH SEE ALSO
+.BR mono (1), xsp (1), asp-state (1), mod_mono (8)
+.SH MORE INFORMATION
+The Mono project (http://www.go-mono.com) is a collaborative effort
+led by Novell (http://www.novell.com) to implement an open source
+version of the .NET Framework.
+

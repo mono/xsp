@@ -1,2 +1,2 @@
-SUBDIRS=doc server test tools scripts
+SUBDIRS=man server test tools scripts
 

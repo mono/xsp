@@ -1,0 +1,40 @@
+.\" 
+.\" asp state server manual page.
+.\" (c) Copyright 2004 Novell, Inc. 
+.\" Author:
+.\"   Jackson Harper  (jackson@ximian.com)
+.\"
+.TH asp-state
+.SH NAME 
+XSP \- Mono ASP.NET Session State Server
+.SH SYNOPSIS
+.B asp_state
+[options]
+.SH DESCRIPTION
+asp-state is an out of process ASP.NET session state server.
+.PP
+asp-state allows you to have session data saved out of process and/or
+on a separate computer.
+.PP
+To use the asp- server just  modify 
+your web.config file to use the state server:
+.PP
+<sessionState mode="StateServer"
+              stateConnectionString="tcpip=server:port"
+              stateNetworkTimeout="number of seconds"/>
+.PP
+And run asp-state
+.SH AUTHORS
+The asp-state server was written by Jackson Harper
+(jackson@ximian.com).
+.SH SEE ALSO
+.BR mono (1), dbsessmgr (1), asp-state (1), mod_mono (8)
+.PP
+System.Web, System.Web.Hosting namespaces.
+.PP
+http://www.asp.net is Microsoft's official site for ASP.NET
+.SH MORE INFORMATION
+The Mono project (http://www.go-mono.com) is a collaborative effort
+led by Novell (http://www.novell.com) to implement an open source
+version of the .NET Framework.
+

@@ -62,6 +62,37 @@ using System.Runtime.CompilerServices;
 
 namespace Mono.ASPNET
 {
+	public class RequestReader
+	{
+		ModMonoRequest request;
+
+		public ModMonoRequest Request {
+			get { return request; }
+		}
+		
+		public RequestReader (NetworkStream ns)
+		{
+			this.request = new ModMonoRequest (ns);
+		}
+
+		public string GetUriPath ()
+		{
+			string path = request.GetUri ();
+
+			int dot = path.LastIndexOf ('.');
+			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
+			if (dot > 0 && slash > 0)
+				path = path.Substring (0, slash);
+
+			return path;
+		}
+
+		public void Decline ()
+		{
+			request.Decline ();
+		}
+	}
+
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
 		ModMonoRequest request;
@@ -72,10 +103,6 @@ namespace Mono.ASPNET
 		string pathInfo;
 		string [][] unknownHeaders;
 
-		public ModMonoRequest Request {
-			get { return request; }
-		}
-		
 		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost)
 			: base (appHost)
 		{
@@ -219,11 +246,6 @@ namespace Mono.ASPNET
 			return result;
 		}
 
-		public void Decline ()
-		{
-			request.Decline ();
-		}
-		
 		public override string GetFilePath ()
 		{
 			return path;

@@ -95,26 +95,13 @@ namespace Mono.ASPNET
 					return;
 				}
 #else
-				// little hack
-				int nowInt = DateTime.Now.ToString().GetHashCode();
-				AppDomain.CurrentDomain.SetData(".domainId", nowInt.ToString("x"));
-				nowInt += "/".GetHashCode ();
-				AppDomain.CurrentDomain.SetData(".appId", nowInt.ToString("x"));
-				AppDomain.CurrentDomain.SetData(".appName", nowInt.ToString("x"));
-				AppDomain.CurrentDomain.SetData(".appPath", "/");
-				AppDomain.CurrentDomain.SetData(".appVPath", "/");
-				AppDomain.CurrentDomain.SetData(".hostingVirtualPath", "/");
-				AppDomain.CurrentDomain.SetData(".hostingInstallDir", "/");
-				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, new XSPApplicationHost());
-				// end hack
-				//XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
-				mwr.ReadRequestData ();
-				host = server.GetApplicationForPath (mwr.GetUriPath (), false);
+				RequestReader rr = new RequestReader (ns);
+				host = server.GetApplicationForPath (rr.GetUriPath (), false);
 				if (host == null) {
-					mwr.Decline ();
+					rr.Decline ();
 					return;
 				}
-				modRequest = mwr.Request;
+				modRequest = rr.Request;
 #endif
 				CrossAppDomainDelegate pr = new CrossAppDomainDelegate (ProcessRequest);
 				host.Domain.DoCallBack (pr);
@@ -340,32 +327,21 @@ namespace Mono.ASPNET
 				if (dir != null) {
 					lock (dirToHost) {
 						object o = dirToHost [dir];
-						bestFit = o as IApplicationHost;
 						if (o == marker) {
 							o = CreateApplicationHost (current, dir);
 							dirToHost [dir] = o;
-							bestFit = (IApplicationHost) o;
 						}
+						bestFit = o as IApplicationHost;
 					}
 					break;
-				} else {
-					//Console.WriteLine ("null for {0}", current);
 				}
 				
 				count--;
 			}
 
 			if (defaultToRoot && bestFit == null) {
-				//Console.WriteLine ("bestFit es null 1");
 				if (appToDir.ContainsKey ("/"))
 					bestFit = dirToHost [appToDir ["/"]] as IApplicationHost;
-				/*
-				if (bestFit == null) {
-					Console.WriteLine ("bestFit es null 2");
-					foreach (string key in dirToHost.Keys)
-						Console.WriteLine ("Key: {0} Value: '{1}'", key, dirToHost [key]);
-				}
-				*/
 			}
 
 			return bestFit;

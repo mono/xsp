@@ -1,3 +1,10 @@
+2003-11-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs: no need to create a full WorkerRequest
+	when we just want to get the uri information.
+
+	* server/XSPApplicationHost.cs: removed workaround for the bug.
+
 2003-10-28  Pedro Martínez Juliá  <yoros@wanadoo.es>
 
 	* server/XSPApplicationHost.cs: add a few lines to set the domain

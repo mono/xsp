@@ -1,3 +1,8 @@
+2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs:
+	(AddPropertyCode): don't try to set properties that are read-only.
+
 2002-06-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: they now delete local copy of System.Web.dll

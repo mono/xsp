@@ -778,6 +778,9 @@ public class Generator
 		bool is_processed = false;
 		bool isDataBound = att.IsDataBound ((string) att [id]);
 
+		if (prop.CanWrite == false)
+			return false;
+
 		if (0 == String.Compare (prop.Name, id, true)){
 			AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id], isDataBound);
 			is_processed = true;

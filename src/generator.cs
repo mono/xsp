@@ -15,6 +15,7 @@ namespace Mono.ASP {
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
+	using System.Web.UI.WebControls;
 
 class Foundry {
 	private static Hashtable foundries;
@@ -118,6 +119,7 @@ public class Generator {
 	private Stack functions;
 	private Stack openedControlTags;
 	private bool parse_ok;
+	private bool has_form_tag;
 
 	private string classDecl;
 	private string className;
@@ -138,6 +140,7 @@ public class Generator {
 		this.parent = "System.Web.UI.Page";
 		//
 		this.interfaces = enableSessionStateLiteral;
+		this.has_form_tag = false;
 		Init ();
 	}
 
@@ -216,13 +219,13 @@ public class Generator {
 	private void PageDirective (TagAttributes att)
 	{
 		if (att ["ClassName"] != null)
-			this.className = (string) att ["classname"];
+			this.className = (string) att ["ClassName"];
 
 		if (att ["EnableSessionState"] != null){
 			string est = (string) att ["EnableSessionState"];
-			if (0 == String.Compare (est, "false"))
+			if (0 == String.Compare (est, "false", true))
 				interfaces = interfaces.Replace (enableSessionStateLiteral, "");
-			else if (0 != String.Compare (est, "true"))
+			else if (0 != String.Compare (est, "true", true))
 				throw new ApplicationException ("EnableSessionState in Page directive not set to " +
 								"a correct value: " + est);
 
@@ -339,15 +342,114 @@ public class Generator {
 	{
 		StringBuilder func_code = new StringBuilder ();
 		current_function = func_code;
+		if (0 == String.Compare (tag_id, "form", true)){
+			if (has_form_tag)
+				throw new ApplicationException ("Only one form server tag allowed.");
+			has_form_tag = true;
+		}
 		openedControlTags.Push (control_id);
 		openedControlTags.Push (tag_id);
+		bool is_generic = control_type.EndsWith ("GenericControl");
 		functions.Push (current_function);
 		current_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl{0} ()\n" +
-						"\t\t{{\n\t\t\t{1} __ctrl;\n\n\t\t\t__ctrl = new {1} ();\n" + 
-						"\t\t\tthis.{0} = __ctrl;\n", control_id, control_type);
+						"\t\t{{\n\t\t\t{1} __ctrl;\n\n\t\t\t__ctrl = new {1} ({2});\n" + 
+						"\t\t\tthis.{0} = __ctrl;\n", control_id, control_type,
+						(is_generic? "\"" + tag_id + "\"" : ""));
 	}
 	
-	private void AddCodeToFunction (Type type, TagAttributes att)
+	/*
+	 * Returns true if it generates some code for the specified property
+	 */
+	private void AddPropertyCode (Type prop_type, string var_name, string att)
+	{
+		/* FIXME: should i check for this or let the compiler fail?
+		 * if (!prop.CanWrite)
+		 *    ....
+		 */
+		if (prop_type == typeof (string)){
+			if (att == null)
+				throw new ApplicationException ("null value for attribute " + var_name );
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = \"{1}\";\n", var_name,
+							Escape (att)); // FIXME: really Escape this?
+		} 
+		else if (prop_type.IsEnum){
+			if (att == null)
+				throw new ApplicationException ("null value for attribute " + var_name );
+
+			string enum_value = EnumValueNameToString (prop_type, att);
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, enum_value);
+		} 
+		else if (prop_type == typeof (bool)){
+			string value;
+			if (att == null)
+				value = "true"; //FIXME: is this ok for non Style properties?
+			else if (0 == String.Compare (att, "true", true))
+				value = "true";
+			else if (0 == String.Compare (att, "false", true))
+				value = "false";
+			else
+				throw new ApplicationException ("Value '" + att  + "' is not a valid boolean.");
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
+		}
+		else if (prop_type == typeof (System.Web.UI.WebControls.Unit)){
+			 //FIXME: should use the culture specified in Page
+			try {
+				Unit value = Unit.Parse (att, System.Globalization.CultureInfo.InvariantCulture);
+			} catch (Exception) {
+				throw new ApplicationException ("'" + att + "' cannot be parsed as a unit.");
+			}
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = " + 
+							"System.Web.UI.WebControls.Unit.Parse (\"{1}\", " + 
+							"System.Globalization.CultureInfo.InvariantCulture);\n", 
+							var_name, att);
+		}
+		else if (prop_type == typeof (System.Web.UI.WebControls.FontUnit)){
+			 //FIXME: should use the culture specified in Page
+			try {
+				FontUnit value = FontUnit.Parse (att, System.Globalization.CultureInfo.InvariantCulture);
+			} catch (Exception) {
+				throw new ApplicationException ("'" + att + "' cannot be parsed as a unit.");
+			}
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = " + 
+							"System.Web.UI.WebControls.FontUnit.Parse (\"{1}\", " + 
+							"System.Globalization.CultureInfo.InvariantCulture);\n", 
+							var_name, att);
+		}
+		else if (prop_type == typeof (Int16) ||
+			 prop_type == typeof (Int32) ||
+			 prop_type == typeof (Int64)){
+			long value;
+			try {
+				value = Int64.Parse (att); //FIXME: should use the culture specified in Page
+			} catch (Exception){
+				throw new ApplicationException (att + " is not a valid signed number or is out of range.");
+			}
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
+		}
+		else if (prop_type == typeof (UInt16) ||
+			 prop_type == typeof (UInt32) ||
+			 prop_type == typeof (UInt64)){
+			ulong value;
+			try {
+				value = UInt64.Parse (att); //FIXME: should use the culture specified in Page
+			} catch (Exception){
+				throw new ApplicationException (att + " is not a valid unsigned number or is out of range.");
+			}
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
+		}
+		else {
+			throw new ApplicationException ("Unsupported type in property: " + 
+							prop_type.ToString ());
+		}
+	}
+
+	
+	private void AddCodeForAttributes (Type type, TagAttributes att)
 	{
 		EventInfo [] ev_info = type.GetEvents ();
 		PropertyInfo [] prop_info = type.GetProperties ();
@@ -378,30 +480,32 @@ public class Generator {
 
 			foreach (PropertyInfo prop in prop_info){
 				if (0 == String.Compare (prop.Name, id, true)){
-					/* FIXME: should i check for this or let the compiler fail?
-					 * if (!prop.CanWrite)
-					 *    ....
-					 */
-
-					//TODO: anything more than Enum and String?
-					Type prop_type = prop.PropertyType;
-					if (prop_type == typeof (string)){
-						current_function.AppendFormat ("\t\t\t__ctrl.{0} = \"{1}\";\n",
-										prop.Name,
-										Escape ((string) att [id]));
-					} else if (prop_type.IsEnum){
-						string enum_value = 
-						       EnumValueNameToString (prop_type, (string) att [id]);
-
-						current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n",
-										prop.Name, enum_value);
-					} else {
-						throw new ApplicationException (
-							"Unsupported type in property: " + 
-							prop_type.ToString ());
-					}
+					AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id]);
 					is_processed = true;
-					break;
+				}
+				else if (!is_processed &&
+					prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
+					id.IndexOf ('-') != -1){
+					string prop_field = id.Replace ("-", ".");
+					string [] parts = prop_field.Split (new char [] {'.'});
+					if (parts.Length != 2)
+						break;
+
+					bool is_bool = prop.PropertyType == typeof (bool);
+					if (!is_bool && att == null){
+						att [id] = ""; // Font-Size -> Font-Size="" as html attribute
+					} else {
+						string value;
+						Type subtype;
+						subtype = Type.GetType (prop.PropertyType + "." + parts [0]);
+						// Font-Bold <=> Font-Bold="true"
+						if (att == null && is_bool)
+							value = "true";
+						else
+							value = (string) att [id];
+						AddPropertyCode (subtype, prop_field, value);
+						is_processed = true;
+					}
 				}
 			}
 
@@ -414,6 +518,7 @@ public class Generator {
 						"SetAttribute (\"{0}\", \"{1}\");\n",
 						id, Escape ((string) att [id]));
 		}
+
             	current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
 					 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
@@ -473,7 +578,7 @@ public class Generator {
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", controlType, html_ctrl.ControlID);
 
 		CreateNewFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType); 
-		AddCodeToFunction (html_ctrl.ControlType, html_ctrl.Attributes);
+		AddCodeForAttributes (html_ctrl.ControlType, html_ctrl.Attributes);
 
 		if (!html_ctrl.SelfClosing)
 			JustDoIt ();
@@ -493,7 +598,7 @@ public class Generator {
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", component_type, component.ControlID);
 
 		CreateNewFunction (component.TagID, component.ControlID, component_type); 
-		AddCodeToFunction (component.ComponentType, component.Attributes);
+		AddCodeForAttributes (component.ComponentType, component.Attributes);
 		if (!component.SelfClosing)
 			JustDoIt ();
 		else
@@ -644,5 +749,6 @@ public class Generator {
 		Console.WriteLine ("Error: " + msg);
 	}
 }
+
 }
 

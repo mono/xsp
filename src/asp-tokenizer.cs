@@ -81,7 +81,7 @@ class AspTokenizer {
 
 	bool is_identifier_part_character (char c)
 	{
-		return (Char.IsLetterOrDigit (c) || c == '_');
+		return (Char.IsLetterOrDigit (c) || c == '_' || c == '-');
 	}
 
 	private int NextToken ()

@@ -80,25 +80,103 @@ public enum TagType {
 	NOTYET
 }
 
-public class TagAttributes : Hashtable {
-	public TagAttributes () :
-		base (new CaseInsensitiveHashCodeProvider (), new CaseInsensitiveComparer ())
+/*
+ * Attributes and values are stored in a couple of ArrayList in Add ().
+ * When MakeHash () is called, they are converted to a Hashtable. If there are any
+ * attributes duplicated it throws an ArgumentException.
+ *
+ * The [] operator works with the Hashtable if the values are in it, otherwise
+ * it uses the ArrayList's.
+ *
+ * Why? You can have a tag in HTML like <a att="value" att="xxx">, but not in tags
+ * marked runat=server and Hashtable requires the key to be unique.
+ * 
+ */
+public class TagAttributes {
+	private Hashtable atts_hash;
+	private ArrayList keys;
+	private ArrayList values;
+	private bool got_hashed;
+
+	public TagAttributes ()
 	{
+		got_hashed = false;
+		keys = new ArrayList ();
+		values = new ArrayList ();
 	}
 
+	private void MakeHash ()
+	{
+		atts_hash = new Hashtable (new CaseInsensitiveHashCodeProvider (),
+					   new CaseInsensitiveComparer ());
+		for (int i = 0; i < keys.Count; i++)
+			atts_hash.Add (keys [i], values [i]);
+		got_hashed = true;
+		keys = null;
+		values = null;
+	}
+	
 	public bool IsRunAtServer ()
 	{
-		if (!Contains ("runat"))
-			return false;
-
-		return (0 == String.Compare ((string) this ["runat"], "server", true));
+		return got_hashed;
 	}
 
+	public void Add (object key, object value)
+	{
+		Console.WriteLine ("Insertando: " + key + " " + value);
+		if (key != null && value != null &&
+		    0 == String.Compare ((string) key,  "runat", true) &&
+		    0 == String.Compare ((string) key,  "runat", true))
+			MakeHash ();
+
+		if (got_hashed)
+			atts_hash.Add (key, value);
+		else {
+			keys.Add (key);
+			values.Add (value);
+		}
+	}
+	
+	public ICollection Keys 
+	{
+		get { return (got_hashed ? atts_hash.Keys : keys); }
+	}
+
+	public object this [object key]
+	{
+		get {
+			if (got_hashed)
+				return atts_hash [key];
+
+			int idx = keys.IndexOf (key);
+			if (idx == -1)
+				return null;
+					
+			return values [idx];
+		}
+
+		set {
+			if (got_hashed)
+				atts_hash [key] = value;
+			else {
+				int idx = keys.IndexOf (key);
+				keys [idx] = value;
+			}
+		}
+	}
+	
+	public int Count 
+	{
+		get { return (got_hashed ? atts_hash.Count : keys.Count);}
+	}
 	public override string ToString ()
 	{
 		string ret = "";
+		string value;
 		foreach (string key in Keys){
-			ret += key + "=" + (string) this [key] + " ";
+			value = (string) this [key];
+			value = value == null ? "" : value;
+			ret += key + "=" + value + " ";
 		}
 
 		return ret;

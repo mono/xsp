@@ -1,3 +1,13 @@
+2002-05-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* asp-tokenizer: allow '-' to be in an identifier (Font-Size).
+
+	* aspelements.cs: modified TagAttributes to allow duplicate attribute
+	names for plain HTML tags.
+
+	* generator.cs: support for more property types in attributes (Styles,
+	integers, bool, Unit, FontUnit). Support for GenericControl.
+
 2002-05-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* aspelements.cs: check for valid attributes in directives.

@@ -1,5 +1,5 @@
 CSC=csc.exe
-CSCFLAGS=/nologo /debug+ /debug:full  /optimize
+CSCFLAGS=/nologo /debug+ /debug:full  /optimize /r:System.Web.dll
 
 SOURCES = asp-parser.cs asp-tokenizer.cs aspelements.cs driver.cs generator.cs
 

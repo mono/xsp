@@ -1,0 +1,8 @@
+<web-application>
+        <name>Root</name>
+        <vpath>/</vpath>
+        <path>/home/mono/public_html/html</path>
+	<!-- vhost and port are ignored in xsp.exe -->
+        <vhost>my.host.name</vhost>
+        <vport>80</vport>
+</web-application>

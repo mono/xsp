@@ -40,6 +40,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono_unix.");
 			Console.WriteLine ("Usage is:\n");
 			Console.WriteLine ("    mod-mono-server.exe [--root rootdir] [--applications APPS] [--filename file]");
+			Console.WriteLine ("            [--appconfigdir DIR] [--appconfigfile FILE]");
 			Console.WriteLine ();
 			Console.WriteLine ("    --filename file: the unix socket file name.");
 			Console.WriteLine ("                    Default value: /tmp/mod_mono_server");
@@ -49,6 +50,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("minimalistic HTTP server\n");
 			Console.WriteLine ("Usage is:\n");
 			Console.WriteLine ("    xsp.exe [--root rootdir] [--applications APPS]");
+			Console.WriteLine ("            [--appconfigdir DIR] [--appconfigfile FILE]");
 			Console.WriteLine ("            [--port N] [--address addr]");
 			Console.WriteLine ();
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
@@ -65,15 +67,30 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                    Default value: current directory.");
 			Console.WriteLine ("                    AppSettings key name: MonoServerRootDir");
 			Console.WriteLine ();
+			Console.WriteLine ("    --appconfigfile FILENAME: adds application definitions from the XML");
+			Console.WriteLine ("                    configuration file. See sample configuration file that");
+			Console.WriteLine ("                    comes with the server.");
+			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigFile");
+			Console.WriteLine ();
+			Console.WriteLine ("    --appconfigdir DIR: adds application definitions from all XML files");
+			Console.WriteLine ("                    found in the specified directory DIR. Files must have");
+			Console.WriteLine ("                    '.webapp' extension");
+			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigDir");
+			Console.WriteLine ();
 			Console.WriteLine ("    --applications APPS: a comma separated list of virtual directory and");
 			Console.WriteLine ("                    real directory for all the applications we want to manage");
 			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
-			Console.WriteLine ("                    by a colon.");
+			Console.WriteLine ("                    by a colon. Optionally you may specify virtual host name");
+			Console.WriteLine ("                    and a port.");
+			Console.WriteLine ();
 			Console.WriteLine ("                    Samples: /:.");
 			Console.WriteLine ("                           the virtual / is mapped to the current directory.");
 			Console.WriteLine ();
 			Console.WriteLine ("                            /blog:../myblog");
 			Console.WriteLine ("                           the virtual /blog is mapped to ../myblog");
+			Console.WriteLine ();
+			Console.WriteLine ("                            myhost.someprovider.net:/blog:../myblog");
+			Console.WriteLine ("                           the virtual /blog at myhost.someprovider.net is mapped to ../myblog");
 			Console.WriteLine ();
 			Console.WriteLine ("                            /:.,/blog:../myblog");
 			Console.WriteLine ("                           Two applications like the above ones are handled.");
@@ -84,6 +101,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("               when the server has no controlling terminal.");
 			Console.WriteLine ();
 			Console.WriteLine ("    --version: displays version information and exits.");
+			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
 
 			Console.WriteLine ();
 		}
@@ -91,11 +109,16 @@ namespace Mono.ASPNET
 		public static int Main (string [] args)
 		{
 			bool nonstop = false;
+			bool verbose = true;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
 			string apps = ConfigurationSettings.AppSettings ["MonoApplications"];
+			if (apps != null && apps != "")
+				Console.WriteLine ("Warning: --applications is deprecated. Use " +
+						   "--appconfigdir or --appconfigfile instead.");
+
+			string appConfigDir = ConfigurationSettings.AppSettings ["MonoApplicationsConfigDir"];
+			string appConfigFile = ConfigurationSettings.AppSettings ["MonoApplicationsConfigFile"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
-			if (apps == null)
-				apps = "/:.";
 #if MODMONO_SERVER
 			string filename = ConfigurationSettings.AppSettings ["UnixSocketFileName"];
 #else
@@ -132,6 +155,12 @@ namespace Mono.ASPNET
 				case "--applications":
 					apps = args [++i];
 					break;
+				case "--appconfigfile":
+					appConfigFile = args [++i];
+					break;
+				case "--appconfigdir":
+					appConfigDir = args [++i];
+					break;
 				case "--nonstop":
 					nonstop = true;
 					break;
@@ -141,6 +170,9 @@ namespace Mono.ASPNET
 				case "--version":
 					ShowVersion ();
 					return 0;
+				case "--verbose":
+					verbose = true;
+					break;
 				default:
 					Console.WriteLine ("Unknown argument: {0}", a);
 					ShowHelp ();
@@ -178,7 +210,17 @@ namespace Mono.ASPNET
 
 			rootDir = Directory.GetCurrentDirectory ();
 			
-			XSPApplicationServer server =  new XSPApplicationServer (apps);
+			XSPApplicationServer server =  new XSPApplicationServer ();
+			if (verbose)
+				server.Verbose = true;
+			if (apps != null)
+				server.AddApplicationsFromCommandLine(apps);
+			if (appConfigFile != null)
+				server.AddApplicationsFromConfigFile(appConfigFile);
+			if (appConfigDir != null)
+				server.AddApplicationsFromConfigDirectory(appConfigDir);
+			if (apps == null && appConfigDir == null && appConfigFile == null)
+				server.AddApplicationsFromCommandLine("/:.");
 #if MODMONO_SERVER
 			server.SetListenFile (filename);
 			Console.WriteLine ("Listening on: {0}", filename);
@@ -206,12 +248,15 @@ namespace Mono.ASPNET
 				Console.WriteLine ("Error: {0}", e.Message);
 				if (evt != null)
 					evt.Set ();
+
+				Environment.Exit (1); // Temp. workaround for errors finishing
 				return 1;
 			}
 			
 			if (evt != null)
 				evt.Set ();
 
+			Environment.Exit (0); // Temp. workaround for errors finishing
 			return 0;
 		}
 	}

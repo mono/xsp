@@ -20,11 +20,11 @@ endif
 common  = IApplicationHost.cs \
 	  XSPApplicationHost.cs \
 	  MonoWorkerRequest.cs \
-	  InitialWorkerRequest.cs \
 	  Tracing.cs \
 	  server.cs
 
 xsp_only = AssemblyInfo.cs.in \
+	  InitialWorkerRequest.cs \
 	  XSPWorkerRequest.cs
 
 xsp_sources = $(common) $(xsp_only:.in=)

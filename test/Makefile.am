@@ -9,6 +9,7 @@ testfiles = 	browsercaps.aspx \
 		databind-attribute.aspx \
 		databind-class.aspx \
 		databind-template.aspx \
+		datalist.aspx \
 		dbpage1.aspx \
 		dbpage2.aspx \
 		htmlanchor.aspx \
@@ -76,7 +77,8 @@ testfiles = 	browsercaps.aspx \
 		mono.png \
 		body.inc \
 		header.inc \
-		CompressExtension.cs
+		CompressExtension.cs \
+		sample.webapp
 
 tabcontrol_src = tabcontrol.cs
 tabcontrol2_src = tabcontrol2.cs

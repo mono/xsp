@@ -18,13 +18,18 @@ modmono_references= -r:System.Web.dll -r:Mono.Posix.dll
 endif
 
 common  = IApplicationHost.cs \
-	  XSPApplicationHost.cs \
 	  MonoWorkerRequest.cs \
 	  Tracing.cs \
+	  ApplicationServer.cs \
+	  LingeringNetworkStream.cs \
+	  BaseApplicationHost.cs \
+	  BaseRequestBroker.cs \
+	  IWebSource.cs \
 	  server.cs
 
 xsp_only = AssemblyInfo.cs.in \
 	  InitialWorkerRequest.cs \
+	  XSPApplicationHost.cs \
 	  XSPWorkerRequest.cs
 
 xsp_sources = $(common) $(xsp_only:.in=)
@@ -32,6 +37,8 @@ xsp_build_sources = $(addprefix $(srcdir)/, $(xsp_sources))
 
 modmono_only = ModMonoRequest.cs \
 	      ModMonoWorkerRequest.cs \
+	      ModMonoApplicationHost.cs \
+	      ModMonoRequest.cs \
 	      AssemblyInfoModMono.cs.in
 
 modmono_sources =  $(common) $(modmono_only:.in=)

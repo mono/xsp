@@ -242,7 +242,13 @@ namespace Mono.ASPNET
 
 			rootDir = Directory.GetCurrentDirectory ();
 			
-			XSPApplicationServer server = new XSPApplicationServer ();
+#if MODMONO_SERVER
+			ModMonoWebSource webSource = new ModMonoWebSource ();
+			ApplicationServer server = new ApplicationServer (webSource);
+#else
+			XSPWebSource webSource = new XSPWebSource ();
+			ApplicationServer server = new ApplicationServer (webSource);
+#endif
 			server.Verbose = verbose;
 
 			if (apps != null)
@@ -257,10 +263,10 @@ namespace Mono.ASPNET
 			if (apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 #if MODMONO_SERVER
-			server.SetListenFile (filename);
+			webSource.SetListenFile (filename);
 			Console.WriteLine ("Listening on: {0}", filename);
 #else
-			server.SetListenAddress (IPAddress.Parse (ip), port);
+			webSource.SetListenAddress (IPAddress.Parse (ip), port);
 			Console.WriteLine ("Listening on port: {0}", port);
 			Console.WriteLine ("Listening on address: {0}", ip);
 #endif

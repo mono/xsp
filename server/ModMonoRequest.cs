@@ -181,11 +181,11 @@ namespace Mono.ASPNET
 			return verb;
 		}
 
-		public void SendResponseFromMemory (byte [] data, int length)
+		public void SendResponseFromMemory (byte [] data, int position, int length)
 		{
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
-			writer.Write (data, 0, length);
+			writer.Write (data, position, length);
 			ReadEnd ();
 		}
 
@@ -352,8 +352,11 @@ namespace Mono.ASPNET
 			return (i == 0);
 		} 
 
-		public int GetClientBlock ([Out] byte [] bytes, int size) 
+		public int GetClientBlock ([Out] byte [] bytes, int position, int size) 
 		{
+			if (!ShouldClientBlock ()) return 0;
+			if (SetupClientBlock () != 0) return 0;
+			
 			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK);
 			writer.Write (size);
 			ReadEnd ();
@@ -361,18 +364,14 @@ namespace Mono.ASPNET
 			if (i > size)
 				throw new Exception ("Houston...");
 
-			return reader.Read (bytes, 0, i);
+			return reader.Read (bytes, position, i);
 		} 
 
-		public void SetStatusCode (int code) 
+		public void SetStatusCodeLine (int code, string status)
 		{
 			SendSimpleCommand (Cmd.SET_STATUS_CODE);
 			writer.Write (code);
 			ReadEnd ();
-		}
-
-		public void SetStatusLine (string status)
-		{
 			SendSimpleCommand (Cmd.SET_STATUS_LINE);
 			WriteString (status);
 			ReadEnd ();

@@ -1,3 +1,55 @@
+2004-06-20  Lluis Sanchez Gual  <lluis@ximian.com>
+
+	* IApplicationHost.cs: Added RequestBroker property to IApplicationHost.
+	  The application host will query for information through this object,
+	  which lives in the main domain.
+	  
+	* Makefile.am: Added new files.
+	
+	* ModMonoRequest.cs: Added position parameter in SendResponseFromMemory, so
+	  we can send partially filled buffers.
+	  GetClientBlock(): Some checks that where done in ModMonoWorkerRequest
+	  have been moved here. We can avoid two cross-app domain calls in this
+	  way.
+	  Merged SetStatusCode and SetStatusLine into SetStatusCodeLine. We avoid
+	  another cross-app domain call.
+	  
+	* ModMonoWorkerRequest.cs: Renamed to ModMonoWorkerRequest, to make things
+	  more understandable.
+	  Removed all references to ModMonoRequest. All request information is
+	  now available as input parameters or through the IRequestBroker.
+	  Some old calls to ModMonoRequest have been merged into a single 
+	  IRequestBroker call, to avoid the overhead of a cross-app domain call.
+	  
+	* XSPApplicationHost.cs: Most of the code has been moved to other classes:
+	  ApplicationServer, WebSource, XSPWebSource, ModMonoWebSource...
+	  
+	* XSPWorkerRequest.cs: Removed dependency to RequestData, since passing it
+	  through the cross-app domain channel requires serialization support.
+	  The same information is passed as primitive parameters.
+	  In general, calls to the network stream are now done through the
+	  IRequestBroker.
+	  
+	* server.cs: Create the ApplicationServer by providing a ModMonoWebSource
+	  or a XSPWebSource instance.
+	  
+	* ApplicationServer.cs: New file. Moved here the old XSPApplicationServer. 
+	  Almost all code is now shared between XSP and mod_mono. Specific behavior
+	  is now encapsulated in an IWebSource object.
+	  
+	* LingeringNetworkStream.cs: New file. Moved here the old MyNetworkStream.
+	
+	* BaseApplicationHost.cs: New file. Moved here the old XSPApplicationHost.
+	
+	* WebSource.cs: New file. Defines the IWebSource and IWorker interfaces.
+	
+	* XSPApplicationHost.cs: New file. Provides an implementation for XSP
+	  of a IWebSource, an IRequestBroker, an IApplicationHost and an IWorker.
+	  
+	* ModMonoApplicationHost.cs: New file. Provides an implementation for 
+	  mod_mono of a IWebSource, an IRequestBroker, an IApplicationHost and an 
+	  IWorker.
+
 2004-06-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/Makefile.am: install extensions.dll into test directory so that

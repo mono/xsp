@@ -94,15 +94,24 @@ namespace Mono.ASPNET
 		}
 	}
 
-	public class XSPWorkerRequest : MonoWorkerRequest
+	public class ModMonoWorkerRequest : MonoWorkerRequest
 	{
-		ModMonoRequest request;
 		bool closed;
 		string verb;
 		string queryString;
 		string protocol;
 		string path;
 		string pathInfo;
+		string localAddress;
+		int serverPort;
+		string remoteAddress;
+		int remotePort;
+		string remoteName;
+		ModMonoRequestBroker requestBroker;
+		string[] headers;
+		string[] headerValues;
+		int requestId;
+
 		string [][] unknownHeaders;
 		static string [] indexFiles = { "index.aspx",
 						"Default.aspx",
@@ -110,7 +119,7 @@ namespace Mono.ASPNET
 						"index.html",
 						"index.htm" };
 
-		static XSPWorkerRequest ()
+		static ModMonoWorkerRequest ()
 		{
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);
@@ -134,16 +143,27 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost)
+		public ModMonoWorkerRequest (int requestId, ModMonoRequestBroker requestBroker, IApplicationHost appHost, string verb, string path, string queryString, string protocol, string localAddress, int serverPort, string remoteAddress, int remotePort, string remoteName, string[] headers, string[] headerValues)
 			: base (appHost)
 		{
-			this.request = new ModMonoRequest (ns);
+			this.requestId = requestId;
+			this.requestBroker = requestBroker;
+			this.verb = verb;
+			this.protocol = protocol;
+			this.queryString = queryString;
+			this.path = path;
+			this.localAddress = localAddress;
+			this.serverPort = serverPort;
+			this.remoteAddress = remoteAddress;
+			this.remotePort = remotePort;
+			this.remoteName = remoteName;
+			this.headers = headers;
+			this.headerValues = headerValues;
 		}
 
-		public XSPWorkerRequest (ModMonoRequest request, IApplicationHost appHost)
-			: base (appHost)
+		public int RequestId
 		{
-			this.request = request;
+			get { return requestId; }
 		}
 
 		public override string GetPathInfo ()
@@ -192,11 +212,6 @@ namespace Mono.ASPNET
 
 		protected override bool GetRequestData ()
 		{
-			verb = request.GetHttpVerbName ();
-			protocol = request.GetProtocol ();
-			queryString = request.GetQueryString ();
-
-			path = request.GetUri ();
 			if (TryDirectory ()) {
 				pathInfo = "";
 				return true;
@@ -227,13 +242,13 @@ namespace Mono.ASPNET
 		
 		public override void FlushResponse (bool finalFlush)
 		{
-			request.Flush ();
+			requestBroker.Flush (requestId);
 		}
 
 		public override void CloseConnection ()
 		{
 			if (!closed) {
-				request.Close ();
+				requestBroker.Close (requestId);
 				closed = true;
 			}
 		}
@@ -250,12 +265,12 @@ namespace Mono.ASPNET
 
 		public override string GetLocalAddress ()
 		{
-			return request.GetLocalAddress ();
+			return localAddress;
 		}
 
 		public override int GetLocalPort ()
 		{
-			return request.GetServerPort ();
+			return serverPort;
 		}
 
 		public override string GetQueryString ()
@@ -265,33 +280,38 @@ namespace Mono.ASPNET
 
 		public override string GetRemoteAddress ()
 		{
-			return request.GetRemoteAddress ();
+			return remoteAddress;
 		}
 
 		public override int GetRemotePort ()
 		{
-			return request.GetRemotePort ();
+			return remotePort;
 		}
 
 		public override string GetServerVariable (string name)
 		{
-			return request.GetServerVariable (name);
+			return requestBroker.GetServerVariable (requestId, name);
 		}
 
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
-			request.SendResponseFromMemory (data, length);
+			if (data.Length > length * 2) {
+				byte[] tmpbuffer = new byte[length];
+				Array.Copy (data, tmpbuffer, length);
+				requestBroker.Write (requestId, tmpbuffer, 0, length);
+			}
+			else
+				requestBroker.Write (requestId, data, 0, length);
 		}
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			request.SetStatusCode (statusCode);
-			request.SetStatusLine (String.Format("{0} {1}", statusCode, statusDescription));
+			requestBroker.SetStatusCodeLine (requestId, statusCode, String.Format("{0} {1}", statusCode, statusDescription));
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
 		{
-			request.SetResponseHeader (name, value);
+			requestBroker.SetResponseHeader (requestId, name, value);
 		}
 
 		public override bool IsClientConnected ()
@@ -318,27 +338,24 @@ namespace Mono.ASPNET
 		
 		public override string GetRemoteName ()
 		{
-			return request.GetRemoteName ();
+			return remoteName;
 		}
 
 		public override string GetUnknownRequestHeader (string name)
 		{
-			return request.GetRequestHeader (name);
+			return GetRequestHeader (name);
 		}
 
 		public override string [][] GetUnknownRequestHeaders ()
 		{
 			if (unknownHeaders == null) {
-				string [] keys = request.GetAllHeaders ();
-				string [] values = request.GetAllHeaderValues ();
-
-				int count = keys.Length;
+				int count = headers.Length;
 				ArrayList pairs = new ArrayList ();
 				for (int i = 0; i < count; i++) {
-					if (HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]) != -1)
+					if (HttpWorkerRequest.GetKnownRequestHeaderIndex (headers [i]) != -1)
 						continue;
 
-					pairs.Add (new string [] { keys [i], values [i]});
+					pairs.Add (new string [] { headers [i], headerValues [i]});
 				}
 				
 				if (pairs.Count != 0) {
@@ -353,7 +370,14 @@ namespace Mono.ASPNET
 
 		public override string GetKnownRequestHeader (int index)
 		{
-			return request.GetRequestHeader (GetKnownRequestHeaderName (index));
+			return GetRequestHeader (GetKnownRequestHeaderName (index));
+		}
+		
+		private string GetRequestHeader (string name)
+		{
+			int i = Array.IndexOf (headers, name);
+			if (i == -1) return null;
+			else return headerValues [i];			
 		}
 
 		public override void SendCalculatedContentLength (int contentLength) 
@@ -363,14 +387,13 @@ namespace Mono.ASPNET
 
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
-			if (buffer == null || size <= 0 || !request.ShouldClientBlock ())
+			if (buffer == null || size <= 0)
 				return 0;
 
-			int read = 0;
-			if (request.SetupClientBlock () == 0)
-				read = request.GetClientBlock (buffer, size);
-
-			return read;
+			byte[] readBuffer;
+			int nr = requestBroker.Read (requestId, size, out readBuffer);
+			Array.Copy (readBuffer, 0, buffer, 0, nr);
+			return nr;
 		}
 	}
 }

@@ -25,7 +25,6 @@ namespace Mono.ASPNET
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
 		IApplicationHost appHost;
-		MyNetworkStream stream;
 		string verb;
 		string path;
 		string pathInfo;
@@ -45,6 +44,8 @@ namespace Mono.ASPNET
 		bool sentConnection;
 		int localPort;
 		string localAddress;
+		int requestId;
+		XSPRequestBroker requestBroker;
 		
 		static byte [] error500;
 
@@ -105,26 +106,33 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public XSPWorkerRequest (MyNetworkStream ns, IApplicationHost appHost, EndPoint localEP,
-					 EndPoint remoteEP, RequestData rdata)
+		public XSPWorkerRequest (int requestId, 
+								XSPRequestBroker requestBroker, 
+								IApplicationHost appHost, 
+								EndPoint localEP,
+					 			EndPoint remoteEP, 
+								string verb, 
+								string path, 
+								string pathInfo, 
+								string queryString, 
+								string protocol, 
+								byte[] inputBuffer)
 			: base (appHost)
 		{
-			if (ns == null)
-				throw new ArgumentNullException ("ns");
-
+			this.requestId = requestId;
+			this.requestBroker = requestBroker;
 			this.appHost = appHost;
 			this.localEP = localEP;
 			this.remoteEP = remoteEP;
-			stream = ns;
-			verb = rdata.Verb;
-			path = rdata.Path;
-			pathInfo = rdata.PathInfo;
-			protocol = rdata.Protocol;
+			this.verb = verb;
+			this.path = path;
+			this.pathInfo = pathInfo;
+			this.protocol = protocol;
 			if (protocol == "HTTP/1.1")
 				protocol = "HTTP/1.0";	// Only 1.0 supported by xsp standalone.
 
-			queryString = rdata.QueryString;
-			inputBuffer = rdata.InputBuffer;
+			this.queryString = queryString;
+			this.inputBuffer = inputBuffer;
 			inputLength = inputBuffer.Length;
 			position = 0;
 
@@ -136,11 +144,15 @@ namespace Mono.ASPNET
 			localPort = ((IPEndPoint) localEP).Port;
 			localAddress = ((IPEndPoint) localEP).Address.ToString();
 		}
+		
+		public int RequestId
+		{
+			get { return requestId; }
+		}
 
 		void FillBuffer ()
 		{
-			inputBuffer = new byte [32*1024];
-			inputLength = stream.Read (inputBuffer, 0, 32*1024);
+			inputLength = requestBroker.Read (requestId, 32*1024, out inputBuffer);
 			position = 0;
 		}
 
@@ -212,9 +224,9 @@ namespace Mono.ASPNET
 		public override void CloseConnection ()
 		{
 			WebTrace.WriteLine ("CloseConnection()");
-			if (stream != null) {
-				stream.Close ();
-				stream = null;
+			if (requestBroker != null) {
+				requestBroker.Close (requestId);
+				requestBroker = null;
 			}
 		}
 
@@ -234,10 +246,10 @@ namespace Mono.ASPNET
 
 				if (response.Length != 0) {
 					byte [] bytes = response.GetBuffer ();
-					stream.Write (bytes, 0, (int) response.Length);
+					requestBroker.Write (requestId, bytes, 0, (int) response.Length);
 				}
-
-				stream.Flush ();
+				
+				requestBroker.Flush (requestId);
 				response.SetLength (0);
 				if (finalFlush)
 					CloseConnection ();
@@ -419,7 +431,7 @@ namespace Mono.ASPNET
 		public override bool IsClientConnected ()
 		{
 			WebTrace.WriteLine ("IsClientConnected()");
-			return stream.Connected;
+			return requestBroker.IsConnected (requestId);
 		}
 
 		public override bool IsEntireEntityBodyIsPreloaded ()
@@ -457,7 +469,7 @@ namespace Mono.ASPNET
 		void WriteString (string s)
 		{
 			byte [] b = Encoding.GetBytes (s);
-			stream.Write (b, 0, b.Length);
+			requestBroker.Write (requestId, b, 0, b.Length);
 
 		}
 
@@ -483,7 +495,9 @@ namespace Mono.ASPNET
 
 			int localsize = size;
 			while (localsize > 0) {
-				int read = stream.Read (buffer, offset, localsize);
+				byte[] readBuffer;
+				int read = requestBroker.Read (requestId, localsize, out readBuffer);
+				Array.Copy (readBuffer, 0, buffer, offset, read);
 				offset += read;
 				localsize -= read;
 			}

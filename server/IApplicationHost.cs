@@ -9,6 +9,7 @@
 
 using System;
 using System.Web;
+
 namespace Mono.ASPNET
 {
 	public interface IApplicationHost
@@ -16,6 +17,11 @@ namespace Mono.ASPNET
 		string Path { get; }	
 		string VPath { get; }	
 		AppDomain Domain { get; }	
+		IRequestBroker RequestBroker { get; set; }
+	}
+	
+	public interface IRequestBroker
+	{
 	}
 }
 

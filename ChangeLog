@@ -1,3 +1,7 @@
+2005-01-20  Lluis Sanchez Gual  <lluis@ximian.com>
+
+	* server/InitialWorkerRequest.cs: Fix parsing of PathInfo.
+
 2005-01-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs: when Content-Length is set only allow

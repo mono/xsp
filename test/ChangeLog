@@ -1,5 +1,9 @@
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* web_label.aspx: one more.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* web_button.aspx:
 	* web_checkbox.aspx: another couple rendered ok.
 

@@ -1,3 +1,11 @@
+2003-05-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs:
+	* server.cs:
+	* server.exe.config:
+	* web.config: the index files must be set in the proper AppDomain.
+	Fixes #42309.
+
 2003-05-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web.config: removed server.exe keys.

@@ -48,8 +48,6 @@ namespace Mono.ASPNET
 			string virtualDir = ConfigurationSettings.AppSettings ["MonoServerVirtualDir"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
 			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];
-			string indexFiles = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
-			XSPWorkerRequest.SetDefaultIndexFiles (indexFiles);
 			
 			if (ip == "" || ip == null)
 				ip = "0.0.0.0";

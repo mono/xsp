@@ -9,6 +9,7 @@
 //
 using System;
 using System.Collections;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -62,9 +63,13 @@ namespace Mono.ASPNET
 
 			serverHeader = String.Format ("Server: {0}/{1} {2}\r\n",
 						      title, version, Environment.OSVersion.Platform);
+
+			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+			SetDefaultIndexFiles (indexes);
+
 		}
 
-		public static void SetDefaultIndexFiles (string list)
+		static void SetDefaultIndexFiles (string list)
 		{
 			if (list == null)
 				return;

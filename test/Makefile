@@ -1,7 +1,7 @@
 CSC=mcs
 
 %.dll: %.cs
-	$(CSC) /r:System.Web /target:library $<
+	$(CSC) /r:System.Web.dll /target:library $<
 
 all: tabcontrol.dll tabcontrol2.dll codebehind1.dll
 

@@ -1,13 +1,14 @@
 EXTRA_DIST = script.in
 
+bin2_scripts_real = xsp2 mod-mono-server2 asp-state2 dbsessmgr2
 if NET_2_0
-bin2_scripts = xsp2 mod-mono-server2 asp-state2 dbsessmgr2
+bin2_scripts = $(bin2_scripts_real)
 endif
 
 bin1_scripts = xsp mod-mono-server asp-state dbsessmgr
 bin_SCRIPTS = $(bin1_scripts) $(bin2_scripts)
 
-CLEANFILES = $(bin1_SCRIPTS) $(bin2_SCRIPTS)
+CLEANFILES = $(bin1_scripts) $(bin2_scripts_real)
 
 plat_bindir = $(libdir)/mono/1.0
 plat_bindir2 = $(libdir)/mono/2.0

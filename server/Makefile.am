@@ -15,9 +15,7 @@ xsp2_SCRIPTS = $(XSP2_EXE)
 modmonoserver_SCRIPTS = mod-mono-server.exe $(MODMONOSERVER2_EXE)
 modmonoserver2_SCRIPTS = $(MODMONOSERVER2_EXE)
 
-CLEANFILES = $(xsp_SCRIPTS) $(modmonoserver_SCRIPTS) \
-		xsp.exe.mdb mod-mono-server.exe.mdb \
-		xsp2.exe.mdb mod-mono-server2.exe.mdb
+CLEANFILES = *.exe *.mdb
 
 EXTRA_DIST = $(common) $(xsp_only) $(modmono_only) AssemblyInfo.cs.in AssemblyInfoModMono.cs.in
 

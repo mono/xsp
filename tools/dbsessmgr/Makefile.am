@@ -9,8 +9,8 @@ endif
 dbsessmgr2dir = $(libdir)/mono/2.0
 dbsessmgr2_SCRIPTS = $(scripts2)
 
-EXTRA_DIST = $(dbsessmgr_input) dbsessmgr.exe.config
-CLEANFILES = dbsessmgr.exe dbsessmgr.exe.mdb
+EXTRA_DIST = $(dbsessmgr_input) dbsessmgr.exe.config dbsessmgr2.exe.config
+CLEANFILES = *.exe *.mdb
 
 dbsessmgr_input = AssemblyInfo.cs.in \
 		 dbsessmgr.cs

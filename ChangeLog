@@ -1,3 +1,12 @@
+2004-12-15  Raja R Harinath  <rharinath@novell.com>
+
+	* server/Makefile.am (CLEANFILES): Clean up *.exe and *.mdb.
+	* tools/dbsessmgr/Makefile.am (EXTRA_DIST): Add dbsessmgr2.exe.config.
+	(CLEANFILES): Clean up *.exe and *.mdb.
+	* tools/asp_state/Makefile.am (EXTRA_DIST): Add asp-state2.exe.config.
+	(CLEANFILES): Clean up *.exe and *.mdb.
+	* scripts/Makefile.am (CLEANFILES): Fix typos.  Clean up all the scripts.
+
 2004-12-13 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:

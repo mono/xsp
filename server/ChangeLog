@@ -1,6 +1,6 @@
-2003-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+2003-07-09  Lluis Sanchez Gual <lluis@ximian.com>
 
-	* XSPWorkerRequest.cs: fixed GetUnknownHeaders.
+	* Makefile: install target: copy web service files.
 
 2003-06-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

@@ -14,7 +14,7 @@
 		DirectoryInfo dir = new DirectoryInfo (Path.GetDirectoryName (Request.PhysicalPath));
 		StringBuilder sb = new StringBuilder ();
 		sb.Append ("<ul class=\"dirlist\">\n");
-		sb.Append (ReadDirectory (Path.Combine (Path.GetDirectoryName (Request.PhysicalPath), "1.1"), ""));
+		sb.Append (ReadDirectory (Path.Combine (Path.GetDirectoryName (Request.PhysicalPath), "1.1"), "1.1/"));
 		sb.Append ("</ul>");
 		fileList.Text = sb.ToString ();
 	}

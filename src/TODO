@@ -1,0 +1,19 @@
+TODO List
+-----------
+
+	This has just started, so the TODO list is much bigger than this.
+
+	General
+	--------
+	* Add support for more directives.
+	* Support inline code.
+	* Support data bindings.
+	* Support <!xxx type tags.
+	
+
+	Controls
+	---------
+	* Support properties between open/close control tag (see details of
+	the syntax in doc/syntax-controls.txt)
+
+

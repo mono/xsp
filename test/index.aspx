@@ -1,4 +1,4 @@
-<%@ language="C#" %>
+<%@ language="C#" EnableSessionState="false" %>
 <%@ Import namespace="System.IO" %>
 <html>
 <head>

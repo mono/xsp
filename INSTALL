@@ -41,3 +41,6 @@ the system.
 
     MCS=csc make
 
+You will also need IIS with support for ASP.NET for xsp to work with the
+MS runtime.
+

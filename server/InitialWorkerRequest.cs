@@ -154,9 +154,8 @@ namespace Mono.ASPNET
 				path = path.Substring (0, qmark);
 			}
 
-			// Decode path
-			// Note: DON'T do this
-			// path = HttpUtility.UrlDecode (path);
+			path = HttpUtility.UrlDecode (path);
+			path = GetSafePath (path);
 			
 			// Yes, MS only looks for the '.'. Try setting a handler for
 			// something not containing a '.' and you won't get path_info.
@@ -177,6 +176,38 @@ namespace Mono.ASPNET
 			return true;
 		}
 
+		string GetSafePath (string path)
+		{
+			path = HttpUtility.UrlDecode (path);
+			path = path.Replace ('\\','/');
+			while (path.IndexOf ("//") != -1)
+				path = path.Replace ("//", "/");
+
+			string [] parts = path.Split ('/');
+			ArrayList result = new ArrayList (parts.Length);
+			
+			int end = parts.Length;
+			for (int i = 0; i < end; i++) {
+				string current = parts [i];
+				if (current == "" || current == "." )
+					continue;
+
+				if (current == "..") {
+					if (result.Count > 0)
+						result.RemoveAt (result.Count - 1);
+					continue;
+				}
+
+				result.Add (current);
+			}
+
+			if (result.Count == 0)
+				return "/";
+
+			result.Insert (0, "");
+			return String.Join ("/", (string []) result.ToArray (typeof (string)));
+		}
+		
 		public void ReadRequestData ()
 		{
 			if (!GetRequestLine ())

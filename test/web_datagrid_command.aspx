@@ -28,7 +28,6 @@
 	// InitList is only called once per session when a GET is received for the page.
 	void InitList ()
 	{
-		Console.WriteLine ("initlist");
 		list = new ArrayList ();
 		list.Add (new Datum ("Spain", "es", "Europe"));
 		list.Add (new Datum ("Japan", "jp", "Asia"));

@@ -88,6 +88,10 @@ namespace Mono.ASPNET
 		{
 			return new XSPRequestBroker ();
 		}
+
+		public void Dispose ()
+		{
+		}
 	}
 	
 	//

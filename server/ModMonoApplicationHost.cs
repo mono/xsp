@@ -144,11 +144,13 @@ namespace Mono.ASPNET
 				filename = null;
 				if (file_bound)
 					File.Delete (f);
+			}
 
-				if (locker != null) {
-					locker.Close ();
-					File.Delete (lockfile);
-				}
+			if (locker != null) {
+				Stream l = locker;
+				locker = null;
+				l.Close ();
+				File.Delete (lockfile);
 			}
 		}
 		
@@ -223,8 +225,11 @@ namespace Mono.ASPNET
 			
 			try {
 				RequestReader rr = new RequestReader (Stream);
-				if (rr.ShuttingDown)
+				if (rr.ShuttingDown) {
 					server.Stop ();
+					Close ();
+					return;
+				}
 
 				string vhost = rr.Request.GetRequestHeader ("Host");
 				int port = -1;

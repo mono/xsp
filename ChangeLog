@@ -1,5 +1,19 @@
 2005-03-18 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server/ModMonoApplicationHost.cs: the lockfile is to be removed even
+	for TCP sockets. Also return immediately if the module wants us to
+	die.
+
+	* server/ApplicationServer.cs: call Dispose on the web source so that
+	removing the lockfile and the unix socket is done asap.
+
+	* server/XSPApplicationHost.cs: added empty Dispose().
+	* server/IWebSource.cs: IWebSource inherits from IDisposable now.
+
+	This fixes bug #73619.
+
+2005-03-18 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/InitialWorkerRequest.cs: prevent empty lines before the
 	actual request from causing an error. Fixes bug #73048.
 

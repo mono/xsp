@@ -34,7 +34,7 @@ using System.Net.Sockets;
 
 namespace Mono.ASPNET
 {
-	public interface IWebSource
+	public interface IWebSource : IDisposable
 	{
 		Socket CreateSocket ();
 		IWorker CreateWorker (Socket client, ApplicationServer server);
@@ -51,3 +51,4 @@ namespace Mono.ASPNET
 		void Flush ();
 	}
 }
+

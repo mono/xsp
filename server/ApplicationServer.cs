@@ -273,10 +273,12 @@ namespace Mono.ASPNET
 		{
 			if (!started)
 				throw new InvalidOperationException ("The server is not started.");
+
 			if (stop)
 				return; // Just ignore, as we're already stopping
 
 			stop = true;	
+			webSource.Dispose ();
 			ThreadPool.QueueUserWorkItem (new WaitCallback (RealStop));
 		}
 

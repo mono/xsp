@@ -71,7 +71,11 @@ namespace Mono.ASPNET
 		{
 			try {
 				mwr.CloseConnection ();
-			} catch {}
+			} catch {
+			} finally {
+				((BaseRequestBroker) requestBroker).UnregisterRequest (mwr.RequestId);
+			}
 		}
 	}
 }
+

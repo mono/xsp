@@ -171,8 +171,7 @@ namespace Mono.ASPNET
 			this.headerValues = headerValues;
 		}
 
-		public int RequestId
-		{
+		public override int RequestId {
 			get { return requestId; }
 		}
 

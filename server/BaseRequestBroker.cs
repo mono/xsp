@@ -15,28 +15,22 @@ namespace Mono.ASPNET
 {
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{
-		ArrayList requests = new ArrayList ();
-		Queue freeSlots = new Queue ();
+		Hashtable requests = new Hashtable ();
 		
 		internal int RegisterRequest (IWorker worker)
 		{
-			lock (requests)
-			{
-				if (freeSlots.Count == 0)
-					return requests.Add (worker);
-				
-				int freeSlot = (int)freeSlots.Dequeue ();
-				requests [freeSlot] = worker;
-				return freeSlot;
+			int result = worker.GetHashCode ();
+			lock (requests) {
+				requests [result] = worker;
 			}
+
+			return result;
 		}
 		
 		internal void UnregisterRequest (int id)
 		{
-			lock (requests)
-			{
-				requests [id] = null;
-				freeSlots.Enqueue (id);
+			lock (requests) {
+				requests.Remove (id);
 			}
 		}
 		
@@ -79,3 +73,4 @@ namespace Mono.ASPNET
 		}
 	}
 }
+

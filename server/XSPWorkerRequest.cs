@@ -145,8 +145,7 @@ namespace Mono.ASPNET
 			localAddress = ((IPEndPoint) localEP).Address.ToString();
 		}
 		
-		public int RequestId
-		{
+		public override int RequestId {
 			get { return requestId; }
 		}
 
@@ -532,7 +531,6 @@ namespace Mono.ASPNET
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
 			status = String.Format ("HTTP/1.0 {0} {1}\r\n", statusCode, statusDescription);
-			WebTrace.WriteLine ("SendStatus() -> " + status);
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)

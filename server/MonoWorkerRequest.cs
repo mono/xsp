@@ -239,6 +239,7 @@ namespace Mono.ASPNET
 		}
 
 		protected abstract bool GetRequestData ();
+		public abstract int RequestId { get; }
 
 		public bool ReadRequestData ()
 		{

@@ -1,3 +1,21 @@
+2004-08-31 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: don't set the socket timeout for
+	mod-mono-server. Apache should take care of that.
+
+	* server/BaseApplicationHost.cs:
+	* server/BaseRequestBroker.cs:
+	* server/ModMonoApplicationHost.cs: unregister the request in
+	EndOfRequest event because under heavy load HttpRuntime.ProcessRequest
+	might return immediately and queue the request for later processing.
+
+	* server/XSPApplicationHost.cs: unregister the request when redirecting
+
+	* server/MonoWorkerRequest.cs:
+	* server/ModMonoWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs: RequestId is not part of
+	MonoWorkerRequest interface.
+
 2004-08-17 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: ignore exceptions when setting socket

@@ -193,9 +193,8 @@ namespace Mono.ASPNET
 					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();
 				} catch {}
-			}
-			finally {
-				if (requestId != -1)
+
+				if (broker != null && requestId != -1)
 					broker.UnregisterRequest (requestId);
 			}
 		}

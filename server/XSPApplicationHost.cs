@@ -100,6 +100,7 @@ namespace Mono.ASPNET
 
 			if (redirect != null) {
 				Redirect (mwr, redirect);
+				broker.UnregisterRequest (reqId);
 				return;
 			}
 
@@ -220,8 +221,8 @@ namespace Mono.ASPNET
 					}
 					stream.Close ();
 				} catch {}
-			} finally {
-				if (requestId != -1)
+
+				if (broker != null && requestId != -1)
 					broker.UnregisterRequest (requestId);
 			}
 		}

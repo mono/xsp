@@ -18,7 +18,7 @@ XSP_SOURCES = AssemblyInfo.cs \
 	  InitialWorkerRequest.cs \
 	  Tracing.cs \
           server.cs
-	  
+
 MODMONO_SERVER_SOURCES =  IApplicationHost.cs \
 			  MonoWorkerRequest.cs \
 			  ModMonoRequest.cs \
@@ -34,7 +34,7 @@ LOCAL_BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 .PHONY: all install clean uninstall trace
 
 all: $(EXES)
-	
+
 install: $(EXES)
 	$(MKINSTALLDIRS) $(LOCAL_BIN_DIR)
 	cp $(EXES) $(LOCAL_BIN_DIR)

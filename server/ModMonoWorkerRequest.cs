@@ -64,17 +64,12 @@ namespace Mono.ASPNET
 {
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
+		ModMonoRequest request;
 		string verb;
 		string queryString;
 		string protocol;
-		string localAddress;
-		string remoteAddress;
-		string remoteName;
 		string path;
 		string pathInfo;
-		int localPort;
-		int remotePort;
-		ModMonoRequest request;
 
 		public ModMonoRequest Request {
 			get { return request; }
@@ -161,18 +156,12 @@ namespace Mono.ASPNET
 
 		public override string GetLocalAddress ()
 		{
-			if (localAddress == null)
-				localAddress = request.GetLocalAddress ();
-
-			return localAddress;
+			return request.GetLocalAddress ();
 		}
 
 		public override int GetLocalPort ()
 		{
-			if (localPort == 0)
-				localPort = request.GetServerPort ();
-
-			return localPort;
+			return request.GetServerPort ();
 		}
 
 		public override string GetQueryString ()
@@ -182,23 +171,16 @@ namespace Mono.ASPNET
 
 		public override string GetRemoteAddress ()
 		{
-			if (remoteAddress == null)
-				remoteAddress = request.GetRemoteAddress ();
-
-			return remoteAddress;
+			return request.GetRemoteAddress ();
 		}
 
 		public override int GetRemotePort ()
 		{
-			if (remotePort == 0)
-				remotePort = request.GetRemotePort ();
-
-			return remotePort;
+			return request.GetRemotePort ();
 		}
 
 		public override string GetServerVariable (string name)
 		{
-			//TODO: cache them in a hash?
 			return request.GetServerVariable (name);
 		}
 
@@ -209,9 +191,9 @@ namespace Mono.ASPNET
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			request.SetStatusCode(statusCode);
+			request.SetStatusCode (statusCode);
 			// Protocol will be added by XSP
-			request.SetStatusLine(String.Format("{0} {1}", statusCode, statusDescription));
+			request.SetStatusLine (String.Format("{0} {1}", statusCode, statusDescription));
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
@@ -248,10 +230,7 @@ namespace Mono.ASPNET
 		
 		public override string GetRemoteName ()
 		{
-			if (remoteName == null)
-				remoteName = request.GetRemoteName ();
-
-			return remoteName;
+			return request.GetRemoteName ();
 		}
 
 		public override string GetUnknownRequestHeader (string name)

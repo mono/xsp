@@ -57,6 +57,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Mono.ASPNET
@@ -96,13 +97,28 @@ namespace Mono.ASPNET
 	{
 		BinaryReader reader;
 		BinaryWriter writer;
-		NetworkStream st;
+		Hashtable reqHeaders = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
+							CaseInsensitiveComparer.Default);
+
+		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
+							   CaseInsensitiveComparer.Default);
+		string verb;
+		string queryString;
+		string protocol;
+		string path;
+		string pathInfo;
+		string localAddress;
+		string remoteAddress;
+		string remoteName;
+		int localPort;
+		int remotePort;
+		int serverPort;
+		bool setupClientBlockCalled;
 
 		public ModMonoRequest (NetworkStream ns)
 		{
-			st = ns;
-			reader = new BinaryReader (st);
-			writer = new BinaryWriter (st);
+			reader = new BinaryReader (ns);
+			writer = new BinaryWriter (ns);
 		}
 
 		void SendSimpleCommand (Cmd cmd)
@@ -124,7 +140,7 @@ namespace Mono.ASPNET
 			byte [] buf = new byte [size];
 			string s;
 			if (size != 0) {
-				st.Read (buf, 0, size);
+				reader.Read (buf, 0, size);
 				//FIXME: encoding!
 				s = Encoding.Default.GetString (buf);
 			} else {
@@ -147,23 +163,31 @@ namespace Mono.ASPNET
 
 		public string GetProtocol ()
 		{
+			if (protocol != null)
+				return protocol;
+
 			SendSimpleCommand (Cmd.GET_PROTOCOL);
 			ReadEnd ();
-			return ReadString ();
+			protocol = ReadString ();
+			return protocol;
 		}
 
 		public string GetHttpVerbName ()
 		{
+			if (verb != null)
+				return verb;
+
 			SendSimpleCommand (Cmd.GET_METHOD);
 			ReadEnd ();
-			return ReadString ();
+			verb = ReadString ();
+			return verb;
 		}
 
 		public void SendResponseFromMemory (byte [] data, int length)
 		{
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
-			st.Write (data, 0, length);
+			writer.Write (data, 0, length);
 			ReadEnd ();
 		}
 
@@ -177,29 +201,48 @@ namespace Mono.ASPNET
 
 		public string GetRequestHeader (string name)
 		{
+			object o = reqHeaders [name];
+			if (o != null)
+				return (string) o;
+
 			SendSimpleCommand (Cmd.GET_REQUEST_HEADER);
 			WriteString (name);
 			ReadEnd ();
-			return ReadString ();
+			o = ReadString ();
+			reqHeaders [name] = o;
+
+			return (string) o;
 		}
 
 		public string GetServerVariable (string name)
 		{
+			object o = serverVariables [name];
+			if (o != null)
+				return (string) o;
+
 			SendSimpleCommand (Cmd.GET_SERVER_VARIABLE);
 			WriteString (name);
 			ReadEnd ();
-			return ReadString ();
+			o = ReadString ();
+			serverVariables [name] = o;
+
+			return (string) o;
 		}
 
 		public string GetUri ()
 		{
+			if (path != null)
+				return path;
+
 			SendSimpleCommand (Cmd.GET_URI);
 			ReadEnd ();
-			return ReadString ();
+			path = ReadString ();
+			return path;
 		}
 
 		public string GetFileName ()
 		{
+			// Not used!
 			SendSimpleCommand (Cmd.GET_FILENAME);
 			ReadEnd ();
 			return ReadString ();
@@ -207,54 +250,81 @@ namespace Mono.ASPNET
 
 		public string GetQueryString ()
 		{
+			if (queryString != null)
+				return queryString;
+
 			SendSimpleCommand (Cmd.GET_QUERY_STRING);
 			ReadEnd ();
-			return ReadString ();
+			queryString = ReadString ();
+			return queryString;
 		}
 
 		// May be different from Connection.GetLocalPort depending on Apache configuration,
 		// for things like self referential URLs, etc.
-
 		public int GetServerPort ()
 		{
+			if (serverPort != 0)
+				return serverPort;
+
 			SendSimpleCommand (Cmd.GET_SERVER_PORT);
 			ReadEnd ();
-			return reader.ReadInt32 ();
+			serverPort = reader.ReadInt32 ();
+			return serverPort;
 		}
 
 		public string GetRemoteAddress ()
 		{
+			if (remoteAddress != null)
+				return remoteAddress;
+
 			SendSimpleCommand (Cmd.GET_REMOTE_ADDRESS);
 			ReadEnd ();
-			return ReadString ();
+			remoteAddress = ReadString ();
+			return remoteAddress;
 		}
 
 		public string GetRemoteName ()
 		{
+			if (remoteName != null)
+				return remoteName;
+
 			SendSimpleCommand (Cmd.GET_REMOTE_NAME);
 			ReadEnd ();
-			return ReadString ();
+			remoteName = ReadString ();
+			return remoteName;
 		}
 
 		public string GetLocalAddress ()
 		{
+			if (localAddress != null)
+				return localAddress;
+
 			SendSimpleCommand (Cmd.GET_LOCAL_ADDRESS);
 			ReadEnd ();
-			return ReadString ();
+			localAddress = ReadString ();
+			return localAddress;
 		}
 
 		public int GetLocalPort ()
 		{
+			if (localPort != 0)
+				return localPort;
+
 			SendSimpleCommand (Cmd.GET_LOCAL_PORT);
 			ReadEnd ();
-			return reader.ReadInt32 ();
+			localPort = reader.ReadInt32 ();
+			return localPort;
 		}
 
 		public int GetRemotePort ()
 		{
+			if (remotePort != 0)
+				return remotePort;
+
 			SendSimpleCommand (Cmd.GET_REMOTE_PORT);
 			ReadEnd ();
-			return reader.ReadInt32 ();
+			remotePort = reader.ReadInt32 ();
+			return remotePort;
 		}
 
 		public void Flush ()
@@ -271,13 +341,17 @@ namespace Mono.ASPNET
 
 		public int SetupClientBlock ()
 		{
+			if (setupClientBlockCalled)
+				return 0;
+
+			setupClientBlockCalled = true;
 			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
 			ReadEnd ();
 			int i = reader.ReadInt32 ();
 			return i;
 		} 
 
-		public bool ShouldClientBlock() 
+		public bool ShouldClientBlock () 
 		{
 			SendSimpleCommand (Cmd.SHOULD_CLIENT_BLOCK);
 			ReadEnd ();
@@ -285,7 +359,7 @@ namespace Mono.ASPNET
 			return (i != 0);
 		} 
 
-		public int GetClientBlock (byte [] bytes, int size) 
+		public int GetClientBlock ([Out] byte [] bytes, int size) 
 		{
 			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK);
 			writer.Write (size);
@@ -294,8 +368,7 @@ namespace Mono.ASPNET
 			if (i > size)
 				throw new Exception ("Houston...");
 
-			st.Read (bytes, 0, i);
-			return i;
+			return reader.Read (bytes, 0, i);
 		} 
 
 		public void SetStatusCode (int code) 

@@ -1,3 +1,12 @@
+2003-09-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* ModMonoWorkerRequest.cs: don't cache the values from mod_mono_unix
+	here...
+	* ModMonoRequest.cs: ...and do it here.
+	(GetClientBlock): mark the array as an Out parameter so that the
+	modified array is passed back to the caller by remoting. This fixes
+	POST when using mod_mono_unix.
+
 2003-09-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs: don't crash when no Host header is received or

@@ -1,24 +1,13 @@
 Testing XSP
 ============
 
-You need to have mono and mcs installed.
+Steps for installing the OLD server (only on unix):
 
-Then run:
+	make old
+	...and follow the instructions...
+
+Steps for installing the NEW server (it may not work right now with mono):
 
 	make install
-
-And it will create a directory called 'rundir' and copy the needed files.
-Then:
-
-	cd rundir
-	mono server.exe PORTNUMBER
-
-where PORTNUMBER is the port you want the server to listen on (ie, 8000).
-
-Finally, just point your web browser to:
-
-	http://127.0.0.1:PORTNUMBER/
-
-and there you go!
-
+	...and follow the instructions...
 

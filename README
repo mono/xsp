@@ -5,12 +5,18 @@ Layout:
 
 	src/
 		Source files for the parser/generator and test server.
+		OBSOLETED!!!
 
 	doc/
 		Documentation about ASP.NET pages
 
 	test/
 		Little sample ASP.NET pages
+
+	server/
+		A stand alone web server that works with MS runtime.
+		We'll be using it to debug/complete our classes.
+		
 		
 Maintainer: gonzalo@ximian.com
 

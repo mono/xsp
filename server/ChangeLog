@@ -1,3 +1,8 @@
+2002-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: added 'trace' target.
+	* index.aspx: removed file added by mistake.
+
 2002-10-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* ChangeLog:

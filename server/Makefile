@@ -17,11 +17,15 @@ install: server.exe web.config global.asax
 	mkdir -p test/bin
 	cp server.exe web.config global.asax test
 	cp server.exe test/bin
-	cp ../test/*.aspx ../test/*.xml test
+	cp ../test/*.aspx ../test/*.xml ../test/*.png test
 	cp ../test/*.dll test/bin
 
 server.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) $(REFS) /out:$@ $^
+
+trace: 
+	rm -f server.exe
+	make -C . CSCFLAGS=/d:TRACE
 
 clean:
 	rm -f server.exe *~ *.pdb

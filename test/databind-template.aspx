@@ -2,6 +2,7 @@
 <html>
 <head>
 <script language="C#" runat="server">
+	private string folks = "folks";
 	void Page_Load(object src, EventArgs e)
 	{
 		if (!Page.IsPostBack){
@@ -42,6 +43,9 @@
 			Number: <%# Container.DataItem %>
 			This is an <b><%# EvenOrOdd((int) Container.DataItem) %></b> number.
 			</ItemTemplate>
+			<FooterTemplate>
+			That is all <%# folks %>
+			</FooterTemplate>
 		</asp:datalist>
 	</form>
 </body>

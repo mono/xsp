@@ -1,3 +1,7 @@
+2003-01-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web_datagrid.aspx: simple datagrid test.
+
 2003-01-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* registertest.aspx:

@@ -42,7 +42,6 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
-using Math = System.Math;
 
 namespace Mono.ASPNET
 {
@@ -272,7 +271,7 @@ namespace Mono.ASPNET
 			while (length > 0 && (count = stream.Read (fileContent, 0, count)) != 0) {
 				SendResponseFromMemory (fileContent, count);
 				length -= count;
-				count = (int) Math.Min (length, fileContent.Length);
+				count = (int) System.Math.Min (length, fileContent.Length);
 			}
 		}
 

@@ -1,3 +1,8 @@
+2005-01-13  Raja R Harinath  <rharinath@novell.com>
+
+	* server/MonoWorkerRequest.cs: Update to compile with the stricter
+	name-resolution of MCS.
+
 2004-12-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs:

@@ -146,7 +146,7 @@ file in the XSP samples directory.
 The Mono XSP server was written by Gonzalo Paniagua Javier
 (gonzalo@ximian.com).
 .SH SEE ALSO
-.BR mono (1), dbsessmgr (1), asp_state (1), mod_mono (8)
+.BR mono (1), dbsessmgr (1), asp-state (1), mod_mono (8)
 .PP
 System.Web, System.Web.Hosting namespaces.
 .PP

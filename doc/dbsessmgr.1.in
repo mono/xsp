@@ -41,7 +41,7 @@ The configuration shipped by default is:
 .SH AUTHORS
 dbsessmgr was written by Jackson Harper (jackson@ximian.com).
 .SH SEE ALSO
-.BR mono (1), xsp (1), asp_state (1), mod_mono (8)
+.BR mono (1), xsp (1), asp-state (1), mod_mono (8)
 .SH MORE INFORMATION
 The Mono project (http://www.go-mono.com) is a collaborative effort
 led by Novell (http://www.novell.com) to implement an open source

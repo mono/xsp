@@ -4,7 +4,7 @@ Testing XSP
 Steps for installing the server:
 
 	./configure --prefix=/your/install/dir
-	make 
+(*)	make 
 	make install
 
     You can change the listen port from the default (8080) using the
@@ -32,4 +32,8 @@ If you're compiling under windows, you may need to copy xsp.exe,
 ICSharpCode.SharpZipLib.dll and Mono.Http.dll (distributed with mono) to
 xsp/server and xsp/server/test/bin directories if it's not installed for
 the system.
+
+(*) In windows, if you want to build xsp using csc, do:
+
+    MCS=csc make
 

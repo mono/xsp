@@ -1,3 +1,10 @@
+2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* INSTALL: added note on building using CSC.
+
+	* test/mod-mono-server.exe.config:
+	* test/web.config: use Version and PublicKeyToken where applicable.
+
 2004-04-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* NEWS:

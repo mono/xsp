@@ -92,7 +92,8 @@ public class DumpExtension : SoapExtension
 
 	public void Dump (MemoryStream stream, string msg)
 	{
-		FileStream fs = new FileStream(filename, FileMode.Append, FileAccess.Write);
+		string fn = Path.Combine (Path.GetTempPath (), filename);
+		FileStream fs = new FileStream (fn, FileMode.Append, FileAccess.Write);
 		StreamWriter sw = new StreamWriter (fs);
 		sw.WriteLine ();
 		sw.WriteLine (msg);

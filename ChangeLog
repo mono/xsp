@@ -1,3 +1,7 @@
+2004-05-26  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: only support HTTP 1.0 in xsp.exe.
+
 2004-05-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/AssemblyInfo.cs.in:

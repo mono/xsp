@@ -116,6 +116,9 @@ namespace Mono.ASPNET
 			path = rdata.Path;
 			pathInfo = rdata.PathInfo;
 			protocol = rdata.Protocol;
+			if (protocol == "HTTP/1.1")
+				protocol = "HTTP/1.0";	// Only 1.0 supported by xsp standalone.
+
 			queryString = rdata.QueryString;
 			inputBuffer = rdata.InputBuffer;
 			inputLength = inputBuffer.Length;

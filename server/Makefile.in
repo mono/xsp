@@ -1,9 +1,7 @@
 MCS=@MCS@
 MCSFLAGS+= -debug+ -debug:full -nologo
-PREFIX=@prefix@
-DESTDIR=
 MKINSTALLDIRS=@top_builddir@mkinstalldirs 
-DISTFILES=Makefile.in $(XSP_SOURCES) ModMonoRequest.cs ModMonoWorkerRequest.cs
+DISTFILES=Makefile.in $(COMMON_SOURCES) $(XSP_ONLY) $(MODMONO_ONLY)
 
 # 
 XSP_REFERENCES= System.Web
@@ -11,26 +9,26 @@ MODMONO_SERVER_REFERENCES= System.Web Mono.Posix
 XSP_REFS= $(addsuffix .dll, $(addprefix -r:, $(XSP_REFERENCES)))
 MODMONO_SERVER_REFS= $(addsuffix .dll, $(addprefix -r:, $(MODMONO_SERVER_REFERENCES)))
 
-XSP_SOURCES = AssemblyInfo.cs \
-          IApplicationHost.cs \
+COMMON_SOURCES= IApplicationHost.cs \
 	  XSPApplicationHost.cs \
 	  MonoWorkerRequest.cs \
-	  XSPWorkerRequest.cs \
 	  InitialWorkerRequest.cs \
 	  Tracing.cs \
-          server.cs
+	  server.cs
 
-MODMONO_SERVER_SOURCES =  IApplicationHost.cs \
-			  MonoWorkerRequest.cs \
-			  ModMonoRequest.cs \
-			  ModMonoWorkerRequest.cs \
-			  XSPApplicationHost.cs \
-			  InitialWorkerRequest.cs \
-			  Tracing.cs \
-			  server.cs
+XSP_ONLY= AssemblyInfo.cs.in \
+	  XSPWorkerRequest.cs
+
+XSP_SOURCES = $(COMMON_SOURCES) $(XSP_ONLY:.in=)
+
+MODMONO_ONLY= ModMonoRequest.cs \
+	      ModMonoWorkerRequest.cs \
+	      AssemblyInfoModMono.cs.in
+
+MODMONO_SERVER_SOURCES =  $(COMMON_SOURCES) $(MODMONO_ONLY:.in=)
 
 EXES = xsp.exe mod-mono-server.exe
-LOCAL_BIN_DIR=$(DESTDIR)$(PREFIX)/bin
+LOCAL_BIN_DIR=@prefix@/bin
 
 .PHONY: all install clean uninstall trace
 
@@ -57,6 +55,6 @@ uninstall:
 	-test -d $(LOCAL_BIN_DIR) && cd $(LOCAL_BIN_DIR) && rm -f $(EXES)
 
 distdir:
-	$(MKINSTALLDIRS) $(DESTDIR)$(PREFIX)/server
-	cp $(DISTFILES) $(DESTDIR)$(PREFIX)/server
+	$(MKINSTALLDIRS) $(distdir)
+	cp $(DISTFILES) $(distdir)
 

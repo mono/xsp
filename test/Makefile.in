@@ -1,6 +1,4 @@
 MCS=@MCS@
-PREFIX=@prefix@
-DESTDIR=
 MKINSTALLDIRS=@top_builddir@mkinstalldirs 
 
 %.dll: %.cs
@@ -56,6 +54,6 @@ clean:
 	rm -f *.dll *~ *.pdb
 
 distdir:
-	$(MKINSTALLDIRS) $(DESTDIR)$(PREFIX)/test
-	cp $(DISTFILES) $(DESTDIR)$(PREFIX)/test
+	$(MKINSTALLDIRS) $(distdir)
+	cp $(DISTFILES) $(distdir)
 

@@ -165,11 +165,13 @@ namespace Mono.ASPNET
 			
 			// Yes, MS only looks for the '.'. Try setting a handler for
 			// something not containing a '.' and you won't get path_info.
-			int dot = path.LastIndexOf ('.');
-			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
-			if (dot > 0 && slash > 0) {
+			int dot = path.IndexOf ('.');
+			int slash = (dot != -1) ? path.IndexOf ('/', dot) : -1;
+			if (dot >= 0 && slash >= 0) {
 				pathInfo = path.Substring (slash);
 				path = path.Substring (0, slash);
+			} else {
+				pathInfo = "";
 			}
 
 			if (path.StartsWith ("/~/")) {

@@ -22,6 +22,8 @@ echo "$CS compiler: $MCS"
 AC_SUBST(MCS)
 AC_OUTPUT([Makefile
 	doc/Makefile
+	server/AssemblyInfo.cs
+	server/AssemblyInfoModMono.cs
 	server/Makefile
 	test/Makefile])
 

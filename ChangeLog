@@ -1,3 +1,13 @@
+2003-10-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: output the assemblyinfos too.
+	* doc/Makefile.am: extradist.
+	* server/AssemblyInfoModMono.cs.in: for mod-mono-server.
+	* server/InitialWorkerRequest.cs: PathInfo should work now.
+	* server/Makefile.in: use the assemblyinfo*.in files.
+	* server/server.cs: added --version.
+	* test/Makefile.in: simplified.
+
 2003-10-05  Pedro Martínez Juliá  <yoros@wanadoo.es>
 
 	* test/index.aspx: change directory where files are searched because

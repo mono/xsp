@@ -12,6 +12,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Web.Hosting;
 
@@ -19,7 +20,21 @@ namespace Mono.ASPNET
 {
 	public class Server
 	{
-		public static void ShowHelp ()
+		static void ShowVersion ()
+		{
+			Assembly assembly = Assembly.GetExecutingAssembly ();
+			string version = assembly.GetName ().Version.ToString ();
+			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
+			string title = ((AssemblyTitleAttribute) att [0]).Title;
+			att = assembly.GetCustomAttributes (typeof (AssemblyCopyrightAttribute), false);
+			string copyright = ((AssemblyCopyrightAttribute) att [0]).Copyright;
+			att = assembly.GetCustomAttributes (typeof (AssemblyDescriptionAttribute), false);
+			string description = ((AssemblyDescriptionAttribute) att [0]).Description;
+			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
+					Path.GetFileName (assembly.Location), version, copyright, description);
+		}
+
+		static void ShowHelp ()
 		{
 #if MODMONO_SERVER
 			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono_unix.");
@@ -67,6 +82,8 @@ namespace Mono.ASPNET
 			Console.WriteLine ();
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
+			Console.WriteLine ();
+			Console.WriteLine ("    --version: displays version information and exists.");
 
 			Console.WriteLine ();
 		}
@@ -120,6 +137,9 @@ namespace Mono.ASPNET
 					break;
 				case "--help":
 					ShowHelp ();
+					return 0;
+				case "--version":
+					ShowVersion ();
 					return 0;
 				default:
 					Console.WriteLine ("Unknown argument: {0}", a);

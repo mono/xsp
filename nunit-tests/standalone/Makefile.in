@@ -36,3 +36,7 @@ distdir:
 
 reautogen:
 	(cd ../.. && ./config.status nunit-tests/standalone/Makefile)
+
+distclean: clean
+	rm -f Makefile
+

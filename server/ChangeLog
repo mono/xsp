@@ -1,9 +1,14 @@
+2003-09-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: don't crash when no Host header is received or
+	if it has an invalid port.
+
 2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
 
-	* XSPWorkerRequest.cs: GetServerName(): reverted previous patch. There was
-	  a conflict with previous changes.
-	  Also modified implementation of GetLocalAddress(). It should get the value
-	  from the request header.
+	* XSPWorkerRequest.cs: GetServerName(): reverted previous patch. There
+	was a conflict with previous changes.
+	Also modified implementation of GetLocalAddress(). It should get the
+	value from the request header.
 
 2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
 

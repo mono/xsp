@@ -124,14 +124,23 @@ namespace Mono.ASPNET
 			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
 			
+			int i = -1;
 			string url = GetKnownRequestHeader (HeaderHost);
-			int i = url.LastIndexOf (":");
+			if (url != null)
+				i = url.LastIndexOf (":");
+
 			if (i == -1) {
 				localPort = 80;
 				localAddress = url;
-			}
-			else {
-				localPort = int.Parse (url.Substring (i+1));
+			} else {
+				try {
+					localPort = int.Parse (url.Substring (i+1));
+				} catch {
+					// May be we should send a 50x error?
+
+					localPort = 80;
+				}
+
 				localAddress = url.Substring (0,i);
 			}
 		}

@@ -1,3 +1,7 @@
+2002-07-06  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* server.cs: when compiling, reference System.Data  and don't reference
+	MyForm.
 
 2002-07-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

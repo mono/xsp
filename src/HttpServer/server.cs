@@ -70,7 +70,7 @@ class PageFactory
 			cscOptions.Add ("-L .");
 			AddReference ("corlib");
 			AddReference ("System");
-			AddReference ("MyForm");
+			AddReference ("System.Data");
 #else
 			cscOptions.Add ("/noconfig");
 			cscOptions.Add ("/nologo");
@@ -79,6 +79,7 @@ class PageFactory
 			cscOptions.Add ("/target:library");
 			AddReference ("mscorlib.dll");
 			AddReference ("System.dll");
+			AddReference ("System.Data.dll");
 			AddReference (".\\MyForm.dll");
 #endif
 			AddReference (Server.SystemWeb);
@@ -607,7 +608,7 @@ public class Server
 	public static string SystemWeb
 	{
 #if MONO
-		get { return (!useMonoClasses ? "System.Web.dll" : ".\\System.Web.dll"); }
+		get { return "System.Web"; }
 #else
 		get { return (!useMonoClasses ? "System.Web.dll" : ".\\System.Web.dll"); }
 #endif

@@ -1,3 +1,7 @@
+2002-07-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web_dropdownlist.aspx: New file.
+
 2002-07-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* mono.png: image for the index page.

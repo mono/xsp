@@ -1,0 +1,6 @@
+2003-02-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* index.aspx:
+	* login.aspx:
+	* web.config: authorization test from http://www.asp.net.
+

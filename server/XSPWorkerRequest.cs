@@ -398,6 +398,9 @@ namespace Mono.ASPNET
 			if (!catOne)
 				return true;
 
+			if (queryString != null && queryString != "")
+				path += "?" + queryString;
+
 			SendStatus (302, "Moved");
 			WriteString (status);
 			WriteString ("Location: " + path + "\r\n");

@@ -1,3 +1,8 @@
+2003-05-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: when redirecting to an index page, also use the
+	query string. Fixes bug #43598.
+
 2003-05-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs:

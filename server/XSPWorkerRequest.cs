@@ -68,8 +68,12 @@ namespace Mono.ASPNET
 			if (att.Length > 0)
 				title = ((AssemblyTitleAttribute) att [0]).Title;
 
+			string plat = Environment.OSVersion.Platform.ToString ();
+			if (plat == "128")
+				plat = "Unix";
+
 			serverHeader = String.Format ("Server: {0}/{1} {2}\r\n",
-						      title, version, Environment.OSVersion.Platform);
+						      title, version, plat); 
 
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);

@@ -12,7 +12,10 @@ SOURCES = asp-parser.cs \
 	  driver.cs \
 	  generator.cs
 
-all: xsp.exe
+all: xsp.exe subdirs
+
+subdirs:
+	(cd HttpServer && make)
 
 xsp.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) /out:$@ $^

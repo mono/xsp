@@ -98,8 +98,12 @@ namespace Mono.ASPNET
 			if (shutdown)
 				return;
 
-			if (cmd != 1)
-				throw new InvalidOperationException ("mod_mono and xsp have different versions.");
+			if (cmd != 1) {
+				string msg = "mod_mono and xsp have different versions.";
+				Console.WriteLine (msg);
+				Console.Error.WriteLine (msg);
+				throw new InvalidOperationException (msg);
+			}
 
 			verb = ReadString ();
 			uri = ReadString ();

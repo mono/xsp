@@ -1,3 +1,20 @@
+2005-02-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs: now they use a common method to get the
+	pathinfo and pathinfo works with apache too.
+
+	* server/ModMonoRequest.cs: when there's a version mismatch, print it
+	everywhere so that it gets to apache logs.
+
+	* server/ApplicationServer.cs: new Paths class containing a method for
+	getting the path and pathinfo from an uri.
+
+	* server/InitialWorkerRequest.cs: no pathinfo computation here.
+	* server/XSPApplicationHost.cs: removed pathinfo parameter.
+
+	* server/Makefile.am: xsp2.exe was being installed to xsp directory !?
+
 2005-02-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: added BadRequest () to HttpErrors.

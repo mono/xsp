@@ -678,5 +678,53 @@ namespace Mono.ASPNET
 			return error500;
 		}
 	}
+
+	class Paths {
+		private Paths ()
+		{
+		}
+
+		public static void GetPathsFromUri (string uri, out string realUri, out string pathInfo)
+		{
+			// There's a hidden missing feature here... :)
+			realUri = uri; pathInfo = "";
+			string basepath = HttpRuntime.AppDomainAppPath;
+			string vpath = HttpRuntime.AppDomainAppVirtualPath;
+			if (vpath [vpath.Length - 1] != '/')
+				vpath += '/';
+
+			if (vpath.Length > uri.Length)
+				return;
+
+			uri = uri.Substring (vpath.Length);
+			while (uri.Length > 0 && uri [0] == '/')
+				uri = uri.Substring (1);
+
+			int dot, slash;
+			int lastSlash = uri.Length;
+			bool windows = (Path.DirectorySeparatorChar == '\\');
+
+			for (dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
+				slash = uri.IndexOf ('/', dot);
+				string partial;
+				if (slash == -1)
+					slash = lastSlash;
+
+				partial = uri.Substring (0, slash);
+				lastSlash = slash;
+				string partial_win = null;
+				if (windows)
+					partial_win = partial.Replace ('/', '\\');
+
+				string path = Path.Combine (basepath, (windows ? partial_win : partial));
+				if (!File.Exists (path))
+					continue;
+				
+				realUri = vpath + uri.Substring (0, slash);
+				pathInfo = uri.Substring (slash);
+				break;
+			}
+		}
+	}
 }
 

@@ -145,7 +145,6 @@ namespace Mono.ASPNET
 					 			EndPoint remoteEP, 
 								string verb, 
 								string path, 
-								string pathInfo, 
 								string queryString, 
 								string protocol, 
 								byte[] inputBuffer)
@@ -155,8 +154,7 @@ namespace Mono.ASPNET
 			this.requestBroker = requestBroker;
 			this.remoteEP = remoteEP;
 			this.verb = verb;
-			this.path = path;
-			this.pathInfo = pathInfo;
+			Paths.GetPathsFromUri (path, out this.path, out pathInfo);
 			this.protocol = protocol;
 			if (protocol == "HTTP/1.1") {
 				this.protocol = "HTTP/1.0";	// Only 1.0 supported by xsp standalone.

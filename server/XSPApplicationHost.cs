@@ -121,14 +121,14 @@ namespace Mono.ASPNET
 	public class XSPApplicationHost : BaseApplicationHost
 	{
 		public void ProcessRequest (int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
-					int remoteEPPort, string verb, string path, string pathInfo,
+					int remoteEPPort, string verb, string path,
 					string queryString, string protocol, byte [] inputBuffer, string redirect)
 		{
 			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
 			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
 			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
-								pathInfo, queryString, protocol, inputBuffer);
+								queryString, protocol, inputBuffer);
 
 			string translated = mwr.GetFilePathTranslated ();
 			if (path [path.Length - 1] != '/' && Directory.Exists (translated))
@@ -262,7 +262,7 @@ namespace Mono.ASPNET
 				vapp.Redirect (rdata.Path, out redirect);
 				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
 						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
-						rdata.Path, rdata.PathInfo, rdata.QueryString,
+						rdata.Path, rdata.QueryString,
 						rdata.Protocol, rdata.InputBuffer, redirect);
 			} catch (Exception e) {
 				bool ignore = ((e is RequestLineException) || (e is IOException));

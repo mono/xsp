@@ -77,7 +77,6 @@ namespace Mono.ASPNET
 		string path;
 		string queryString;
 		string protocol;
-		string pathInfo;
 		NetworkStream stream;
 		bool gotSomeInput;
 
@@ -211,18 +210,6 @@ namespace Mono.ASPNET
 
 			path = HttpUtility.UrlDecode (path);
 			path = GetSafePath (path);
-			
-			// Yes, MS only looks for the '.'. Try setting a handler for
-			// something not containing a '.' and you won't get path_info.
-			int dot = path.LastIndexOf ('.');
-			int slash = (dot != -1) ? path.IndexOf ('/', dot) : -1;
-			if (dot >= 0 && slash >= 0) {
-				pathInfo = path.Substring (slash);
-				path = path.Substring (0, slash);
-			} else {
-				pathInfo = "";
-			}
-
 			if (path.StartsWith ("/~/")) {
 				// Not sure about this. It makes request such us /~/dir/file work
 				path = path.Substring (2);
@@ -287,7 +274,6 @@ namespace Mono.ASPNET
 				byte [] buffer = new byte [inputLength - position];
 				Buffer.BlockCopy (inputBuffer, position, buffer, 0, inputLength - position);
 				rd.InputBuffer = buffer;
-				rd.PathInfo = pathInfo;
 				FreeBuffer (inputBuffer);
 				return rd;
 			}

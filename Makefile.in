@@ -2,6 +2,7 @@ SUBDIRS = server test doc
 NAME_VERSION=@PACKAGE_NAME@-@PACKAGE_VERSION@
 DIST_DIR="@abs_top_builddir@/$(NAME_VERSION)"
 TARFILE=$(NAME_VERSION).tar.gz
+TEST_DIR=$(DESTDIR)$(PREFIX)/share/doc/xsp/test
 
 .PHONY: all install clean uninstall dist
 
@@ -14,6 +15,15 @@ install: all
 	for i in $(SUBDIRS); do	\
 		$(MAKE) -C $$i install || exit 1; \
 	done;
+	@echo ""
+	@echo "xsp installation succeeded!"
+	@echo ""
+	@echo "  There are some samples ready to run in: "
+	@echo "        $(TEST_DIR)"
+	@echo ""
+	@echo "  You can try them with the following command: "
+	@echo "        mono xsp.exe --root $(TESTDIR)"
+	@echo ""
 
 clean uninstall:
 	for i in $(SUBDIRS); do	\

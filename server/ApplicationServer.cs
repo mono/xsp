@@ -413,6 +413,7 @@ namespace Mono.ASPNET
 		ArrayList readSockets = new ArrayList ();
 		Hashtable timeouts = new Hashtable ();
 		Hashtable uses = new Hashtable ();
+		object locker = new object ();
 
 		public ArrayList SelectRead ()
 		{
@@ -432,6 +433,14 @@ namespace Mono.ASPNET
 				// wSockets already contains listen_socket.
 			}
 
+			lock (locker)
+				CheckTimeouts (wSockets);
+
+			return wSockets;
+		}
+
+		void CheckTimeouts (ArrayList wSockets)
+		{
 			int w = timeouts.Count;
 			if (w > 0) {
 				Socket [] socks_timeout = new Socket [w];
@@ -444,58 +453,63 @@ namespace Mono.ASPNET
 					DateTime atime = (DateTime) timeouts [k];
 					TimeSpan diff = now - atime;
 					if (diff.TotalMilliseconds > 15 * 1000) {
+						RemoveReadSocket (k);
 						k.Close ();
-						readSockets.Remove (k);
-						timeouts.Remove (k);
-						uses.Remove (k);
 						continue;
 					}
 				}
 			}
-
-			return wSockets;
 		}
 
 		public void IncrementReuseCount (Socket sock)
 		{
-			if (uses.ContainsKey (sock)) {
-				int n = (int) uses [sock];
-				uses [sock] = n + 1;
-			} else {
-				uses [sock] = 1;
+			lock (locker) {
+				if (uses.ContainsKey (sock)) {
+					int n = (int) uses [sock];
+					uses [sock] = n + 1;
+				} else {
+					uses [sock] = 1;
+				}
 			}
 		}
 
 		public int GetReuseCount (Socket sock)
 		{
-			if (uses.ContainsKey (sock))
-				return (int) uses [sock];
+			lock (locker) {
+				if (uses.ContainsKey (sock))
+					return (int) uses [sock];
 
-			uses [sock] = 1;
-			return 1;
+				uses [sock] = 1;
+				return 1;
+			}
 		}
-		
+
 		public void AddReadSocket (Socket sock)
 		{
-			readSockets.Add (sock);
+			lock (locker)
+				readSockets.Add (sock);
 		}
 
 		public void AddReadSocket (Socket sock, DateTime time)
 		{
-			if (readSockets.Contains (sock)) {
-				timeouts [sock] = time;
-				return;
-			}
+			lock (locker) {
+				if (readSockets.Contains (sock)) {
+					timeouts [sock] = time;
+					return;
+				}
 
-			readSockets.Add (sock);
-			timeouts [sock] = time;
+				readSockets.Add (sock);
+				timeouts [sock] = time;
+			}
 		}
 
 		public void RemoveReadSocket (Socket sock)
 		{
-			readSockets.Remove (sock);
-			timeouts.Remove (sock);
-			uses.Remove (sock);
+			lock (locker) {
+				readSockets.Remove (sock);
+				timeouts.Remove (sock);
+				uses.Remove (sock);
+			}
 		}
 	}
 	

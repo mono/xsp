@@ -5,7 +5,7 @@
 .\" Author:
 .\"   Gonzalo Paniagua Javier (gonzalo@ximian.com)
 .\"
-.TH xsp "1" "28 May 2004" "xsp @VERSION@" "User Commands"
+.TH xsp "1" "10 Jul 2004" "xsp @VERSION@" "User Commands"
 .SH NAME 
 XSP \- Mono ASP.NET Web Server
 .SH SYNOPSIS
@@ -30,23 +30,27 @@ another web server (at the time of this writing Apache 1.3 and Apache
 2.0 were supported). This mechanism is better used for high-traffic
 servers or production systems, since it can integrate with the main
 HTTP server and leverage all of the optimizations and extensions of an
-existing server, while providing the ASP.NET runtime.
+existing server, while providing the ASP.NET runtime. You can choose
+the communication channel used between mod_mono and mod-mono-server. If
+you provide a --filename option, a unix socket is used, otherwise you
+can give --port to use a TCP socket.
 .SH OPTIONS
 .TP
-.I \-\-port PORT (xsp only)
-Changes the default port where the XSP server will listen to
-requests.  By default XSP listens on port 8080.
-AppSettings key name: MonoServerPort
-.TP
-.I \-\-address addr (xsp only)
-Sets the IP address to listen on. By default it's 0.0.0.0.
+.I \-\-address addr
+Sets the IP address to listen on. By default it's 0.0.0.0 for xsp and
+127.0.0.1 for mod-mono-server.
 AppSettings key name: MonoServerAddress
+.TP
+.I \-\-port PORT
+Changes the default port where the XSP server will listen to
+requests.  By default XSP listens on port 8080 and mod-mono-server has
+no default.
+AppSettings key name: MonoServerPort
 .TP
 .I \-\-filename file (mod-mono-server only)
 The unix socket file name to listen on.
 Default value: /tmp/mod_mono_server
 AppSettings key name: UnixSocketFileName
-
 .TP
 .I \-\-root PATH
 The root directory for XSP.  The default is the directory where XSP is

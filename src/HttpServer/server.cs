@@ -541,7 +541,9 @@ class MyWorkerRequest
 	
 	public void ProcessRequest ()
 	{
-		GetRequestData ();
+		if (GetRequestData () == false)
+			return;
+
 		if (fileName.IndexOf ("..") != -1){
 			RenderErrorPage (400, "Bad request", ".. not allowed in request");
 			return;
@@ -665,20 +667,37 @@ class MyWorkerRequest
 			query_options = "";
 	}
 	
-	private void GetRequestData ()
+	private bool GetRequestData ()
 	{
 		GetRequestMethod ();
 		GetCapabilities ();
 		GetQueryOptions ();
 
 		if (query [0] == '/')
-			fileName = query.Substring (1);
-		else
-			fileName = query;
+			query = query.Substring (1);
 
-		int end = fileName.IndexOf (' ');
+		int end = query.IndexOf (' ');
+		string target;
 		if (end != -1)
-			fileName = fileName.Substring (0, end);
+			target = query.Substring (0, end);
+		else
+			target = query;
+
+		int qmark = target.IndexOf ('?');
+		if (qmark == -1){
+			fileName = target;
+			return true;
+		}
+		
+		if (qmark == 0){
+			RenderErrorPage (400, "Bad Request", "Malformed query string.");
+			return false;
+		}
+
+		fileName = target.Substring (0, qmark);
+		if (query_options == "")
+			query_options = target.Substring (qmark + 1);
+		return true;
 	}
 	
 	private void RenderPage (Page page)

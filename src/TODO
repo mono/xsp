@@ -1,9 +1,0 @@
-TODO List
------------
-
-* Add support for more directives.
-We can now pass options to the other components of the ASP.NET framework so,
-for most cases, it's just a matter of add it to the generated file header.
-
-* Fix bugs
-

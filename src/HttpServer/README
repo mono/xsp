@@ -1,6 +1,0 @@
-Directory xsp/src/HttpServer
------------------------------
-
-This directory contains a web server that serves .aspx pages.
-It is intended for testing purposes only.
-

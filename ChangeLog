@@ -1,3 +1,8 @@
+2004-05-06  Sebastien Pouliot  <sebastien@ximian.com>
+
+	* INSTALL: Removed notes about RNG on Windows as this had been fixed
+	for some times.
+
 2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/Makefile.am: install the sample dlls to the right place. Thanks

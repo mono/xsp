@@ -1,7 +1,22 @@
+2004-05-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* ChangeLog: forgot an entry.
+
+	* configure.in: 0.13.99
+	* test/tabcontrol.cs: don't try to serialize a StateBag.
+
 2004-05-06  Sebastien Pouliot  <sebastien@ximian.com>
 
 	* INSTALL: Removed notes about RNG on Windows as this had been fixed
 	for some times.
+
+2004-05-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/dbpage1.aspx:
+	* test/dbpage2.aspx:
+	* test/mod-mono-server.exe.config:
+	* test/web.config: don't use the deprecated Mono.Data.PostgresqlClient,
+	but Npgsql.
 
 2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

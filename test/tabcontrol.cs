@@ -20,13 +20,11 @@ namespace Mono.Controls
 	public class Tabs : UserControl
 	{
 		Hashtable tabData;
-		StateBag localValues;
 		ArrayList titles;
 
 		public Tabs ()
 		{
 			titles = new ArrayList ();
-			localValues = new StateBag (false);
 		}
 
 		public void AddTab (string title, string url)
@@ -57,8 +55,8 @@ namespace Mono.Controls
 		protected override object SaveViewState ()
 		{
 			if (tabData != null) {
-				Triplet t = new Triplet (tabData, localValues, titles);
-				return new Pair (base.SaveViewState (), t);
+				Pair p = new Pair (tabData, titles);
+				return new Pair (base.SaveViewState (), p);
 			}
 			return null;
 		}
@@ -68,10 +66,9 @@ namespace Mono.Controls
 			if (savedState != null) {
 				Pair saved = (Pair) savedState;
 				base.LoadViewState (saved.First);
-				Triplet t = (Triplet) saved.Second;
-				tabData = t.First as Hashtable;
-				localValues = t.Second as StateBag;
-				titles = t.Third as ArrayList;
+				Pair p = (Pair) saved.Second;
+				tabData = p.First as Hashtable;
+				titles = p.Second as ArrayList;
 			}
 		}
 		
@@ -162,95 +159,95 @@ namespace Mono.Controls
 		public int BlankWidth
 		{
 			get { 
-				object o = localValues ["BlankWidth"];
+				object o = ViewState ["BlankWidth"];
 				if (o == null)
 					return 15;
 				return (int) o;
 			}
 			set {
-				localValues ["BlankWidth"] = value;
+				ViewState ["BlankWidth"] = value;
 			}
 		}
 
 		public int Width
 		{
 			get { 
-				object o = localValues ["Width"];
+				object o = ViewState ["Width"];
 				if (o == null)
 					return 120;
 				return (int) o;
 			}
 			set {
-				localValues ["Width"] = value;
+				ViewState ["Width"] = value;
 			}
 		}
 
 		public string Align
 		{
 			get { 
-				object o = localValues ["Align"];
+				object o = ViewState ["Align"];
 				if (o == null)
 					return "center";
 				return (string) o;
 			}
 			set {
-				localValues ["Align"] = value;
+				ViewState ["Align"] = value;
 			}
 		}
 
 		public string CurrentTabName
 		{
 			get {
-				object o = localValues ["CurrentTabName"];
+				object o = ViewState ["CurrentTabName"];
 				if (o == null)
 					return String.Empty;
-				return (string) localValues ["CurrentTabName"];
+				return (string) ViewState ["CurrentTabName"];
 			}
 
 			set {
-				localValues ["CurrentTabName"] = value;
+				ViewState ["CurrentTabName"] = value;
 			}
 		}
 
 		public string CurrentTabColor
 		{
 			get {
-				object o = localValues ["CurrentTabColor"];
+				object o = ViewState ["CurrentTabColor"];
 				if (o == null)
 					return "#FFFFFF";
-				return (string) localValues ["CurrentTabColor"];
+				return (string) ViewState ["CurrentTabColor"];
 			}
 
 			set {
-				localValues ["CurrentTabColor"] = value;
+				ViewState ["CurrentTabColor"] = value;
 			}
 		}
 
 		public string CurrentTabBackColor
 		{
 			get {
-				object o = localValues ["CurrentTabBackColor"];
+				object o = ViewState ["CurrentTabBackColor"];
 				if (o == null)
 					return "#3366CC";
-				return (string) localValues ["CurrentTabBackColor"];
+				return (string) ViewState ["CurrentTabBackColor"];
 			}
 
 			set {
-				localValues ["CurrentTabBackColor"] = value;
+				ViewState ["CurrentTabBackColor"] = value;
 			}
 		}
 
 		public string TabBackColor
 		{
 			get {
-				object o = localValues ["TabBackColor"];
+				object o = ViewState ["TabBackColor"];
 				if (o == null)
 					return "#efefef";
-				return (string) localValues ["TabBackColor"];
+				return (string) ViewState ["TabBackColor"];
 			}
 
 			set {
-				localValues ["TabBackColor"] = value;
+				ViewState ["TabBackColor"] = value;
 			}
 		}
 	}

@@ -163,16 +163,6 @@ namespace Mono.ASPNET
 			return queryStringBytes;
 		}
 
-		public override string GetRawUrl ()
-		{
-			string queryString = GetQueryString ();
-			string path = GetFilePath ();
-			if (queryString != null && queryString.Length > 0)
-				return path + "?" + queryString;
-
-			return path;
-		}
-
 		string DoMapPathEvent (string path)
 		{
 			if (MapPathEvent != null) {

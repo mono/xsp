@@ -68,6 +68,7 @@ namespace Mono.ASPNET
 #else
 				
 				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
+				mwr.ReadRequestData ();
 				host = host.GetApplicationForPath (mwr.GetUriPath (), false);
 				modRequest = mwr.Request;
 				if (host == null) {

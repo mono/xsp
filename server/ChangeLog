@@ -1,5 +1,15 @@
 2003-08-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* InitialWorkerRequest.cs: removed Console...
+	* ModMonoRequest.cs: removed debug output.
+
+	* ModMonoWorkerRequest.cs: added pathinfo support.
+	* MonoWorkerRequest.cs: removed GetRawUrl from here.
+	* XSPApplicationHost.cs: read the request data needed to get the Uri.
+
+
+2003-08-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* InitialWorkerRequest.cs: added PathInfo support.
 	
 	* MonoWorkerRequest.cs: removed unused GetPathInfo. Don't cache the

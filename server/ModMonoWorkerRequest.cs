@@ -70,6 +70,8 @@ namespace Mono.ASPNET
 		string localAddress;
 		string remoteAddress;
 		string remoteName;
+		string path;
+		string pathInfo;
 		int localPort;
 		int remotePort;
 		ModMonoRequest request;
@@ -90,8 +92,39 @@ namespace Mono.ASPNET
 			this.request = request;
 		}
 
+		public override string GetPathInfo ()
+		{
+			return pathInfo;
+		}
+
+		public override string GetRawUrl ()
+		{
+			string result = path;
+			if (pathInfo != null && pathInfo.Length > 0)
+				result += pathInfo;
+
+			if (queryString != null && queryString.Length > 0)
+				return result + "?" + queryString;
+
+			return result;
+		}
+
 		protected override bool GetRequestData ()
 		{
+			verb = request.GetHttpVerbName ();
+			protocol = request.GetProtocol ();
+			queryString = request.GetQueryString ();
+
+			path = request.GetUri ();
+
+			// It's already 'urldecoded'
+			int dot = path.LastIndexOf ('.');
+			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
+			if (dot > 0 && slash > 0) {
+				pathInfo = path.Substring (slash);
+				path = path.Substring (0, slash);
+			}
+
 			return true;
 		}
 		
@@ -118,17 +151,11 @@ namespace Mono.ASPNET
 
 		public override string GetHttpVerbName ()
 		{
-			if (verb == null)
-				verb = request.GetHttpVerbName ();
-
 			return verb;
 		}
 
 		public override string GetHttpVersion ()
 		{
-			if (protocol == null)
-				protocol = request.GetProtocol ();
-
 			return protocol;
 		}
 
@@ -150,9 +177,6 @@ namespace Mono.ASPNET
 
 		public override string GetQueryString ()
 		{
-			if (queryString == null)
-				queryString = request.GetQueryString ();
-
 			return queryString;
 		}
 
@@ -203,7 +227,13 @@ namespace Mono.ASPNET
 
 		public override string GetUriPath ()
 		{
-			return request.GetUri ();
+			WebTrace.WriteLine ("GetUriPath()");
+
+			string result = path;
+			if (pathInfo != null && pathInfo.Length > 0)
+				result += pathInfo;
+
+			return result;
 		}
 
 		public void Decline ()
@@ -213,21 +243,9 @@ namespace Mono.ASPNET
 		
 		public override string GetFilePath ()
 		{
-			//Docs say it is physical path, but it seems it is the virtual path
-			return GetUriPath ();
+			return path;
 		}
 		
-		// Until we fix MonoWorkerRequest Map()
-		public override string GetFilePathTranslated ()
-		{
-			return request.GetFileName ();
-		}
-
-		public override string MapPath (string path)
-		{
-			return base.MapPath (path);
-		}
-
 		public override string GetRemoteName ()
 		{
 			if (remoteName == null)

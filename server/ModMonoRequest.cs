@@ -105,33 +105,17 @@ namespace Mono.ASPNET
 			writer = new BinaryWriter (st);
 		}
 
-		[Conditional("DEBUG")]
-		static void WriteDebug (bool yeah, string format, params object [] args)
-		{
-			Console.WriteLine (format, args);
-		}
-		
-		[Conditional("DEBUG")]
-		static void WriteDebug (string format, params object [] args)
-		{
-		}
-		
 		void SendSimpleCommand (Cmd cmd)
 		{
 			int b = (int) cmd;
-			WriteDebug ("Escribo cmd: {0} {1}", b, cmd);
 			writer.Write (b);
 		}
 
 		void ReadEnd ()
 		{
-			WriteDebug ("ReadEnd");
 			byte b = reader.ReadByte ();
-			WriteDebug ("ReadEnd done");
-			if (b != 0) {
-				WriteDebug ("b es :{0} {1}", b, (char) b);
+			if (b != 0)
 				throw new Exception ("Protocol violation or error");
-			}
 		}
 
 		string ReadString ()
@@ -146,28 +130,23 @@ namespace Mono.ASPNET
 			} else {
 				s = "";
 			}
-			WriteDebug ("Leo string. Size: {0} {1}", s.Length, s);
 			return s;
 		}
 
 		void WriteString (string s)
 		{
-			WriteDebug ("envio string: {0} {1}", s.Length, s);
 			writer.Write (Encoding.Default.GetByteCount (s));
 			writer.Write (Encoding.Default.GetBytes (s));
-			WriteDebug ("Enviada!");
 		}
 		
 		public void Decline ()
 		{
-			WriteDebug ("Decline");
 			SendSimpleCommand (Cmd.DECLINE_REQUEST);
 			ReadEnd ();
 		}
 
 		public string GetProtocol ()
 		{
-			WriteDebug ("GetProtocol");
 			SendSimpleCommand (Cmd.GET_PROTOCOL);
 			ReadEnd ();
 			return ReadString ();
@@ -175,7 +154,6 @@ namespace Mono.ASPNET
 
 		public string GetHttpVerbName ()
 		{
-			WriteDebug ("GetHttpVerbName");
 			SendSimpleCommand (Cmd.GET_METHOD);
 			ReadEnd ();
 			return ReadString ();
@@ -183,7 +161,6 @@ namespace Mono.ASPNET
 
 		public void SendResponseFromMemory (byte [] data, int length)
 		{
-			WriteDebug ("SendResponseFromMemory");
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
 			st.Write (data, 0, length);
@@ -192,7 +169,6 @@ namespace Mono.ASPNET
 
 		public void SetResponseHeader (string name, string value)
 		{
-			WriteDebug ("SetResponseHeader ({0} = {1})", name, value);
 			SendSimpleCommand (Cmd.SET_RESPONSE_HEADER);
 			WriteString (name);
 			WriteString (value);
@@ -201,7 +177,6 @@ namespace Mono.ASPNET
 
 		public string GetRequestHeader (string name)
 		{
-			WriteDebug ("GetRequestHeader ({0})", name);
 			SendSimpleCommand (Cmd.GET_REQUEST_HEADER);
 			WriteString (name);
 			ReadEnd ();
@@ -210,7 +185,6 @@ namespace Mono.ASPNET
 
 		public string GetServerVariable (string name)
 		{
-			WriteDebug ("GetServerVariable ({0})", name);
 			SendSimpleCommand (Cmd.GET_SERVER_VARIABLE);
 			WriteString (name);
 			ReadEnd ();
@@ -219,7 +193,6 @@ namespace Mono.ASPNET
 
 		public string GetUri ()
 		{
-			WriteDebug ("GetUri");
 			SendSimpleCommand (Cmd.GET_URI);
 			ReadEnd ();
 			return ReadString ();
@@ -227,7 +200,6 @@ namespace Mono.ASPNET
 
 		public string GetFileName ()
 		{
-			WriteDebug ("GetFileName");
 			SendSimpleCommand (Cmd.GET_FILENAME);
 			ReadEnd ();
 			return ReadString ();
@@ -235,7 +207,6 @@ namespace Mono.ASPNET
 
 		public string GetQueryString ()
 		{
-			WriteDebug ("GetQueryString");
 			SendSimpleCommand (Cmd.GET_QUERY_STRING);
 			ReadEnd ();
 			return ReadString ();
@@ -246,7 +217,6 @@ namespace Mono.ASPNET
 
 		public int GetServerPort ()
 		{
-			WriteDebug ("GetServerPort");
 			SendSimpleCommand (Cmd.GET_SERVER_PORT);
 			ReadEnd ();
 			return reader.ReadInt32 ();
@@ -254,7 +224,6 @@ namespace Mono.ASPNET
 
 		public string GetRemoteAddress ()
 		{
-			WriteDebug ("GetRemoteAddress");
 			SendSimpleCommand (Cmd.GET_REMOTE_ADDRESS);
 			ReadEnd ();
 			return ReadString ();
@@ -262,7 +231,6 @@ namespace Mono.ASPNET
 
 		public string GetRemoteName ()
 		{
-			WriteDebug ("GetRemoteName");
 			SendSimpleCommand (Cmd.GET_REMOTE_NAME);
 			ReadEnd ();
 			return ReadString ();
@@ -270,7 +238,6 @@ namespace Mono.ASPNET
 
 		public string GetLocalAddress ()
 		{
-			WriteDebug ("GetLocalAddress");
 			SendSimpleCommand (Cmd.GET_LOCAL_ADDRESS);
 			ReadEnd ();
 			return ReadString ();
@@ -278,7 +245,6 @@ namespace Mono.ASPNET
 
 		public int GetLocalPort ()
 		{
-			WriteDebug ("GetLocalPort");
 			SendSimpleCommand (Cmd.GET_LOCAL_PORT);
 			ReadEnd ();
 			return reader.ReadInt32 ();
@@ -286,7 +252,6 @@ namespace Mono.ASPNET
 
 		public int GetRemotePort ()
 		{
-			WriteDebug ("GetRemotePort");
 			SendSimpleCommand (Cmd.GET_REMOTE_PORT);
 			ReadEnd ();
 			return reader.ReadInt32 ();
@@ -294,21 +259,18 @@ namespace Mono.ASPNET
 
 		public void Flush ()
 		{
-			WriteDebug ("Flush");
 			SendSimpleCommand (Cmd.FLUSH);
 			ReadEnd ();
 		}
 
 		public void Close ()
 		{
-			WriteDebug ("Close");
 			SendSimpleCommand (Cmd.CLOSE);
 			ReadEnd ();
 		}
 
 		public int SetupClientBlock ()
 		{
-			WriteDebug ("SetupClientBlock");
 			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
 			ReadEnd ();
 			int i = reader.ReadInt32 ();
@@ -317,7 +279,6 @@ namespace Mono.ASPNET
 
 		public bool ShouldClientBlock() 
 		{
-			WriteDebug ("ShouldClientBlock");
 			SendSimpleCommand (Cmd.SHOULD_CLIENT_BLOCK);
 			ReadEnd ();
 			int i = reader.ReadInt32 ();
@@ -326,7 +287,6 @@ namespace Mono.ASPNET
 
 		public int GetClientBlock (byte [] bytes, int size) 
 		{
-			WriteDebug ("GetClientBlock");
 			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK);
 			writer.Write (size);
 			ReadEnd ();
@@ -340,20 +300,16 @@ namespace Mono.ASPNET
 
 		public void SetStatusCode (int code) 
 		{
-			WriteDebug ("SetStatusCode");
 			SendSimpleCommand (Cmd.SET_STATUS_CODE);
 			writer.Write (code);
 			ReadEnd ();
-			WriteDebug ("END SetStatusCode");
 		}
 
 		public void SetStatusLine (string status)
 		{
-			WriteDebug ("SetStatusLine");
 			SendSimpleCommand (Cmd.SET_STATUS_LINE);
 			WriteString (status);
 			ReadEnd ();
-			WriteDebug ("END SetStatusLine");
 		}
 	}
 }

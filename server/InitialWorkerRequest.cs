@@ -168,7 +168,6 @@ namespace Mono.ASPNET
 			int dot = path.LastIndexOf ('.');
 			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
 			if (dot > 0 && slash > 0) {
-				Console.WriteLine ("path: {0} {1} {2}", path, dot, slash);
 				pathInfo = path.Substring (slash);
 				path = path.Substring (0, slash);
 			}

@@ -116,13 +116,14 @@ class ControlStack
 	private Stack controls;
 	private ControlStackData top;
 
-	struct ControlStackData 
+	class ControlStackData 
 	{
 		public Type controlType;
 		public string controlID;
 		public string tagID;
 		public ChildrenKind childKind;
 		public string defaultPropertyName;
+		public int childrenNumber;
 
 		public ControlStackData (Type controlType,
 					 string controlID,
@@ -135,11 +136,12 @@ class ControlStack
 			this.tagID = tagID;
 			this.childKind = childKind;
 			this.defaultPropertyName = defaultPropertyName;
+			childrenNumber = 0;
 		}
 
 		public override string ToString ()
 		{
-			return controlType + " " + controlID + " " + tagID + " " + childKind;
+			return controlType + " " + controlID + " " + tagID + " " + childKind + " " + childrenNumber;
 		}
 	}
 	
@@ -154,6 +156,8 @@ class ControlStack
 			  ChildrenKind childKind,
 			  string defaultPropertyName)
 	{
+		if (controlType != null)
+			AddChild ();
 		top = new ControlStackData (controlType, controlID, tagID, childKind, defaultPropertyName);
 		controls.Push (top);
 	}
@@ -190,6 +194,12 @@ class ControlStack
 		return top.defaultPropertyName;
 	}
 
+	public void AddChild ()
+	{
+		if (top != null)
+			top.childrenNumber++;
+	}
+	
 	public int Count
 	{
 		get { return controls.Count; }
@@ -406,6 +416,7 @@ public class Generator
 		current_function.AppendFormat ("\t\t\t__parser.AddParsedSubObject (" + 
 					       "new System.Web.UI.LiteralControl (\"{0}\"));\n",
 					       Escape (asis.Text));
+		controls.AddChild ();
 	}
 
 	private string EnumValueNameToString (Type enum_type, string value_name)
@@ -1155,6 +1166,7 @@ public class Generator
 			control_id = controls.PeekControlID ();
 			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
 							"AddParsedSubObject (this.{0});\n\n", control_id);
+			controls.AddChild ();
 			old_function = (StringBuilder) functions.Pop ();
 			current_function = (StringBuilder) functions.Peek ();
 			controls.Pop ();

@@ -7,6 +7,8 @@
 	* asp-parser.cs: added support for HTML comments.
 
 	* generator.cs: added support for float and double properties.
+	Keep track of the number of direct children of each control (needed
+	when generating code for code render blocks).
 
 2002-05-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

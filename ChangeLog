@@ -1,3 +1,10 @@
+2004-05-30  Jackson Harper  <jackson@ximian.com>
+
+	* configure.in: 
+	* doc/.cvsignore:
+	* doc/Makefile.am:
+	* doc/asp_state.1.in: Add asp_state man page.
+	
 2004-05-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:

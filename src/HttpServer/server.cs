@@ -45,18 +45,224 @@ class MyCapabilities : HttpBrowserCapabilities
 	}
 }
 
+class PageFactory
+{
+	class PageBuilder
+	{
+		private ArrayList cscOptions;
+		private string fileName;
+		private string csFileName;
+		private string className;
+
+		private PageBuilder ()
+		{
+		}
+
+		public PageBuilder (string fileName)
+		{
+			this.fileName = fileName;
+			csFileName = fileName.Replace (".aspx", ".cs");
+
+			cscOptions = new ArrayList ();
+			cscOptions.Add ("/noconfig");
+			cscOptions.Add ("/nologo");
+			cscOptions.Add ("/debug+");
+			cscOptions.Add ("/debug:full");
+			cscOptions.Add ("/target:library");
+			AddReference ("mscorlib.dll");
+			AddReference ("System.dll");
+			AddReference (".\\MyForm.dll");
+			AddReference (Server.SystemWeb);
+			AddReference (Server.SystemDrawing);
+		}
+
+		public Page Build ()
+		{
+			if (Xsp (fileName, csFileName) == false){
+				Console.WriteLine ("Error running xsp. Take a look at the output file.");
+				return null;
+			}
+
+			StreamReader st_file = new StreamReader (File.OpenRead ("output\\" + csFileName));
+			StringReader file_content = new StringReader (st_file.ReadToEnd ()); //FIXME
+			st_file.Close ();
+			if (GetBuildOptions (file_content) == false)
+				return null;
+
+			Page page = GetInstance ();
+			return page;
+		}
+
+		private static bool Xsp (string fileName, string csFileName)
+		{
+			return RunProcess ("xsp", 
+					   fileName, 
+					   "output\\" + csFileName, 
+					   "output\\xsp_" + fileName + ".bat");
+		}
+
+		private static bool RunProcess (string exe, string arguments, string output_file, string bat_file)
+		{
+			Console.WriteLine ("{0} {1}", exe, arguments);
+			Console.WriteLine ("Output goes to {0}", output_file);
+			Console.WriteLine ("Bat file is {0}", bat_file);
+
+			Process proc = new Process ();
+			proc.StartInfo.FileName = exe;
+			proc.StartInfo.Arguments = arguments;
+			proc.StartInfo.UseShellExecute = false;
+			proc.StartInfo.RedirectStandardOutput = true;
+			proc.Start ();
+			string poutput = proc.StandardOutput.ReadToEnd();
+			proc.WaitForExit ();
+			int result = proc.ExitCode;
+			proc.Close ();
+
+			StreamWriter cmd_output = new StreamWriter (File.Create (output_file));
+			cmd_output.Write (poutput);
+			cmd_output.Close ();
+			StreamWriter bat_output = new StreamWriter (File.Create (bat_file));
+			bat_output.Write (exe + " " + arguments);
+			bat_output.Close ();
+
+			return (result == 0);
+		}
+
+		private bool GetBuildOptions (StringReader genCode)
+		{
+			string line;
+			string dll;
+
+			while ((line = genCode.ReadLine ()) != String.Empty){
+				if (line.StartsWith ("//<class ")){
+					className = GetAttributeValue (line, "name");
+				}
+				else if (line.StartsWith ("//<compileandreference ")){
+					string src = GetAttributeValue (line, "src");
+					dll = src.Replace (".cs", ".dll"); //FIXME
+					//File.Delete (dll);
+					if (Compile (src, dll) == false){
+						Console.WriteLine ("Error compiling {0}. See the output file.", src);
+						return false;
+					}
+					AddReference (dll.Replace (".dll", ""));
+				}
+				else if (line.StartsWith ("//<reference ")){
+					dll = GetAttributeValue (line, "dll");
+					AddReference (dll);
+				}
+				else {
+					Console.WriteLine ("This is the build option line i get:\n" + line);
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private void AddReference (string reference)
+		{
+			cscOptions.Add ("/r:" + reference);
+		}
+		
+		private string GetAttributeValue (string line, string att)
+		{
+			string att_start = att + "=\"";
+			int begin = line.IndexOf (att_start);
+			int end = line.Substring (begin + att_start.Length).IndexOf ('"');
+			if (begin == -1 || end == -1)
+				throw new ApplicationException ("Error in reference option:\n" + line);
+
+			return line.Substring (begin + att_start.Length, end);
+		}
+		
+		private Page GetInstance ()
+		{
+			string dll = "output\\" + fileName.Replace (".aspx", ".dll");
+			//File.Delete (dll);
+			Compile (csFileName, dll); // May be this fails cause we are locking 
+									  // the dll
+			Assembly page_dll = Assembly.LoadFrom (dll);
+			if (page_dll == null){
+				Console.WriteLine ("Error loading generated dll: " + dll);
+				return null;
+			}
+
+			Type page_type = page_dll.GetType ("ASP." + className);
+			if (page_type == null){
+				Console.WriteLine ("Error looking for type ASP." + className);
+				return null;
+			}
+
+			Console.WriteLine ("Loaded type: {0}", page_type);
+			return (Page) Activator.CreateInstance (page_type);
+		}
+
+		private bool Compile (string csName, string dllName)
+		{
+			string [] args = new string [cscOptions.Count + 2];
+			int i = 0;
+			foreach (string option in cscOptions)
+				args [i++] = option;
+
+			args [i++] = "/out:" + dllName;
+			args [i] = "output\\" + csName;
+
+			string cmdline = "";
+			foreach (string arg in args)
+				cmdline += " " + arg;
+
+			string noext = csName.Replace (".cs", "");
+			string output_file = "output\\output_from_compilation_" + noext + ".txt";
+			string bat_file = "output\\last_compilation_" + noext + ".bat";
+			return RunProcess ("csc.exe", cmdline, output_file, bat_file);
+		}
+	}
+
+	private static Hashtable loadedPages;
+
+	static PageFactory ()
+	{
+		loadedPages = new Hashtable ();
+	}
+
+	private PageFactory ()
+	{
+	}
+
+	public static Page GetPage (string fileName, string query_options)
+	{
+		HttpRequest request = new HttpRequest (fileName, "http://127.0.0.1/" + fileName, 
+						       query_options);
+
+		string view_state = request.QueryString ["__VIEWSTATE"];
+		if (view_state != null && loadedPages.ContainsKey (view_state))
+			return (Page) loadedPages [view_state];
+
+		PageBuilder builder = new PageBuilder (fileName);
+		Page page = builder.Build ();
+		if (page != null){
+			string state = page.GetTypeHashCode ().ToString ();
+			loadedPages.Add (state, page);
+		}
+
+		return page;
+	}
+
+}
+
 class MyWorkerRequest
 {
 	private string fileName;
-	private string csFileName;
 	private TextReader input;
 	private TextWriter output;
-	private ArrayList cscOptions;
-	private string className;
-	private string full_request;
+
 	private string method;
 	private string query;
-	private string query_options;
+	private string protocol;
+	private string query_options = "";
+	private int post_size;
+	private MyCapabilities headers;
 
 	private MyWorkerRequest ()
 	{
@@ -69,36 +275,16 @@ class MyWorkerRequest
 
 		this.input = input;
 		this.output = output;
-		cscOptions = new ArrayList ();
-		cscOptions.Add ("/noconfig");
-		cscOptions.Add ("/nologo");
-		cscOptions.Add ("/debug+");
-		cscOptions.Add ("/debug:full");
-		cscOptions.Add ("/target:library");
-		AddReference ("mscorlib.dll");
-		AddReference ("System.dll");
-		AddReference (".\\MyForm.dll");
-		AddReference (Server.SystemWeb);
-		AddReference (Server.SystemDrawing);
 	}
 
 	public void ProcessRequest ()
 	{
-		GetRequest ();
+		GetRequestData ();
 		if (!fileName.EndsWith (".aspx"))
 			return;
 
-		if (Xsp () == false){
-			Console.WriteLine ("Error running xsp. Take a look at the output file.");
-			return;
-		}
-		StreamReader st_file = new StreamReader (File.OpenRead ("output\\" + csFileName));
-		StringReader file_content = new StringReader (st_file.ReadToEnd ()); //FIXME
-		st_file.Close ();
-		if (GetBuildOptions (file_content) == false)
-			return;
+		Page page = PageFactory.GetPage (fileName, query_options);
 
-		Page page = Build ();
 		if (page == null){
 			Console.WriteLine ("Error creating the instace of the generated class.");
 			return;
@@ -107,176 +293,107 @@ class MyWorkerRequest
 		SetupPage (page);
 	}
 	
-	private void GetRequest ()
+	private void GetRequestMethod ()
 	{
-		full_request = input.ReadLine ();
-		string req = full_request.Trim ();
+		string req = input.ReadLine ();
+		if (req == null)
+			throw new ApplicationException ("Void request.");
+
 		if (0 == String.Compare ("GET ", req.Substring (0, 4), true))
 			method = "GET";
 		else if (0 == String.Compare ("POST ", req.Substring (0, 5), true))
 			method = "POST";
 		else
-			throw new InvalidOperationException ("Unrecognized method in query: " + full_request);
+			throw new InvalidOperationException ("Unrecognized method in query: " + req);
 
-		fileName = full_request.Substring (method.Length);
-		fileName = fileName.Trim ();
-		if (fileName [0] == '/')
-			fileName = fileName.Substring (1);
+		req = req.TrimEnd ();
+		int idx = req.IndexOf (' ') + 1;
+		if (idx >= req.Length)
+			throw new ApplicationException ("What do you want?");
+
+		string page_protocol = req.Substring (idx);
+		int idx2 = page_protocol.IndexOf (' ');
+		if (idx2 == -1)
+			idx2 = page_protocol.Length;
+		
+		query = page_protocol.Substring (0, idx2);
+		protocol = page_protocol.Substring (idx2);
+	}
+
+	private void GetCapabilities ()
+	{
+		headers = new MyCapabilities ();
+		if (protocol == "")
+			return;
+		
+		string line;
+		int idx;
+		while ((line = input.ReadLine ()) != "") {
+			if (line == null){
+				headers.Add ("Accept", "*/*");
+
+				headers.Add ("Referer", "http://127.0.0.1/");
+				headers.Add ("Accept-Language", "es");
+				headers.Add ("Accept-Encoding", "gzip, deflate");
+				headers.Add ("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; " + 
+							   "Windows NT 5.0; .NET CLR 1.0.3705)");
+				headers.Add ("Host", "127.0.0.1");
+				return;
+			}
+			idx = line.IndexOf (':');
+			if (idx == -1 || idx == line.Length - 1)
+				Console.WriteLine ("Ignoring request header: " + line);
+			string key = line.Substring (0, idx);
+			string value = line.Substring (idx + 1);
+			headers.Add (key, value);
+			if (key == "Content-Length")
+				post_size = Int32.Parse (value.Trim ());
+		}
+	}
+	
+	private void GetQueryOptions ()
+	{
+		if (method == "POST") {
+			char [] line = new char [post_size];
+			input.Read (line, 0, post_size);
+			query_options = new string (line);
+		}
+		
+		if (query_options == null)
+			query_options = "";
+	}
+	
+	private void GetRequestData ()
+	{
+		GetRequestMethod ();
+		GetCapabilities ();
+		GetQueryOptions ();
+
+		// Yes, only /file.aspx or file.aspx is allowed by now.
+		if (query [0] == '/')
+			fileName = query.Substring (1);
+		else
+			fileName = query;
 
 		int end = fileName.IndexOf (' ');
 		if (end != -1)
 			fileName = fileName.Substring (0, end);
+
 		Console.WriteLine ("File name: {0}", fileName);
-		csFileName = fileName.Replace (".aspx", ".cs");
 	}
 	
-	private bool RunProcess (string exe, string arguments, string output_file, string bat_file)
-	{
-		Console.WriteLine ("{0} {1}", exe, arguments);
-		Console.WriteLine ("Output goes to {0}", output_file);
-		Console.WriteLine ("Bat file is {0}", bat_file);
-
-		Process proc = new Process ();
-		proc.StartInfo.FileName = exe;
-		proc.StartInfo.Arguments = arguments;
-		proc.StartInfo.UseShellExecute = false;
-		proc.StartInfo.RedirectStandardOutput = true;
-		proc.Start ();
-		string poutput = proc.StandardOutput.ReadToEnd();
-		proc.WaitForExit ();
-		int result = proc.ExitCode;
-		proc.Close ();
-
-		StreamWriter cmd_output = new StreamWriter (File.Create (output_file));
-		cmd_output.Write (poutput);
-		cmd_output.Close ();
-		StreamWriter bat_output = new StreamWriter (File.Create (bat_file));
-		bat_output.Write (exe + " " + arguments);
-		bat_output.Close ();
-
-		return (result == 0);
-	}
-
-	private bool Xsp ()
-	{
-		return RunProcess ("xsp.exe", 
-				   fileName, 
-				   "output\\" + csFileName, 
-				   "output\\xsp_" + fileName + ".bat");
-	}
-
-	private HttpBrowserCapabilities GetCapabilities ()
-	{
-		MyCapabilities capab = new MyCapabilities ();
-		capab.Add ("Accept", "*/*");
-
-		capab.Add ("Referer", "http://127.0.0.1/");
-		capab.Add ("Accept-Language", "es");
-		capab.Add ("Accept-Encoding", "gzip, deflate");
-		capab.Add ("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR" +
-			   " 1.0.3705)");
-		capab.Add ("Host", "127.0.0.1");
-		return capab;
-	}
-
 	private void SetupPage (Page page)
 	{
-		HttpRequest request = new HttpRequest (fileName, "http://127.0.0.1/" + fileName, "");
-		request.Browser = GetCapabilities ();
+		HttpRequest request = new HttpRequest (fileName, "http://127.0.0.1/" + fileName, 
+						       query_options);
+
+		request.Browser = headers;
+		request.RequestType = method;
+
 		HttpResponse response = new HttpResponse (output);
 		page.ProcessRequest (new HttpContext (request, response));
 	}
 
-	private void AddReference (string reference)
-	{
-		cscOptions.Add ("/r:" + reference);
-	}
-	
-	private string GetAttributeValue (string line, string att)
-	{
-		string att_start = att + "=\"";
-		int begin = line.IndexOf (att_start);
-		int end = line.Substring (begin + att_start.Length).IndexOf ('"');
-		if (begin == -1 || end == -1)
-			throw new ApplicationException ("Error in reference option:\n" + line);
-
-		return line.Substring (begin + att_start.Length, end);
-	}
-	
-	private bool GetBuildOptions (StringReader genCode)
-	{
-		string line;
-		string dll;
-
-		while ((line = genCode.ReadLine ()) != String.Empty){
-			if (line.StartsWith ("//<class ")){
-				className = GetAttributeValue (line, "name");
-			}
-			else if (line.StartsWith ("//<compileandreference ")){
-				string src = GetAttributeValue (line, "src");
-				dll = src.Replace (".cs", ".dll"); //FIXME
-				//File.Delete (dll);
-				if (Compile (src, dll) == false){
-					Console.WriteLine ("Error compiling {0}. See the output file.", src);
-					return false;
-				}
-				AddReference (dll.Replace (".dll", ""));
-			}
-			else if (line.StartsWith ("//<reference ")){
-				dll = GetAttributeValue (line, "dll");
-				AddReference (dll);
-			}
-			else {
-				Console.WriteLine ("This is the build option line i get:\n" + line);
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private Page Build ()
-	{
-		string dll = "output\\" + fileName.Replace (".aspx", ".dll");
-		//File.Delete (dll);
-		Compile (fileName.Replace (".aspx", ".cs"), dll); // May be this fails cause we are locking 
-								  // the dll
-
-		Assembly page_dll = Assembly.LoadFrom (dll);
-		if (page_dll == null){
-			Console.WriteLine ("Error loading generated dll: " + dll);
-			return null;
-		}
-
-		Type page_type = page_dll.GetType ("ASP." + className);
-		if (page_type == null){
-			Console.WriteLine ("Error looking for type ASP." + className);
-			return null;
-		}
-
-		Console.WriteLine ("Loaded type: {0}", page_type);
-		return (Page) Activator.CreateInstance (page_type);
-	}
-
-	private bool Compile (string csName, string dllName)
-	{
-		string [] args = new string [cscOptions.Count + 2];
-		int i = 0;
-		foreach (string option in cscOptions)
-			args [i++] = option;
-
-		args [i++] = "/out:" + dllName;
-		args [i] = "output\\" + csName;
-
-		string cmdline = "";
-		foreach (string arg in args)
-			cmdline += " " + arg;
-
-		string noext = csName.Replace (".cs", "");
-		string output_file = "output\\output_from_compilation_" + noext + ".txt";
-		string bat_file = "output\\last_compilation_" + noext + ".bat";
-		return RunProcess ("csc.exe", cmdline, output_file, bat_file);
-	}
 }
 
 class Worker

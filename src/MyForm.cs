@@ -21,7 +21,7 @@ public class MyHtmlForm : System.Web.UI.HtmlControls.HtmlForm
 	{
 	}
 				
-	protected override void RenderAttributes (HtmlTextWriter writer){
+/*	protected override void RenderAttributes (HtmlTextWriter writer){
 		writer.WriteAttribute ("id", ID);
 		writer.WriteAttribute ("name", Name);
 		writer.WriteAttribute ("method", Method);
@@ -36,7 +36,7 @@ public class MyHtmlForm : System.Web.UI.HtmlControls.HtmlForm
 	{
 		foreach (Control c in Controls)
 			c.RenderControl (writer);
-	}
+	}*/
 
 }
 }

@@ -1,3 +1,7 @@
+2002-06-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: preliminary page caching used for session tracking.
+
 2002-06-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: delete local copy of System.Web.dll if DEBUGMONOSW is

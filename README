@@ -1,14 +1,55 @@
-XSP is Ximian's implementation of the ASP.NET page parser 
-and code generator for running ASP Web Applications.
+* Welcome to XSP!
+-----------------
 
-Layout:
+	The XSP server is a small web server that hosts the Mono
+    System.Web classes for running what is commonly known as ASP.NET.
 
-	src/
-		Source files for the parser/generator and test server.
-		OBSOLETED!!!
+* Compiling and Running XSP
+---------------------------
+
+	To compile XSP you need a `make' compatible tool, then type
+    the following commands:
+
+	make 
+	make install
+
+    Then to run it, go to the directory that contains your .aspx
+    files, and execute xsp:
+
+	cd my-asp-dir
+	mono xsp.exe 
+
+    You can optionally provide a port where the server should run:
+
+	mono xsp.exe --port 80
+
+    The default is port 8080, or you can configure thee server using
+    the server.exe.config file.
+
+    This is not a full fledged server, it is just a shell for hosting
+    ASP.NET.
+
+* Hosting
+---------
+
+        The System.Web classes provide what is commonly known as
+    ASP.NET, it provides the platform to run web applications and web
+    services, and provides a number of hooks that allows the user to
+    host it on applications or other web servers. 
+
+        If you are interested in hosting the ASP.NET classes for
+    higher performance in an Apache module or your favorite web
+    server, you could use the code in this module as a starting point
+    for it. 
+
+	The code to look at is: server/MonoApplicationHost.cs and
+    server/MonoWorkerRequest.cs.  
+
+* Directory Layout
+------------------
 
 	doc/
-		Documentation about ASP.NET pages
+		Some documentation about the XSP server. 
 
 	test/
 		Little sample ASP.NET pages
@@ -19,6 +60,10 @@ Layout:
 		MonoApplicationHost and MonoWorkerRequest can be used to embed
 		an ASP.NET serve in your application.
 		
+	src/
+		Source files for the parser/generator and test server.
+		OBSOLETED!!!
+
 		
 Maintainer: gonzalo@ximian.com
 

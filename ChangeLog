@@ -1,3 +1,14 @@
+2004-06-10  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs: only send the Close to the module
+	once.
+
+	* server/XSPApplicationHost.cs: added new class MyNetworkStream that
+	handles lingering close for xsp standalone like apache does. Fixes
+	bug #59688. BIG THANKS to David Taylor.
+
+	* server/XSPWorkerRequest.cs: ensure we read all the data requested for
+	the request body. Only call stream.Close once.
 
 2004-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

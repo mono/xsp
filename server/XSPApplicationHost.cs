@@ -53,12 +53,61 @@ namespace Mono.ASPNET
 		}
 	}
 
+	public class MyNetworkStream : NetworkStream 
+	{
+		const int useconds_to_linger = 2000000;
+		const int max_useconds_to_linger = 30000000;
+
+		public MyNetworkStream (Socket sock, bool owns) : base (sock, owns)
+		{
+		}
+
+#if !MODMONO_SERVER
+		void LingeringClose ()
+		{
+			int waited = 0;
+			byte [] buffer = null;
+
+			Socket.Shutdown (SocketShutdown.Send);
+			while (waited < max_useconds_to_linger) {
+				int nread = 0;
+				if (buffer == null)
+					buffer = new byte [512];
+
+				try {
+					if (!Socket.Poll (useconds_to_linger, SelectMode.SelectRead))
+						break;
+
+					nread = Socket.Receive (buffer, 0, buffer.Length, 0);
+				} catch { }
+
+				if (nread == 0)
+					break;
+
+				waited += useconds_to_linger;
+			}
+		}
+
+		public override void Close ()
+		{
+			try {
+				LingeringClose ();
+			} finally {
+				base.Close ();
+			}
+		}
+#endif
+		public bool Connected {
+			get { return Socket.Connected; }
+		}
+	}
+
 	[Serializable]
 	class Worker
 	{
 		[NonSerialized] XSPApplicationServer server;
 		IApplicationHost host;
-		NetworkStream ns;
+		MyNetworkStream ns;
 		EndOfRequestHandler endOfRequest;
 #if MODMONO_SERVER
 		ModMonoRequest modRequest;
@@ -71,7 +120,7 @@ namespace Mono.ASPNET
 		public Worker (Socket client, EndPoint localEP, XSPApplicationServer server)
 		{
 			endOfRequest = new EndOfRequestHandler (EndOfRequest);
-			ns = new NetworkStream (client, true);
+			ns = new MyNetworkStream (client, true);
 			this.server = server;
 #if !MODMONO_SERVER
 			try {
@@ -152,7 +201,7 @@ namespace Mono.ASPNET
 		public void EndOfRequest (MonoWorkerRequest mwr)
 		{
 			try {
-				ns.Close ();
+				mwr.CloseConnection ();
 			} catch {}
 		}
 	}

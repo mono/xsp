@@ -25,7 +25,7 @@ namespace Mono.ASPNET
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
 		IApplicationHost appHost;
-		Stream stream;
+		MyNetworkStream stream;
 		string verb;
 		string path;
 		string pathInfo;
@@ -105,7 +105,7 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost, EndPoint localEP,
+		public XSPWorkerRequest (MyNetworkStream ns, IApplicationHost appHost, EndPoint localEP,
 					 EndPoint remoteEP, RequestData rdata)
 			: base (appHost)
 		{
@@ -212,7 +212,10 @@ namespace Mono.ASPNET
 		public override void CloseConnection ()
 		{
 			WebTrace.WriteLine ("CloseConnection()");
-			stream.Close ();
+			if (stream != null) {
+				stream.Close ();
+				stream = null;
+			}
 		}
 
 		public override void FlushResponse (bool finalFlush)
@@ -229,8 +232,10 @@ namespace Mono.ASPNET
 					headersSent = true;
 				}
 
-				byte [] bytes = response.GetBuffer ();
-				stream.Write (bytes, 0, (int) response.Length);
+				if (response.Length != 0) {
+					byte [] bytes = response.GetBuffer ();
+					stream.Write (bytes, 0, (int) response.Length);
+				}
 
 				stream.Flush ();
 				response.SetLength (0);
@@ -414,7 +419,7 @@ namespace Mono.ASPNET
 		public override bool IsClientConnected ()
 		{
 			WebTrace.WriteLine ("IsClientConnected()");
-			return true; //FIXME
+			return stream.Connected;
 		}
 
 		public override bool IsEntireEntityBodyIsPreloaded ()
@@ -476,7 +481,14 @@ namespace Mono.ASPNET
 					return length;
 			}
 
-			return (length + stream.Read (buffer, offset, size));
+			int localsize = size;
+			while (localsize > 0) {
+				int read = stream.Read (buffer, offset, localsize);
+				offset += read;
+				localsize -= read;
+			}
+
+			return (length + size);
 		}
 
 		public override int ReadEntityBody (byte [] buffer, int size)

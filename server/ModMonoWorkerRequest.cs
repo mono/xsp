@@ -97,6 +97,7 @@ namespace Mono.ASPNET
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
 		ModMonoRequest request;
+		bool closed;
 		string verb;
 		string queryString;
 		string protocol;
@@ -218,12 +219,6 @@ namespace Mono.ASPNET
 			return true;
 		}
 		
-		public override void EndOfRequest ()
-		{
-			CloseConnection ();
-			base.EndOfRequest ();
-		}
-
 		public override bool HeadersSent ()
 		{
 			//FIXME!!!!: how do we know this?
@@ -237,7 +232,10 @@ namespace Mono.ASPNET
 
 		public override void CloseConnection ()
 		{
-			request.Close ();
+			if (!closed) {
+				request.Close ();
+				closed = true;
+			}
 		}
 
 		public override string GetHttpVerbName ()

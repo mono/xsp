@@ -1,5 +1,10 @@
 2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* test/Makefile.am: install the sample dlls to the right place. Thanks
+	to Pablo Baena.
+
+2004-05-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* tools/nunitasp/source/NUnitAspTest/Makefile.am: fixed distcheck and
 	don't install NUnitAspTest.dll.
 

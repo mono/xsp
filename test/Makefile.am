@@ -97,7 +97,7 @@ samples_DATA = $(testfiles)
 samplesexedir = $(datadir)/doc/xsp/test
 samplesexe_SCRIPTS = ServiceClient.exe
 
-samplesbindir = $(datadir)/xsp/doc/test/bin
+samplesbindir = $(datadir)/doc/xsp/test/bin
 samplesbin_SCRIPTS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll
 
 CLEANFILES = $(samplesbin_SCRIPTS) $(samplesexe_SCRIPTS)

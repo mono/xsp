@@ -123,10 +123,9 @@ public class TagAttributes {
 
 	public void Add (object key, object value)
 	{
-		Console.WriteLine ("Insertando: " + key + " " + value);
 		if (key != null && value != null &&
 		    0 == String.Compare ((string) key,  "runat", true) &&
-		    0 == String.Compare ((string) key,  "runat", true))
+		    0 == String.Compare ((string) value,  "server", true))
 			MakeHash ();
 
 		if (got_hashed)
@@ -188,14 +187,12 @@ public class Tag : Element {
 	protected TagType tagType;
 	protected TagAttributes attributes;
 	protected bool self_closing;
+	private static int ctrlNumber = 1;
 
 	internal Tag (Tag other) :
-		  base (ElementType.TAG)
+		this (other.tag, other.attributes, other.self_closing)
 	{
-		this.tag = other.tag;
 		this.tagType = other.tagType;
-		this.attributes = other.attributes;
-		this.self_closing = other.self_closing;
 	}
 
 	public Tag (string tag, TagAttributes attributes, bool self_closing) :
@@ -260,6 +257,11 @@ public class Tag : Element {
 	public override string ToString ()
 	{
 		return TagID + " " + Attributes + " " + self_closing;
+	}
+
+	protected void SetNewID ()
+	{
+		attributes.Add ("ID", "_control" + ctrlNumber++);
 	}
 }
 
@@ -375,7 +377,6 @@ public class HtmlControlTag : Tag {
 
 	private static Hashtable controls;
 	private static Hashtable inputTypes;
-	private static int ctrlNumber = 1;
 
 	private static void InitHash ()
 	{
@@ -418,12 +419,8 @@ public class HtmlControlTag : Tag {
 		base (tag, attributes, self_closing) 
 	{
 		SetData ();
-		if (attributes ["ID"] == null){
-			object controlID = attributes ["ID"];
-			if (controlID == null)
-				attributes.Add ("ID", "_control" + ctrlNumber);
-		}
-		ctrlNumber++;
+		if (attributes ["ID"] == null)
+			SetNewID ();
 	}
 
 	public HtmlControlTag (Tag source_tag) :
@@ -487,6 +484,8 @@ public class Component : Tag {
 		int pos = input_tag.TagID.IndexOf (':');
 		alias = tag.Substring (0, pos);
 		control_type = tag.Substring (pos + 1);
+		if (attributes ["ID"] == null)
+			SetNewID ();
 	}
 
 	public Type ComponentType

@@ -1,5 +1,12 @@
 2002-05-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* aspelements.cs: assign a default name to controls without ID
+	attribute.
+
+	* generator.cs: fixed Style properties setting.
+
+2002-05-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* asp-tokenizer: allow '-' to be in an identifier (Font-Size).
 
 	* aspelements.cs: modified TagAttributes to allow duplicate attribute

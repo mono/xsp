@@ -482,29 +482,38 @@ public class Generator {
 				if (0 == String.Compare (prop.Name, id, true)){
 					AddPropertyCode (prop.PropertyType, prop.Name, (string) att [id]);
 					is_processed = true;
+					break;
 				}
-				else if (!is_processed &&
-					prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
-					id.IndexOf ('-') != -1){
+				else if (prop.PropertyType == typeof (System.Web.UI.WebControls.FontInfo) &&
+					 id.IndexOf ('-') != -1){
 					string prop_field = id.Replace ("-", ".");
 					string [] parts = prop_field.Split (new char [] {'.'});
-					if (parts.Length != 2)
-						break;
+					if (parts.Length != 2 || 
+					    0 != String.Compare (prop.Name, parts [0], true))
+						continue;
 
-					bool is_bool = prop.PropertyType == typeof (bool);
-					if (!is_bool && att == null){
-						att [id] = ""; // Font-Size -> Font-Size="" as html attribute
-					} else {
+					PropertyInfo [] subprops = prop.PropertyType.GetProperties ();
+					foreach (PropertyInfo subprop in subprops){
+						if (0 != String.Compare (subprop.Name, parts [1], true))
+							continue;
+
+						bool is_bool = subprop.PropertyType == typeof (bool);
+						if (!is_bool && att == null){
+							att [id] = ""; // Font-Size -> Font-Size="" as html
+							break;
+						}
+
 						string value;
-						Type subtype;
-						subtype = Type.GetType (prop.PropertyType + "." + parts [0]);
-						// Font-Bold <=> Font-Bold="true"
 						if (att == null && is_bool)
-							value = "true";
+							value = "true"; // Font-Bold <=> Font-Bold="true"
 						else
 							value = (string) att [id];
-						AddPropertyCode (subtype, prop_field, value);
+
+						AddPropertyCode (subprop.PropertyType,
+								 prop.Name + "." + subprop.Name,
+								 value);
 						is_processed = true;
+						break;
 					}
 				}
 			}

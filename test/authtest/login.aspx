@@ -2,7 +2,7 @@
 <%@ Import Namespace="System.Web.Security" %>
 <html>
 <script language="C#" runat=server>
-	void Click (object sender, EventArgs e)
+	void Login_Click (object sender, EventArgs e)
 	{
 		if ((UserEmail.Value == "jdoe@somewhere.com") && (UserPass.Value == "password")) {
 			FormsAuthentication.RedirectFromLoginPage (UserEmail.Value, PersistCookie.Checked);

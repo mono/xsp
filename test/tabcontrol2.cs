@@ -1,5 +1,5 @@
 //
-// tabcontrol.cs: sample user control.
+// tabcontrol2.cs: sample user control.
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -17,61 +17,69 @@ using System.Web.UI.WebControls;
 
 namespace Mono.Controls
 {
-	public class Tabs2 : UserControl, IPostBackEventHandler
+	[ParseChildren(false)]
+	public class TabContent : Control
 	{
-		Hashtable tabData;
-		StateBag localValues;
+		string label;
+
+		public TabContent ()
+		{
+		}
+
+		protected override void Render (HtmlTextWriter writer)
+		{
+			if (this.Parent.GetType () != typeof (Tabs2))
+				throw new ApplicationException ("TabContent can only be rendered inside Tabs2");
+			base.Render (writer);
+		}
+		
+		public string Label
+		{
+			get {
+				if (label == null)
+					return "* You did not set a label for this control *";
+				return label;
+			}
+
+			set {
+				label = value;
+			}
+		}
+	}
+
+	[ParseChildren(false)]
+	public class Tabs2 : UserControl, IPostBackEventHandler, IParserAccessor
+	{
+		Hashtable localValues;
 		ArrayList titles;
 
 		public Tabs2 ()
 		{
 			titles = new ArrayList ();
-			localValues = new StateBag (false);
+			localValues = new Hashtable ();
 		}
 
-		public void AddTab (string title, ControlCollection controls)
+		private void AddTab (TabContent tabContent)
 		{
-			if (title == null || title == String.Empty || controls == null)
-				return;
-
-			if (tabData == null) {
-				tabData = new Hashtable ();
-				CurrentTabName = title;
-			}
-
-			tabData.Add (title, controls);
+			string title = tabContent.Label;
+			Controls.Add (tabContent);
 			titles.Add (title);
-		}
-
-		public void Clear ()
-		{
-			tabData = null;
-			CurrentTabName = "";
-		}
-		
-		public void RemoveTab (string title)
-		{
-			tabData.Remove (title);
+			if (Controls.Count == 1)
+				CurrentTabName = title;
 		}
 
 		protected override object SaveViewState ()
 		{
-			if (tabData != null) {
-				Triplet t = new Triplet (tabData, localValues, titles);
-				return new Pair (base.SaveViewState (), t);
-			}
-			return null;
+			return new Triplet (base.SaveViewState (), localValues, titles);
 		}
 		
 		protected override void LoadViewState (object savedState)
 		{
 			if (savedState != null) {
-				Pair saved = (Pair) savedState;
+				Triplet saved = (Triplet) savedState;
 				base.LoadViewState (saved.First);
-				Triplet t = (Triplet) saved.Second;
-				tabData = t.First as Hashtable;
-				localValues = t.Second as StateBag;
-				titles = t.Third as ArrayList;
+				localValues = saved.Second as Hashtable;
+				titles = saved.Third as ArrayList;
 			}
 		}
 		
@@ -79,6 +87,12 @@ namespace Mono.Controls
 		{
 			base.OnPreRender (e);
 			Page.GetPostBackEventReference (this);
+			foreach (TabContent content in Controls) {
+				if (content.Label  == CurrentTabName)
+					content.Visible = true;
+				else
+					content.Visible = false;
+			}
 		}
 
 		void IPostBackEventHandler.RaisePostBackEvent (string argument)
@@ -88,6 +102,28 @@ namespace Mono.Controls
 
 			if (CurrentTabName != argument)
 				CurrentTabName = argument;
+		}
+
+		protected override ControlCollection CreateControlCollection ()
+		{
+			return new ControlCollection (this);
+		}
+		
+		protected override void AddParsedSubObject (object obj)
+		{
+			if (obj is LiteralControl)
+				return; // Ignore plain text
+
+			if (!(obj is TabContent))
+				throw new ArgumentException ("Tabs2 Only allows TabContent controls inside.",
+							     "obj");
+			
+			AddTab ((TabContent) obj);
+		}
+		
+		void IParserAccessor.AddParsedSubObject (object obj)
+		{
+			AddParsedSubObject (obj);
 		}
 
 		private void RenderBlank (HtmlTextWriter writer)
@@ -162,7 +198,10 @@ namespace Mono.Controls
 		
 		protected override void Render (HtmlTextWriter writer)
 		{
-			if (tabData == null || tabData.Count == 0)
+			if (Page != null)
+				Page.VerifyRenderingInServerForm (this);
+
+			if (Controls.Count == 0)
 				return;
 
 			writer.WriteBeginTag ("table");
@@ -177,10 +216,6 @@ namespace Mono.Controls
 			writer.WriteEndTag ("tbody");
 			writer.WriteEndTag ("table");
 			writer.WriteLine ();
-			Controls.Clear ();
-			ControlCollection currentSet = (ControlCollection) tabData [CurrentTabName];
-			foreach (Control ctrl in currentSet)
-				Controls.Add (ctrl);
 			base.RenderChildren (writer);
 		}
 

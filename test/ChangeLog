@@ -1,3 +1,14 @@
+2002-07-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* tabcontrol.aspx: removed .dll extension from assembly file name.
+
+	* tabcontrol2.aspx: now it does not set up the contents of each tab
+	programatically. It uses <Mono:TabContent...>.
+
+	* tabcontrol2.cs: added TabContent control. TabContent can contain any
+	control (excluding HtmlForm, of course). Modified Tabs2 to use
+	TabContent and maintaining state of all tabs.
+
 2002-07-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* tabcontrol2.aspx: page to test tabcontrol2.cs

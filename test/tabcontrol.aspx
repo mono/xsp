@@ -1,6 +1,6 @@
 <%@ Page Language="C#" %>
 <%@ Import namespace="System.Reflection" %>
-<%@ Register TagPrefix="Mono" NAmespace="Mono.Controls" assembly="tabcontrol.dll" %>
+<%@ Register TagPrefix="Mono" NAmespace="Mono.Controls" assembly="tabcontrol" %>
 <html>
 <!-- Authors:
 --	Gonzalo Paniagua Javier (gonzalo@ximian.com)

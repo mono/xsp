@@ -1,3 +1,12 @@
+2002-07-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* tabcontrol.aspx: sample using a user control that allows modifying
+	its properties and display the resulting control.
+
+	* tabcontrol.cs: the user control for the above page. It must be
+	compiled and the dll copied to output directory if testing with our
+	test server.
+
 2002-07-06  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* dbpage1.aspx: displays data from a database in a Table.

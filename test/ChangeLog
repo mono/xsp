@@ -1,3 +1,7 @@
+2002-06-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web_panel.aspx: New file.
+
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web_radiobutton.aspx:

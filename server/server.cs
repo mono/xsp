@@ -310,6 +310,7 @@ namespace Mono.ASPNET
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();
+					Environment.Exit (0);
 				}
 			} catch (Exception e) {
 				Console.WriteLine ("Error: {0}", e.Message);

@@ -105,7 +105,26 @@ namespace Mono.ASPNET
 
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
-
+		
+		static Stack bufferStack = new Stack ();
+		
+		static MemoryStream AllocateMemoryStream ()
+		{
+			lock (bufferStack) {
+				if (bufferStack.Count != 0)
+					return (MemoryStream) bufferStack.Pop ();
+			}
+			return new MemoryStream ();
+		}
+		
+		static void FreeMemoryStream (MemoryStream buf)
+		{
+			buf.SetLength (0);
+			lock (bufferStack) {
+				bufferStack.Push (buf);
+			}
+		}
+		
 		public XSPWorkerRequest (int requestId, 
 								XSPRequestBroker requestBroker, 
 								IApplicationHost appHost, 
@@ -138,7 +157,7 @@ namespace Mono.ASPNET
 
 			GetRequestHeaders ();
 			responseHeaders = new StringBuilder ();
-			response = new MemoryStream ();
+			response = AllocateMemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
 			
 			localPort = ((IPEndPoint) localEP).Port;
@@ -229,6 +248,8 @@ namespace Mono.ASPNET
 			if (requestBroker != null) {
 				requestBroker.Close (requestId);
 				requestBroker = null;
+				FreeMemoryStream (response);
+				response = null;
 			}
 		}
 
@@ -251,10 +272,12 @@ namespace Mono.ASPNET
 					requestBroker.Write (requestId, bytes, 0, (int) response.Length);
 				}
 				
-				requestBroker.Flush (requestId);
-				response.SetLength (0);
 				if (finalFlush)
 					CloseConnection ();
+				else {
+					requestBroker.Flush (requestId);
+					response.SetLength (0);
+				}
 			} catch (Exception e) {
 				WebTrace.WriteLine (e.ToString ());
 			}

@@ -1,3 +1,10 @@
+2004-09-12 Ben Maurer  <bmaurer@ximian.com>
+
+	* server/server.cs: allow for clean exit (workaround)
+	* server/XSPWorkerRequest.cs: avoid a remoting call.
+	cache MemoryStreams
+	* InitialWorkerRequest.cs: cache byte [] buffers.
+
 2004-09-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in: added AM_MKDIR_P to make automake 1.8 happier.

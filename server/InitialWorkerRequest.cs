@@ -45,7 +45,7 @@ namespace Mono.ASPNET
 			return sb.ToString ();
 		}
 	}
-
+	
 	public class InitialWorkerRequest
 	{
 		string verb;
@@ -60,6 +60,24 @@ namespace Mono.ASPNET
 		int position;
 		const int BSize = 1024 * 32;
 		
+		static Stack bufferStack = new Stack ();
+		
+		static byte [] AllocateBuffer ()
+		{
+			lock (bufferStack) {
+				if (bufferStack.Count != 0)
+					return (byte []) bufferStack.Pop ();
+			}
+			return new byte [BSize];
+		}
+		
+		static void FreeBuffer (byte [] buf)
+		{
+			lock (bufferStack) {
+				bufferStack.Push (buf);
+			}
+		}
+		
 		public InitialWorkerRequest (NetworkStream ns)
 		{
 			if (ns == null)
@@ -70,7 +88,7 @@ namespace Mono.ASPNET
 
 		void FillBuffer ()
 		{
-			inputBuffer = new byte [BSize];
+			inputBuffer = AllocateBuffer ();
 			inputLength = stream.Read (inputBuffer, 0, BSize);
 			position = 0;
 		}
@@ -229,6 +247,7 @@ namespace Mono.ASPNET
 				Buffer.BlockCopy (inputBuffer, position, buffer, 0, inputLength - position);
 				rd.InputBuffer = buffer;
 				rd.PathInfo = pathInfo;
+				FreeBuffer (inputBuffer);
 				return rd;
 			}
 		}

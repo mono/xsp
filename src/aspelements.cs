@@ -273,6 +273,8 @@ public class Tag : Element
 
 	protected void SetNewID ()
 	{
+		if (attributes == null)
+			attributes = new TagAttributes ();
 		attributes.Add ("ID", "_control" + ctrlNumber++);
 	}
 }
@@ -459,7 +461,7 @@ public class HtmlControlTag : Tag
 		base (tag, attributes, self_closing) 
 	{
 		SetData ();
-		if (attributes ["ID"] == null)
+		if (attributes == null || attributes ["ID"] == null)
 			SetNewID ();
 	}
 
@@ -527,7 +529,12 @@ public enum ChildrenKind
 	/*
 	 * Children must correspond to properties of the parent control. No literal text allowed.
 	 */
-	PROPERTIES
+	PROPERTIES,
+	/*
+	 * Special case used inside <columns>...</columns>
+	 * Only allow DataGridColumn and derived classes.
+	 */
+	DBCOLUMNS
 }
 
 // TODO: support for ControlBuilderAttribute that may be used in custom controls
@@ -564,6 +571,8 @@ public class Component : Tag
 	private static bool GuessAllowChildren (Type type)
 	{
 		PropertyInfo controls = type.GetProperty ("Controls");
+		if (controls == null)
+			return false;
 		MethodInfo getm = controls.GetGetMethod ();
 		object control_instance = Activator.CreateInstance (type);
 		object control_collection = getm.Invoke (control_instance, null);
@@ -577,11 +586,17 @@ public class Component : Tag
 		this.is_close_tag = input_tag is CloseTag;
 		this.type = type;
 		this.allow_children = GuessAllowChildren (type);
-		this.children_kind = GuessChildrenKind (type);
+		if (type != typeof (System.Web.UI.WebControls.DataGridColumn) &&
+		    !type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn)))
+			this.children_kind = GuessChildrenKind (type);
+		else
+			this.children_kind = ChildrenKind.PROPERTIES; // Special case because columns don't have a
+								      // 'Controls' property
+
 		int pos = input_tag.TagID.IndexOf (':');
 		alias = tag.Substring (0, pos);
 		control_type = tag.Substring (pos + 1);
-		if (attributes ["ID"] == null)
+		if (attributes == null || attributes ["ID"] == null)
 			SetNewID ();
 	}
 

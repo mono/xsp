@@ -1,3 +1,10 @@
+2002-05-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* aspelements.cs: added some checks for null. New ChildKind DBCOLUMNS
+	to special case Columns inside DataGrid.
+	* generator.cs: added support for ITemplate and
+	DataGridColumnCollection.
+
 2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* TODO: removed task.

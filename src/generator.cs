@@ -319,7 +319,8 @@ public class Generator
 	private void ProcessPlainText ()
 	{
 		PlainText asis;
-		if ((ChildrenKind) childrenKind.Peek () != ChildrenKind.CONTROLS){
+		ChildrenKind children_kind = (ChildrenKind) childrenKind.Peek ();
+		if (children_kind != ChildrenKind.CONTROLS){
 			asis = (PlainText) elements.Current;
 			string result = asis.Text.Trim ();
 			if (result != ""){
@@ -329,14 +330,8 @@ public class Generator
 			return;
 		}
 		
-		while (true){
-			asis = (PlainText) elements.Current;
-			ControlTreeAddEscaped (asis.Text);
-
-			if (!(elements.Peek () is PlainText))
-				break;
-			elements.MoveNext ();
-		}
+		asis = (PlainText) elements.Current;
+		ControlTreeAddEscaped (asis.Text);
 	}
 
 	private string EnumValueNameToString (Type enum_type, string value_name)
@@ -361,14 +356,25 @@ public class Generator
 		return enum_type.ToString () + "." + nested_types [0].Name;
 	}
 	
-	private void CreateNewControlFunction (string tag_id,
-					       string control_id,
-					       Type control_type,
-					       ChildrenKind children_kind)
+	private void NewControlFunction (string tag_id,
+					 string control_id,
+					 Type control_type,
+					 ChildrenKind children_kind)
 	{
-		if ((ChildrenKind) childrenKind.Peek () != ChildrenKind.CONTROLS){
+		ChildrenKind prev_children_kind = (ChildrenKind) childrenKind.Peek ();
+		if (prev_children_kind != ChildrenKind.CONTROLS &&
+		    prev_children_kind != ChildrenKind.DBCOLUMNS){
 			string prev_tag_id = (string) openedControlTags.Pop ();
 			throw new ApplicationException ("Child controls not allowed for " + prev_tag_id);
+		}
+
+		if (prev_children_kind == ChildrenKind.DBCOLUMNS &&
+		    control_type != typeof (System.Web.UI.WebControls.DataGridColumn) &&
+		    !control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn))){
+			string prev_tag_id = (string) openedControlTags.Pop ();
+			throw new ApplicationException ("Inside " + prev_tag_id + " only " + 
+							"System.Web.UI.WebControls.DataGridColum " + 
+							"objects are allowed");
 		}
 					
 		childrenKind.Push (children_kind);
@@ -384,7 +390,7 @@ public class Generator
 		openedControlTags.Push (tag_id);
 		bool is_generic = control_type ==  typeof (System.Web.UI.HtmlControls.HtmlGenericControl);
 		functions.Push (current_function);
-		current_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl{0} ()\n" +
+		current_function.AppendFormat ("\t\tprivate System.Web.UI.Control __BuildControl_{0} ()\n" +
 						"\t\t{{\n\t\t\t{1} __ctrl;\n\n\t\t\t__ctrl = new {1} ({2});\n" + 
 						"\t\t\tthis.{0} = __ctrl;\n", control_id, control_type,
 						(is_generic? "\"" + tag_id + "\"" : ""));
@@ -489,7 +495,7 @@ public class Generator
 			current_function.AppendFormat ("\t\t\t__ctrl.{0} = (System.Drawing.Color) " + 
 						       "System.ComponentModel.TypeDescriptor.GetConverter " + 
 						       "(typeof (System.Drawing.Color))." + 
-						       "ConvertFromString (\"{1}\");;\n", var_name, att);
+						       "ConvertFromString (\"{1}\");\n", var_name, att);
 		}	
 		else {
 			throw new ApplicationException ("Unsupported type in property: " + 
@@ -599,9 +605,32 @@ public class Generator
 		current_function = (StringBuilder) functions.Peek ();
 
 		string control_id = (string) openedControlTags.Pop ();
-		old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
-		current_function.AppendFormat ("\t\t\tthis.__BuildControl{0} ();\n\t\t\t__parser." +
-						"AddParsedSubObject (this.{0});\n\n", control_id);
+		Type control_type = (Type) controlTypes.Peek ();
+		
+		if (control_type == typeof (System.Web.UI.ITemplate)){
+			old_function.Append ("\n\t\t}\n\n");
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = new System.Web.UI." + 
+						       "CompiledTemplateBuilder (new System.Web.UI." +
+						       "BuildTemplateMethod (this.__BuildControl_{1}));\n",
+						       saved_id, control_id);
+		}
+		else if (control_type == typeof (System.Web.UI.WebControls.DataGridColumnCollection)){
+			old_function.Append ("\n\t\t}\n\n");
+			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} (__ctrl.{1});\n",
+							control_id, saved_id);
+		}
+		else if (control_type == typeof (System.Web.UI.WebControls.DataGridColumn) ||
+			 control_type.IsSubclassOf (typeof (System.Web.UI.WebControls.DataGridColumn))){
+			old_function.Append ("\n\t\t}\n\n");
+			current_function.AppendFormat ("\t\t\tthis.BuildControl_{0} ();\n" +
+						       "\t\t\t__ctrl.Add (this.{0});\n\n", control_id);
+		}
+		else {
+			old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
+			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
+						       "AddParsedSubObject (this.{0});\n\n", control_id);
+		}
+
 		init_funcs.Append (old_function);
 		 // Avoid getting empty stacks for unbalanced open/close tags
 		if (childrenKind.Count > 1)
@@ -643,7 +672,7 @@ public class Generator
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", controlType, html_ctrl.ControlID);
 
 		ChildrenKind children_kind = html_ctrl.IsContainer ? ChildrenKind.CONTROLS : ChildrenKind.NONE;
-		CreateNewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind); 
+		NewControlFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, children_kind); 
 		AddCodeForAttributes (html_ctrl.ControlType, html_ctrl.Attributes);
 
 		if (!html_ctrl.SelfClosing)
@@ -658,7 +687,7 @@ public class Generator
 		Type component_type = component.ComponentType;
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", component_type, component.ControlID);
 
-		CreateNewControlFunction (component.TagID, component.ControlID, component_type,
+		NewControlFunction (component.TagID, component.ControlID, component_type,
 					  component.ChildrenKind); 
 		AddCodeForAttributes (component.ComponentType, component.Attributes);
 		if (!component.SelfClosing)
@@ -677,11 +706,11 @@ public class Generator
 					  obj.ObjectClass, obj.ObjectID);
 	}
 
-	private void NewPropertyFunction (PropertyTag tag)
+	// Creates a new function that sets the values of subproperties.
+	private void NewStyleFunction (PropertyTag tag)
 	{
-		StringBuilder func_code = new StringBuilder ();
-		current_function = func_code;
-		functions.Push (current_function);
+		current_function = new StringBuilder ();
+
 		string prop_id = tag.PropertyID;
 		Type prop_type = tag.PropertyType;
 		// begin function
@@ -712,10 +741,71 @@ public class Generator
 		// Finish function
 		current_function.Append ("\n\t\t}\n\n");
 		init_funcs.Append (current_function);
-		functions.Pop ();
 		current_function = (StringBuilder) functions.Peek ();
 		current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} (__ctrl.{1});\n",
 						prop_id, tag.PropertyName);
+	}
+
+	// This one just opens the function. Closing is performed in FinishControlFunction ()
+	private void NewTemplateFunction (PropertyTag tag)
+	{
+		/*
+		 * FIXME
+		 * This function does almost the same as NewControlFunction.
+		 * Consider merging.
+		 */
+		string prop_id = tag.PropertyID;
+		Type prop_type = tag.PropertyType;
+		string tag_id = tag.PropertyName; // Real property name used in FinishControlFunction
+
+		childrenKind.Push (ChildrenKind.CONTROLS);
+		controlTypes.Push (prop_type);
+		openedControlTags.Push (prop_id);
+		openedControlTags.Push (tag_id);
+		current_function = new StringBuilder ();
+		functions.Push (current_function);
+		current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} " +
+						"(System.Web.UI.Control __ctrl)\n" +
+						"\t\t{{\n" +
+						"\t\t\tSystem.Web.UI.IParserAccessor __parser " + 
+						"= (System.Web.UI.IParserAccessor) __ctrl;\n" , prop_id);
+	}
+
+	// Closing is performed in FinishControlFunction ()
+	private void NewDBColumnFunction (PropertyTag tag)
+	{
+		/*
+		 * FIXME
+		 * This function also does almost the same as NewControlFunction.
+		 * Consider merging.
+		 */
+		string prop_id = tag.PropertyID;
+		Type prop_type = tag.PropertyType;
+		string tag_id = tag.PropertyName; // Real property name used in FinishControlFunction
+
+		childrenKind.Push (ChildrenKind.DBCOLUMNS);
+		controlTypes.Push (prop_type);
+		openedControlTags.Push (prop_id);
+		openedControlTags.Push (tag_id);
+		current_function = new StringBuilder ();
+		functions.Push (current_function);
+		current_function.AppendFormat ("\t\tprivate void __BuildControl_{0} " +
+						"(System.Web.UI.WebControl.DataGridColumnCollection __ctrl)\n" +
+						"\t\t{{\n", prop_id);
+	}
+
+	private void NewPropertyFunction (PropertyTag tag)
+	{
+		if (tag.PropertyType == typeof (System.Web.UI.WebControls.Style) ||
+		    tag.PropertyType.IsSubclassOf (typeof (System.Web.UI.WebControls.Style)))
+			NewStyleFunction (tag);
+		else if (tag.PropertyType == typeof (System.Web.UI.ITemplate))
+			NewTemplateFunction (tag);
+		else if (tag.PropertyType == typeof (System.Web.UI.WebControls.DataGridColumnCollection))
+			NewDBColumnFunction (tag);
+		else
+			throw new ApplicationException ("Other than Style and ITemplate not supported yet. " + 
+							tag.PropertyType);
 	}
 	
 	private void ProcessHtmlTag ()
@@ -754,10 +844,12 @@ public class Generator
 
 	private Tag Map (Tag tag)
 	{
-		if (tag is CloseTag || tag.Attributes == null || !tag.Attributes.IsRunAtServer ())
+		int pos = tag.TagID.IndexOf (":");
+		if (tag is CloseTag || 
+		    ((tag.Attributes == null || 
+		    !tag.Attributes.IsRunAtServer ()) && pos == -1))
 			return tag;
 
-		int pos = tag.TagID.IndexOf (":");
 		if (pos == -1){
 			if (0 == String.Compare (tag.TagID, "object", true))
 				return new ServerObjectTag (tag);
@@ -883,7 +975,7 @@ public class Generator
 			old_function.Append ("\n\t\t\treturn __ctrl;\n\t\t}\n\n");
 			init_funcs.Append (old_function);
 			control_id = (string) openedControlTags.Pop ();
-			current_function.AppendFormat ("\t\t\tthis.__BuildControl{0} ();\n\t\t\t__parser." +
+			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n\t\t\t__parser." +
 							"AddParsedSubObject (this.{0});\n\n", control_id);
 			old_function = (StringBuilder) functions.Pop ();
 			current_function = (StringBuilder) functions.Peek ();

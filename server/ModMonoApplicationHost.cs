@@ -272,7 +272,7 @@ namespace Mono.ASPNET
 									modRequest.GetAllHeaderValues());
 				
 			} catch (Exception e) {
-				Console.WriteLine ("In ModMonoWorker.Run: {0}", e.Message);
+				//Console.WriteLine ("In ModMonoWorker.Run: {0}", e.Message);
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();

@@ -1,5 +1,10 @@
 2005-03-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server/ModMonoApplicationHost.cs: don't print the exception to apache
+	logs so that connection probing does not polute them.
+
+2005-03-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/ApplicationServer.cs: prevent premature stop from mod_mono from
 	not doing the clean up. Patch from Rob Lyon.
 

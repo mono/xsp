@@ -12,42 +12,42 @@ EXTRA_DIST = $(local_sources) NUnitAsp.csproj
 CLEANFILES = NUnitAsp.dll
 
 asptesterdir_sources = \
-	./AspTester/AspControlTester.cs \
-	./AspTester/ButtonTester.cs \
-	./AspTester/CheckBoxTester.cs \
-	./AspTester/DataGridTester.cs \
-	./AspTester/DropDownListTester.cs \
-	./AspTester/ImageButtonTester.cs \
-	./AspTester/LabelTester.cs \
-	./AspTester/LinkButtonTester.cs \
-	./AspTester/ListBoxTester.cs \
-	./AspTester/ListControlTester.cs \
-	./AspTester/ListItemCollectionTester.cs \
-	./AspTester/ListItemTester.cs \
-	./AspTester/PanelTester.cs \
-	./AspTester/RadioButtonTester.cs \
-	./AspTester/TextBoxTester.cs \
-	./AspTester/UserControlTester.cs \
-	./AspTester/ValidationSummaryTester.cs
+	$(srcdir)/AspTester/AspControlTester.cs \
+	$(srcdir)/AspTester/ButtonTester.cs \
+	$(srcdir)/AspTester/CheckBoxTester.cs \
+	$(srcdir)/AspTester/DataGridTester.cs \
+	$(srcdir)/AspTester/DropDownListTester.cs \
+	$(srcdir)/AspTester/ImageButtonTester.cs \
+	$(srcdir)/AspTester/LabelTester.cs \
+	$(srcdir)/AspTester/LinkButtonTester.cs \
+	$(srcdir)/AspTester/ListBoxTester.cs \
+	$(srcdir)/AspTester/ListControlTester.cs \
+	$(srcdir)/AspTester/ListItemCollectionTester.cs \
+	$(srcdir)/AspTester/ListItemTester.cs \
+	$(srcdir)/AspTester/PanelTester.cs \
+	$(srcdir)/AspTester/RadioButtonTester.cs \
+	$(srcdir)/AspTester/TextBoxTester.cs \
+	$(srcdir)/AspTester/UserControlTester.cs \
+	$(srcdir)/AspTester/ValidationSummaryTester.cs
 
 htmltesterdir_sources = \
-	./HtmlTester/AnchorTester.cs \
-	./HtmlTester/HtmlControlTester.cs \
-	./HtmlTester/HtmlInputCheckBoxTester.cs
+	$(srcdir)/HtmlTester/AnchorTester.cs \
+	$(srcdir)/HtmlTester/HtmlControlTester.cs \
+	$(srcdir)/HtmlTester/HtmlInputCheckBoxTester.cs
 
 sgmldir_sources = \
-	./Sgml/SgmlParser.cs \
-	./Sgml/SgmlReader.cs
+	$(srcdir)/Sgml/SgmlParser.cs \
+	$(srcdir)/Sgml/SgmlReader.cs
 
 local_sources =  \
-	./AssemblyInfo.cs \
-	./ControlTester.cs \
-	./HttpClient.cs \
-	./Tester.cs \
-	./WebAssertion.cs \
-	./WebForm.cs \
-	./WebFormTestCase.cs \
-	./WebPage.cs
+	$(srcdir)/AssemblyInfo.cs \
+	$(srcdir)/ControlTester.cs \
+	$(srcdir)/HttpClient.cs \
+	$(srcdir)/Tester.cs \
+	$(srcdir)/WebAssertion.cs \
+	$(srcdir)/WebForm.cs \
+	$(srcdir)/WebFormTestCase.cs \
+	$(srcdir)/WebPage.cs
 
 nunitasp_sources = \
 	$(asptesterdir_sources) \

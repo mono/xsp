@@ -4,10 +4,12 @@ namespace WebServiceTest
 {
 	public class ServiceClientTest
 	{
-		static void Main() 
+		static void Main(string [] args) 
 		{
 			Console.WriteLine ("Testing simple web service");
 			TestService s = new TestService ();
+			if (args.Length>0)
+				s.Url = "http://" + args [0] + "/TestService.asmx";
 			for (int n=0; n<10; n++)
 			{
 				string res = s.Echo ("hola");

@@ -65,7 +65,11 @@ How to test
 -----------
 
 Build XSP and start the server as usual.
-cd to xsp/test and run ServiceClient.exe.
+cd to xsp/test and run ServiceClient.exe passing the hostname and port:
+
+For example:
+
+	mono ServiceClient.exe localhost:8080
 
 After execution, you should see the files trace.log and dump.log in
 xsp/server/test with the traces of the requests. You can try to add and remove

@@ -82,29 +82,57 @@ void BuildOperationInfo ()
 void BuildParameters (ArrayList list, OperationMessage opm)
 {
 	Message msg = descriptions.GetMessage (opm.Message);
-	MessagePart part = msg.Parts[0];
-	XmlSchemaElement elem = (XmlSchemaElement) schemas.Find (part.Element, typeof(XmlSchemaElement));
-	XmlSchemaComplexType ctype = (XmlSchemaComplexType) elem.SchemaType;
-	XmlSchemaSequence seq = ctype.Particle as XmlSchemaSequence;
-	if (seq == null) return;
-	
-	foreach (XmlSchemaObject ob in seq.Items)
+	if (msg.Parts.Count > 0 && msg.Parts[0].Name == "parameters")
 	{
-		Parameter p = new Parameter();
-		p.Description = "No additional remarks";
-		
-		if (ob is XmlSchemaElement)
+		MessagePart part = msg.Parts[0];
+		XmlSchemaComplexType ctype;
+		if (part.Element == XmlQualifiedName.Empty)
 		{
-			XmlSchemaElement selem = GetRefElement ((XmlSchemaElement)ob);
-			p.Name = selem.Name;
-			p.Type = selem.SchemaTypeName.Name;
+			ctype = (XmlSchemaComplexType) schemas.Find (part.Type, typeof(XmlSchemaComplexType));
 		}
 		else
 		{
-			p.Name = "Unknown";
-			p.Type = "Unknown";
+			XmlSchemaElement elem = (XmlSchemaElement) schemas.Find (part.Element, typeof(XmlSchemaElement));
+			ctype = (XmlSchemaComplexType) elem.SchemaType;
 		}
-		list.Add (p);
+		XmlSchemaSequence seq = ctype.Particle as XmlSchemaSequence;
+		if (seq == null) return;
+		
+		foreach (XmlSchemaObject ob in seq.Items)
+		{
+			Parameter p = new Parameter();
+			p.Description = "No additional remarks";
+			
+			if (ob is XmlSchemaElement)
+			{
+				XmlSchemaElement selem = GetRefElement ((XmlSchemaElement)ob);
+				p.Name = selem.Name;
+				p.Type = selem.SchemaTypeName.Name;
+			}
+			else
+			{
+				p.Name = "Unknown";
+				p.Type = "Unknown";
+			}
+			list.Add (p);
+		}
+	}
+	else
+	{
+		foreach (MessagePart part in msg.Parts)
+		{
+			Parameter p = new Parameter ();
+			p.Description = "No additional remarks";
+			p.Name = part.Name;
+			if (part.Element == XmlQualifiedName.Empty)
+				p.Type = part.Type.Name;
+			else
+			{
+				XmlSchemaElement elem = (XmlSchemaElement) schemas.Find (part.Element, typeof(XmlSchemaElement));
+				p.Type = elem.SchemaTypeName.Name;
+			}
+			list.Add (p);
+		}
 	}
 }
 
@@ -181,6 +209,8 @@ class Parameter
 <a class="method" href='<%=PageName%>'>Overview</a><br>
 <div class="smallSeparator"></div>
 <a class="method" href='<%=PageName + "?wsdl"%>'>Service Description</a>
+<div class="smallSeparator"></div>
+<a class="method" href='<%=PageName + "?code=cs"%>'>C# proxy</a>
 <br><br>
 	<asp:repeater id="BindingsRepeater" runat=server>
 		<itemtemplate name="itemtemplate">

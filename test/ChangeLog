@@ -1,3 +1,7 @@
+2003-09-14  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* DefaultWsdlHelpGenerator.aspx. Added support for C# proxy generation.
+
 2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
 
 	* Added DefaultWsdlHelpGenerator.aspx.

@@ -1,5 +1,10 @@
 2003-01-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* MonoWorkerRequest.cs:
+	* XSPWorkerRequest.cs: moved GetUnknownHeader(s) here.
+
+2003-01-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* IApplicationHost.cs: 
 	* MonoWorkerRequest.cs: the same files as in mod_mono. They must be kept
 	in synch.

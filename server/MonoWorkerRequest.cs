@@ -65,7 +65,6 @@ namespace Mono.ASPNET
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
 		IApplicationHost appHost;
-		Hashtable headers;
 		string [][] unknownHeaders;
 		ArrayList response;
 		Encoding encoding;
@@ -153,47 +152,6 @@ namespace Mono.ASPNET
 				return path + "?" + queryString;
 
 			return path;
-		}
-
-		public override string GetUnknownRequestHeader (string name)
-		{
-			if (headers == null)
-				return null;
-
-			return headers [name] as string;
-		}
-
-		public override string [][] GetUnknownRequestHeaders ()
-		{
-			if (unknownHeaders == null) {
-				if (headers == null)
-					return (unknownHeaders = new string [0][]);
-
-				ICollection keysColl = headers.Keys;
-				ICollection valuesColl = headers.Values;
-				string [] keys = new string [keysColl.Count];
-				string [] values = new string [valuesColl.Count];
-				keysColl.CopyTo (keys, 0);
-				valuesColl.CopyTo (values, 0);
-
-				int count = keys.Length;
-				ArrayList pairs = new ArrayList ();
-				for (int i = 0; i < count; i++) {
-					int index = HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]);
-					if (index == -1)
-						continue;
-					pairs.Add (new string [] { keys [i], values [i]});
-				}
-				
-				if (pairs.Count != 0) {
-					unknownHeaders = new string [pairs.Count][];
-					for (int i = 0; i < pairs.Count; i++)
-						unknownHeaders [i] = (string []) pairs [i];
-					//unknownHeaders = (string [][]) pairs.ToArray (typeof (string [][]));
-				}
-			}
-
-			return unknownHeaders;
 		}
 
 		public override string MapPath (string path)

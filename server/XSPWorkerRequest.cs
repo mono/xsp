@@ -108,6 +108,10 @@ namespace Mono.ASPNET
 			path = rdata.Path;
 			protocol = rdata.Protocol;
 			queryString = rdata.QueryString;
+			inputBuffer = rdata.InputBuffer;
+			inputLength = rdata.InputLength;
+			position = rdata.Position;
+
 			headers = rdata.Headers;
 			responseHeaders = new StringBuilder ();
 			response = new MemoryStream ();

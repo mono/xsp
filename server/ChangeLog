@@ -1,5 +1,14 @@
 2003-08-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* InitialWorkerRequest.cs:
+	* XSPWorkerRequest.cs: keep the read buffer, its length and the position
+	around (used in POST). Somehow this bug didnn't show up under MS
+	runtime.
+
+	* XSPApplicationHost.cs: fixed warning and commented out WriteLines.
+
+2003-08-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* IApplicationHost.cs: added 2 methods and 1 property to the
 	interface.
 	

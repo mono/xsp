@@ -24,6 +24,9 @@ namespace Mono.ASPNET
 		public string QueryString;
 		public string Protocol;
 		public Hashtable Headers;
+		public byte [] InputBuffer;
+		public int InputLength;
+		public int Position;
 
 		public RequestData (string verb, string path, string queryString, string protocol,
 				    Hashtable headers)
@@ -183,7 +186,11 @@ namespace Mono.ASPNET
 
 		public RequestData RequestData {
 			get {
-				return new RequestData (verb, path, queryString, protocol, headers);
+				RequestData rd = new RequestData (verb, path, queryString, protocol, headers);
+				rd.InputBuffer = inputBuffer;
+				rd.InputLength = inputLength;
+				rd.Position = position;
+				return rd;
 			}
 		}
 	}

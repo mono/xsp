@@ -28,9 +28,10 @@ namespace Mono.ASPNET
 		IApplicationHost host;
 		EndPoint remoteEP;
 		NetworkStream ns;
-		RequestData rdata;
 #if MODMONO_SERVER
 		ModMonoRequest modRequest;
+#else
+		RequestData rdata;
 #endif
 
 		static byte [] error500;
@@ -163,14 +164,14 @@ namespace Mono.ASPNET
  			appToDir = new Hashtable ();
  			dirToHost = new Hashtable ();
  			string [] apps = applications.Split (',');
-			Console.WriteLine ("applications: {0}", applications);
+			//Console.WriteLine ("applications: {0}", applications);
  			foreach (string str in apps) {
  				string [] app = str.Split (':');
  				if (app.Length != 2)
  					throw new ArgumentException ("Should be something like VPath:realpath");
  
  				string fp = System.IO.Path.GetFullPath (app [1]);
- 				Console.WriteLine ("{0} -> {1}", app [0], fp);
+ 				//Console.WriteLine ("{0} -> {1}", app [0], fp);
  				appToDir [app [0]] = fp;
  				dirToHost [fp] = marker;
  			}
@@ -250,7 +251,7 @@ namespace Mono.ASPNET
 				if (current == "")
 					current = "/";
 
-				Console.WriteLine ("current: {0} path: {1}", current, path);
+				//Console.WriteLine ("current: {0} path: {1}", current, path);
 				string dir = appToDir [current] as string;
 				if (dir != null) {
 					object o = dirToHost [dir];
@@ -262,20 +263,22 @@ namespace Mono.ASPNET
 					}
 					break;
 				} else {
-					Console.WriteLine ("null for {0}", current);
+					//Console.WriteLine ("null for {0}", current);
 				}
 				
 				count--;
 			}
 
 			if (defaultToRoot && bestFit == null) {
-				Console.WriteLine ("bestFit es null 1");
+				//Console.WriteLine ("bestFit es null 1");
 				bestFit = dirToHost [appToDir ["/"]] as IApplicationHost;
+				/*
 				if (bestFit == null) {
 					Console.WriteLine ("bestFit es null 2");
 					foreach (string key in dirToHost.Keys)
 						Console.WriteLine ("Key: {0} Value: '{1}'", key, dirToHost [key]);
 				}
+				*/
 			}
 
 			return bestFit;

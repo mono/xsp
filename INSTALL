@@ -1,23 +1,34 @@
-Testing XSP
-============
+* Compiling and installing XSP
+-------------------------------
 
-Steps for installing the server:
+    We will assume you want to install XSP in /usr.
 
-	./configure --prefix=/your/install/dir
-(*)	make 
+    To compile XSP type and install it to /usr:
+
+	./configure --prefix=/usr
+	make 
 	make install
 
-    You can change the listen port from the default (8080) using the
-    configuration file (xsp.exe.config).
+    If you don't specify --prefix, it will default to /usr/local.
 
-    Or you can use the --port command line option.
+* Running XSP with the bundled tests
+------------------------------------
 
-    If you're gonna try the samples that use a database (such as dbpage1.aspx),
-    you may need to modify the values of DBProviderAssembly, DBConnectionType
-    and/or DbConnectionString in web.config file.
+    Go to /usr/share/doc/xsp/test directory and run:
 
-    In order to display monodoc.ashx, you need to have monodoc itself
-    installed.
+	mono /usr/bin/xsp.exe 
+
+    You can optionally provide a port where the server should listen on:
+
+	mono /usr/bin/xsp.exe --port 80
+
+    The default port is 8080.
+
+    There are other command line options. Run:
+    
+        mono /usr/bin/xsp.exe --help
+
+    to display all of them.
 
 Notes for MS runtime users
 ----------------------------

@@ -671,9 +671,13 @@ class MyWorkerRequest
 			}
 			string key = line.Substring (0, idx);
 			string value = line.Substring (idx + 1);
-			headers.Add (key, value);
-			if (key == "Content-Length")
-				post_size = Int32.Parse (value.Trim ());
+			try {
+				headers.Add (key, value);
+				if (key == "Content-Length")
+					post_size = Int32.Parse (value.Trim ());
+			} catch (Exception) {
+				Console.WriteLine ("Duplicated key in headers: '{0}: {1}'", key, value);
+			}
 		}
 	}
 	

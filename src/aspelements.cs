@@ -9,19 +9,23 @@
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
 //
 
-namespace Mono.ASP {
+namespace Mono.ASP
+{
 	using System;
 	using System.Collections;
+	using System.Reflection;
 	using System.Text;
 	using System.Web.UI.HtmlControls;
 	using System.Web.UI.WebControls;
 	
-public enum ElementType {
+public enum ElementType
+{
 	TAG,
 	PLAINTEXT
 }
 
-public abstract class Element {
+public abstract class Element
+{
 	private ElementType elementType;
 
 	public Element (ElementType type)
@@ -35,7 +39,8 @@ public abstract class Element {
 	}
 } // class Element
 
-public class PlainText : Element {
+public class PlainText : Element
+{
 	private StringBuilder text;
 
 	public PlainText () : base (ElementType.PLAINTEXT)
@@ -69,7 +74,8 @@ public class PlainText : Element {
 	}
 }
 
-public enum TagType {
+public enum TagType
+{
 	DIRECTIVE,
 	HTML,
 	HTMLCONTROL,
@@ -77,6 +83,7 @@ public enum TagType {
 	INLINEVAR,
 	INLINECODE,
 	CLOSING,
+	SERVEROBJECT,
 	NOTYET
 }
 
@@ -92,7 +99,8 @@ public enum TagType {
  * marked runat=server and Hashtable requires the key to be unique.
  * 
  */
-public class TagAttributes {
+public class TagAttributes
+{
 	private Hashtable atts_hash;
 	private ArrayList keys;
 	private ArrayList values;
@@ -168,6 +176,7 @@ public class TagAttributes {
 	{
 		get { return (got_hashed ? atts_hash.Count : keys.Count);}
 	}
+
 	public override string ToString ()
 	{
 		string ret = "";
@@ -182,7 +191,8 @@ public class TagAttributes {
 	}
 }
 
-public class Tag : Element {
+public class Tag : Element
+{
 	protected string tag;
 	protected TagType tagType;
 	protected TagAttributes attributes;
@@ -265,7 +275,8 @@ public class Tag : Element {
 	}
 }
 
-public class CloseTag : Tag {
+public class CloseTag : Tag
+{
 	public CloseTag (string tag) : base (tag, null, false)
 	{
 		tagType = TagType.CLOSING;
@@ -372,7 +383,33 @@ public class Directive : Tag {
 	}
 }
 
-public class HtmlControlTag : Tag {
+public class ServerObjectTag : Tag
+{
+	public ServerObjectTag (Tag tag) :
+		base (tag.TagID, tag.Attributes, tag.SelfClosing) 
+	{
+		tagType = TagType.SERVEROBJECT;
+		if (!attributes.IsRunAtServer ())
+			throw new ApplicationException ("how did it happen?: <object> without runat=server");
+		
+		if (attributes.Count != 3 || !SelfClosing || ObjectID == null || ObjectClass == null)
+			throw new ApplicationException ("Incorrect syntax: <object id=\"name\" " + 
+							"class=\"full.class.name\" runat=\"server\" />");
+	}
+
+	public string ObjectID
+	{
+		get { return (string) attributes ["id"]; }
+	}
+		
+	public string ObjectClass
+	{
+		get { return (string) attributes ["class"]; }
+	}
+}
+
+public class HtmlControlTag : Tag
+{
 	private Type control_type;
 
 	private static Hashtable controls;
@@ -469,18 +506,30 @@ public class HtmlControlTag : Tag {
 	}
 }
 
-public class Component : Tag {
+public class Component : Tag
+{
 	private Type type;
 	private string alias;
 	private string control_type;
 	private bool is_close_tag;
+	private bool allow_children;
 
+	private static bool GuessAllowChildren (Type type)
+	{
+		object o = Activator.CreateInstance (type);
+		PropertyInfo controls = type.GetProperty ("Controls");
+		MethodInfo getm = controls.GetGetMethod ();
+		object cc = getm.Invoke (o, null);
+		return (!(cc is System.Web.UI.EmptyControlCollection));
+	}
+	
 	public Component (Tag input_tag, Type type) :
 		base (input_tag)
 	{
 		tagType = TagType.SERVERCONTROL;
 		this.is_close_tag = input_tag is CloseTag;
 		this.type = type;
+		this.allow_children = GuessAllowChildren (type);
 		int pos = input_tag.TagID.IndexOf (':');
 		alias = tag.Substring (0, pos);
 		control_type = tag.Substring (pos + 1);
@@ -503,6 +552,10 @@ public class Component : Tag {
 		get { return is_close_tag; }
 	}
 
+	public bool AllowChildren
+	{
+		get { return allow_children; }
+	}
 	public override string ToString ()
 	{
 		return type.ToString () + " Alias: " + alias + " ID: " + (string) attributes ["id"];

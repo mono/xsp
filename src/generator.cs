@@ -9,7 +9,8 @@
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
 //
 
-namespace Mono.ASP {
+namespace Mono.ASP
+{
 	using System;
 	using System.Collections;
 	using System.IO;
@@ -17,7 +18,8 @@ namespace Mono.ASP {
 	using System.Text;
 	using System.Web.UI.WebControls;
 
-class Foundry {
+class Foundry
+{
 	private static Hashtable foundries;
 	struct InternalFoundry {
 		public string [] str;
@@ -73,7 +75,8 @@ class Foundry {
 	}
 }
 
-class ArrayListWrapper {
+class ArrayListWrapper
+{
 	private ArrayList list;
 	private int index;
 
@@ -106,7 +109,8 @@ class ArrayListWrapper {
 	}
 }
 
-public class Generator {
+public class Generator
+{
 	private object [] parts;
 	private ArrayListWrapper elements;
 	private StringBuilder prolog;
@@ -118,6 +122,7 @@ public class Generator {
 	private StringBuilder current_function;
 	private Stack functions;
 	private Stack openedControlTags;
+	private Stack childrenAllowed;
 	private bool parse_ok;
 	private bool has_form_tag;
 
@@ -135,6 +140,8 @@ public class Generator {
 
 		this.elements = new ArrayListWrapper (elements);
 		this.className = filename.Replace ('.', '_'); // Overridden by @ Page classname
+		this.className = className.Replace ('-', '_'); 
+		this.className = className.Replace (' ', '_');
 		this.fullPath = Path.GetFullPath (filename);
 		//FIXME: get them from directives
 		this.parent = "System.Web.UI.Page";
@@ -149,6 +156,8 @@ public class Generator {
 		prolog = new StringBuilder ();
 		declarations = new StringBuilder ();
 		openedControlTags = new Stack ();
+		childrenAllowed = new Stack ();
+		childrenAllowed.Push (true);
 		script = new StringBuilder ();
 		constructor = new StringBuilder ();
 		init_funcs = new StringBuilder ();
@@ -306,6 +315,16 @@ public class Generator {
 	private void ProcessPlainText ()
 	{
 		PlainText asis;
+		if (!(bool) childrenAllowed.Peek ()){
+			asis = (PlainText) elements.Current;
+			string result = asis.Text.Trim ();
+			if (result != ""){
+				string tag_id = (string) openedControlTags.Pop ();
+				throw new ApplicationException ("Literal content not allowed for " + tag_id);
+			}
+			return;
+		}
+		
 		while (true){
 			asis = (PlainText) elements.Current;
 			ControlTreeAddEscaped (asis.Text);
@@ -338,8 +357,14 @@ public class Generator {
 		return enum_type.ToString () + "." + nested_types [0].Name;
 	}
 	
-	private void CreateNewFunction (string tag_id, string control_id, string control_type)
+	private void CreateNewFunction (string tag_id, string control_id, string control_type, bool allow_children)
 	{
+		if (!(bool) childrenAllowed.Peek ()){
+			string prev_tag_id = (string) openedControlTags.Pop ();
+			throw new ApplicationException ("Child controls not allowed for " + prev_tag_id);
+		}
+					
+		childrenAllowed.Push (allow_children);
 		StringBuilder func_code = new StringBuilder ();
 		current_function = func_code;
 		if (0 == String.Compare (tag_id, "form", true)){
@@ -528,8 +553,9 @@ public class Generator {
 						id, Escape ((string) att [id]));
 		}
 
-            	current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
-					 "(System.Web.UI.IParserAccessor) __ctrl;\n");
+		if ((bool) childrenAllowed.Peek ())
+			current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
+						 "(System.Web.UI.IParserAccessor) __ctrl;\n");
 	}
 	
 	private bool FinishFunction (string tag_id)
@@ -553,6 +579,8 @@ public class Generator {
 		current_function.AppendFormat ("\t\t\tthis.__BuildControl{0} ();\n\t\t\t__parser." +
 						"AddParsedSubObject (this.{0});\n\n", control_id);
 		init_funcs.Append (old_function);
+		if (childrenAllowed.Count > 1) // Avoid getting an empty stack for unbalanced open/close tags
+			childrenAllowed.Pop ();
 		return true;
 	}
 
@@ -586,7 +614,7 @@ public class Generator {
 		string controlType = html_ctrl.ControlType.ToString ();
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", controlType, html_ctrl.ControlID);
 
-		CreateNewFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType); 
+		CreateNewFunction (html_ctrl.TagID, html_ctrl.ControlID, controlType, true); 
 		AddCodeForAttributes (html_ctrl.ControlType, html_ctrl.Attributes);
 
 		if (!html_ctrl.SelfClosing)
@@ -598,20 +626,26 @@ public class Generator {
 	private void ProcessComponent ()
 	{
 		Component component = (Component) elements.Current;
-		if (component.IsCloseTag){
-			FinishFunction (component.TagID);
-			return;
-		}
-		
 		string component_type = component.ComponentType.ToString ();
 		declarations.AppendFormat ("\t\tprotected {0} {1};\n", component_type, component.ControlID);
 
-		CreateNewFunction (component.TagID, component.ControlID, component_type); 
+		CreateNewFunction (component.TagID, component.ControlID, component_type, component.AllowChildren); 
 		AddCodeForAttributes (component.ComponentType, component.Attributes);
 		if (!component.SelfClosing)
 			JustDoIt ();
 		else
 			FinishFunction (component.TagID);
+	}
+
+	private void ProcessServerObjectTag ()
+	{
+		ServerObjectTag obj = (ServerObjectTag) elements.Current;
+		declarations.AppendFormat ("\t\tprivate {0} cached{1};\n", obj.ObjectClass, obj.ObjectID);
+		constructor.AppendFormat ("\n\t\tprivate {0} {1}\n\t\t{{\n\t\t\tget {{\n\t\t\t\t" + 
+					  "if (this.cached{1} == null)\n\t\t\t\t\tthis.cached{1} = " + 
+					  "new {0} ();\n\t\t\t\treturn cached{1};\n\t\t\t}}\n\t\t}}\n\n",
+					  obj.ObjectClass, obj.ObjectID);
+
 	}
 
 	private Tag Map (Tag tag)
@@ -620,8 +654,11 @@ public class Generator {
 			return tag;
 
 		int pos = tag.TagID.IndexOf (":");
-		if (pos == -1)
+		if (pos == -1){
+			if (0 == String.Compare (tag.TagID, "object", true))
+				return new ServerObjectTag (tag);
 			return new HtmlControlTag (tag);
+		}
 
 		string foundry_name = tag.TagID.Substring (0, pos);
 		string component_name = tag.TagID.Substring (pos + 1);
@@ -638,7 +675,7 @@ public class Generator {
 		return component;
 	}
 	
-	public void ProcessCloseTag ()
+	private void ProcessCloseTag ()
 	{
 		CloseTag close_tag = (CloseTag) elements.Current;
 		if (FinishFunction (close_tag.TagID))
@@ -672,6 +709,8 @@ public class Generator {
 					ProcessComponent ();
 				else if (elements.Current is CloseTag)
 					ProcessCloseTag ();
+				else if (elements.Current is ServerObjectTag)
+					ProcessServerObjectTag ();
 				else {
 					if (elements.Current is Tag)
 						elements.Current = new PlainText (((Tag) elements.Current).PlainHtml);

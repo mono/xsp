@@ -1,3 +1,8 @@
+2003-07-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web.config: update to new type/assembly name and make it use gzip by
+	default.
+
 2003-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web.config: the new mono.aspnet configuration section has been added

@@ -1,3 +1,13 @@
+2003-07-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* AcceptEncodingConfig.cs:
+	* AcceptEncodingModule.cs:
+	* AcceptEncodingSectionHandler.cs:
+	* GZipFilter.cs:
+	* Makefile: these .cs files have been moved to Mono.Http.dll.
+
+	* AssemblyInfo.cs: upgrade version.
+
 2003-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* AcceptEncodingConfig.cs: class to hold the configuration for the

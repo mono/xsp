@@ -1,11 +1,11 @@
 # Run make CSC=csc if you want debugging on windows.
 # Add CSCFLAGS=/d:TRACE if you want trace support
 CSC=mcs
-CSCFLAGS+= /debug+ /debug:full /nologo
+CSCFLAGS+= -debug+ -debug:full -nologo
 
 # 
-REFERENCES= System.Web ICSharpCode.SharpZipLib
-REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
+REFERENCES= System.Web Mono.Http
+REFS= $(addsuffix .dll, $(addprefix -r:, $(REFERENCES)))
 
 SOURCES = AssemblyInfo.cs \
           IApplicationHost.cs \
@@ -13,11 +13,7 @@ SOURCES = AssemblyInfo.cs \
 	  MonoWorkerRequest.cs \
 	  XSPWorkerRequest.cs \
 	  Tracing.cs \
-          server.cs \
-	  AcceptEncodingConfig.cs \
-	  AcceptEncodingModule.cs \
-	  AcceptEncodingSectionHandler.cs \
-	  GZipFilter.cs
+          server.cs
 
 all: xsp.exe
 	

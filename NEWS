@@ -1,3 +1,8 @@
+July 24, 2003 - Gonzalo Paniagua
+----------------------------------
+
+* The gzip compression related classes are now in Mono.Http.dll
+
 
 July 23, 2003 - Gonzalo Paniagua
 ----------------------------------

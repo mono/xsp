@@ -1,3 +1,13 @@
+2003-08-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* InitialWorkerRequest.cs: added PathInfo support.
+	
+	* MonoWorkerRequest.cs: removed unused GetPathInfo. Don't cache the
+	mapped path as it may change (ie., / -> /index.aspx).
+
+	* XSPWorkerRequest.cs: support pathinfo. Works with MS. Always send
+	the 'Connection: close' header. Added support for GetLocal*.
+
 2003-08-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* InitialWorkerRequest.cs: fixed bugs 47937 and 47938.

@@ -13,6 +13,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Web;
 
 namespace Mono.ASPNET
 {
@@ -21,6 +22,7 @@ namespace Mono.ASPNET
 	{
 		public string Verb;
 		public string Path;
+		public string PathInfo;
 		public string QueryString;
 		public string Protocol;
 		public Hashtable Headers;
@@ -37,6 +39,16 @@ namespace Mono.ASPNET
 			this.Protocol = protocol;
 			this.Headers = headers;
 		}
+
+		public override string ToString ()
+		{
+			StringBuilder sb = new StringBuilder ();
+			sb.AppendFormat ("Verb: {0}\n", Verb);
+			sb.AppendFormat ("Path: {0}\n", Path);
+			sb.AppendFormat ("PathInfo: {0}\n", PathInfo);
+			sb.AppendFormat ("QueryString: {0}\n", QueryString);
+			return sb.ToString ();
+		}
 	}
 
 	public class InitialWorkerRequest
@@ -45,6 +57,7 @@ namespace Mono.ASPNET
 		string path;
 		string queryString;
 		string protocol;
+		string pathInfo;
 		Hashtable headers;
 		NetworkStream stream;
 
@@ -147,6 +160,19 @@ namespace Mono.ASPNET
 				path = path.Substring (0, qmark);
 			}
 
+			// Decode path
+			path = HttpUtility.UrlDecode (path);
+			
+			// Yes, MS only looks for the '.'. Try setting a handler for
+			// something not containing a '.' and you won't get path_info.
+			int dot = path.LastIndexOf ('.');
+			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
+			if (dot > 0 && slash > 0) {
+				Console.WriteLine ("path: {0} {1} {2}", path, dot, slash);
+				pathInfo = path.Substring (slash);
+				path = path.Substring (0, slash);
+			}
+
 			if (path.StartsWith ("/~/")) {
 				// Not sure about this. It makes request such us /~/dir/file work
 				path = path.Substring (2);
@@ -191,6 +217,7 @@ namespace Mono.ASPNET
 				rd.InputBuffer = inputBuffer;
 				rd.InputLength = inputLength;
 				rd.Position = position;
+				rd.PathInfo = pathInfo;
 				return rd;
 			}
 		}

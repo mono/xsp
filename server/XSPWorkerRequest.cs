@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Simon Waite (simon@psionics.demon.co.uk)
 //
-// (C) 2002 Ximian, Inc (http://www.ximian.com)
+// (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
 //
 using System;
 using System.Collections;
@@ -28,6 +28,7 @@ namespace Mono.ASPNET
 		Stream stream;
 		string verb;
 		string path;
+		string pathInfo;
 		string queryString;
 		string protocol;
 		Hashtable headers;
@@ -39,7 +40,9 @@ namespace Mono.ASPNET
 		byte [] inputBuffer;
 		int inputLength;
 		int position;
+		EndPoint localEP;
 		EndPoint remoteEP;
+		bool sentConnection;
 		
 		static byte [] error500;
 
@@ -94,18 +97,20 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost, EndPoint remoteEP,
-					 RequestData rdata)
+		public XSPWorkerRequest (NetworkStream ns, IApplicationHost appHost, EndPoint localEP,
+					 EndPoint remoteEP, RequestData rdata)
 			: base (appHost)
 		{
 			if (ns == null)
 				throw new ArgumentNullException ("ns");
 
 			this.appHost = appHost;
+			this.localEP = localEP;
 			this.remoteEP = remoteEP;
 			stream = ns;
 			verb = rdata.Verb;
 			path = rdata.Path;
+			pathInfo = rdata.PathInfo;
 			protocol = rdata.Protocol;
 			queryString = rdata.QueryString;
 			inputBuffer = rdata.InputBuffer;
@@ -130,6 +135,9 @@ namespace Mono.ASPNET
 				if (!headersSent) {
 					responseHeaders.Insert (0, serverHeader);
 					responseHeaders.Insert (0, status);
+					if (!sentConnection)
+						responseHeaders.Append ("Connection: close\r\n");
+
 					responseHeaders.Append ("\r\n");
 					WriteString (responseHeaders.ToString ());
 					headersSent = true;
@@ -219,21 +227,19 @@ namespace Mono.ASPNET
 		public override string GetLocalAddress ()
 		{
 			WebTrace.WriteLine ("GetLocalAddress()");
-			//FIXME
-			return "localhost";
+			return ((IPEndPoint) localEP).Address.ToString ();
 		}
 
 		public override int GetLocalPort ()
 		{
 			WebTrace.WriteLine ("GetLocalPort()");
-			//FIXME
-			return 8080;
+			return ((IPEndPoint) remoteEP).Port;
 		}
 
 		public override string GetPathInfo ()
 		{
 			WebTrace.WriteLine ("GetPathInfo()");
-			return "GetPathInfo";
+			return pathInfo;
 		}
 
 		public override byte [] GetPreloadedEntityBody ()
@@ -259,10 +265,14 @@ namespace Mono.ASPNET
 		public override string GetRawUrl ()
 		{
 			WebTrace.WriteLine ("GetRawUrl()");
-			if (queryString != null && queryString.Length > 0)
-				return path + "?" + queryString;
+			string result = path;
+			if (pathInfo != null && pathInfo.Length > 0)
+				result += pathInfo;
 
-			return path;
+			if (queryString != null && queryString.Length > 0)
+				return result + "?" + queryString;
+
+			return result;
 		}
 
 		public override string GetRemoteAddress ()
@@ -307,7 +317,12 @@ namespace Mono.ASPNET
 		public override string GetUriPath ()
 		{
 			WebTrace.WriteLine ("GetUriPath()");
-			return path;
+
+			string result = path;
+			if (pathInfo != null && pathInfo.Length > 0)
+				result += pathInfo;
+
+			return result;
 		}
 
 		public override bool HeadersSent ()
@@ -358,6 +373,7 @@ namespace Mono.ASPNET
 		{
 			byte [] b = Encoding.GetBytes (s);
 			stream.Write (b, 0, b.Length);
+
 		}
 
 		protected override bool GetRequestData ()
@@ -413,6 +429,9 @@ namespace Mono.ASPNET
 		public override void SendUnknownResponseHeader (string name, string value)
 		{
 			WebTrace.WriteLine ("SendUnknownResponseHeader (" + name + ", " + value + ")");
+			if (String.Compare (name, "connection", true) == 0)
+				sentConnection = true;
+
 			if (!headersSent)
 				responseHeaders.AppendFormat ("{0}: {1}\r\n", name, value);
 		}

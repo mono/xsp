@@ -98,7 +98,6 @@ namespace Mono.ASPNET
 	{
 		IApplicationHost appHostBase;
 		Encoding encoding;
-		string mappedPath;
 		byte [] queryStringBytes;
 
 		public MonoWorkerRequest (IApplicationHost appHost)
@@ -135,10 +134,7 @@ namespace Mono.ASPNET
 
 		public override string GetFilePathTranslated ()
 		{
-			if (mappedPath == null)
-				mappedPath = MapPath (GetFilePath ());
-
-			return mappedPath;
+			return MapPath (GetFilePath ());
 		}
 
 		public override string GetLocalAddress ()
@@ -149,11 +145,6 @@ namespace Mono.ASPNET
 		public override int GetLocalPort ()
 		{
 			return 0;
-		}
-
-		public override string GetPathInfo ()
-		{
-			return "GetPathInfo"; //???
 		}
 
 		public override byte [] GetPreloadedEntityBody ()

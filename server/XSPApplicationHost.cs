@@ -26,12 +26,13 @@ namespace Mono.ASPNET
 	class Worker
 	{
 		IApplicationHost host;
-		EndPoint remoteEP;
 		NetworkStream ns;
 #if MODMONO_SERVER
 		ModMonoRequest modRequest;
 #else
 		RequestData rdata;
+		EndPoint remoteEP;
+		EndPoint localEP;
 #endif
 
 		static byte [] error500;
@@ -50,7 +51,10 @@ namespace Mono.ASPNET
 		{
 			ns = new NetworkStream (client, true);
 			this.host = host;
+#if !MODMONO_SERVER
 			remoteEP = client.RemoteEndPoint;
+			localEP = client.LocalEndPoint;
+#endif
 		}
 
 		public void Run (object state)
@@ -84,7 +88,7 @@ namespace Mono.ASPNET
 		public void ProcessRequest ()
 		{
 #if !MODMONO_SERVER
-			XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host, remoteEP, rdata);
+			XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host, localEP, remoteEP, rdata);
 #else
 			XSPWorkerRequest mwr = new XSPWorkerRequest (modRequest, host);
 #endif

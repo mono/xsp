@@ -1,3 +1,7 @@
+2002-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server-side-object.aspx: New file.
+
 2002-06-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* session1.aspx: used to play with session tracking.

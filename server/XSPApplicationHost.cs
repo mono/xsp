@@ -28,6 +28,7 @@ namespace Mono.ASPNET
 	{
 		IApplicationHost host;
 		NetworkStream ns;
+		bool requestFinished;
 #if MODMONO_SERVER
 		ModMonoRequest modRequest;
 #else
@@ -90,6 +91,7 @@ namespace Mono.ASPNET
 					ns.Write (error500, 0, error500.Length);
 				} catch {}
 			} finally {
+				requestFinished = true;
 				try {
 					ns.Close ();
 				} catch {}
@@ -98,21 +100,34 @@ namespace Mono.ASPNET
 
 		public void ProcessRequest ()
 		{
+			ILease l = (ILease) ns.GetLifetimeService ();
+			l.Register (this);
 #if !MODMONO_SERVER
 			XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host, localEP, remoteEP, rdata);
 #else
+			l = (ILease) modRequest.GetLifetimeService ();
+			l.Register (this);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (modRequest, host);
 #endif
-			if (!mwr.ReadRequestData ())
+			if (!mwr.ReadRequestData ()) {
+				requestFinished = true;
 				return;
+			}
 
 			mwr.ProcessRequest ();
 		}
 
 		TimeSpan ISponsor.Renewal (ILease lease)
 		{
-			Console.WriteLine ("Renewal called: {0}", lease.GetType ());
-			return TimeSpan.MaxValue;
+			TimeSpan result;
+
+			if (requestFinished)
+				result = new TimeSpan (0);
+			else
+				result = new TimeSpan (0, 2, 0);
+
+			Console.WriteLine ("Renewal called: {0} Returning: {1}", lease.GetType (), result);
+			return result;
 		}
 	}
 

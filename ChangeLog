@@ -1,3 +1,7 @@
+2003-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: really add the sponsors now.
+
 2003-09-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* ChangeLog: unified all ChangeLog.
@@ -29,13 +33,13 @@
 
 2003-09-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
-	* server/XSPApplicationHost.cs: added a ISponsor for NetworkStream and don't
-	crash xsp.exe if RemoteEndPoint throws an exception.
+	* server/XSPApplicationHost.cs: added a ISponsor for NetworkStream and
+	don't crash xsp.exe if RemoteEndPoint throws an exception.
 
 2003-09-19  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
-	* server/ModMonoWorkerRequest.cs: don't cache the values from mod_mono_unix
-	here...
+	* server/ModMonoWorkerRequest.cs: don't cache the values from
+	mod_mono_unix here...
 	* server/ModMonoRequest.cs: ...and do it here.
 	(GetClientBlock): mark the array as an Out parameter so that the
 	modified array is passed back to the caller by remoting. This fixes

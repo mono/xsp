@@ -1,15 +1,19 @@
 MCS=@MCS@
 MCSFLAGS+= -debug+ -debug:full -nologo
 MKINSTALLDIRS=@top_builddir@mkinstalldirs 
-DISTFILES=Makefile.in $(SOURCES)
+DISTFILES=Makefile.in $(ASPSTATE_SOURCES_IN)
 
 REFERENCES=
 
-ASPSTATE_SOURCES= AssemblyInfo.cs.in \
+ASPSTATE_SOURCES_IN= AssemblyInfo.cs.in \
 	 asp_state.cs
 
+ASPSTATE_SOURCES = $(ASPSTATE_SOURCES_IN:.in=)
+
 EXES= asp_state.exe
+
 INSTALL_FILES=asp_state.exe asp_state.exe.config
+
 LOCAL_BIN_DIR=$(DESTDIR)@prefix@/bin
 
 .PHONY: all install clean uninstall trace

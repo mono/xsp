@@ -4,10 +4,10 @@ MKINSTALLDIRS=@top_builddir@mkinstalldirs
 DISTFILES=Makefile.in $(ASPNET_FILES) $(CS_FILES)
 
 ASPNET_FILES = \
-	bug51682-1.aspx
+	test1.aspx \
+	test2.aspx
 
-CS_FILES = \
-	bug51682-1.cs
+CS_FILES = $(ASPNET_FILES:.aspx=.cs)
 
 # 
 REFERENCES= System.Web NUnit.Framework NUnitAsp
@@ -33,3 +33,5 @@ distdir:
 	$(MKINSTALLDIRS) $(distdir)
 	cp $(DISTFILES) $(distdir)
 
+reautogen:
+	(cd ../.. && ./config.status nunit-tests/standalone/Makefile)

@@ -1,0 +1,35 @@
+MCS=@MCS@
+MCSFLAGS+= -debug+ -debug:full -nologo
+MKINSTALLDIRS=@top_builddir@mkinstalldirs 
+DISTFILES=Makefile.in $(SOURCES)
+
+REFERENCES=
+
+ASPSTATE_SOURCES= AssemblyInfo.cs.in \
+	 asp_state.cs
+
+EXES= asp_state.exe
+INSTALL_FILES=asp_state.exe asp_state.exe.config
+LOCAL_BIN_DIR=$(DESTDIR)@prefix@/bin
+
+.PHONY: all install clean uninstall trace
+
+all: $(EXES)
+
+install: $(EXES)
+	$(MKINSTALLDIRS) $(LOCAL_BIN_DIR)
+	cp $(INSTALL_FILES) $(LOCAL_BIN_DIR)
+
+asp_state.exe: $(ASPSTATE_SOURCES)
+	$(MCS) $(MCSFLAGS) /out:$@ $^
+
+clean:
+	rm -f $(EXES) *~ *.pdb
+
+uninstall:
+	-test -d $(LOCAL_BIN_DIR) && cd $(LOCAL_BIN_DIR) && rm -f $(INSTALL_FILES)
+
+distdir:
+	$(MKINSTALLDIRS) $(distdir)
+	cp $(DISTFILES) $(distdir)
+

@@ -108,6 +108,7 @@ namespace Mono.ASPNET
 		int serverPort;
 		bool setupClientBlockCalled;
 		Hashtable headers;
+		int clientBlock;
 
 		public ModMonoRequest (NetworkStream ns)
 		{
@@ -323,12 +324,13 @@ namespace Mono.ASPNET
 		public int SetupClientBlock ()
 		{
 			if (setupClientBlockCalled)
-				return 0;
+				return clientBlock;
 
 			setupClientBlockCalled = true;
 			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
 			ReadEnd ();
 			int i = reader.ReadInt32 ();
+			clientBlock = i;
 			return i;
 		} 
 
@@ -337,7 +339,7 @@ namespace Mono.ASPNET
 			SendSimpleCommand (Cmd.SHOULD_CLIENT_BLOCK);
 			ReadEnd ();
 			int i = reader.ReadInt32 ();
-			return (i != 0);
+			return (i == 0);
 		} 
 
 		public int GetClientBlock ([Out] byte [] bytes, int size) 

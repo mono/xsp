@@ -1,3 +1,12 @@
+2003-11-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoRequest.cs: cache the result of the first (and unique)
+	SetupClientBlock. Return false when should not block.
+
+	* server/ModMonoWorkerRequest.cs: removed staled stuff. First do a
+	'should' and then setup the client block.
+
+
 2003-11-17  Duncan Mak  <duncan@ximian.com>
 
 	* server/Makefile.in (LOCAL_BIN_DIR):

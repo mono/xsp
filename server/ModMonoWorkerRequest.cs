@@ -285,17 +285,10 @@ namespace Mono.ASPNET
 					unknownHeaders = new string [pairs.Count][];
 					for (int i = 0; i < pairs.Count; i++)
 						unknownHeaders [i] = (string []) pairs [i];
-					//unknownHeaders = (string [][]) pairs.ToArray (typeof (string [][]));
 				}
 			}
 
 			return unknownHeaders;
-			/**
-			 *FIXME: this should return all the headers whose index in:
-			 *   HttpWorkerRequest.GetKnownRequestHeaderIndex (headerName);
-			 * is -1. Once we get the value, keep it in a class field.
-			 */
-			return null;
 		}
 
 		public override string GetKnownRequestHeader (int index)
@@ -305,16 +298,16 @@ namespace Mono.ASPNET
 
 		public override void SendCalculatedContentLength (int contentLength) 
 		{
-			// Do nothing, it will be set correctly by XSP in the output content length filter
+			// Do nothing
 		}
 
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
-			if (buffer == null || size <= 0 || request.SetupClientBlock () != 0 /* APR_SUCCESS */)
+			if (buffer == null || size <= 0 || !request.ShouldClientBlock ())
 				return 0;
 
 			int read = 0;
-			if (request.ShouldClientBlock ())
+			if (request.SetupClientBlock () == 0)
 				read = request.GetClientBlock (buffer, size);
 
 			return read;

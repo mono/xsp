@@ -284,6 +284,11 @@ namespace Mono.ASPNET
 			return bestFit;
 		}
 		
+		public override object InitializeLifetimeService ()
+		{
+			return null; // who wants to live forever?
+		}
+		
 		public string Path {
 			get {
 				if (path == null)

@@ -95,7 +95,19 @@ namespace Mono.ASPNET
 					return;
 				}
 #else
-				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
+				// little hack
+				int nowInt = DateTime.Now.ToString().GetHashCode();
+				AppDomain.CurrentDomain.SetData(".domainId", nowInt.ToString("x"));
+				nowInt += "/".GetHashCode ();
+				AppDomain.CurrentDomain.SetData(".appId", nowInt.ToString("x"));
+				AppDomain.CurrentDomain.SetData(".appName", nowInt.ToString("x"));
+				AppDomain.CurrentDomain.SetData(".appPath", "/");
+				AppDomain.CurrentDomain.SetData(".appVPath", "/");
+				AppDomain.CurrentDomain.SetData(".hostingVirtualPath", "/");
+				AppDomain.CurrentDomain.SetData(".hostingInstallDir", "/");
+				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, new XSPApplicationHost());
+				// end hack
+				//XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
 				mwr.ReadRequestData ();
 				host = server.GetApplicationForPath (mwr.GetUriPath (), false);
 				if (host == null) {

@@ -1,3 +1,14 @@
+2003-10-28  Pedro Martínez Juliá  <yoros@wanadoo.es>
+
+	* server/XSPApplicationHost.cs: add a few lines to set the domain
+	data requested by XSPWorkerReqest (SimpleWorkerRequest). These are
+	garbage lines because they are used only for the main application
+	and there must be other way to get mod-mono-server working without
+	this little hack.
+
+	* test/Makefile.in: add "*.inc" and "*.xsl" to the install wildcard
+	list. These files are needed by other "*.aspx" files.
+
 2003-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/IApplicationHost.cs: reduced to the minimum.

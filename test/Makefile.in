@@ -16,6 +16,8 @@ DISTFILES= *.aspx \
 	     *.asax \
 	     *.xml \
 	     *.png \
+	     *.inc \
+	     *.xsl \
 	     Makefile.in \
 	     *.cs
 

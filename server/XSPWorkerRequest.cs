@@ -68,6 +68,8 @@ namespace Mono.ASPNET
 		XSPRequestBroker requestBroker;
 		bool keepAlive;
 		bool haveContentLength;
+		long contentSent;
+		long contentLength;
 		bool isclosed;
 		
 		static string serverHeader;
@@ -297,6 +299,18 @@ namespace Mono.ASPNET
 			responseHeaders.Append ("Connection: Keep-Alive\r\n");
 		}
 
+		int UpdateBodyLength (int currentBlockLength)
+		{
+			if (!haveContentLength || contentSent < contentLength - currentBlockLength) {
+				contentSent += currentBlockLength;
+				return currentBlockLength;
+			}
+
+			int result = (int) (contentLength - contentSent);
+			contentSent = contentLength;
+			return result;
+		}
+
 		public override void FlushResponse (bool finalFlush)
 		{
 			if (requestBroker == null)
@@ -318,6 +332,7 @@ namespace Mono.ASPNET
 					if (oldLength == 0 || oldLength >= 32768) {
 						requestBroker.Write (requestId, headerBytes, 0, headerBytes.Length);
 					} else {
+						oldLength = UpdateBodyLength (oldLength);
 						// Attempt not to send a minimum of 2 packets
 						int newLength = oldLength + headerBytes.Length;
 						response.SetLength (newLength);
@@ -333,7 +348,8 @@ namespace Mono.ASPNET
 
 				if (response.Length != 0) {
 					byte [] bytes = response.GetBuffer ();
-					requestBroker.Write (requestId, bytes, 0, (int) response.Length);
+					int len = UpdateBodyLength ((int) response.Length);
+					requestBroker.Write (requestId, bytes, 0, len);
 				}
 				
 				if (finalFlush)
@@ -625,8 +641,10 @@ namespace Mono.ASPNET
 			}
 
 			if (!sentConnection && !haveContentLength &&
-			     String.Compare (name, "Content-Length", true, CultureInfo.InvariantCulture) == 0)
+			     String.Compare (name, "Content-Length", true, CultureInfo.InvariantCulture) == 0) {
 				haveContentLength = true;
+				contentLength = Int64.Parse (value); // This should work, otherwise HttpResponse throws.
+			}
 
 			if (!headersSent) {
 				responseHeaders.Append (name);

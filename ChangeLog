@@ -1,3 +1,8 @@
+2005-01-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: when Content-Length is set only allow
+	sending that amount of bytes in the body. Fixes bug #71092.
+
 2005-01-13  Raja R Harinath  <rharinath@novell.com>
 
 	* server/MonoWorkerRequest.cs: Update to compile with the stricter

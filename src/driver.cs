@@ -42,7 +42,7 @@ public class Driver {
 			ap = new AspParser (args [i], input);
 			ap.parse ();
 			al = ap.Elements;
-			Generator gen = new Generator (Path.GetFileName (args [i]), al, as_control);
+			Generator gen = new Generator (args [i], al, as_control);
 			gen.ProcessElements ();
 			gen.Print ();
 		}

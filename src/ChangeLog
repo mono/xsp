@@ -1,3 +1,9 @@
+2002-07-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* driver.cs: use the full file name from the command line.
+
+	* generator.cs: path fixes.
+
 2002-07-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* driver.cs: added --control option to generate code for user

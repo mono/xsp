@@ -380,16 +380,17 @@ public class Generator
 		CompilationFailed = 3
 	}
 
-	public Generator (string filename, ArrayList elements, bool as_control)
+	public Generator (string pathToFile, ArrayList elements, bool as_control)
 	{
 		if (elements == null)
 			throw new ArgumentNullException ();
 
 		this.elements = new ArrayListWrapper (elements);
+		string filename = Path.GetFileName (pathToFile);
 		this.className = filename.Replace ('.', '_'); // Overridden by @ Page classname
 		this.className = className.Replace ('-', '_'); 
 		this.className = className.Replace (' ', '_');
-		this.fullPath = Path.GetFullPath (filename);
+		this.fullPath = Path.GetFullPath (pathToFile);
 		this.as_control = as_control;
 		if (as_control) {
 			this.parent = "System.Web.UI.UserControl"; // Overriden by @ Control Inherits
@@ -549,7 +550,15 @@ public class Generator
 				throw new ApplicationException ("Source file extension for controls " + 
 								"must be .ascx");
 
-			UserControlData data = GenerateUserControl (src);
+			string pathToFile = Path.GetDirectoryName (src);
+			if (pathToFile == "") {
+				pathToFile = Path.GetDirectoryName (fullPath);
+			} else if (!Path.IsPathRooted (pathToFile)) {
+				pathToFile = Path.Combine  (Path.GetDirectoryName (fullPath), pathToFile);
+			}
+
+			string srcLocation = pathToFile + Path.DirectorySeparatorChar + Path.GetFileName (src);
+			UserControlData data = GenerateUserControl (srcLocation);
 			switch (data.result) {
 			case UserControlResult.OK:
 				prolog.AppendFormat ("\tusing {0};\n", "ASP");
@@ -1520,7 +1529,7 @@ public class Generator
 		}
 
 		constructor.AppendFormat ("\t\t\t\tASP.{0}.__intialized = true;\n\t\t\t}}\n\t\t}}\n\n",
-					  className, fullPath);
+					  className);
          
 		//FIXME: add AutoHandlers: don't know what for...yet!
 		constructor.AppendFormat (

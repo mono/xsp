@@ -44,7 +44,6 @@ namespace Mono.ASPNET
 
 		static string dirSeparatorString = Path.DirectorySeparatorChar.ToString ();
 
-		// Any other?
 		static string [] indexFiles = { "index.aspx",
 						"Default.aspx",
 						"default.aspx",
@@ -63,6 +62,24 @@ namespace Mono.ASPNET
 
 			serverHeader = String.Format ("Server: {0}/{1} {2}\r\n",
 						      title, version, Environment.OSVersion.Platform);
+		}
+
+		public static void SetDefaultIndexFiles (string list)
+		{
+			if (list == null)
+				return;
+
+			ArrayList files = new ArrayList ();
+			string [] fs = list.Split (',');
+			foreach (string f in fs) {
+				string trimmed = f.Trim ();
+				if (trimmed == "") 
+					continue;
+
+				files.Add (trimmed);
+			}
+
+			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
 		public XSPWorkerRequest (TcpClient client, IApplicationHost appHost)
@@ -167,7 +184,6 @@ namespace Mono.ASPNET
 		public override void FlushResponse (bool finalFlush)
 		{
 			try {
-				WebTrace.WriteLine ("FlushResponse({0}), {1}", finalFlush, headersSent);
 				if (!headersSent) {
 					responseHeaders.Insert (0, serverHeader);
 					responseHeaders.Insert (0, status);

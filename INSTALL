@@ -8,7 +8,7 @@ Steps for installing the server:
 	...and follow the instructions...
 
     You can change the listen port from the default (8080) using the
-    configuration file (web.config).
+    configuration file (server.exe.config).
 
     Or you can use the --port command line option.
 

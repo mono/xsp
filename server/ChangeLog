@@ -1,3 +1,12 @@
+2003-05-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web.config: removed server.exe keys.
+	* Makefile: readded server.exe.config.
+
+	* XSPWorkerRequest.cs:
+	* server.cs:
+	* server.exe.config: made the default index files list configurable.
+
 2003-05-03  Pedro Martínez Juliá  <yoros@wanadoo.es>
 
 	* server.cs: new options to set listen address.

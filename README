@@ -24,7 +24,7 @@
 	mono xsp.exe --port 80
 
     The default is port 8080, or you can configure the server using
-    the web.config file.
+    the server.exe.config file.
 
     There are other command line options and appSettings options.
     Run 'mono server.exe --help' to view all of them.

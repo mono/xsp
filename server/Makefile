@@ -21,7 +21,7 @@ all: server.exe
 install: server.exe web.config global.asax
 	rm -rf test
 	mkdir -p test/bin
-	cp server.exe web.config global.asax test
+	cp server.exe server.exe.config web.config global.asax test
 	cp server.exe test/bin
 	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.xsl ../test/*.png test
 	cp ../test/*.dll test/bin

@@ -4,7 +4,7 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
-// (C) 2002 Ximian, Inc (http://www.ximian.com)
+// (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
 //
 
 using System;
@@ -48,9 +48,11 @@ namespace Mono.ASPNET
 			string virtualDir = ConfigurationSettings.AppSettings ["MonoServerVirtualDir"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
 			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];
-			if (ip == "" || ip == null) {
+			string indexFiles = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+			XSPWorkerRequest.SetDefaultIndexFiles (indexFiles);
+			
+			if (ip == "" || ip == null)
 				ip = "0.0.0.0";
-			}
 
 			oport = ConfigurationSettings.AppSettings ["MonoServerPort"];
 			if (oport == null)

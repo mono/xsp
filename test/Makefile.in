@@ -6,8 +6,8 @@ MKINSTALLDIRS=@top_builddir@mkinstalldirs
 
 DLLS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll 
 EXES = ServiceClient.exe
-SAMPLES_DIR = $(DESTDIR)$(PREFIX)/share/doc/xsp/test
-SAMPLES_BIN_DIR = $(DESTDIR)$(PREFIX)/share/doc/xsp/test/bin
+SAMPLES_DIR = @prefix@/share/doc/xsp/test
+SAMPLES_BIN_DIR = @prefix@/share/doc/xsp/test/bin
 DISTFILES= *.aspx \
 	     *.ascx \
 	     *.asmx \

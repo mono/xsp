@@ -27,13 +27,13 @@
 		}
 
 		if (providerAssembly == null || providerAssembly == "")
-			providerAssembly = "Mono.Data.PostgreSqlClient";
+			providerAssembly = "Npgsql";
 		
 		if (cncTypeName == null || cncTypeName == "")
-			cncTypeName = "Mono.Data.PostgreSqlClient.PgSqlConnection";
+			cncTypeName = "Npgsql.NpgqlConnection";
 		
 		if (cncString == null || cncString == "")
-			cncString = "hostaddr=127.0.0.1;user=monotest;password=monotest;dbname=monotest";
+			cncString = "server=127.0.0.1;user id=monotest;password=monotest;dbname=monotest";
 	}
 
 	void ShowError (Exception exc)
@@ -52,7 +52,7 @@
 
 		GetConnectionData (out providerAssemblyName, out connectionTypeName, out cncString);
 		if (cncType == null) {		
-			Assembly dbAssembly = Assembly.Load (providerAssemblyName);
+			Assembly dbAssembly = Assembly.LoadWithPartialName (providerAssemblyName);
 			cncType = dbAssembly.GetType (connectionTypeName, true);
 			if (!typeof (IDbConnection).IsAssignableFrom (cncType))
 				throw new ApplicationException ("The type '" + cncType +

@@ -1,5 +1,9 @@
 2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* databind-template.aspx: new file.
+
+2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* databind-class.aspx: new file.
 
 2002-05-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>

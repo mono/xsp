@@ -13,9 +13,6 @@ samples_DATA = $(testfiles)
 samplesbindir = $(datadir)/doc/xsp/test/bin
 samplesbin_SCRIPTS = treeview.dll
 
-imagesdir = $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
-images_DATA = TreeLineImages/*
-
 EXTRA_DIST = $(testfiles) \
 	         $(treeview_src) \
 			 $(images_DATA)
@@ -29,3 +26,9 @@ dist-hook:
 	mkdir $(distdir)/TreeLineImages
 	cp -p $(srcdir)/TreeLineImages/*gif $(distdir)/TreeLineImages
 
+install-data-hook:
+	mkdir $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
+	cp $(srcdir)/TreeLineImages/*gif $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
+
+uninstall-data-hook:
+	rm $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages/*gif

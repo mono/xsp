@@ -21,3 +21,5 @@ testfiles = \
 
 samplesdir = $(datadir)/doc/xsp/test
 samples_DATA = $(testfiles)
+
+EXTRA_DIST = $(testfiles)

@@ -12,6 +12,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Web.Hosting;
+using System.Net;
 
 namespace Mono.ASPNET
 {
@@ -27,6 +28,9 @@ namespace Mono.ASPNET
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
 			Console.WriteLine ("                    Default value: 8080");
 			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
+			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
+			Console.WriteLine ("                    Default value: 0.0.0.0");
+			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ("    --root rootdir: rootdir is the root directory for the application.");
 			Console.WriteLine ("                    Default value: current directory");
 			Console.WriteLine ("                    AppSettings key name: MonoRootDir");
@@ -43,6 +47,10 @@ namespace Mono.ASPNET
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
 			string virtualDir = ConfigurationSettings.AppSettings ["MonoServerVirtualDir"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
+			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];
+			if (ip == "" || ip == null) {
+				ip = "0.0.0.0";
+			}
 
 			oport = ConfigurationSettings.AppSettings ["MonoServerPort"];
 			if (oport == null)
@@ -60,6 +68,9 @@ namespace Mono.ASPNET
 					break;
 				case "--virtual":
 					virtualDir = args [++i];
+					break;
+				case "--address":
+					ip = args [++i];
 					break;
 				case "--help":
 					ShowHelp ();
@@ -88,9 +99,11 @@ namespace Mono.ASPNET
 			Type type = typeof (XSPApplicationHost);
 			XSPApplicationHost host;
 			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, virtualDir, rootDir);
-			host.SetListenAddress (port);
+
+			host.SetListenAddress(IPAddress.Parse(ip), port);
 			
 			Console.WriteLine ("Listening on port: {0}", port);
+			Console.WriteLine ("Listening on address: {0}", ip);
 			Console.WriteLine ("Root directory: {0}", rootDir);
 			Console.WriteLine ("Virtual directory: {0}", virtualDir);
 

@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.MonoApplicationHost
+// Mono.ASPNET.XSPApplicationHost
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -13,15 +13,16 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Web;
+using System.Web.Hosting;
 
 namespace Mono.ASPNET
 {
 	class Worker
 	{
-		MonoApplicationHost host;
+		IApplicationHost host;
 		TcpClient client;
 
-		public Worker (TcpClient client, MonoApplicationHost host)
+		public Worker (TcpClient client, IApplicationHost host)
 		{
 			this.client = client;
 			this.host = host;
@@ -29,12 +30,12 @@ namespace Mono.ASPNET
 		
 		public void Run (object state)
 		{
-			MonoWorkerRequest mwr = new MonoWorkerRequest (client, host);
+			XSPWorkerRequest mwr = new XSPWorkerRequest (client, host);
 			mwr.ProcessRequest ();
 		}
 	}
 	
-	public class MonoApplicationHost : MarshalByRefObject
+	public class XSPApplicationHost : MarshalByRefObject, IApplicationHost
 	{
 		TcpListener listen_socket;
 		bool started;
@@ -42,7 +43,7 @@ namespace Mono.ASPNET
 		IPEndPoint bindAddress;
 		Thread runner;
 
-		public MonoApplicationHost ()
+		public XSPApplicationHost ()
 		{
 			SetListenAddress (80);
 		}
@@ -104,16 +105,26 @@ namespace Mono.ASPNET
 
 			started = false;
 		}
-		
-		public string Path
+
+		object IApplicationHost.CreateApplicationHost (string virtualPath, string baseDirectory)
 		{
+			return CreateApplicationHost (virtualPath, baseDirectory);
+		}
+
+		public static object CreateApplicationHost (string virtualPath, string baseDirectory)
+		{
+			return ApplicationHost.CreateApplicationHost (typeof (XSPApplicationHost),
+								      virtualPath,
+								      baseDirectory);
+		}
+
+		public string Path {
 			get {
 				return AppDomain.CurrentDomain.GetData (".appPath").ToString ();
 			}
 		}
 
-		public string VPath
-		{
+		public string VPath {
 			get {
 				return AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
 			}

@@ -1,12 +1,53 @@
-//
-// Mono.ASPNET.MonoWorkerRequest
-//
-// Authors:
-//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//	Simon Waite (simon@psionics.demon.co.uk)
-//
-// (C) 2002 Ximian, Inc (http://www.ximian.com)
-//
+/* ====================================================================
+ * The Apache Software License, Version 1.1
+ *
+ * Copyright (c) 2002 Daniel Lopez Ridruejo.
+ *           (c) 2002 Ximian, Inc.
+ *           All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution,
+ *    if any, must include the following acknowledgment:
+ *       "This product includes software developed by 
+ *        Daniel Lopez Ridruejo (daniel@rawbyte.com) and
+ *        Ximian Inc. (http://www.ximian.com)"
+ *    Alternately, this acknowledgment may appear in the software itself,
+ *    if and wherever such third-party acknowledgments normally appear.
+ *
+ * 4. The name "mod_mono" must not be used to endorse or promote products 
+ *    derived from this software without prior written permission. For written
+ *    permission, please contact daniel@rawbyte.com.
+ *
+ * 5. Products derived from this software may not be called "mod_mono",
+ *    nor may "mod_mono" appear in their name, without prior written
+ *    permission of Daniel Lopez Ridruejo and Ximian Inc.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL DANIEL LOPEZ RIDRUEJO OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ */
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -21,220 +62,101 @@ using System.Web.Hosting;
 
 namespace Mono.ASPNET
 {
-	public class MonoWorkerRequest : SimpleWorkerRequest
+	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
-		TcpClient client;
-		MonoApplicationHost appHost;
-		TextReader input;
-		Stream output;
-		string verb;
-		string path;
-		string queryString;
-		string protocol;
+		IApplicationHost appHost;
 		Hashtable headers;
 		string [][] unknownHeaders;
-		bool headersSent;
-		StringBuilder responseHeaders;
-		string status;
 		ArrayList response;
-		static Encoding encoding = new UTF8Encoding (false);
-		static string serverHeader;
+		Encoding encoding;
+		string mappedPath;
+		byte [] queryStringBytes;
 
-		static string dirSeparatorString = Path.DirectorySeparatorChar.ToString ();
-
-		// Any other?
-		static string [] indexFiles = { "index.aspx",
-						"Default.aspx",
-						"default.aspx",
-						"index.html",
-						"index.htm" };
-						
-
-		static MonoWorkerRequest ()
-		{
-			Assembly assembly = Assembly.GetExecutingAssembly ();
-			string title = "Mono-XSP Server";
-			string version = assembly.GetName ().Version.ToString ();
-			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
-			if (att.Length > 0)
-				title = ((AssemblyTitleAttribute) att [0]).Title;
-
-			serverHeader = String.Format ("Server: {0}/{1} {2}\r\n",
-						      title, version, Environment.OSVersion.Platform);
-		}
-
-		public MonoWorkerRequest (TcpClient client, MonoApplicationHost appHost)
+		public MonoWorkerRequest (IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
 		{
-			if (client == null)
-				throw new ArgumentNullException ("client");
-
 			if (appHost == null)
 				throw new ArgumentNullException ("appHost");
 
-			this.client = client;
 			this.appHost = appHost;
-			output = client.GetStream ();
-			input = new StreamReader (output);
-			responseHeaders = new StringBuilder ();
 			response = new ArrayList ();
-			status = "HTTP/1.0 200 OK\r\n";
 		}
 
-		public override void CloseConnection ()
-		{
-			WebTrace.WriteLine ("CloseConnection()");
-			input.Close ();
-			client.Close ();
-		}
+		protected virtual Encoding Encoding {
+			get {
+				if (encoding == null)
+					encoding = new UTF8Encoding (false);
 
-		public override void FlushResponse (bool finalFlush)
-		{
-			try {
-				WebTrace.WriteLine ("FlushResponse({0}), {1}", finalFlush, headersSent);
-				if (!headersSent) {
-					responseHeaders.Insert (0, serverHeader);
-					responseHeaders.Insert (0, status);
-					responseHeaders.Append ("\r\n");
-					byte [] b = encoding.GetBytes (responseHeaders.ToString ());
-					output.Write (b, 0, b.Length);
-					headersSent = true;
-				}
-
-				foreach (byte [] bytes in response)
-					output.Write (bytes, 0, bytes.Length);
-
-				output.Flush ();
-				response.Clear ();
-				if (finalFlush)
-					CloseConnection ();
-			} catch (Exception e) {
-				WebTrace.WriteLine (e.ToString ());
+				return encoding;
 			}
+
+			set { encoding = value; }
 		}
 
 		public override string GetAppPath ()
 		{
-			WebTrace.WriteLine ("GetAppPath()");
+			if (appHost.VPath == "/")
+				return "";
+
 			return appHost.VPath;
 		}
 
 		public override string GetAppPathTranslated ()
 		{
-			WebTrace.WriteLine ("GetAppPath()");
 			return appHost.Path;
-		}
-
-
-		public override string GetFilePath ()
-		{
-			WebTrace.WriteLine ("GetFilePath()");
-			return path;
 		}
 
 		public override string GetFilePathTranslated ()
 		{
-			WebTrace.WriteLine ("GetFilePathTranslated()");
-			return MapPath (path);
-		}
+			if (mappedPath == null)
+				mappedPath = MapPath (GetFilePath ());
 
-		public override string GetHttpVerbName ()
-		{
-			WebTrace.WriteLine ("GetHttpVerbName()");
-			return verb;
-		}
-
-		public override string GetHttpVersion ()
-		{
-			WebTrace.WriteLine ("GetHttpVersion()");
-			return protocol;
-		}
-
-		public override string GetKnownRequestHeader (int index)
-		{
-			if (headers == null)
-				return null;
-
-			string headerName = HttpWorkerRequest.GetKnownRequestHeaderName (index);
-			WebTrace.WriteLine (String.Format ("GetKnownRequestHeader({0}) -> {1}", index, headerName));
-			return headers [headerName] as string;
+			return mappedPath;
 		}
 
 		public override string GetLocalAddress ()
 		{
-			WebTrace.WriteLine ("GetLocalAddress()");
 			return "localhost";
 		}
 
 		public override int GetLocalPort ()
 		{
-			WebTrace.WriteLine ("GetLocalPort()");
-			return 8080;
+			return 0;
 		}
 
 		public override string GetPathInfo ()
 		{
-			WebTrace.WriteLine ("GetPathInfo()");
-			return "GetPathInfo";
+			return "GetPathInfo"; //???
 		}
 
 		public override byte [] GetPreloadedEntityBody ()
 		{
-			WebTrace.WriteLine ("GetPreloadedEntityBody");
 			return null;
-		}
-
-		public override string GetQueryString ()
-		{
-			WebTrace.WriteLine ("GetQueryString()");
-			return queryString;
 		}
 
 		public override byte [] GetQueryStringRawBytes ()
 		{
-			WebTrace.WriteLine ("GetQueryStringRawBytes()");
-			if (queryString == null)
-				return null;
-			return encoding.GetBytes (queryString);
+			if (queryStringBytes == null) {
+				string queryString = GetQueryString ();
+				if (queryString != null)
+					queryStringBytes = Encoding.GetBytes (queryString);
+			}
+
+			return queryStringBytes;
 		}
 
 		public override string GetRawUrl ()
 		{
-			WebTrace.WriteLine ("GetRawUrl()");
+			string queryString = GetQueryString ();
+			string path = GetFilePath ();
 			if (queryString != null && queryString.Length > 0)
 				return path + "?" + queryString;
 
 			return path;
 		}
 
-		public override string GetRemoteAddress ()
-		{
-			WebTrace.WriteLine ("GetRemoteAddress()");
-			return "remoteAddress";
-		}
-
-		public override int GetRemotePort ()
-		{
-			WebTrace.WriteLine ("GetRemotePort()");
-			return 0;
-		}
-
-
-		public override string GetServerName ()
-		{
-			WebTrace.WriteLine ("GetServerName()");
-			return "localhost";
-		}
-
-		public override string GetServerVariable (string name)
-		{
-			WebTrace.WriteLine ("GetServerVariable()");
-			return "me piden " + name;
-		}
-
 		public override string GetUnknownRequestHeader (string name)
 		{
-			WebTrace.WriteLine ("GetUnknownRequestHeader()");
 			if (headers == null)
 				return null;
 
@@ -243,7 +165,6 @@ namespace Mono.ASPNET
 
 		public override string [][] GetUnknownRequestHeaders ()
 		{
-			WebTrace.WriteLine ("GetKnownRequestHeaders()");
 			if (unknownHeaders == null) {
 				if (headers == null)
 					return (unknownHeaders = new string [0][]);
@@ -275,29 +196,6 @@ namespace Mono.ASPNET
 			return unknownHeaders;
 		}
 
-		public override string GetUriPath ()
-		{
-			WebTrace.WriteLine ("GetUriPath()");
-			return path;
-		}
-
-		public override bool HeadersSent ()
-		{
-			WebTrace.WriteLine ("HeadersSent() -> " + headersSent);
-			return headersSent;
-		}
-
-		public override bool IsClientConnected ()
-		{
-			WebTrace.WriteLine ("IsClientConnected()");
-			return true; //FIXME
-		}
-
-		public override bool IsEntireEntityBodyIsPreloaded ()
-		{
-			return false; //TODO: handle preloading data
-		}
-
 		public override string MapPath (string path)
 		{
 			if (path == null || path.Length == 0 || path == "/")
@@ -313,155 +211,25 @@ namespace Mono.ASPNET
 			return Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
 		}
 
-		bool TryDirectory ()
-		{
-			string localPath = GetFilePathTranslated ();
-			
-			if (!Directory.Exists (localPath))
-				return true;
-
-			if (localPath.EndsWith (dirSeparatorString)) {
-				foreach (string indexFile in indexFiles) {
-					if (File.Exists (localPath + indexFile)) {
-						path += indexFile;
-						break;
-					}
-				}
-				return true;
-			}
-
-			SendStatus (302, "Found");
-			SendUnknownResponseHeader ("Location", path + '/');
-			FlushResponse (true);
-			return false;
-		}
+		protected abstract bool GetRequestData ();
 
 		public void ProcessRequest ()
 		{
 			if (!GetRequestData ())
 				return;
 
-			if (!TryDirectory ())
-				return;
-
-			WebTrace.WriteLine ("ProcessRequest()");
 			HttpRuntime.ProcessRequest (this);
-		}
-
-		private bool GetRequestLine ()
-		{
-			string req = input.ReadLine ();
-			if (req == null)
-				return false;
-
-			req = req.Trim ();
-			int length = req.Length;
-			if (length >= 5 && 0 == String.Compare ("GET ", req.Substring (0, 4), true))
-				verb = "GET";
-			else if (length >= 6 && 0 == String.Compare ("POST ", req.Substring (0, 5), true))
-				verb = "POST";
-			else
-				throw new InvalidOperationException ("Unsupported method in query: " + req);
-
-			req = req.Substring (verb.Length + 1).TrimStart ();
-			string [] s = req.Split (' ');
-			length = s.Length;
-
-			switch (length) {
-			case 1:
-				path = s [0];
-				break;
-			case 2:
-				path = s [0];
-				protocol = s [1];
-				break;
-			default:
-				return false;
-			}
-
-			int qmark = path.IndexOf ('?');
-			if (qmark != -1) {
-				queryString = path.Substring (qmark + 1);
-				path = path.Substring (0, qmark);
-			}
-
-			if (path.StartsWith ("/~/")) {
-				// Not sure about this. It makes request such us /~/dir/file work
-				path = path.Substring (2);
-			}
-
-			return true;
-		}
-
-		private bool GetRequestHeaders ()
-		{
-			string line;
-			headers = new Hashtable ();
-			
-			while ((line = input.ReadLine ()) != null && line.Length > 0) {
-				int colon = line.IndexOf (':');
-				if (colon == -1 || line.Length < colon + 2)
-					return false;
-				
-				string key = line.Substring (0, colon);
-				string value = line.Substring (colon + 1).Trim ();
-				headers [key] = value;
-			}
-
-			return true;	
-		}
-
-		private bool GetRequestData ()
-		{
-			try {
-				if (!GetRequestLine ())
-					return false;
-
-				if (protocol == null) {
-					protocol = "HTTP/1.0";
-				} else 	if (!GetRequestHeaders ()) {
-					return false;
-				}
-
-				WebTrace.WriteLine ("verb: " + verb);
-				WebTrace.WriteLine ("path: " + path);
-				WebTrace.WriteLine ("queryString: " + queryString);
-				WebTrace.WriteLine ("protocol: " + protocol);
-				if (headers != null) {
-					foreach (string key in headers.Keys)
-						WebTrace.WriteLine (key + ": " + headers [key]);
-				}
-			} catch (Exception) {
-				return false;
-			}
-			
-			return true;
-		}
-
-		public override int ReadEntityBody (byte [] buffer, int size)
-		{
-			WebTrace.WriteLine ("ReadEntityBody()");
-			if (buffer == null || size == 0)
-				return 0;
-
-			char [] chars = new char [size];
-			int read;
-			if ((read = input.ReadBlock (chars, 0, size)) == 0)
-				return 0;
-
-			byte [] bytes = encoding.GetBytes (chars, 0, read);
-			bytes.CopyTo (buffer, 0);
-			return bytes.Length;
 		}
 
 		public override void SendCalculatedContentLength (int contentLength)
 		{
+			//FIXME: Should we ignore this for apache2?
 			SendUnknownResponseHeader ("Content-Length", contentLength.ToString ());
 		}
 
 		public override void SendKnownResponseHeader (int index, string value)
 		{
-			if (headersSent)
+			if (HeadersSent ())
 				return;
 
 			string headerName = HttpWorkerRequest.GetKnownResponseHeaderName (index);
@@ -491,7 +259,6 @@ namespace Mono.ASPNET
 
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
-			WebTrace.WriteLine ("SendResponseFromFile()");
 			Stream file = null;
 			try {
 				file = File.OpenRead (filename);
@@ -504,7 +271,6 @@ namespace Mono.ASPNET
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{
-			WebTrace.WriteLine ("SendResponseFromFile(2)");
 			Stream file = null;
 			try {
 				file = new FileStream (handle, FileAccess.Read);
@@ -514,30 +280,6 @@ namespace Mono.ASPNET
 					file.Close ();
 			}
 		}
-
-		public override void SendResponseFromMemory (byte [] data, int length)
-		{
-			WebTrace.WriteLine ("SendResponseFromMemory()");
-			if (length <= 0)
-				return;
-
-			byte [] bytes = new byte [length];
-			Array.Copy (data, 0, bytes, 0, length);
-			response.Add (bytes);
-		}
-
-		public override void SendStatus (int statusCode, string statusDescription)
-		{
-			status = String.Format ("{0} {1} {2}\r\n", protocol, statusCode, statusDescription);
-			WebTrace.WriteLine ("SendStatus() -> " + status);
-		}
-
-		public override void SendUnknownResponseHeader (string name, string value)
-		{
-			WebTrace.WriteLine ("SendUnknownResponseHeader (" + name + ", " + value + ")");
-			if (!headersSent)
-				responseHeaders.AppendFormat ("{0}: {1}\r\n", name, value);
-		}
 	}
-
 }
+

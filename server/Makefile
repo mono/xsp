@@ -7,11 +7,14 @@ CSCFLAGS+= /debug+ /debug:full /nologo
 REFERENCES= System.Web
 REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
 
-SOURCES = server.cs \
-	  MonoApplicationHost.cs \
+SOURCES = AssemblyInfo.cs \
+          IApplicationHost.cs \
+	  XSPApplicationHost.cs \
 	  MonoWorkerRequest.cs \
+	  XSPWorkerRequest.cs \
 	  Tracing.cs \
-	  AssemblyInfo.cs
+          server.cs
+	  
 
 all: server.exe
 	
@@ -20,6 +23,8 @@ install: server.exe web.config global.asax
 	mkdir -p test/bin
 	cp server.exe *.config global.asax test
 	cp server.exe test/bin
+	test -f server.dbg && cp server.dbg test
+	test -f server.dbg && cp server.dbg test/bin
 	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png test
 	cp ../test/*.dll test/bin
 	# Remove next line once assembly loading is fixed.
@@ -33,6 +38,6 @@ trace:
 	$(MAKE) -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
 
 clean:
-	rm -f server.exe *~ *.pdb
+	rm -f server.exe *~ *.pdb *.dbg
 	rm -rf test
 

@@ -1,3 +1,23 @@
+2003-01-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* IApplicationHost.cs: 
+	* MonoWorkerRequest.cs: the same files as in mod_mono. They must be kept
+	in synch.
+
+	* XSPApplicationHost.cs: same as previous MonoApplicationHost, but
+	implements IApplicationHost.
+
+	* XSPWorkerRequest.cs: it derives now from MonoWorkerRequest. Removed
+	some overrides that are already present in the base class.
+
+	* server.cs: use XSPApplicationHost.
+
+	* Makefile: added/removed files to SOURCES. Install the .dbg file.
+
+	* MonoApplicationHost.cs: Removed file.
+
+	Now mod_mono and xsp share IApplicationHost and MonoWorkerRequest.
+
 2003-01-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MonoWorkerRequest.cs: fixed GetRawUrl.

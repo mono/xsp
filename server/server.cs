@@ -30,11 +30,15 @@ namespace Mono.ASPNET
 			object oport;
 			
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
-			Type type = typeof (MonoApplicationHost);
+			Type type = typeof (XSPApplicationHost);
 			string cwd = Directory.GetCurrentDirectory ();
-			MonoApplicationHost host;
+			XSPApplicationHost host;
 
-			host =  (MonoApplicationHost) ApplicationHost.CreateApplicationHost (type, "/", cwd);
+			/**
+			 * FIXME: we should create application hosts for every application, ie, the "/"
+			 * should be different for each application we're running
+			 */
+			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, "/", cwd);
 			oport = ConfigurationSettings.AppSettings ["MonoServerPort"];
 			if (oport == null)
 				oport = 8080;

@@ -2,14 +2,18 @@ MCSFLAGS= -debug+ -debug:full -nologo
 
 xspdir = $(libdir)/mono/1.0
 modmonoserverdir = $(libdir)/mono/1.0
+xsp2dir = $(libdir)/mono/2.0
+modmonoserver2dir = $(libdir)/mono/2.0
 
 if NET_2_0
 XSP2_EXE = xsp2.exe
 MODMONOSERVER2_EXE = mod-mono-server2.exe
 endif
 
-xsp_SCRIPTS = xsp.exe $(XSP2_EXE)
+xsp_SCRIPTS = xsp.exe
+xsp2_SCRIPTS = $(XSP2_EXE)
 modmonoserver_SCRIPTS = mod-mono-server.exe $(MODMONOSERVER2_EXE)
+modmonoserver2_SCRIPTS = $(MODMONOSERVER2_EXE)
 
 CLEANFILES = $(xsp_SCRIPTS) $(modmonoserver_SCRIPTS) \
 		xsp.exe.mdb mod-mono-server.exe.mdb \

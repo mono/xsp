@@ -1,3 +1,8 @@
+2004-09-30 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/web_regularexpressionvalidator.aspx: improved example. Patch by
+	Tomasz Rybak.
+
 2004-09-29 Ben Maurer  <bmaurer@ximian.com>
 
 	* server/LingeringNetworkStream.cs: make the byte [] buffer

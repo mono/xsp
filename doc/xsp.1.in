@@ -33,29 +33,40 @@ HTTP server and leverage all of the optimizations and extensions of an
 existing server, while providing the ASP.NET runtime.
 .SH OPTIONS
 .TP
-.I \-\-port PORT
+.I \-\-port PORT (xsp only)
 Changes the default port where the XSP server will listen to
 requests.  By default XSP listens on port 8080.
+AppSettings key name: MonoServerPort
 .TP
-.I \-\-address addr
+.I \-\-address addr (xsp only)
 Sets the IP address to listen on. By default it's 0.0.0.0.
+AppSettings key name: MonoServerAddress
+.TP
+.I \-\-filename file (mod-mono-server only)
+The unix socket file name to listen on.
+Default value: /tmp/mod_mono_server
+AppSettings key name: UnixSocketFileName
+
 .TP
 .I \-\-root PATH
 The root directory for XSP.  The default is the directory where XSP is
 executed. The current directory will be changed to this one before
 creating any application.
+AppSettings key name: MonoServerRootDir
 .TP
 .I \-\-appconfigfile FILENAME
 Adds application definitions from the XML configuration file. See sample
 configuration file that comes with the server (sample.webapp) and
 .B WEBAPP FILE FORMAT
 below.
+AppSettings key name: MonoApplicationsConfigFile
 .TP
 .I \-\-appconfigdir DIR
 Adds application definitions from all XML files found in the specified
 directory DIR. Files must have '.webapp' extension.
+AppSettings key name: MonoApplicationsConfigDir
 .TP
-.I \-\-applications APPS
+.I \-\-applications APPS (Deprecated!)
 A semicolon separated list of virtual directory and real directory for all the
 applications we want to manage with this server. The virtual and real dirs. are
 separated by a colon. The default value is '/:.'.
@@ -84,6 +95,44 @@ Shows the list of options and exits.
 .TP
 .I \-\-verbose
 Prints extra messages. Useful for debugging.
+.SH DEFAULT INDEX FILES
+You can choose which files are considered as index using
+.I xsp.exe.config
+configuration file like this:
+
+.nf
+    <appSettings>
+    <add key="MonoServerDefaultIndexFiles"
+         value="index.aspx" />
+    </appSettings>
+.fi
+
+By default, it has index.aspx, Default.aspx, default.aspx, index.html
+and index.htm. The order matters.
+
+.SH WEBAPP FILE FORMAT
+The format of the .webapp files used for --appconfigfile and
+--appconfigdir is:
+
+.nf
+<apps>
+<web-application>
+        <name>{appname}</name>
+        <vhost>{virtual host for application}</vhost>
+        <vport>{port for the application}</vport>
+        <vpath>{virtual directory in apache}</vpath>
+        <path>{physical path to aspx files}</path>
+</web-application>
+</apps>
+.fi
+
+You can include any number of <web-application> nodes, one per
+ASP.NET application to run.
+
+There's a
+.I sample.webapp
+file in the XSP samples directory.
+
 .SH AUTHORS
 The Mono XSP server was written by Gonzalo Paniagua Javier
 (gonzalo@ximian.com).

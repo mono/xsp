@@ -5,6 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
 // (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
+// (c) Copyright 2004 Novell, Inc. (http://www.novell.com)
 //
 
 using System;
@@ -44,7 +45,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ();
 			Console.WriteLine ("    --filename file: the unix socket file name.");
 			Console.WriteLine ("                    Default value: /tmp/mod_mono_server");
-			Console.WriteLine ("                    AppSettings key name: UnixSocketFileName");
+			Console.WriteLine ("                    AppSettings key name: MonoUnixSocket");
 #else
 			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
 			Console.WriteLine ("minimalistic HTTP server\n");
@@ -77,7 +78,8 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                    '.webapp' extension");
 			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigDir");
 			Console.WriteLine ();
-			Console.WriteLine ("    --applications APPS: a comma separated list of virtual directory and");
+			Console.WriteLine ("    --applications APPS: This argument is DEPRECATED.");
+			Console.WriteLine ("                    a comma separated list of virtual directory and");
 			Console.WriteLine ("                    real directory for all the applications we want to manage");
 			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
 			Console.WriteLine ("                    by a colon. Optionally you may specify virtual host name");
@@ -120,7 +122,7 @@ namespace Mono.ASPNET
 			string appConfigFile = ConfigurationSettings.AppSettings ["MonoApplicationsConfigFile"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
 #if MODMONO_SERVER
-			string filename = ConfigurationSettings.AppSettings ["UnixSocketFileName"];
+			string filename = ConfigurationSettings.AppSettings ["MonoUnixSocket"];
 #else
 			object oport;
 			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];

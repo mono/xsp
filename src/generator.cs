@@ -19,6 +19,7 @@ namespace Mono.ASP
 	using System.Reflection;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using System.Web.UI.HtmlControls;
 	using System.Web.UI.WebControls;
 
 class Foundry
@@ -259,8 +260,6 @@ class ControlStack
 		set { top.useCodeRender= value; }
 	}
 	
-	// Does white space between tags matter?
-	// Currently it only matters in WebControls
 	public bool SpaceBetweenTags
 	{
 		get {
@@ -270,6 +269,8 @@ class ControlStack
 				if (type.Namespace == "System.Web.UI.WebControls")
 					space_between_tags = true;
 				else if (type.IsSubclassOf (typeof (System.Web.UI.WebControls.WebControl)))
+					space_between_tags = true;
+				else if (type == typeof (System.Web.UI.HtmlControls.HtmlSelect))
 					space_between_tags = true;
 				else
 					space_between_tags = false;
@@ -972,13 +973,10 @@ public class Generator
 			old_function.Append ("\n\t\t}\n\n");
 			string parsed = "";
 			string ctrl_name = "ctrl";
-			/*
-			 * This seems to be wrong.
-			if (controls.PeekChildKind () == ChildrenKind.CONTROLS){
+			if (controls.Container == typeof (System.Web.UI.HtmlControls.HtmlSelect)){
 				parsed = "ParsedSubObject";
 				ctrl_name = "parser";
 			}
-			*/
 
 			current_function.AppendFormat ("\t\t\tthis.__BuildControl_{0} ();\n" +
 						       "\t\t\t__{1}.Add{2} (this.{0});\n\n",

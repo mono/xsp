@@ -1,3 +1,7 @@
+2002-07-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs: fixed HtmlSelect + <option> support.
+
 2002-07-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* generator.cs: 

@@ -26,7 +26,7 @@ namespace Mono.ASPNET
 {
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
-		TcpClient client;
+		Socket client;
 		IApplicationHost appHost;
 		Stream stream;
 		string verb;
@@ -89,7 +89,7 @@ namespace Mono.ASPNET
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 
-		public XSPWorkerRequest (TcpClient client, IApplicationHost appHost)
+		public XSPWorkerRequest (Socket client, IApplicationHost appHost)
 			: base (appHost)
 		{
 			if (client == null)
@@ -97,7 +97,7 @@ namespace Mono.ASPNET
 
 			this.client = client;
 			this.appHost = appHost;
-			stream = client.GetStream ();
+			stream = new NetworkStream (client, false);
 			responseHeaders = new StringBuilder ();
 			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
@@ -332,13 +332,31 @@ namespace Mono.ASPNET
 		public override string GetRemoteAddress ()
 		{
 			WebTrace.WriteLine ("GetRemoteAddress()");
-			return "remoteAddress";
+			IPEndPoint ep = (IPEndPoint) client.RemoteEndPoint;
+
+			return ep.Address.ToString ();
 		}
 
+		public override string GetRemoteName ()
+		{
+			string ip = GetRemoteAddress ();
+			string name = null;
+			try {
+				IPHostEntry entry = Dns.GetHostByName (ip);
+				name = entry.HostName;
+			} catch {
+				name = ip;
+			}
+
+			return name;
+		}
+		
 		public override int GetRemotePort ()
 		{
 			WebTrace.WriteLine ("GetRemotePort()");
-			return 0;
+			IPEndPoint ep = (IPEndPoint) client.RemoteEndPoint;
+
+			return ep.Port;
 		}
 
 

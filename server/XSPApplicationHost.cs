@@ -20,9 +20,9 @@ namespace Mono.ASPNET
 	class Worker
 	{
 		IApplicationHost host;
-		TcpClient client;
+		Socket client;
 
-		public Worker (TcpClient client, IApplicationHost host)
+		public Worker (Socket client, IApplicationHost host)
 		{
 			this.client = client;
 			this.host = host;
@@ -37,7 +37,7 @@ namespace Mono.ASPNET
 	
 	public class XSPApplicationHost : MarshalByRefObject, IApplicationHost
 	{
-		TcpListener listen_socket;
+		Socket listen_socket;
 		bool started;
 		bool stop;
 		IPEndPoint bindAddress;
@@ -76,8 +76,9 @@ namespace Mono.ASPNET
 			if (started)
 				throw new InvalidOperationException ("The server is already started.");
 
-			listen_socket = new TcpListener (bindAddress);
-			listen_socket.Start ();
+			listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+			listen_socket.Bind (bindAddress);
+			listen_socket.Listen (5);
 			runner = new Thread (new ThreadStart (RunServer));
 			runner.Start ();
 			stop = false;
@@ -90,16 +91,16 @@ namespace Mono.ASPNET
 				throw new InvalidOperationException ("The server is not started.");
 
 			stop = true;	
-			listen_socket.Stop ();
+			listen_socket.Close ();
 			WebTrace.WriteLine ("Server stopped.");
 		}
 
 		private void RunServer ()
 		{
 			started = true;
-			TcpClient client;
+			Socket client;
 			while (!stop){
-				client = listen_socket.AcceptTcpClient ();
+				client = listen_socket.Accept ();
 				WebTrace.WriteLine ("Accepted connection.");
 				Worker worker = new Worker (client, this);
 				ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));

@@ -1,3 +1,9 @@
+2003-05-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPApplicationHost.cs:
+	* XSPWorkerRequest.cs: support GetRemoteName, GetRemoteAddress and
+	GetRemotePort. Fixes bug #43985.
+
 2003-05-24  Ben Maurer <bmaurer@users.sourceforge.net>
 	* XSPWorkerRequest.cs: Now /foo/ does not redirect to
 	/foo/index.aspx, it just does a Response.Transfer () sort of

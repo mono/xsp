@@ -1,3 +1,10 @@
+2004-04-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* NEWS: updated.
+	* server/ModMonoRequest.cs:
+	* server/ModMonoWorkerRequest.cs: marshal 2 string arrays instead of
+	a Hashtable for request headers.
+
 2004-04-08  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: try the default index pages as the

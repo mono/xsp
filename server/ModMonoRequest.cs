@@ -197,9 +197,20 @@ namespace Mono.ASPNET
 			ReadEnd ();
 		}
 
-		public Hashtable GetAllRequestHeaders ()
+		public string [] GetAllHeaders ()
 		{
-			return headers;
+			ICollection k = headers.Keys;
+			string [] keys = new string [k.Count];
+			k.CopyTo (keys, 0);
+			return keys;
+		}
+
+		public string [] GetAllHeaderValues ()
+		{
+			ICollection v = headers.Values;
+			string [] values = new string [v.Count];
+			v.CopyTo (values, 0);
+			return values;
 		}
 
 		public string GetRequestHeader (string name)

@@ -331,20 +331,15 @@ namespace Mono.ASPNET
 		public override string [][] GetUnknownRequestHeaders ()
 		{
 			if (unknownHeaders == null) {
-				Hashtable headers = request.GetAllRequestHeaders ();
-				ICollection keysColl = headers.Keys;
-				ICollection valuesColl = headers.Values;
-				string [] keys = new string [keysColl.Count];
-				string [] values = new string [valuesColl.Count];
-				keysColl.CopyTo (keys, 0);
-				valuesColl.CopyTo (values, 0);
+				string [] keys = request.GetAllHeaders ();
+				string [] values = request.GetAllHeaderValues ();
 
 				int count = keys.Length;
 				ArrayList pairs = new ArrayList ();
 				for (int i = 0; i < count; i++) {
-					int index = HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]);
-					if (index != -1)
+					if (HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]) == -1)
 						continue;
+
 					pairs.Add (new string [] { keys [i], values [i]});
 				}
 				

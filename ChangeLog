@@ -1,3 +1,7 @@
+2005-02-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: detect if gmcs actually works. Patch by Robert Jordan.
+
 2005-02-08  Raja R Harinath  <rharinath@novell.com>
 
 	* test/2.0/treeview/Makefile.am (install-data-hook,uninstall-hook): 

@@ -19,6 +19,25 @@ if test "x$MCS" = "xno" ; then
 	MCS=$CSC
 fi
 
+if test "x$GMCS" != "xno" ; then
+	AC_MSG_CHECKING([whether gmcs is actually able to compile...])
+
+	tmpin=`mktemp`
+	tmpout=`mktemp`
+
+	echo "class Foo { public static void Main() {} }" > $tmpin
+
+	if [ gmcs -r:System.Web.dll -out:$tmpout $tmpin > /dev/null 2>&1 ]
+	then
+		AC_MSG_RESULT(yes)
+	else
+		GMCS=no
+		AC_MSG_RESULT(no)
+	fi
+
+	rm -f $tmpin $tmpout
+fi
+
 case "$host" in
 	*-*-mingw*|*-*-cygwin*)
 	platform_win32=yes	

@@ -3,7 +3,7 @@
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//  Lluis Sanchez Gual (lluis@ximian.com)
+//	Lluis Sanchez Gual (lluis@ximian.com)
 //
 // (C) Copyright 2004 Novell, Inc
 //
@@ -11,6 +11,8 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Web;
 
 namespace Mono.ASPNET
 {
@@ -85,13 +87,67 @@ namespace Mono.ASPNET
 	//
 	public class XSPApplicationHost : BaseApplicationHost
 	{
-		public void ProcessRequest (int reqId, string localEPAddr, int localEPPort, string remoteEPAdds, int remoteEPPort, string verb, string path, string pathInfo, string queryString, string protocol, byte[] inputBuffer)
+		public void ProcessRequest (int reqId, string localEPAddr, int localEPPort, string remoteEPAdds,
+					int remoteEPPort, string verb, string path, string pathInfo,
+					string queryString, string protocol, byte [] inputBuffer, string redirect)
 		{
 			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
-			IPEndPoint localEP = new IPEndPoint (IPAddress.Parse(localEPAddr), localEPPort);
-			IPEndPoint remoteEP = new IPEndPoint (IPAddress.Parse(remoteEPAdds), remoteEPPort);
-			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path, pathInfo, queryString, protocol, inputBuffer);
+			IPEndPoint localEP = new IPEndPoint (IPAddress.Parse (localEPAddr), localEPPort);
+			IPEndPoint remoteEP = new IPEndPoint (IPAddress.Parse (remoteEPAdds), remoteEPPort);
+			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
+								pathInfo, queryString, protocol, inputBuffer);
+
+			if (redirect != null) {
+				Redirect (mwr, redirect);
+				return;
+			}
+
 			ProcessRequest (mwr);
+		}
+
+		static string content301 = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
+				"<html><head>\n<title>301 Moved Permanently</title>\n</head><body>\n" +
+				"<h1>Moved Permanently</h1>\n" +
+				"<p>The document has moved to <a href='http://{0}{1}'>http://{0}{1}</a>.</p>\n" +
+				"</body></html>\n";
+
+		static void Redirect (XSPWorkerRequest wr, string location)
+		{
+			string host = wr.GetKnownRequestHeader (HttpWorkerRequest.HeaderHost);
+			wr.SendStatus (301, "Moved Permanently");
+			wr.SendUnknownResponseHeader ("Connection", "close");
+			wr.SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
+			wr.SendUnknownResponseHeader ("Location", String.Format ("http://{0}{1}", host, location));
+			Encoding enc = Encoding.ASCII;
+			wr.SendUnknownResponseHeader ("Content-Type", "text/html; charset=" + enc.WebName);
+			string content = String.Format (content301, host, location);
+			byte [] contentBytes = enc.GetBytes (content);
+			wr.SendUnknownResponseHeader ("Content-Length", contentBytes.Length.ToString ());
+			wr.SendResponseFromMemory (contentBytes, contentBytes.Length);
+			wr.FlushResponse (true);
+			wr.CloseConnection ();
+		}
+
+		static string GetValueFromHeader (string header, string attr)
+		{
+			int where = header.IndexOf (attr + '=');
+			if (where == -1)
+				return null;
+
+			where += attr.Length + 1;
+			int max = header.Length;
+			if (where >= max)
+				return String.Empty;
+
+			char ending = header [where];
+			if (ending != '"')
+				ending = ' ';
+
+			int end = header.Substring (where + 1).IndexOf (ending);
+			if (end == -1)
+				return (ending == '"') ? null : header.Substring (where);
+
+			return header.Substring (where, end);
 		}
 	}
 	
@@ -134,7 +190,10 @@ namespace Mono.ASPNET
 				int port = ((IPEndPoint) localEP).Port;
 				
 				VPathToHost vapp = server.GetApplicationForPath (vhost, port, rdata.Path, true);
-				XSPApplicationHost host = (XSPApplicationHost) vapp.AppHost;
+				XSPApplicationHost host = null;
+				if (vapp != null)
+					host = (XSPApplicationHost) vapp.AppHost;
+
 				if (host == null) {
 					byte [] nf = HttpErrors.NotFound (rdata.Path);
 					stream.Write (nf, 0, nf.Length);
@@ -145,8 +204,12 @@ namespace Mono.ASPNET
 				broker = (XSPRequestBroker) vapp.RequestBroker;
 				requestId = broker.RegisterRequest (this);
 				
-				host.ProcessRequest (requestId, localEP.Address.ToString(), localEP.Port, remoteEP.Address.ToString(), remoteEP.Port, rdata.Verb, rdata.Path, rdata.PathInfo, rdata.QueryString, rdata.Protocol, rdata.InputBuffer);
-
+				string redirect;
+				vapp.Redirect (rdata.Path, out redirect);
+				host.ProcessRequest (requestId, localEP.Address.ToString(), localEP.Port,
+						remoteEP.Address.ToString(), remoteEP.Port, rdata.Verb,
+						rdata.Path, rdata.PathInfo, rdata.QueryString,
+						rdata.Protocol, rdata.InputBuffer, redirect);
 			} catch (Exception e) {
 				Console.WriteLine (e);
 				try {
@@ -154,8 +217,7 @@ namespace Mono.ASPNET
 					stream.Write (error, 0, error.Length);
 					stream.Close ();
 				} catch {}
-			}
-			finally {
+			} finally {
 				if (requestId != -1)
 					broker.UnregisterRequest (requestId);
 			}

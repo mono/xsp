@@ -178,6 +178,10 @@ namespace Mono.ASPNET
 
 		string GetSafePath (string path)
 		{
+			string trail = "";
+			if (path.EndsWith ("/"))
+				trail = "/";
+
 			path = HttpUtility.UrlDecode (path);
 			path = path.Replace ('\\','/');
 			while (path.IndexOf ("//") != -1)
@@ -205,7 +209,7 @@ namespace Mono.ASPNET
 				return "/";
 
 			result.Insert (0, "");
-			return String.Join ("/", (string []) result.ToArray (typeof (string)));
+			return String.Join ("/", (string []) result.ToArray (typeof (string))) + trail;
 		}
 		
 		public void ReadRequestData ()

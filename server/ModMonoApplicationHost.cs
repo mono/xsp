@@ -88,10 +88,15 @@ namespace Mono.ASPNET
 	//
 	public class ModMonoApplicationHost : BaseApplicationHost
 	{
-		public void ProcessRequest (int reqId, string verb, string queryString, string path, string protocol, string localAddress, int serverPort, string remoteAddress, int remotePort, string remoteName, string[] headers, string[] headerValues)
+		public void ProcessRequest (int reqId, string verb, string queryString, string path,
+					string protocol, string localAddress, int serverPort, string remoteAddress,
+					int remotePort, string remoteName, string [] headers, string [] headerValues)
 		{
 			ModMonoRequestBroker broker = (ModMonoRequestBroker) RequestBroker;
-			ModMonoWorkerRequest mwr = new ModMonoWorkerRequest (reqId, broker, this, verb, path, queryString, protocol, localAddress, serverPort, remoteAddress, remotePort, remoteName, headers, headerValues);
+			ModMonoWorkerRequest mwr = new ModMonoWorkerRequest (reqId, broker, this, verb, path, queryString,
+									protocol, localAddress, serverPort, remoteAddress,
+									remotePort, remoteName, headers, headerValues);
+
 			ProcessRequest (mwr);
 		}
 	}

@@ -3,7 +3,7 @@
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//  Lluis Sanchez Gual (lluis@ximian.com)
+//	Lluis Sanchez Gual (lluis@ximian.com)
 //
 // (C) Copyright 2004 Novell, Inc
 //
@@ -339,6 +339,18 @@ namespace Mono.ASPNET
 			this.AppHost = null;
 		}
 
+		public bool Redirect (string path, out string redirect)
+		{
+			redirect = null;
+			int plen = path.Length;
+			if (plen == this.vpath.Length - 1) {
+				redirect = this.vpath;
+				return true;
+			}
+
+			return false;
+		}
+
 		public bool Match (string vhost, int vport, string vpath)
 		{
 			if (vport != -1 && this.vport != -1 && vport != this.vport)
@@ -397,7 +409,7 @@ namespace Mono.ASPNET
 				   "<html><head><title>500 Server Error</title><body><h1>Server error</h1>\r\n" +
 				   "Your client sent a request that was not understood by this server.\r\n" +
 				   "</body></html>\r\n";
-			error500 = Encoding.Default.GetBytes (s);
+			error500 = Encoding.ASCII.GetBytes (s);
 		}
 
 		public static byte [] NotFound (string uri)

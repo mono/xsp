@@ -279,10 +279,13 @@ namespace Mono.ASPNET
 
 			stop = true;	
 			webSource.Dispose ();
-			ThreadPool.QueueUserWorkItem (new WaitCallback (RealStop));
+
+			// A foreground thread is required to end cleanly
+			Thread stopThread = new Thread (new ThreadStart (RealStop));
+			stopThread.Start ();
 		}
 
-		void RealStop (object notused)
+		void RealStop ()
 		{
 			runner.Abort ();
 			listen_socket.Close ();

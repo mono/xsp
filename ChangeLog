@@ -1,3 +1,9 @@
+2005-04-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: use a foreground thread to stop the
+	server instead of one from the threadpool. Patch from Rob Lyon that
+	fixes bug #73357.
+
 2005-03-18 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoApplicationHost.cs: the lockfile is to be removed even

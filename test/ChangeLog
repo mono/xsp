@@ -1,3 +1,11 @@
+2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* htmlanchor.aspx: New file.
+	* htmlbutton.aspx: New file.
+	* htmlgeneric.aspx: New file.
+
+	These render fine using xsp + server + mono System.Web.
+
 2002-05-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* code-render.aspx: new file.

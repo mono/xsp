@@ -1,6 +1,6 @@
 <%@ Page Language="C#" %>
 <%@ Import namespace="System.Reflection" %>
-<%@ Register TagPrefix="Mono" Namespace="Mono.Controls" assembly="tabcontrol2.dll" %>
+<%@ Register TagPrefix="Mono" Namespace="Mono.Controls" assembly="tabcontrol2" %>
 <html>
 <!-- You must compile tabcontrol2.cs and copy the dll to the output/ directory -->
 <!-- Authors:

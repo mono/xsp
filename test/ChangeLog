@@ -1,5 +1,10 @@
 2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* htmltable.aspx:
+	* htmltextarea.aspx: New files. Rendered ok.
+
+2002-06-09  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* htmlselect.aspx: another one that is rendered by our System.Web.
 
 2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>

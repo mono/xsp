@@ -1,3 +1,8 @@
+2004-10-17  Ben Maurer  <bmaurer@ximian.com>
+
+	* server/MonoWorkerRequest.cs (MapPath): avoid the
+	concat here.
+
 2004-10-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: set the accepted socket to Blocking.

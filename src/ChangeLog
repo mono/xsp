@@ -1,5 +1,9 @@
 2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* aspelements.c: fixed IsDataBound for attributes with null value.
+
+2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* MyForm.cs: don't output anything to console when rendering childs.
 
 2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>

@@ -193,7 +193,7 @@ public class TagAttributes
 
 	public bool IsDataBound (string att)
 	{
-		if (!got_hashed)
+		if (att == null || !got_hashed)
 			return false;
 
 		return (att.StartsWith ("<%#") && att.EndsWith ("%>"));

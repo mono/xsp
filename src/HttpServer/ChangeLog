@@ -1,3 +1,8 @@
+2002-07-25  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server.cs: patch from Miguel to improve non-aspx file request
+	performance.
+
 2002-07-17  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* Makefile: use only mcs.

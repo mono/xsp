@@ -497,6 +497,7 @@ class MyWorkerRequest
 	private TextReader input;
 	private TextWriter output;
 	private TextWriter outputBuffer;
+	private StreamWriter stream_output;
 	private HttpResponse response;
 
 	private string method;
@@ -526,13 +527,14 @@ class MyWorkerRequest
 	{
 	}
 
-	public MyWorkerRequest (TextReader input, TextWriter output)
+	public MyWorkerRequest (TextReader input, TextWriter output, StreamWriter stream_output)
 	{
 		if (input == null || output == null)
 			throw new ArgumentNullException ();
 
 		this.input = input;
 		this.output = output;
+		this.stream_output = stream_output;
 		outputBuffer = new StringWriter ();
 	}
 
@@ -594,19 +596,24 @@ class MyWorkerRequest
 	
 	void ProcessRequestNonASPX ()
 	{
+		FileInfo fi = new FileInfo (fileOnDisk);
+
+		stream_output.Write ("HTTP/1.0 200 OK\r\n" +
+				     "Host 127.0.0.1\r\n" +
+				     "ContentType: ");
+		stream_output.Write (GetContentType ());
+		stream_output.Write ("\r\nContent-Length: ");
+		stream_output.Write (fi.Length.ToString ());
+
+		Stream bases = stream_output.BaseStream;
 		Stream fileInput = File.Open (fileOnDisk, FileMode.Open); //FIXME
 		byte [] fileContent = new byte [8192];
 		int count = fileContent.Length;
-		Decoder decoder = Encoding.UTF8.GetDecoder ();
 		while ((count = fileInput.Read (fileContent, 0, count)) != 0) {
-			char [] chars = new char [decoder.GetCharCount (fileContent, 0, count)];
-			decoder.GetChars (fileContent, 0, count, chars, 0);
-			outputBuffer.Write (chars);
-			chars = null;
+			bases.Write (fileContent, 0, count);
 		}
 
 		fileInput.Close ();
-		SendData ();
 	}
 	
 	private void GetRequestMethod ()
@@ -779,10 +786,11 @@ class Worker
 	public void Run ()
 	{
 		Console.WriteLine ("Started processing...");
-		HtmlTextWriter output = new HtmlTextWriter (new StreamWriter (socket.GetStream ()));
+		StreamWriter stream_output = new StreamWriter (socket.GetStream ());
+		HtmlTextWriter output = new HtmlTextWriter (stream_output);
 		StreamReader input = new StreamReader (socket.GetStream ());
 		try {
-			MyWorkerRequest proc = new MyWorkerRequest (input, output);
+			MyWorkerRequest proc = new MyWorkerRequest (input, output, stream_output);
 			proc.ProcessRequest ();
 		} catch (Exception e) {
 			Console.WriteLine ("Caught exception in Worker.Run");
@@ -947,7 +955,7 @@ public class Server
 		StringReader fake_input = new StringReader ("get " + file_name + " http/1.0");
 		HtmlTextWriter output = new HtmlTextWriter (Console.Out);
 		try {
-			MyWorkerRequest proc = new MyWorkerRequest (fake_input, output);
+			MyWorkerRequest proc = new MyWorkerRequest (fake_input, output, null);
 			proc.ProcessRequest ();
 			output.Flush ();
 		} catch (Exception e) {

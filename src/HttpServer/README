@@ -1,0 +1,44 @@
+Directory xsp/src/HttpServer
+-----------------------------
+
+This directory contains a web server that serves .aspx pages.
+It is intended for testing purposes only.
+
+IMPORTANT: right now, it can only generate a given page once until we implement
+something that unload assemblies loaded from .dll or move the dll to some other
+place before loading them.
+
+How does it work
+------------------
+Given a HTTP query in the form:
+
+[GET|POST] filename.aspx HTTP/1.0
+
+It generates its C# code using xsp, compiles it with mcs, renders the page
+and send it back to the client.
+
+
+How to test
+------------
+
+* Create a directory (./testing).
+
+* Copy ../xsp.exe, ../MyForm.dll, server.exe and xsp.bat to it.
+
+* Copy some aspx file to ./testing 
+
+* (optional) Verify that xsp yourfile.aspx generates C# code and that mcs
+can compile it).
+
+* cd ./testing; ./server PORTNUMBER
+
+* For real men:
+
+	- telnet 127.0.0.1 PORTNUMBER
+	  get yourfile.aspx http/1.0
+
+* For the rest, use your browser: http://127.0.0.1:PORTNUMBER/yourfile.aspx
+
+- Enjoy!
+
+

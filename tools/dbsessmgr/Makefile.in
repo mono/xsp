@@ -38,3 +38,7 @@ distdir:
 	$(MKINSTALLDIRS) $(distdir)
 	cp $(DISTFILES) $(distdir)
 
+distclean: clean
+	rm -f Makefile
+
+

@@ -76,3 +76,7 @@ distdir:
 	cp $(ASPTESTERDIR_SOURCES) $(distdir)/AspTester
 	cp $(HTMLTESTERDIR_SOURCES) $(distdir)/HtmlTester
 
+distclean: clean
+	rm -f Makefile
+
+

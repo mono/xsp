@@ -1,3 +1,14 @@
+2004-01-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile.am: added nunit-tests to SUBDIRS.
+	* server/Makefile.in:
+	* test/Makefile.in:
+	* tools/asp_state/Makefile.in:
+	* tools/dbsessmgr/Makefile.in:
+	* tools/nunitasp/source/NUnitAsp/Makefile.in:
+	* tools/nunitasp/source/NUnitAspTest/Makefile.in: added distclean
+	target.
+
 2003-12-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/server.cs: beutified error on --address argument. Fixes bug

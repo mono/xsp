@@ -86,3 +86,6 @@ distdir:
 	cp $(HTMLTESTERDIR_SOURCES) $(distdir)/HtmlTester
 	cp $(SGMLDIR_SOURCES) $(HTMLDTD) $(distdir)/Sgml
 
+distclean: clean
+	rm -f Makefile
+

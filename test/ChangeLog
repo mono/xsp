@@ -1,3 +1,11 @@
+2002-11-24  Daniel Morgan <danmorg@sc.rr.com>
+
+	* dbpage1.aspx: modify to dynamically load
+	the Mono.Data.PostgreSqlClient assembly
+	and Connection class
+	Mono.Data.PostgreSqlClient.PgSqlConnection.  This is
+	a temporary solution until global.asax has support for this.
+
 2002-10-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: used to build the .cs files for user controls.

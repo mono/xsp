@@ -1,22 +1,40 @@
 <%@ language="C#" %>
+<%@ import namespace="System" %>
 <%@ import namespace="System.Data" %>
-<%@ import namespace="System.Data.SqlClient" %>
+<%@ import namespace="System.Reflection" %>
+
 <html>
 <script runat=server>
+
+	// FIXME: temporary hack to get this working
+	static Assembly dbAssembly = null;
+	static Type typ = null;
 
 	/* You must setup a user (monotest, pw=monotest), a database
 	 *called monotest with a table called test which has two columns:
 	 *person and email
 	 */
-	SqlConnection cnc;
+	
+	IDbConnection cnc;
 	void Page_Init (object sender, EventArgs e)
 	{
-		cnc = new SqlConnection ();
+		// FIXME: temporary hack to get this working until
+		// we can use global.asax file (no support fot it yet)
+		// to dynamically load an assembly
+		if(dbAssembly == null) {		
+			const string connectionTypeName = "Mono.Data.PostgreSqlClient.PgSqlConnection";
+			const string providerAssemblyName = "Mono.Data.PostgreSqlClient";			
+			dbAssembly = Assembly.Load (providerAssemblyName);
+			typ = dbAssembly.GetType (connectionTypeName);
+		}
+
+		cnc = (IDbConnection) Activator.CreateInstance (typ);
+		
 		string connectionString = "hostaddr=127.0.0.1;" +
 					  "user=monotest;" +
 					  "password=monotest;" +
 					  "dbname=monotest";
-					  
+
 		cnc.ConnectionString = connectionString;
 		cnc.Open ();
 	}
@@ -33,6 +51,7 @@
 	void Filter_Changed (object sender, EventArgs e)
 	{
 		UpdateTable (PersonFilter.Text, MailFilter.Text);
+		
 	}
 
 	private void UpdateTable (string filterPerson, string filterMail)
@@ -54,6 +73,7 @@
 				row.Cells.Add (cell);
 			}
 			myTable.Rows.Add (row);
+			
 		}
 	}
 

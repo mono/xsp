@@ -11,6 +11,15 @@
 
     If you don't specify --prefix, it will default to /usr/local.
 
+    Note that since XSP started requiring gmcs and the 2.0 runtime,
+    you need to make sure you have the needed assemblies installed.
+    This is done from svn by doing:
+    	./configure --profile=net_2_0
+	make
+	make install
+    in the mcs/ svn module or configuring the mono tarball/module
+    with the --with-preview=yes option.
+
 * Running XSP with the bundled tests
 ------------------------------------
 

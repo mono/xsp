@@ -1,4 +1,16 @@
 XSP is Ximian's implementation of the ASP.NET page parser 
 and code generator for running ASP Web Applications.
 
+Layout:
+
+	src/
+		Source files for the parser/generator.
+
+	doc/
+		Documentation about ASP.NET pages
+
+	test/
+		Little sample ASP.NET pages
+		
 Maintainer: gonzalo@ximian.com
+

@@ -2,13 +2,14 @@ CSC=csc.exe
 CSCFLAGS=/nologo /debug+ /debug:full  /optimize /r:System.Web.dll
 
 SOURCES = asp-parser.cs asp-tokenizer.cs aspelements.cs driver.cs generator.cs
+TARGET= xsp.exe
 
-all: aspparser.exe
+all: $(TARGET)
 
-aspparser.exe: $(SOURCES)
-	$(CSC) $(CSCFLAGS) /r:System.Web.dll /out:aspparser.exe ${SOURCES}
+$(TARGET): $(SOURCES)
+	$(CSC) $(CSCFLAGS) /r:System.Web.dll /out:$(TARGET) ${SOURCES}
 
 clean:
-	rm -f aspparser.exe *~ *.pdb
+	rm -f $(TARGET) *~ *.pdb
 	
 

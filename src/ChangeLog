@@ -5,6 +5,8 @@
 
 	* generator.cs: fixed Style properties setting.
 
+	* Makefile: changed the name of the executable.
+
 2002-05-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* asp-tokenizer: allow '-' to be in an identifier (Font-Size).

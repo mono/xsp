@@ -155,7 +155,8 @@ namespace Mono.ASPNET
 			}
 
 			// Decode path
-			path = HttpUtility.UrlDecode (path);
+			// Note: DON'T do this
+			// path = HttpUtility.UrlDecode (path);
 			
 			// Yes, MS only looks for the '.'. Try setting a handler for
 			// something not containing a '.' and you won't get path_info.

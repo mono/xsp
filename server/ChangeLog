@@ -1,3 +1,7 @@
+2003-01-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: also copy .ascx files.
+
 2002-12-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MonoWorkerRequest.cs: it know handles directory requests either

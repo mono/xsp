@@ -1,3 +1,9 @@
+2003-01-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* registertest.aspx:
+	* registertest1.ascx:
+	* registertest2.ascx: new test for @ Register directive.
+
 2003-01-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: added codebehind1 test.

@@ -1,6 +1,6 @@
 MCSFLAGS= -debug+ -debug:full -nologo
 
-dbsessmgrdir = $(bindir)
+dbsessmgrdir = $(libdir)/mono/1.0
 dbsessmgr_SCRIPTS = dbsessmgr.exe dbsessmgr.exe.config
 
 EXTRA_DIST = $(dbsessmgr_input) dbsessmgr.exe.config

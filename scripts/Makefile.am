@@ -1,6 +1,6 @@
 EXTRA_DIST = script.in
 
-bin_SCRIPTS = xsp mod-mono-server
+bin_SCRIPTS = xsp mod-mono-server asp-state dbsessmgr
 
 CLEANFILES = $(bin_SCRIPTS)
 

@@ -22,6 +22,7 @@ namespace Mono.ASPNET
 {
 	public class MonoWorkerRequest : SimpleWorkerRequest
 	{
+		const string VERSION = "0.2";
 		TcpClient client;
 		MonoApplicationHost appHost;
 		TextReader input;
@@ -35,6 +36,7 @@ namespace Mono.ASPNET
 		bool headersSent;
 		StringBuilder responseHeaders;
 		string status;
+		string platform;
 		ArrayList response;
 		static Encoding encoding = new UTF8Encoding (false);
 
@@ -54,6 +56,21 @@ namespace Mono.ASPNET
 			responseHeaders = new StringBuilder ();
 			response = new ArrayList ();
 			status = "HTTP/1.0 200 OK\r\n";
+
+			switch (Path.DirectorySeparatorChar) {
+			case '/':
+				platform = " (Unix)";
+				break;
+			case '\\':
+				platform = " (Win32)";
+				break;
+			default:
+				/* unknown platform */
+				platform = "";
+				break;
+			}
+
+			platform = "Server: Mono-XSP/" + VERSION + platform + "\r\n";
 		}
 
 		public override void CloseConnection ()
@@ -68,6 +85,7 @@ namespace Mono.ASPNET
 			try {
 				WebTrace.WriteLine ("FlushResponse({0}), {1}", finalFlush, headersSent);
 				if (!headersSent) {
+					responseHeaders.Insert (0, platform);
 					responseHeaders.Insert (0, status);
 					responseHeaders.Append ("\r\n");
 					byte [] b = encoding.GetBytes (responseHeaders.ToString ());

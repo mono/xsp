@@ -167,7 +167,7 @@ namespace Mono.ASPNET
 			string localPath = GetFilePathTranslated ();
 			
 			if (!Directory.Exists (localPath))
-				return true;
+				return false;
 
 			string oldPath = path;
 			if (!path.EndsWith ("/"))

@@ -1,3 +1,7 @@
+2002-08-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* dbpage2.aspx: fixes to make mcs happy.
+
 2002-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* temperature.aspx: Duncan asked for this temperature converter.

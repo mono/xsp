@@ -108,14 +108,12 @@
 			return;
 		}
 
-		uint dbid;
 		try {
-			dbid = UInt32.Parse (s_dbid);
+			uint dbid = UInt32.Parse (s_dbid);
+			DoInsert (dbid, s_dbname, s_dbaddress);
 		} catch (Exception e) {
 			errorLine.InnerHtml = "<b>Error parsing ID: " + e.Message + "</b>";
-			return;
 		}
-		DoInsert (dbid, s_dbname, s_dbaddress);
 	}
 
 	void DeleteData (object o, EventArgs args)
@@ -126,35 +124,27 @@
 			return;
 		}
 
-		uint dbid;
 		try {
-			dbid = UInt32.Parse (s_deleteID);
+			uint dbid = UInt32.Parse (s_deleteID);
+			deleteSubmit.Visible = false;
+			deleteID.Visible = false;
+			deleteTable.Visible = true;
+			confirmDelete.Visible = true;
+			deleteIDLabel.InnerHtml = "ID: " + dbid;
 		} catch (Exception e) {
 			errorLine.InnerHtml = "<b>Error parsing ID: " + e.Message + "</b>" + " " + s_deleteID;
-			return;
 		}
-		
-		deleteSubmit.Visible = false;
-		deleteID.Visible = false;
-		deleteTable.Visible = true;
-		confirmDelete.Visible = true;
-		deleteIDLabel.InnerHtml = "ID: " + dbid;
 	}
 
 	void ConfirmDeleteData (object o, EventArgs args)
 	{
 		string s_deleteID = deleteIDLabel.InnerHtml.Substring (4).Trim ();
-		uint dbid;
-		bool exception = false;
 		try {
-			dbid = UInt32.Parse (s_deleteID);
+			uint dbid = UInt32.Parse (s_deleteID);
+			DoDelete (dbid);
 		} catch (Exception e) {
 			errorLine.InnerHtml = "<b>Error parsing ID: " + e.Message + "</b>" + " " + s_deleteID;
-			exception = true;
 		}
-		
-		if (!exception)
-			DoDelete (dbid);
 
 		deleteSubmit.Visible = true;
 		deleteID.Visible = true;
@@ -179,7 +169,7 @@
 
 	void UpdateData (object o, EventArgs args)
 	{
-		uint dbid;
+		uint dbid = 0;
 		try {
 			dbid = UInt32.Parse (updateID.Text.Trim ());
 		} catch (Exception e) {
@@ -199,7 +189,7 @@
 
 	void RefreshUpdateData (object o, EventArgs args)
 	{
-		uint dbid;
+		uint dbid = 0;
 		try {
 			dbid = UInt32.Parse (updateID.Text.Trim ());
 		} catch (Exception e) {

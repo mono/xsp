@@ -11,6 +11,11 @@ install: all
 	@echo 'Then point your web browser to http://127.0.0.1:8080/'
 	@echo 'You can change the default port (8080) in the server.exe.config file.'
 	@echo ""
+	@echo "If you're gonna try the samples that use a database (such as dbpage1.aspx),"
+	@echo "you may need to modify the values of DBProviderAssembly, DBConnectionType"
+	@echo "and/or DbConnectionString in server.exe.config file."
+
+	@echo ""
 	@echo 'Enjoy!'
 	@echo "-------------"
 	@echo ""

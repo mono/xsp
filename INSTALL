@@ -15,3 +15,7 @@ Steps for installing the server:
 
     Or you can use the --port command line option.
 
+    If you're gonna try the samples that use a database (such as dbpage1.aspx),
+    you may need to modify the values of DBProviderAssembly, DBConnectionType
+    and/or DbConnectionString in server.exe.config file.
+

@@ -23,8 +23,8 @@ install: server.exe web.config global.asax
 	mkdir -p test/bin
 	cp server.exe *.config global.asax test
 	cp server.exe test/bin
-	test -f server.dbg && cp server.dbg test
-	test -f server.dbg && cp server.dbg test/bin
+	-test -f server.dbg && cp server.dbg test
+	-test -f server.dbg && cp server.dbg test/bin
 	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png test
 	cp ../test/*.dll test/bin
 	# Remove next line once assembly loading is fixed.

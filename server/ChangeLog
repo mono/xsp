@@ -1,3 +1,11 @@
+2003-01-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile:
+	* server.exe.config:
+	* web.config: make the database accessing samples take some
+	parameters from the configuration file to choose the IDbConnection
+	and documented it.
+
 2003-01-14  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MonoWorkerRequest.cs:

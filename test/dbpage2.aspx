@@ -1,6 +1,7 @@
 <%@ language="C#" %>
 <%@ import namespace="System.Data" %>
 <%@ import namespace="System.Data.SqlClient" %>
+<%@ import namespace="System.Reflection" %>
 <%@ Register TagPrefix="Mono" Namespace="Mono.Controls" assembly="tabcontrol2" %>
 <html>
 <!-- You must compile tabcontrol2.cs and copy the dll to the output/ directory -->
@@ -10,25 +11,67 @@
 -->
 <script runat=server>
 
-	SqlConnection cnc;
+	static Type cncType = null;
+
+	void GetConnectionData (out string providerAssembly, out string cncTypeName, out string cncString)
+	{
+		providerAssembly = null;
+		cncTypeName = null;
+		cncString = null;
+		NameValueCollection config = ConfigurationSettings.AppSettings as NameValueCollection;
+		if (config != null) {
+			foreach (string s in config.Keys) {
+				if (0 == String.Compare ("DBProviderAssembly", s, true)) {
+					providerAssembly = config [s];
+				} else if (0 == String.Compare ("DBConnectionType", s, true)) {
+					cncTypeName = config [s];
+				} else if (0 == String.Compare ("DBConnectionString", s, true)) {
+					cncString = config [s];
+				}
+			}
+		}
+
+		if (providerAssembly == null || providerAssembly == "")
+			providerAssembly = "Mono.Data.PostgreSqlClient";
+		
+		if (cncTypeName == null || cncTypeName == "")
+			cncTypeName = "Mono.Data.PostgreSqlClient.PgSqlConnection";
+		
+		if (cncString == null || cncString == "")
+			cncString = "hostaddr=127.0.0.1;user=monotest;password=monotest;dbname=monotest";
+	}
+
+	void ShowError (Exception exc)
+	{
+		noDBLine.InnerHtml += "<p><b>The error was:</b>\n<pre> " + exc + "</pre><p>";
+		theForm.Visible = false;
+		noDBLine.Visible = true;
+	}
+
+	IDbConnection cnc;
 	void Page_Init (object sender, EventArgs e)
 	{
-		if (cnc == null) {
-			cnc = new SqlConnection ();
-			string connectionString = "hostaddr=127.0.0.1;" +
-						  "user=monotest;" +
-						  "password=monotest;" +
-						  "dbname=monotest";
-						  
-			cnc.ConnectionString = connectionString;
-			try {
-				cnc.Open ();
-			} catch (Exception e2) {
-				noDBLine.InnerHtml += "<p><b>The error was:</b>\n<pre> " + e2.Message + "</pre><p>";
-				cnc = null;
-				theForm.Visible = false;
-				noDBLine.Visible = true;
-			}
+		string connectionTypeName;
+		string providerAssemblyName;
+		string cncString;
+
+		GetConnectionData (out providerAssemblyName, out connectionTypeName, out cncString);
+		if (cncType == null) {		
+			Assembly dbAssembly = Assembly.Load (providerAssemblyName);
+			cncType = dbAssembly.GetType (connectionTypeName, true);
+			if (!typeof (IDbConnection).IsAssignableFrom (cncType))
+				throw new ApplicationException ("The type '" + cncType +
+								"' does not implement IDbConnection.\n" +
+								"Check 'DbConnectionType' in server.exe.config.");
+		}
+
+		cnc = (IDbConnection) Activator.CreateInstance (cncType);
+		cnc.ConnectionString = cncString;
+		try {
+			cnc.Open ();
+		} catch (Exception exc) {
+			ShowError (exc);
+			cnc = null;
 		}
 	}
 
@@ -60,21 +103,25 @@
 		IDbCommand selectCommand = cnc.CreateCommand();
 
 		selectCommand.CommandText = selectCmd;
-		IDataReader reader = selectCommand.ExecuteReader ();
-		table.Rows.Clear ();
-		while (reader.Read ()) {
-			TableRow row = new TableRow ();
-			for (int i = 0; i < reader.FieldCount; i++) {
-				TableCell cell = new TableCell ();
-				object data = reader.GetValue (i);
-				if (data == null)
-					data = "(null)";
-				cell.Controls.Add (new LiteralControl (data.ToString ()));
-				row.Cells.Add (cell);
+		try {
+			IDataReader reader = selectCommand.ExecuteReader ();
+			table.Rows.Clear ();
+			while (reader.Read ()) {
+				TableRow row = new TableRow ();
+				for (int i = 0; i < reader.FieldCount; i++) {
+					TableCell cell = new TableCell ();
+					object data = reader.GetValue (i);
+					if (data == null)
+						data = "(null)";
+					cell.Controls.Add (new LiteralControl (data.ToString ()));
+					row.Cells.Add (cell);
+				}
+				table.Rows.Add (row);
 			}
-			table.Rows.Add (row);
+			reader.Close ();
+		} catch (Exception exc) {
+			ShowError (exc);
 		}
-		reader.Close ();
 	}
 
 	private void DoInsert (uint dbid, string dbname, string dbaddress)
@@ -240,12 +287,14 @@
 </head>
 <body>
 <span runat="server" visible="false" id="noDBLine">
-<h3>Error connecting to database</h3>
+<h3>Database Error</h3>
 Sorry, could not connect to a database.
 <p>
-You should set up a PostgreSQL database for user <i>'monotest'</i>,
-password <i>'monotest'</i> and dbname <i>'monotest'</i> accesible
-through the loopback interface.
+You should set up a database for user <i>'monotest'</i>,
+password <i>'monotest'</i> and dbname <i>'monotest'</i>
+<p>
+Then modify the variables DBProviderAssembly, DBConnectionType and
+DBConnectionString in server.exe.config file to fit your needs.
 <p>
 The database should have a table called customers created with the following command:
 <pre>

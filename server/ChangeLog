@@ -1,3 +1,11 @@
+2002-12-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile: updated.
+	* server/MonoWorkerRequest.cs: give credits to Opless (Simon White).
+	* server/server.cs: get the port from a config file.
+	* server/server.exe.config: configuration file.
+	* server/web.config: added appSettings.
+
 2002-10-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MonoWorkerRequest.cs: use a default encoding without markers.

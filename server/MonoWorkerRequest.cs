@@ -3,6 +3,7 @@
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//	Simon White (simon@psionics.demon.co.uk)
 //
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
 //

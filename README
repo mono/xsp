@@ -14,8 +14,10 @@ Layout:
 		Little sample ASP.NET pages
 
 	server/
-		A stand alone web server that works with MS runtime.
-		We'll be using it to debug/complete our classes.
+		A stand alone web server that works with mono and MS runtime.
+		We are using it to debug/complete our classes.
+		MonoApplicationHost and MonoWorkerRequest can be used to embed
+		an ASP.NET serve in your application.
 		
 		
 Maintainer: gonzalo@ximian.com

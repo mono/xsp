@@ -1,13 +1,14 @@
 Testing XSP
 ============
 
-Steps for installing the OLD server (only on unix):
-
-	make old
-	...and follow the instructions...
-
-Steps for installing the NEW server (it may not work right now with mono):
+Steps for installing the server:
 
 	make install
 	...and follow the instructions...
+
+You can change the listen port from the default (8080) using the configuration
+file. Currently you have to change it in server/test/server.exe.config file,
+but we recommend keeeping that value synched with the one in
+server/test/web.config file because the first one will be deprecated in favor
+of the latter.
 

@@ -1,6 +1,7 @@
 samplesdir = $(datadir)/doc/xsp/test/1.1/asp.net
 
 testfiles = \
+		browsercaps.aspx \
 		codebehind1.aspx \
 		code-render.aspx \
 		body.inc \

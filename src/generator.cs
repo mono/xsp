@@ -860,8 +860,8 @@ public class Generator
 					if (0 == String.Compare (ev.Name, id_as_event, true)){
 						current_function.AppendFormat (
 								"\t\t\t__ctrl.{0} += " + 
-								"new System.EventHandler (this.{1});\n", 
-								ev.Name, att [id]);
+								"new {1} (this.{2});\n", 
+								ev.Name, ev.EventHandlerType, att [id]);
 						is_processed = true;
 						break;
 					}

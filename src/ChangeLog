@@ -1,3 +1,11 @@
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* TODO: updated.
+
+	* generator.cs:
+	(AddCodeForAttributes): not all events are EventHandler (ie., 
+	ImageEventHandler).
+
 2002-06-11  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* generator.cs: ignore white space between webcontrols opening/closing

@@ -1,13 +1,9 @@
 TODO List
 -----------
 
-	This has just started, so the TODO list is much bigger than this.
+* Add support for more directives.
+We can now pass options to the other components of the ASP.NET framework so,
+for most cases, it's just a matter of add it to the generated file header.
 
-	General
-	--------
-	* Add support for more directives.
-	* Support inline code.
-	* Support data bindings.
-	* Support <!xxx type tags.
-	
+* Fix bugs
 

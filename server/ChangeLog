@@ -1,3 +1,10 @@
+2003-02-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: fixed ReadEntityBody. Thanks to Brian Ritchie.
+	Don't use a StreamReader to read from the stream cause it may buffer
+	some data. TODO -> now we're using ReadByte to read from the stream.
+	We should use Read and do some buffering.
+
 2003-01-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile:

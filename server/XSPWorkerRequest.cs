@@ -25,8 +25,7 @@ namespace Mono.ASPNET
 	{
 		TcpClient client;
 		IApplicationHost appHost;
-		TextReader input;
-		Stream output;
+		Stream stream;
 		string verb;
 		string path;
 		string queryString;
@@ -70,17 +69,54 @@ namespace Mono.ASPNET
 
 			this.client = client;
 			this.appHost = appHost;
-			output = client.GetStream ();
-			input = new StreamReader (output);
+			stream = client.GetStream ();
 			responseHeaders = new StringBuilder ();
 			response = new ArrayList ();
 			status = "HTTP/1.0 200 OK\r\n";
 		}
 
+		string ReadLine ()
+		{
+			bool foundCR = false;
+			StringBuilder text = new StringBuilder ();
+
+			while (true) {
+				int c = stream.ReadByte ();
+
+				if (c == -1) {				// end of stream
+					if (text.Length == 0)
+						return null;
+
+					if (foundCR)
+						text.Length--;
+
+					break;
+				}
+
+				if (c == '\n') {			// newline
+					if ((text.Length > 0) && (text [text.Length - 1] == '\r'))
+						text.Length--;
+
+					foundCR = false;
+					break;
+				} else if (foundCR) {
+					text.Length--;
+					break;
+				}
+
+				if (c == '\r')
+					foundCR = true;
+					
+
+				text.Append ((char) c);
+			}
+
+			return text.ToString ();
+		}
+
 		public override void CloseConnection ()
 		{
 			WebTrace.WriteLine ("CloseConnection()");
-			input.Close ();
 			client.Close ();
 		}
 
@@ -93,14 +129,14 @@ namespace Mono.ASPNET
 					responseHeaders.Insert (0, status);
 					responseHeaders.Append ("\r\n");
 					byte [] b = Encoding.GetBytes (responseHeaders.ToString ());
-					output.Write (b, 0, b.Length);
+					stream.Write (b, 0, b.Length);
 					headersSent = true;
 				}
 
 				foreach (byte [] bytes in response)
-					output.Write (bytes, 0, bytes.Length);
+					stream.Write (bytes, 0, bytes.Length);
 
-				output.Flush ();
+				stream.Flush ();
 				response.Clear ();
 				if (finalFlush)
 					CloseConnection ();
@@ -300,7 +336,7 @@ namespace Mono.ASPNET
 
 		private bool GetRequestLine ()
 		{
-			string req = input.ReadLine ();
+			string req = ReadLine ();
 			if (req == null)
 				return false;
 
@@ -348,7 +384,7 @@ namespace Mono.ASPNET
 			string line;
 			headers = new Hashtable ();
 			
-			while ((line = input.ReadLine ()) != null && line.Length > 0) {
+			while ((line = ReadLine ()) != null && line.Length > 0) {
 				int colon = line.IndexOf (':');
 				if (colon == -1 || line.Length < colon + 2)
 					return false;
@@ -394,14 +430,8 @@ namespace Mono.ASPNET
 			if (buffer == null || size == 0)
 				return 0;
 
-			char [] chars = new char [size];
-			int read;
-			if ((read = input.ReadBlock (chars, 0, size)) == 0)
-				return 0;
-
-			byte [] bytes = Encoding.GetBytes (chars, 0, read);
-			bytes.CopyTo (buffer, 0);
-			return bytes.Length;
+			byte [] bytes = new byte [size];
+			return stream.Read (bytes, 0, size);
 		}
 
 		public override void SendResponseFromMemory (byte [] data, int length)

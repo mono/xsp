@@ -158,6 +158,7 @@ namespace Mono.ASPNET
 		public override void EndOfRequest ()
 		{
 			CloseConnection ();
+			base.EndOfRequest ();
 		}
 
 		public override bool HeadersSent ()

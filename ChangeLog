@@ -1,3 +1,8 @@
+2004-03-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs: really close the opened connection.
+	Patch from Jan Jaros.
+
 2004-01-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: apply the same changes as in

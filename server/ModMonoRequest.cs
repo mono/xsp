@@ -67,13 +67,8 @@ namespace Mono.ASPNET
 		FIRST_COMMAND,
 		SEND_FROM_MEMORY = 0,
 		GET_SERVER_VARIABLE,
-		GET_SERVER_PORT,
 		SET_RESPONSE_HEADER,
-		GET_REMOTE_ADDRESS,
-		GET_LOCAL_ADDRESS,
-		GET_REMOTE_PORT,
 		GET_LOCAL_PORT,
-		GET_REMOTE_NAME,
 		FLUSH,
 		CLOSE,
 		SHOULD_CLIENT_BLOCK,
@@ -124,6 +119,12 @@ namespace Mono.ASPNET
 				string key = ReadString ();
 				headers [key] = ReadString ();
 			}
+
+			localAddress = ReadString ();
+			serverPort = reader.ReadInt32 ();
+			remoteAddress = ReadString ();
+			remotePort = reader.ReadInt32 ();
+			remoteName = ReadString ();
 		}
 
 		void SendSimpleCommand (Cmd cmd)
@@ -231,41 +232,21 @@ namespace Mono.ASPNET
 		// for things like self referential URLs, etc.
 		public int GetServerPort ()
 		{
-			if (serverPort != 0)
-				return serverPort;
-
-			SendSimpleCommand (Cmd.GET_SERVER_PORT);
-			serverPort = reader.ReadInt32 ();
 			return serverPort;
 		}
 
 		public string GetRemoteAddress ()
 		{
-			if (remoteAddress != null)
-				return remoteAddress;
-
-			SendSimpleCommand (Cmd.GET_REMOTE_ADDRESS);
-			remoteAddress = ReadString ();
 			return remoteAddress;
 		}
 
 		public string GetRemoteName ()
 		{
-			if (remoteName != null)
-				return remoteName;
-
-			SendSimpleCommand (Cmd.GET_REMOTE_NAME);
-			remoteName = ReadString ();
 			return remoteName;
 		}
 
 		public string GetLocalAddress ()
 		{
-			if (localAddress != null)
-				return localAddress;
-
-			SendSimpleCommand (Cmd.GET_LOCAL_ADDRESS);
-			localAddress = ReadString ();
 			return localAddress;
 		}
 
@@ -281,11 +262,6 @@ namespace Mono.ASPNET
 
 		public int GetRemotePort ()
 		{
-			if (remotePort != 0)
-				return remotePort;
-
-			SendSimpleCommand (Cmd.GET_REMOTE_PORT);
-			remotePort = reader.ReadInt32 ();
 			return remotePort;
 		}
 

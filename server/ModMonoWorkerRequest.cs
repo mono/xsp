@@ -300,12 +300,12 @@ namespace Mono.ASPNET
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
 			if (data.Length > length * 2) {
-				byte[] tmpbuffer = new byte[length];
-				Array.Copy (data, tmpbuffer, length);
+				byte [] tmpbuffer = new byte [length];
+				Buffer.BlockCopy (data, 0, tmpbuffer, 0, length);
 				requestBroker.Write (requestId, tmpbuffer, 0, length);
-			}
-			else
+			} else {
 				requestBroker.Write (requestId, data, 0, length);
+			}
 		}
 
 		public override void SendStatus (int statusCode, string statusDescription)
@@ -394,9 +394,9 @@ namespace Mono.ASPNET
 			if (buffer == null || size <= 0)
 				return 0;
 
-			byte[] readBuffer;
+			byte [] readBuffer;
 			int nr = requestBroker.Read (requestId, size, out readBuffer);
-			Array.Copy (readBuffer, 0, buffer, 0, nr);
+			Buffer.BlockCopy (readBuffer, 0, buffer, 0, nr);
 			return nr;
 		}
 	}

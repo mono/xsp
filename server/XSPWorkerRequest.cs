@@ -43,6 +43,8 @@ namespace Mono.ASPNET
 		EndPoint localEP;
 		EndPoint remoteEP;
 		bool sentConnection;
+		string localAddress;
+		int localPort;
 		
 		static byte [] error500;
 
@@ -121,6 +123,17 @@ namespace Mono.ASPNET
 			responseHeaders = new StringBuilder ();
 			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
+			
+			string url = GetKnownRequestHeader (HeaderHost);
+			int i = url.LastIndexOf (":");
+			if (i == -1) {
+				localPort = 80;
+				localAddress = url;
+			}
+			else {
+				localPort = int.Parse (url.Substring (i+1));
+				localAddress = url.Substring (0,i);
+			}
 		}
 
 		public override void CloseConnection ()
@@ -227,13 +240,13 @@ namespace Mono.ASPNET
 		public override string GetLocalAddress ()
 		{
 			WebTrace.WriteLine ("GetLocalAddress()");
-			return ((IPEndPoint) localEP).Address.ToString ();
+			return localAddress;
 		}
 
 		public override int GetLocalPort ()
 		{
 			WebTrace.WriteLine ("GetLocalPort()");
-			return ((IPEndPoint) localEP).Port;
+			return localPort;
 		}
 
 		public override string GetPathInfo ()
@@ -305,8 +318,7 @@ namespace Mono.ASPNET
 		public override string GetServerName ()
 		{
 			WebTrace.WriteLine ("GetServerName()");
-			IPEndPoint ep = (IPEndPoint) client.LocalEndPoint;
-			return ep.Address.ToString ();
+			return "localhost";
 		}
 
 		public override string GetServerVariable (string name)

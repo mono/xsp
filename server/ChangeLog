@@ -1,5 +1,12 @@
 2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
 
+	* XSPWorkerRequest.cs: GetServerName(): reverted previous patch. There was
+	  a conflict with previous changes.
+	  Also modified implementation of GetLocalAddress(). It should get the value
+	  from the request header.
+
+2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
+
 	* XSPWorkerRequest.cs: GetServerName(): return the 
 	  address of the local server.
 

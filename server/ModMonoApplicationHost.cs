@@ -190,8 +190,7 @@ namespace Mono.ASPNET
 			} catch (Exception e) {
 				Console.WriteLine (e);
 				try {
-					byte [] error = HttpErrors.ServerError ();
-					Stream.Write (error, 0, error.Length);
+					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();
 				} catch {}
 			}

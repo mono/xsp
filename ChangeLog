@@ -1,3 +1,8 @@
+2004-07-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoApplicationHost.cs: don't write the 50x error response
+	to the stream. Just closing works and doesn't drive mod_mono crazy.
+
 2004-07-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/Makefile.am:

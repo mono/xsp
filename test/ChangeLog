@@ -1,5 +1,10 @@
 2002-06-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* web_checkboxlist.aspx: New file. Still have to fix the Name property
+	to assign name attribute depending on parent name.
+
+2002-06-18  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* web_listbox.aspx: new file rendered ok.
 
 2002-06-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>

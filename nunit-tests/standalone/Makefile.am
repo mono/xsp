@@ -1,5 +1,5 @@
 MCSFLAGS= -debug+ -debug:full -nologo \
-	   -lib:@top_srcdir@/tools/nunitasp/source/NUnitAsp \
+	   -lib:@top_builddir@/tools/nunitasp/source/NUnitAsp \
 	   -lib:"$(libdir)"
 
 

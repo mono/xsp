@@ -1,5 +1,11 @@
 2004-08-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* nunit-tests/standalone/Makefile.am:
+	* tools/nunitasp/source/NUnitAspTest/Makefile.am: fix distcheck on a
+	clean system and remove warnings.
+
+2004-08-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* server/ModMonoWorkerRequest.cs: GetRequestHeader is case insensitive
 	now. Thanks to Jan Jaros.
 

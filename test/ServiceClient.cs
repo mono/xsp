@@ -10,7 +10,7 @@ namespace WebServiceTest
 			TestService s = new TestService ();
 			if (args.Length > 0)
 				s.Url = "http://" + args [0] + "/TestService.asmx";
-			for (int n=0; n<10; n++)
+			for (int n=0; n<500; n++)
 			{
 				string res = s.Echo ("hola");
 				Console.WriteLine ("The server said: " + res);

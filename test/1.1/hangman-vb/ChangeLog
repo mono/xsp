@@ -1,2 +1,5 @@
+2005-03-15 Zac Bowling <zac@zacbowling.com>
+	* Makefile: added "mkdir -p bin" to fix build error
+
 2004-10-01 Anirban Bhattacharjee<banirban@novell.com>
 	* New directory

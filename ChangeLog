@@ -1,3 +1,11 @@
+2004-09-29 Ben Maurer  <bmaurer@ximian.com>
+
+	* server/LingeringNetworkStream.cs: make the byte [] buffer
+	static here. It is not of consequence what we write to the buffer
+	so we may as well cache it.
+	* server/XSPWorkerRequest.cs: Avoid String.Format related stuff,
+	just append to the stringbuilder.
+
 2004-09-28 Ben Maurer  <bmaurer@ximian.com>
 
 	* server/XSPApplicationHost.cs: rather than pass an ip addr

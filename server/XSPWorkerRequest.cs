@@ -546,8 +546,12 @@ namespace Mono.ASPNET
 			if (String.Compare (name, "connection", true) == 0)
 				sentConnection = true;
 
-			if (!headersSent)
-				responseHeaders.AppendFormat ("{0}: {1}\r\n", name, value);
+			if (!headersSent) {
+				responseHeaders.Append (name);
+				responseHeaders.Append (": ");
+				responseHeaders.Append (value);
+				responseHeaders.Append ("\r\n");
+			}
 		}
 	}
 }

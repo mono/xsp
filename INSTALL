@@ -16,6 +16,9 @@ Steps for installing the server:
     you may need to modify the values of DBProviderAssembly, DBConnectionType
     and/or DbConnectionString in web.config file.
 
+    In order to display monodoc.ashx, you need to have monodoc it self
+    installed.
+
 Notes for MS runtime users
 ----------------------------
 You may need to set authentication mode to "None" in web.config file until

@@ -1,10 +1,10 @@
 all: 
-	make -C test
-	make -C server
+	$(MAKE) -C test
+	$(MAKE) -C server
 
 install: all
-	make -C test
-	make -C server install
+	$(MAKE) -C test
+	$(MAKE) -C server install
 	@echo ""
 	@echo "-------------"
 	@echo 'Now cd to server/test and run: mono server.exe or ./server.exe'
@@ -16,8 +16,8 @@ install: all
 	@echo ""
 
 clean:
-	make -C test clean
-	make -C server clean
-	make -C src clean
+	$(MAKE) -C test clean
+	$(MAKE) -C server clean
+	$(MAKE) -C src clean
 	rm -rf rundir *~
 

@@ -23,7 +23,7 @@
 
 	mono xsp.exe --port 80
 
-    The default is port 8080, or you can configure thee server using
+    The default is port 8080, or you can configure the server using
     the server.exe.config file.
 
     This is not a full fledged server, it is just a shell for hosting

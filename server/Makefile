@@ -30,7 +30,7 @@ server.exe: $(SOURCES)
 
 trace: 
 	rm -f server.exe
-	make -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
+	$(MAKE) -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
 
 clean:
 	rm -f server.exe *~ *.pdb

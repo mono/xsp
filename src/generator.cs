@@ -15,6 +15,7 @@ namespace Mono.ASP
 	using System.Collections;
 	using System.ComponentModel;
 	using System.Drawing;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
@@ -29,17 +30,19 @@ class Foundry
 		public string [] str;
 		public Foundry foundry;
 
-		public InternalFoundry (string assembly_name, string name_space)
+		public InternalFoundry (string assembly_name, string name_space, string type_name)
 		{
-			str = new string [2];
+			str = new string [3];
 			str [0] = assembly_name;
 			str [1] = name_space;
+			str [2] = type_name;
 			foundry = null;
 		}
 	}
 
 	private string name_space;
 	private Assembly assembly;
+	private string type_name;
 
 	static Foundry ()
 	{
@@ -48,21 +51,46 @@ class Foundry
 		RegisterFoundry ("asp", "System.Web", "System.Web.UI.WebControls");
 	}
 
-	private Foundry (string assembly_name, string name_space)
+	private Foundry (string [] strs)
 	{
-		assembly = Assembly.LoadWithPartialName (assembly_name);
-		this.name_space = name_space;
+		try {
+			assembly = Assembly.LoadFrom (Path.GetFullPath (strs [0]));
+		} catch (Exception) {
+			assembly = Assembly.LoadWithPartialName (strs [0]);
+		}
+		
+
+		if (assembly == null)
+			throw new ApplicationException ("Assembly not found: " + strs [0]);
+
+		this.name_space = strs [1];
+		this.type_name = strs [2];
 	}
 
 	public Component MakeComponent (string component_name, Tag tag)
 	{
+		// For assemblies created from an ascx file
+		if (type_name != null && 0 == String.Compare (component_name, type_name, true))
+			throw new ApplicationException ("Only type '" + type_name + "' allowed.");
+		else if (type_name != null)
+			component_name = type_name;
+
 		Type type = assembly.GetType (name_space + "." + component_name, true, true);
 		return new Component (tag, type);
 	}
 
 	public static void RegisterFoundry (string foundry_name, string assembly_name, string name_space)
 	{
-		InternalFoundry i_foundry = new InternalFoundry (assembly_name, name_space);
+		InternalFoundry i_foundry = new InternalFoundry (assembly_name, name_space, null);
+		foundries.Add (foundry_name, i_foundry);
+	}
+
+	public static void RegisterFoundry (string foundry_name,
+					    string assembly_name,
+					    string name_space,
+					    string type_name)
+	{
+		InternalFoundry i_foundry = new InternalFoundry (assembly_name, name_space, type_name);
 		foundries.Add (foundry_name, i_foundry);
 	}
 
@@ -73,7 +101,7 @@ class Foundry
 
 		InternalFoundry i_foundry = (InternalFoundry) foundries [foundry_name];
 		if (i_foundry.foundry == null)
-			i_foundry.foundry = new Foundry (i_foundry.str [0], i_foundry.str [1]);
+			i_foundry.foundry = new Foundry (i_foundry.str);
 
 		return i_foundry.foundry;
 	}
@@ -341,9 +369,18 @@ public class Generator
 	private string interfaces;
 	private string parent;
 	private string fullPath;
+	private bool as_control;
 	private static string enableSessionStateLiteral =  ", System.Web.SessionState.IRequiresSessionState";
 
-	public Generator (string filename, ArrayList elements)
+	enum UserControlResult
+	{
+		OK = 0,
+		FileNotFound = 1,
+		XspFailed = 2,
+		CompilationFailed = 3
+	}
+
+	public Generator (string filename, ArrayList elements, bool as_control)
 	{
 		if (elements == null)
 			throw new ArgumentNullException ();
@@ -353,9 +390,15 @@ public class Generator
 		this.className = className.Replace ('-', '_'); 
 		this.className = className.Replace (' ', '_');
 		this.fullPath = Path.GetFullPath (filename);
-		this.parent = "System.Web.UI.Page"; // Overriden by @ Page Inherits
+		this.as_control = as_control;
+		if (as_control) {
+			this.parent = "System.Web.UI.UserControl"; // Overriden by @ Control Inherits
+			this.interfaces = "";
+		} else {
+			this.parent = "System.Web.UI.Page"; // Overriden by @ Page Inherits
+			this.interfaces = enableSessionStateLiteral;
+		}
 		//
-		this.interfaces = enableSessionStateLiteral;
 		this.has_form_tag = false;
 		Init ();
 	}
@@ -403,9 +446,12 @@ public class Generator
 
 		declarations.Append ("\t\tprivate static int __autoHandlers;\n");
 
-		current_function.Append ("\t\tprivate void __BuildControlTree (System.Web.UI.Control __ctrl)\n\t\t{\n" + 
-					"\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
-					"(System.Web.UI.IParserAccessor) __ctrl;\n\n");
+		current_function.Append ("\t\tprivate void __BuildControlTree (System.Web.UI.Control __ctrl)\n\t\t{\n");
+		if (!as_control)
+			current_function.Append ("\t\t\tSystem.Web.UI.IParserAccessor __parser = " + 
+						 "(System.Web.UI.IParserAccessor) __ctrl;\n\n");
+		else
+			controls.UseCodeRender = true;
 	}
 
 	public StringReader GetCode ()
@@ -445,7 +491,6 @@ public class Generator
 	{
 		if (att ["ClassName"] != null){
 			this.className = (string) att ["ClassName"];
-			return;
 		}
 
 		if (att ["EnableSessionState"] != null){
@@ -455,9 +500,9 @@ public class Generator
 			else if (0 != String.Compare (est, "true", true))
 				throw new ApplicationException ("EnableSessionState in Page directive not set to " +
 								"a correct value: " + est);
-			return;
 		}
 
+		/*
 		if (att ["Inherits"] != null){
 			parent = (string) att ["Inherits"];
 			string source_file = att ["Src"] as string;
@@ -466,7 +511,12 @@ public class Generator
 			else
 				buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", parent);
 
-			return;
+		}
+		*/
+
+		if (att ["CompilerOptions"] != null){
+			string compilerOptions = (string) att ["CompilerOptions"];
+			buildOptions.AppendFormat ("//<compileroptions options=\"{0}\"/>\n", compilerOptions);
 		}
 
 		//FIXME: add support for more attributes.
@@ -494,10 +544,29 @@ public class Generator
 			if (name_space != "" && assembly_name != "")
 				throw new ApplicationException ("Invalid attributes for @ Register: " +
 								att.ToString ());
-			//FIXME:
-			throw new ApplicationException ("<%@ Register Tagprefix=xxx " +
-							"Tagname=yyy Src=zzzz %> " +
-							"not supported yet.");
+			
+			if (!src.EndsWith (".ascx"))
+				throw new ApplicationException ("Source file extension for controls " + 
+								"must be .ascx");
+
+			UserControlData data = GenerateUserControl (src);
+			switch (data.result) {
+			case UserControlResult.OK:
+				prolog.AppendFormat ("\tusing {0};\n", "ASP");
+				Foundry.RegisterFoundry (tag_prefix, data.assemblyName, "ASP", data.className);
+				buildOptions.AppendFormat ("//<reference dll=\"{0}\"/>\n", data.assemblyName);
+				break;
+			case UserControlResult.FileNotFound:
+				throw new ApplicationException ("File '" + src + "' not found.");
+			case UserControlResult.XspFailed:
+				//TODO
+				throw new NotImplementedException ();
+			case UserControlResult.CompilationFailed:
+				//TODO: should say where the generated .cs file is for the server to
+				//show the source and the compiler error
+				throw new NotImplementedException ();
+			}
+			return;
 		}
 
 		throw new ApplicationException ("Invalid combination of attributes in " +
@@ -511,8 +580,14 @@ public class Generator
 		if (att == null)
 			return;
 
-		switch (directive.TagID.ToUpper ()){
+		string id = directive.TagID.ToUpper ();
+		switch (id){
 		case "PAGE":
+		case "CONTROL":
+			if (as_control && id != "CONTROL")
+				throw new ApplicationException ("@Page not allowed if --control specified.");
+			else if (!as_control && id != "PAGE")
+				throw new ApplicationException ("@Control not allowed here.");
 			PageDirective (att);
 			break;
 		case "IMPORT":
@@ -1099,6 +1174,9 @@ public class Generator
 		NewControlFunction (component.TagID, component.ControlID, component_type,
 				    component.ChildrenKind, component.DefaultPropertyName); 
 
+		if (component_type.IsSubclassOf (typeof (System.Web.UI.UserControl)))
+			current_function.Append ("\t\t\t__ctrl.InitializeAsUserControl (Page);\n");
+
 		if (component_type.IsSubclassOf (typeof (System.Web.UI.Control)))
 			current_function.AppendFormat ("\t\t\t__ctrl.ID = \"{0}\";\n", component.ControlID);
 
@@ -1426,21 +1504,23 @@ public class Generator
 		buildOptions.Append ("\n");
 		classDecl = "\tpublic class " + className + " : " + parent + interfaces + " {\n"; 
 		prolog.Append ("\n" + classDecl);
-		declarations.Append (
-			"\t\tprivate static bool __intialized = false;\n\n" +
-			"\t\tprivate static System.Collections.ArrayList __fileDependencies;\n\n");
+		declarations.Append ("\t\tprivate static bool __intialized = false;\n\n");
+		if (!as_control)
+			declarations.Append ("\t\tprivate static ArrayList __fileDependencies;\n\n");
 
 		// adds the constructor
-		constructor.AppendFormat (
-			"\t\tpublic {0} ()\n\t\t{{\n" + 
-			"\t\t\tSystem.Collections.ArrayList dependencies;\n\n" +
-			"\t\t\tif (ASP.{0}.__intialized == false){{\n" + 
-			"\t\t\t\tdependencies = new System.Collections.ArrayList ();\n" +
-			"\t\t\t\tdependencies.Add (@\"{1}\");\n" +
-			"\t\t\t\tASP.{0}.__fileDependencies = dependencies;\n" +
-			"\t\t\t\tASP.{0}.__intialized = true;\n" +
-			"\t\t\t}}\n" +
-			"\t\t}}\n\n", className, fullPath);
+		constructor.AppendFormat ("\t\tpublic {0} ()\n\t\t{{\n" + 
+					"\t\t\tSystem.Collections.ArrayList dependencies;\n\n" +
+					"\t\t\tif (ASP.{0}.__intialized == false){{\n", className); 
+		if (!as_control) {
+			constructor.AppendFormat ("\t\t\t\tdependencies = new System.Collections.ArrayList ();\n" +
+						"\t\t\t\tdependencies.Add (@\"{1}\");\n" +
+						"\t\t\t\tASP.{0}.__fileDependencies = dependencies;\n",
+						className, fullPath);
+		}
+
+		constructor.AppendFormat ("\t\t\t\tASP.{0}.__intialized = true;\n\t\t\t}}\n\t\t}}\n\n",
+					  className, fullPath);
          
 		//FIXME: add AutoHandlers: don't know what for...yet!
 		constructor.AppendFormat (
@@ -1461,22 +1541,29 @@ public class Generator
 			"\t\t\tget { return \"/dummypath\"; }\n" +
 			"\t\t}\n\n");
 
-		Random rnd = new Random ();
 #if MONO
 #else
-		epilog.Append ("\n\t\tpublic override void VerifyRenderingInServerForm (Control control)\n" +
-				"\t\t{\n\t\t}\n\n");
+		if (!as_control)
+			epilog.Append ("\n\t\tpublic override void VerifyRenderingInServerForm (Control control)\n" +
+					"\t\t{\n\t\t}\n\n");
 #endif
-		epilog.AppendFormat (
-			"\n" +
-			"\t\tprotected override void FrameworkInitialize ()\n\t\t{{\n" +
-			"\t\t\tthis.__BuildControlTree (this);\n" +
-			"\t\t\tthis.FileDependencies = ASP.{0}.__fileDependencies;\n" +
-			"\t\t\tthis.EnableViewStateMac = true;\n" +
-			"\t\t}}\n\n" + 
-			"\t\tpublic override int GetTypeHashCode ()\n\t\t{{\n" +
-			"\t\t\treturn {1};\n" +
-			"\t\t}}\n\t}}\n}}\n", className, rnd.Next ());
+		epilog.Append ("\n\t\tprotected override void FrameworkInitialize ()\n\t\t{\n" +
+				"\t\t\tthis.__BuildControlTree (this);\n");
+
+		if (!as_control) {
+			epilog.AppendFormat ("\t\t\tthis.FileDependencies = ASP.{0}.__fileDependencies;\n" +
+						"\t\t\tthis.EnableViewStateMac = true;\n", className);
+		}
+		epilog.Append ("\t\t}\n\n");
+
+		if (!as_control) {
+			Random rnd = new Random ();
+			epilog.AppendFormat ("\t\tpublic override int GetTypeHashCode ()\n\t\t{{\n" +
+					     "\t\t\treturn {0};\n" +
+					     "\t\t}}\n", rnd.Next ());
+		}
+
+		epilog.Append ("\t}\n}\n");
 
 		// Closes the currently opened tags
 		StringBuilder old_function = current_function;
@@ -1504,6 +1591,159 @@ public class Generator
 			AddCodeRenderFunction (controls.CodeRenderFunction.ToString (), controls.PeekControlID ());
 
 		functions.Pop ();
+	}
+
+	//
+	// Functions related to compilation of user controls
+	//
+	
+	private static char dirSeparator = Path.DirectorySeparatorChar;
+	struct UserControlData
+	{
+		public UserControlResult result;
+		public string className;
+		public string assemblyName;
+	}
+
+	private static UserControlData GenerateUserControl (string src)
+	{
+		UserControlData data = new UserControlData ();
+		data.result = UserControlResult.OK;
+
+		if (!File.Exists (src)) {
+			data.result = UserControlResult.FileNotFound;
+			return data;
+		}
+
+		string noExt = Path.GetFileNameWithoutExtension (src);
+		string csName = "output" + dirSeparator + "xsp_ctrl_" + noExt + ".cs";
+		if (!Directory.Exists ("output"))
+			Directory.CreateDirectory ("output");
+
+		if (Xsp (src, csName) == false) {
+			data.result = UserControlResult.XspFailed;
+			return data;
+		}
+		
+		StreamReader fileReader = new StreamReader (File.Open (csName, FileMode.Open));
+		data.className = src.Replace ('.', '_');
+#if MONO
+		StringBuilder compilerOptions = new StringBuilder ("-r System.Web -r System.Drawing ");
+		compilerOptions.Append ("--target library ");
+#else
+		StringBuilder compilerOptions = new StringBuilder ("/r:System.Web.dll /r:System.Drawing.dll ");
+		compilerOptions.Append ("/target:library ");
+#endif
+		string line;
+		while ((line = fileReader.ReadLine ()) != null && line != "") {
+			if (line.StartsWith ("//<class ")) {
+				data.className = GetAttributeValue (line, "name");
+			} else if (line.StartsWith ("//<reference ")) {
+				string dllName = GetAttributeValue (line, "dll");
+#if MONO
+				compilerOptions.AppendFormat ("-r {0} ", Path.ChangeExtension (dllName, null));
+#else
+				compilerOptions.AppendFormat ("/r:{0} ", dllName);
+#endif
+			} else if (line.StartsWith ("//<compileroptions ")) {
+				string options = GetAttributeValue (line, "options");
+				compilerOptions.Append (" " + options + " ");
+			} else {
+				Console.Error.WriteLine ("Ignoring build option: {0}", line);
+			}
+		}
+		fileReader.Close ();
+
+		string dll = Path.ChangeExtension (csName, ".dll");
+		data.assemblyName = dll;
+		if (Compile (csName, dll, compilerOptions) == false) {
+			data.result = UserControlResult.CompilationFailed;
+		}
+		
+		return data;
+	}
+
+	private static string GetAttributeValue (string line, string att)
+	{
+		string att_start = att + "=\"";
+		int begin = line.IndexOf (att_start);
+		int end = line.Substring (begin + att_start.Length).IndexOf ('"');
+		if (begin == -1 || end == -1)
+			throw new ApplicationException ("Error in compilation option:\n" + line);
+
+		return line.Substring (begin + att_start.Length, end);
+	}
+		
+	private static bool Xsp (string fileName, string csFileName)
+	{
+#if MONO
+		return RunProcess ("mono", 
+				   "xsp.exe --control " + fileName, 
+				   csFileName,
+				   "output" + dirSeparator + "xsp_ctrl_" + Path.GetFileName (fileName) + 
+				   ".sh");
+#else
+		return RunProcess ("xsp", 
+				   "--control " + fileName, 
+				   csFileName,
+				   "output" + dirSeparator + "xsp_ctrl_" + fileName + ".bat");
+#endif
+	}
+
+	private static bool Compile (string csName, string dllName, StringBuilder compilerOptions)
+	{
+#if MONO
+		compilerOptions.AppendFormat ("-o {0} ", dllName);
+#else
+		compilerOptions.AppendFormat ("/out:{0} ", dllName);
+#endif
+		compilerOptions.Append (csName + " ");
+
+		string cmdline = compilerOptions.ToString ();
+		string noext = Path.GetFileNameWithoutExtension (csName);
+		string output_file = "output" + dirSeparator + "output_from_compilation_" + noext + ".txt";
+		string bat_file = "output" + dirSeparator + "last_compilation_" + noext + ".bat";
+#if MONO
+		return RunProcess ("mcs", cmdline, output_file, bat_file);
+#else
+		return RunProcess ("csc.exe", cmdline, output_file, bat_file);
+#endif
+	}
+
+	private static bool RunProcess (string exe, string arguments, string output_file, string script_file)
+	{
+		Process proc = new Process ();
+#if MONO
+		proc.StartInfo.FileName = "redirector.sh";
+		proc.StartInfo.Arguments = exe + " " + output_file + " " + arguments;
+		proc.Start ();
+		proc.WaitForExit ();
+		int result = proc.ExitCode;
+		proc.Close ();
+
+		StreamWriter bat_output = new StreamWriter (File.Create (script_file));
+		bat_output.Write ("./redirector.sh" + " " + exe + " " + output_file + " " + arguments);
+		bat_output.Close ();
+#else
+		proc.StartInfo.FileName = exe;
+		proc.StartInfo.Arguments = arguments;
+		proc.StartInfo.UseShellExecute = false;
+		proc.StartInfo.RedirectStandardOutput = true;
+		proc.Start ();
+		string poutput = proc.StandardOutput.ReadToEnd();
+		proc.WaitForExit ();
+		int result = proc.ExitCode;
+		proc.Close ();
+
+		StreamWriter cmd_output = new StreamWriter (File.Create (output_file));
+		cmd_output.Write (poutput);
+		cmd_output.Close ();
+		StreamWriter bat_output = new StreamWriter (File.Create (script_file));
+		bat_output.Write (exe + " " + arguments);
+		bat_output.Close ();
+#endif
+
+		return (result == 0);
 	}
 
 }

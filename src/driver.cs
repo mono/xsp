@@ -19,7 +19,7 @@ public class Driver {
 
 	static void help ()
 	{
-		Console.WriteLine ("Usage: xsp filename [filename ...]\n");
+		Console.WriteLine ("Usage: xsp [--control] filename [filename ...]\n");
 	}
 	
 	public static void Main (string [] args){
@@ -31,17 +31,20 @@ public class Driver {
 		Stream input;
 		AspParser ap;
 		ArrayList al;
-		for (int i = 0; i < args.Length; i++){
+		bool as_control = false;
+		int i = 0;
+		if (args [0] == "--control"){
+			as_control = true;
+			i = 1;
+		}
+		for (; i < args.Length; i++){
 			input = File.OpenRead (args [i]);
 			ap = new AspParser (args [i], input);
 			ap.parse ();
 			al = ap.Elements;
-			Generator gen = new Generator (Path.GetFileName (args [i]), al);
+			Generator gen = new Generator (Path.GetFileName (args [i]), al, as_control);
 			gen.ProcessElements ();
-			if (args.Length >= i + 1 || args [i + 1] != "no")
-				gen.Print ();
-			else
-				i++;
+			gen.Print ();
 		}
 	}
 }

@@ -255,11 +255,10 @@ class PageFactory
 			string line;
 			string dll;
 
-			while ((line = genCode.ReadLine ()) != String.Empty){
+			while ((line = genCode.ReadLine ()) != String.Empty) {
 				if (line.StartsWith ("//<class ")){
 					className = GetAttributeValue (line, "name");
-				}
-				else if (line.StartsWith ("//<compileandreference ")){
+				} else if (line.StartsWith ("//<compileandreference ")) {
 					string src = GetAttributeValue (line, "src");
 					dll = src.Replace (".cs", ".dll"); //FIXME
 					//File.Delete (dll);
@@ -268,12 +267,13 @@ class PageFactory
 						return false;
 					}
 					AddReference (dll.Replace (".dll", ""));
-				}
-				else if (line.StartsWith ("//<reference ")){
+				} else if (line.StartsWith ("//<reference ")) {
 					dll = GetAttributeValue (line, "dll");
 					AddReference (dll);
-				}
-				else {
+				} else if (line.StartsWith ("//<compileroptions ")) {
+					string options = GetAttributeValue (line, "options");
+					cscOptions.Append (" " + options + " ");
+				} else {
 					Console.WriteLine ("This is the build option line i get:\n" + line);
 					return false;
 				}
@@ -286,7 +286,8 @@ class PageFactory
 		{
 			string arg;
 #if MONO
-			arg = String.Format ("-r {0} ", reference);
+			//arg = String.Format ("-r {0} ", Path.ChangeExtension (reference, null));
+			arg = String.Format ("-r {0} ", reference.Replace (".dll", ""));
 #else
 			arg = String.Format ("/r:{0} ", reference);
 #endif

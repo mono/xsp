@@ -1,3 +1,9 @@
+2002-06-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: they now delete local copy of System.Web.dll
+	if DEBUGMONOSW is not set (just to avoid conflicts when running the
+	server).
+	
 2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: reference a local copy of mono System.Web.dll

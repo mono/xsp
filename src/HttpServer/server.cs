@@ -301,11 +301,25 @@ class Worker
 			Console.WriteLine (e.ToString ());
 			output.WriteLine ("<html>\n<title>Error</title>\n<body>\n<pre>\n" + e.ToString () +
 					  "\n</pre>\n</body>\n</html>\n");
-			output.Close ();
 		}
 
-		// output is closed in Page.ProcessRequest
-		input.Close ();
+		// Under MS may be it throws an exception...?
+		try {
+			output.Flush ();
+		} catch (Exception){
+		}
+
+		try {
+			output.Close ();
+		} catch (Exception){
+		}
+
+		try {
+			input.Close ();
+		} catch (Exception){
+		}
+		//
+
 		socket.Close ();
 		Console.WriteLine ("Finished processing...");
 	}

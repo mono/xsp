@@ -46,13 +46,18 @@ How to help debugging mono System.Web
 ----------------------------------------
 * Set the environment variable DEBUGMONOSW to any value.
 
-* Run make in mcs/class and copy mcs/class/System.Web.dll to ./testing,
-xsp/src and xsp/src/HttpServer.
+* Run make in mcs/class and copy mcs/class/System.Web.dll to ./testingMono,
+xsp/src and xsp/src/HttpServer. If you run make again without the DEBUGMONOSW
+environment variable set, it will delete the local copy of System.Web.dll
+(just to avoid conflicts).
 
 * Follow the steps in previous section. Now xsp.exe and server.exe
 are using mono's System.Web.
 
-* In directory (folder? :) ./testing run './server --usemonoclasses PORT'.
+* In directory (folder? :) ./testingMono run './server --usemonoclasses PORT'.
+
+* Now you can have ./testing/server.exe using MS System.Web serving pages on 
+a port and ./testingMono./server.exe serving on another port.
 
 * Don't forget to read the above IMPORTANT note. You'll have to rerun the
 server on every access to a given page.

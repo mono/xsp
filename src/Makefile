@@ -7,7 +7,7 @@ SYSTEM_WEB=System.Web.dll
 else
 REFERENCES= System.Web \
 	    System.Drawing
-SYSTEM_WEB=
+SYSTEM_WEB= remove_system_web
 endif
 
 SOURCES = asp-parser.cs \
@@ -25,6 +25,9 @@ xsp.exe: $(SOURCES)
 
 MyForm.dll: MyForm.cs $(SYSTEM_WEB)
 	$(CSC) $(CSCFLAGS) /t:library $<
+
+remove_system_web:
+	rm -f System.Web.dll
 
 System.Web.dll:
 	echo "You must copy mono System.Web.dll to this directory"

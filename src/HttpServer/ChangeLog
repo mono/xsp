@@ -1,3 +1,14 @@
+2002-06-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: delete local copy of System.Web.dll if DEBUGMONOSW is
+	not set (just to avoid conflicts when running the server).
+	
+	* README: updated debug setup information to show how you can have two
+	running servers on different ports one using mono and other MS.
+
+	* server.cs: flush the output stream and close without throwing an
+	exception under MS.
+
 2002-06-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server.cs: added --file command line option. If supplied, the next

@@ -86,6 +86,9 @@
 
 	void UpdateTable (string filterPerson, string filterMail)
 	{
+		if (cnc == null)
+			return;
+
 		IDbCommand selectCommand = cnc.CreateCommand();
 		IDataReader reader;
 

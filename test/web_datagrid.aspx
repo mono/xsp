@@ -70,7 +70,7 @@
 </script>
 </head>
 <body>
-<h3>DataGrid sample</h1>
+<h3>DataGrid sample</h3>
 <form runat="server">
 	<asp:datagrid id="dg" border="1" AutoGenerateColumns="false"
 		EnableViewState="false" runat="server">

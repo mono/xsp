@@ -1,3 +1,10 @@
+2003-11-17  Duncan Mak  <duncan@ximian.com>
+
+	* server/Makefile.in (LOCAL_BIN_DIR):
+	* test/Makefile.in (SAMPLES_DIR, SAMPLES_BIN_DIR): Use
+	$(DESTDIR)$(prefix) instead of @prefix@. This is needed for the
+	build system.
+
 2003-11-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* doc/xsp.1: updated.

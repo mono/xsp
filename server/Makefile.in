@@ -28,7 +28,7 @@ MODMONO_ONLY= ModMonoRequest.cs \
 MODMONO_SERVER_SOURCES =  $(COMMON_SOURCES) $(MODMONO_ONLY:.in=)
 
 EXES = xsp.exe mod-mono-server.exe
-LOCAL_BIN_DIR=@prefix@/bin
+LOCAL_BIN_DIR=$(DESTDIR)$(prefix)/bin
 
 .PHONY: all install clean uninstall trace
 

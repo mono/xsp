@@ -6,8 +6,8 @@ MKINSTALLDIRS=@top_builddir@mkinstalldirs
 
 DLLS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll 
 EXES = ServiceClient.exe
-SAMPLES_DIR = @prefix@/share/doc/xsp/test
-SAMPLES_BIN_DIR = @prefix@/share/doc/xsp/test/bin
+SAMPLES_DIR = $(DESTDIR)$(prefix)/share/doc/xsp/test
+SAMPLES_BIN_DIR = $(DESTDIR)$(prefix)/share/doc/xsp/test/bin
 DISTFILES= *.aspx \
 	     *.ascx \
 	     *.asmx \
@@ -51,7 +51,7 @@ extensions.dll: TraceExtension.cs EncryptExtension.cs DumpExtension.cs
 ServiceClient.exe: extensions.dll ServiceClient.cs Reference.cs
 	$(MCS) -r:System.Web.dll -r:System.Web.Services.dll -r:extensions.dll \
 		ServiceClient.cs Reference.cs
-	
+
 clean:
 	rm -f *.dll *~ *.pdb
 

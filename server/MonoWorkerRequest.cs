@@ -202,7 +202,7 @@ namespace Mono.ASPNET
 		{
 			WebTrace.WriteLine ("GetRawUrl()");
 			if (queryString != null && queryString.Length > 0)
-				return path + "/" + queryString;
+				return path + "?" + queryString;
 
 			return path;
 		}

@@ -21,5 +21,6 @@ xsp.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) /out:$@ $^
 
 clean:
+	(cd HttpServer && make clean)
 	rm -f xsp.exe *~ *.pdb 
 

@@ -1,0 +1,24 @@
+Testing XSP
+============
+
+You need to have mono and mcs installed.
+
+Then run:
+
+	make install
+
+And it will create a directory called 'rundir' and copy the needed files.
+Then:
+
+	cd rundir
+	mono server.exe PORTNUMBER
+
+where PORTNUMBER is the port you want the server to listen on (ie, 8000).
+
+Finally, just point your web browser to:
+
+	http://127.0.0.1:PORTNUMBER/
+
+and there you go!
+
+

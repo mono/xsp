@@ -4,7 +4,7 @@ and code generator for running ASP Web Applications.
 Layout:
 
 	src/
-		Source files for the parser/generator.
+		Source files for the parser/generator and test server.
 
 	doc/
 		Documentation about ASP.NET pages

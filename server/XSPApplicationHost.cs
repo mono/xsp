@@ -9,6 +9,7 @@
 //
 
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -213,8 +214,10 @@ namespace Mono.ASPNET
 			} catch (Exception e) {
 				Console.WriteLine (e);
 				try {
-					byte [] error = HttpErrors.ServerError ();
-					stream.Write (error, 0, error.Length);
+					if (!(e is IOException)) {
+						byte [] error = HttpErrors.ServerError ();
+						stream.Write (error, 0, error.Length);
+					}
 					stream.Close ();
 				} catch {}
 			} finally {

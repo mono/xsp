@@ -231,7 +231,7 @@ namespace Mono.ASPNET
  				throw new InvalidOperationException ("No applications defined.");
  				
 			listen_socket = webSource.CreateSocket ();
-			listen_socket.Listen (5);
+			listen_socket.Listen (500);
 			runner = new Thread (new ThreadStart (RunServer));
 			runner.IsBackground = bgThread;
 			runner.Start ();
@@ -255,15 +255,60 @@ namespace Mono.ASPNET
 			WebTrace.WriteLine ("Server stopped.");
 		}
 
-		private void RunServer ()
+		void SetSocketOptions (Socket sock)
 		{
+			sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 15000); // 15s
+			sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 15000); // 15s
+		}
+
+		ArrayList allSockets = new ArrayList ();
+		ArrayList wSockets = new ArrayList ();
+		Hashtable timeouts = new Hashtable ();
+
+		void RunServer ()
+		{
+			allSockets.Add (listen_socket);
+			wSockets.Add (listen_socket);
 			started = true;
 			Socket client;
+			int w;
 			while (!stop){
-				client = listen_socket.Accept ();
-				WebTrace.WriteLine ("Accepted connection.");
-				IWorker worker = webSource.CreateWorker (client, this);
-				ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
+				Socket.Select (wSockets, null, null, 500 * 1000); // 500ms
+				w = wSockets.Count;
+				for (int i = 0; i < w; i++) {
+					Socket s = (Socket) wSockets [i];
+					if (s == listen_socket) {
+						client = s.Accept ();
+						WebTrace.WriteLine ("Accepted connection.");
+						SetSocketOptions (client);
+						allSockets.Add (client);
+						timeouts [client] = 0;
+						continue;
+					}
+
+					allSockets.Remove (s);
+					timeouts.Remove (s);
+					IWorker worker = webSource.CreateWorker (s, this);
+					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
+				}
+
+				w = timeouts.Count;
+				Socket [] socks_timeout = new Socket [w];
+				timeouts.Keys.CopyTo (socks_timeout, 0);
+				foreach (Socket k in socks_timeout) {
+					int n = (int) timeouts [k];
+					if (n >= 30) {
+						k.Close ();
+						allSockets.Remove (k);
+						timeouts.Remove (k);
+						continue;
+					}
+					
+					timeouts [k] = ++n;
+				}
+				
+				wSockets.Clear ();
+				wSockets.AddRange (allSockets);
 			}
 
 			started = false;

@@ -1,3 +1,13 @@
+2004-07-28 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: increased the backlog for listen, set
+	accepted sockets read/write timeout to 15s and handle timeouts when
+	reading request data before submitting the work item to the threadpool.
+	* server/XSPApplicationHost.cs: don't write a 500 error response if
+	we got an IOException when reading from the network stream.
+	* server/XSPWorkerRequest.cs: if there's an IOException when reading
+	the headers, just rethrow it.
+
 2004-07-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoApplicationHost.cs: don't write the 50x error response

@@ -217,8 +217,10 @@ namespace Mono.ASPNET
 					string value = line.Substring (colon + 1).Trim ();
 					headers [key] = value;
 				}
+			} catch (IOException ioe) {
+				throw;
 			} catch (Exception e) {
-				throw new Exception ("Error reading headers.");
+				throw new Exception ("Error reading headers.", e);
 			}
 		}
 

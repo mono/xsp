@@ -257,8 +257,12 @@ namespace Mono.ASPNET
 
 		void SetSocketOptions (Socket sock)
 		{
-			sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 15000); // 15s
-			sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 15000); // 15s
+			try {
+				sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 15000); // 15s
+				sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 15000); // 15s
+			} catch {
+				// Ignore exceptions here for systems that do not support this options.
+			}
 		}
 
 		ArrayList allSockets = new ArrayList ();

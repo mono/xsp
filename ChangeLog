@@ -1,3 +1,8 @@
+2004-08-17 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ApplicationServer.cs: ignore exceptions when setting socket
+	options as there are systems that don't support them. Fixes bug #63031.
+
 2004-08-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* nunit-tests/standalone/Makefile.am:

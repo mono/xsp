@@ -1,3 +1,10 @@
+2005-02-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoApplicationHost.cs:
+	* server/ModMonoTCPWebSource.cs:
+	* server/server.cs: use a FileStream as a lock to prevent running
+	more than one mod-mono-server with the same arguments.
+
 2005-02-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: override IsSecure and implement it.

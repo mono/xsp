@@ -195,8 +195,10 @@ namespace Mono.ASPNET
 				oport = 8080;
 
 			Options options = 0;
+			int hash = 0;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
+				hash ^= args [i].GetHashCode () + i;
 				
 				switch (a){
 #if MODMONO_SERVER
@@ -252,6 +254,10 @@ namespace Mono.ASPNET
 			}
 
 #if MODMONO_SERVER
+			if (hash < 0)
+				hash = -hash;
+
+			string lockfile;
 			bool useTCP = ((options & Options.Port) != 0);
 			if (!useTCP) {
 				if (filename == null || filename == "")
@@ -263,6 +269,11 @@ namespace Mono.ASPNET
 					Console.WriteLine ("ERROR: --address without --port");
 					Environment.Exit (1);
 				}
+				lockfile = Path.Combine (Path.GetTempPath (), filename);
+				lockfile = String.Format ("{0}_{1}", lockfile, hash);
+			} else {
+				lockfile = Path.Combine (Path.GetTempPath (), "mod_mono_TCP_");
+				lockfile = String.Format ("{0}_{1}", lockfile, hash);
 			}
 #endif
 			IPAddress ipaddr = null;
@@ -295,9 +306,9 @@ namespace Mono.ASPNET
 			IWebSource webSource;
 #if MODMONO_SERVER
 			if (useTCP) {
-				webSource = new ModMonoTCPWebSource (ipaddr, port);
+				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
-				webSource = new ModMonoWebSource (filename);
+				webSource = new ModMonoWebSource (filename, lockfile);
 			}
 
 			if ((options & Options.Terminate) != 0) {

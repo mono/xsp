@@ -43,10 +43,22 @@ namespace Mono.ASPNET
 	{
 		string filename;
 		bool file_bound;
+		Stream locker;
+		string lockfile;
 
-		protected ModMonoWebSource () {}
+		protected ModMonoWebSource (string lockfile)
+		{
+			this.lockfile = lockfile;
+			try {
+				locker = File.OpenWrite (lockfile);
+			} catch {
+				Console.Error.WriteLine ("Another mod-mono-server with the same arguments is already running.");
+				Environment.Exit (1);
+			}
+		}
 
-		public ModMonoWebSource (string filename)
+		public ModMonoWebSource (string filename, string lockfile)
+			: this (lockfile)
 		{
 			if (filename == null)
 				throw new ArgumentNullException ("filename");
@@ -132,6 +144,11 @@ namespace Mono.ASPNET
 				filename = null;
 				if (file_bound)
 					File.Delete (f);
+
+				if (locker != null) {
+					locker.Close ();
+					File.Delete (lockfile);
+				}
 			}
 		}
 		

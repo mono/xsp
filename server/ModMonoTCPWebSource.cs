@@ -37,7 +37,8 @@ namespace Mono.ASPNET
 	{
 		IPEndPoint bindAddress;
 
-		public ModMonoTCPWebSource (IPAddress address, int port)
+		public ModMonoTCPWebSource (IPAddress address, int port, string lockfile)
+			: base (lockfile)
 		{
 			if (address == IPAddress.Any)
 				address = IPAddress.Loopback;

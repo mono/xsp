@@ -1,9 +1,9 @@
 SUBDIRS = AspTester HtmlTester
 
 if PLATFORM_WIN32
-MCSFLAGS= -debug+ -debug:full -nologo -lib:../NUnitAsp -lib:"$(libdir)"
+MCSFLAGS= -debug+ -debug:full -nologo -lib:.$(srcdir)/NUnitAsp -lib:"$(libdir)"
 else
-MCSFLAGS= -debug+ -debug:full -nologo -lib:../NUnitAsp
+MCSFLAGS= -debug+ -debug:full -nologo -lib:.$(srcdir)/NUnitAsp
 endif
 
 nunitasptestdir = $(libdir)

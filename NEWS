@@ -10,6 +10,6 @@ July 23, 2003 - Gonzalo Paniagua
 I should have started writing this before...
 
 * Changed executable name to xsp.exe (yeah!)
-* Added gzip encoding support. It's disabled by default. You can enable it in
+* Added gzip encoding support. It's enabled by default. You can disable it in
 test/web.config file.
 

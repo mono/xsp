@@ -1,3 +1,7 @@
+2002-07-08  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* server.cs: fixed page caching. Also keep track of loaded dlls.
+
 2002-07-06  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* server.cs: when compiling, reference System.Data  and don't reference

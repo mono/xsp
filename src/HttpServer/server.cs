@@ -49,11 +49,12 @@ class PageFactory
 {
 	class PageBuilder
 	{
-		private ArrayList cscOptions;
+		private StringBuilder cscOptions;
 		private string fileName;
 		private string csFileName;
 		private string className;
 		private static char dirSeparator = Path.DirectorySeparatorChar;
+		private static Hashtable compiled_dlls = new Hashtable ();
 
 		private PageBuilder ()
 		{
@@ -64,23 +65,23 @@ class PageFactory
 			this.fileName = fileName;
 			csFileName = fileName.Replace (".aspx", ".cs");
 
-			cscOptions = new ArrayList ();
+			cscOptions = new StringBuilder ();
 #if MONO
-			cscOptions.Add ("--target library");
-			cscOptions.Add ("-L .");
+			cscOptions.Append ("--target library ");
+			cscOptions.Append ("-L . ");
 			AddReference ("corlib");
 			AddReference ("System");
 			AddReference ("System.Data");
 #else
-			cscOptions.Add ("/noconfig");
-			cscOptions.Add ("/nologo");
-			cscOptions.Add ("/debug+");
-			cscOptions.Add ("/debug:full");
-			cscOptions.Add ("/target:library");
-			AddReference ("mscorlib.dll");
-			AddReference ("System.dll");
-			AddReference ("System.Data.dll");
-			AddReference (".\\MyForm.dll");
+			cscOptions.Append ("/noconfig ");
+			cscOptions.Append ("/nologo ");
+			cscOptions.Append ("/debug+ ");
+			cscOptions.Append ("/debug:full ");
+			cscOptions.Append ("/target:library ");
+			AddReference ("mscorlib.dll ");
+			AddReference ("System.dll ");
+			AddReference ("System.Data.dll ");
+			AddReference (".\\MyForm.dll ");
 #endif
 			AddReference (Server.SystemWeb);
 			AddReference (Server.SystemDrawing);
@@ -88,18 +89,34 @@ class PageFactory
 
 		public Page Build ()
 		{
-			if (Xsp (fileName, csFileName) == false){
-				Console.WriteLine ("Error running xsp. Take a look at the output file.");
-				return null;
+			Pair cached = compiled_dlls [fileName] as Pair;
+			string dll;
+			
+			if (cached == null) {
+				if (Xsp (fileName, csFileName) == false){
+					Console.WriteLine ("Error running xsp. " + 
+							   "Take a look at the output file.");
+					return null;
+				}
+
+				StreamReader st_file = new StreamReader (File.OpenRead ("output" +
+											dirSeparator +
+											csFileName));
+				
+				StringReader file_content = new StringReader (st_file.ReadToEnd ());
+				st_file.Close ();
+				if (GetBuildOptions (file_content) == false)
+					return null;
+
+				dll = "output" + dirSeparator + fileName.Replace (".aspx", ".dll");
+				if (Compile (csFileName, dll) == true)
+					compiled_dlls.Add (fileName, new Pair (className, dll));
+			} else {
+				className = (string) cached.First;
+				dll = (string) cached.Second;
 			}
 
-			StreamReader st_file = new StreamReader (File.OpenRead ("output" + dirSeparator + csFileName));
-			StringReader file_content = new StringReader (st_file.ReadToEnd ()); //FIXME
-			st_file.Close ();
-			if (GetBuildOptions (file_content) == false)
-				return null;
-
-			return GetInstance ();
+			return GetInstance (dll);
 		}
 
 		private static bool Xsp (string fileName, string csFileName)
@@ -192,11 +209,13 @@ class PageFactory
 
 		private void AddReference (string reference)
 		{
+			string arg;
 #if MONO
-			cscOptions.Add ("-r " + reference);
+			arg = String.Format ("-r {0} ", reference);
 #else
-			cscOptions.Add ("/r:" + reference);
+			arg = String.Format ("/r:{0} ", reference);
 #endif
+			cscOptions.Append (arg);
 		}
 		
 		private string GetAttributeValue (string line, string att)
@@ -210,12 +229,8 @@ class PageFactory
 			return line.Substring (begin + att_start.Length, end);
 		}
 		
-		private Page GetInstance ()
+		private Page GetInstance (string dll)
 		{
-			string dll = "output" + dirSeparator + fileName.Replace (".aspx", ".dll");
-			//File.Delete (dll);
-			Compile (csFileName, dll); // May be this fails cause we are locking 
-									  // the dll
 			Assembly page_dll = Assembly.LoadFrom (dll);
 			if (page_dll == null){
 				Console.WriteLine ("Error loading generated dll: " + dll);
@@ -234,22 +249,14 @@ class PageFactory
 
 		private bool Compile (string csName, string dllName)
 		{
-			string [] args = new string [cscOptions.Count + 2];
-			int i = 0;
-			foreach (string option in cscOptions)
-				args [i++] = option;
-
 #if MONO
-			args [i++] = "-o " + dllName;
+			cscOptions.AppendFormat ("-o {0} ", dllName);
 #else
-			args [i++] = "/out:" + dllName;
+			cscOptions.AppendFormat ("/out:{0} ", dllName);
 #endif
-			args [i] = "output" + dirSeparator + csName;
+			cscOptions.Append ("output" + dirSeparator + csName);
 
-			string cmdline = "";
-			foreach (string arg in args)
-				cmdline += " " + arg;
-
+			string cmdline = cscOptions.ToString ();
 			string noext = csName.Replace (".cs", "");
 			string output_file = "output" + dirSeparator + "output_from_compilation_" + noext + ".txt";
 			string bat_file = "output" + dirSeparator + "last_compilation_" + noext + ".bat";
@@ -261,12 +268,7 @@ class PageFactory
 		}
 	}
 
-	private static Hashtable loadedPages;
-
-	static PageFactory ()
-	{
-		loadedPages = new Hashtable ();
-	}
+	private static Hashtable loadedPages = new Hashtable ();
 
 	private PageFactory ()
 	{
@@ -274,30 +276,41 @@ class PageFactory
 
 	public static Page GetPage (string fileName, string query_options)
 	{
+#if MONO
 		HttpRequest request = new HttpRequest (fileName, "http://127.0.0.1/" + fileName, 
 						       query_options);
 
 		string view_state = request.QueryString ["__VIEWSTATE"];
-		if (view_state != null && loadedPages.ContainsKey (view_state))
-			return (Page) loadedPages [view_state];
+		if (view_state != null && loadedPages.ContainsValue (view_state)){
+			Page p = null;
+			foreach (Page _p in loadedPages.Keys){
+				if (view_state == loadedPages [_p] as string){
+					p = _p;
+					break;
+				}
+			}
+
+			if (p != null)
+				return p;
+		}
+#endif
 
 		PageBuilder builder = new PageBuilder (fileName);
 		Page page = builder.Build ();
 #if MONO
 		if (page != null)
-			loadedPages.Add (page.GetViewStateString (), page);
+			loadedPages.Add (page, null);
 #endif
 
 		return page;
 	}
 
-	public static void UpdateHash (string old_state, string new_state)
+	public static void UpdateHash (Page page, string new_state)
 	{
-		if (!(loadedPages.ContainsKey (old_state)))
+		if (!(loadedPages.ContainsKey (page)))
 			return;
-		Page page = (Page) loadedPages [old_state];
-		loadedPages.Remove (old_state);
-		loadedPages.Add (new_state, page);
+
+		loadedPages [page] = new_state;
 	}
 
 }
@@ -347,7 +360,7 @@ class MyWorkerRequest
 		RenderPage (page);
 #if MONO
 		string new_view_state = page.GetViewStateString ();
-		PageFactory.UpdateHash (old_view_state, new_view_state);
+		PageFactory.UpdateHash (page, new_view_state);
 #endif
 	}
 	

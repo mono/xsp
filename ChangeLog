@@ -1,3 +1,7 @@
+2005-01-20  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* configure.in: Added new test makefiles.
+
 2005-01-20  Lluis Sanchez Gual  <lluis@ximian.com>
 
 	* server/InitialWorkerRequest.cs: Fix parsing of PathInfo.

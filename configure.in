@@ -49,7 +49,18 @@ AC_OUTPUT([
 	server/AssemblyInfoModMono.cs
 	server/Makefile
 	test/Makefile
-	test/authtest/Makefile
+	test/1.1/Makefile
+	test/1.1/authtest/Makefile
+	test/1.1/asp.net/Makefile
+	test/1.1/webcontrols/Makefile
+	test/1.1/html/Makefile
+	test/1.1/webservice/Makefile
+	test/1.1/databind/Makefile
+	test/1.1/handlers/Makefile
+	test/1.1/customcontrol/Makefile
+	test/2.0/Makefile
+	test/2.0/menu/Makefile
+	test/2.0/treeview/Makefile
         tools/Makefile
         tools/asp_state/Makefile
         tools/asp_state/AssemblyInfo.cs

@@ -16,3 +16,6 @@ Steps for installing the server:
     you may need to modify the values of DBProviderAssembly, DBConnectionType
     and/or DbConnectionString in web.config file.
 
+NOTE for windows users: you may need to set authentication mode to "None" in
+web.config file until RNGCryptoServiceProvider works in windows.
+

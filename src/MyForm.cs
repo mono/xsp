@@ -23,10 +23,13 @@ public class MyHtmlForm : System.Web.UI.HtmlControls.HtmlForm
 				
 	protected override void RenderAttributes (HtmlTextWriter writer){
 		writer.WriteAttribute ("id", ID);
-		//FIXME
-		writer.WriteAttribute ("method", "post");
-		//FIXME
+		writer.WriteAttribute ("name", Name);
+		writer.WriteAttribute ("method", Method);
 		writer.WriteAttribute ("action", "DummyAction.aspx", true);
+		if (this.Enctype != null){
+			writer.WriteAttribute ("enctype", Enctype);
+			Attributes.Remove ("enctype");
+		}
 	}
 
 	protected override void RenderChildren (HtmlTextWriter writer)

@@ -1,3 +1,8 @@
+2002-06-07  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* MyForm.cs: render enctype attribute.
+	* aspelements.cs: all <input> tags are self-closing.
+
 2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* aspelements.c: fixed IsDataBound for attributes with null value.

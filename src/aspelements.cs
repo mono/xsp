@@ -524,6 +524,7 @@ public class HtmlControlTag : Tag
 			if (control_type == null)
 				throw new ArgumentException ("Unknown input type -> " + type_value);
 			is_container = false;
+			self_closing = true; // All <input ...> are self-closing
 		}
 	}
 

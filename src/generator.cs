@@ -182,7 +182,10 @@ class ControlStack
 		if (controlType != null){
 			AddChild ();
 			container_type = GetContainerType (controlType);
+			if (container_type == null)
+				container_type = this.Container;
 		}
+
 		top = new ControlStackData (controlType,
 					    controlID,
 					    tagID,

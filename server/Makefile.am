@@ -11,7 +11,11 @@ EXTRA_DIST = $(common) $(xsp_only) $(modmono_only)
 
 # 
 xsp_references= -r:System.Web.dll
-modmono_references= -r:System.Web.dll  -r:Mono.Posix.dll
+if PLATFORM_WIN32
+modmono_references= -lib:"$(libdir)" -r:System.Web.dll -r:Mono.Posix.dll
+else
+modmono_references= -r:System.Web.dll -r:Mono.Posix.dll
+endif
 
 common  = IApplicationHost.cs \
 	  XSPApplicationHost.cs \

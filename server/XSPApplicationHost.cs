@@ -42,6 +42,8 @@ namespace Mono.ASPNET
 		bool stop;
 		IPEndPoint bindAddress;
 		Thread runner;
+		string path;
+		string vpath;
 
 		public XSPApplicationHost ()
 		{
@@ -120,13 +122,19 @@ namespace Mono.ASPNET
 
 		public string Path {
 			get {
-				return AppDomain.CurrentDomain.GetData (".appPath").ToString ();
+				if (path == null)
+					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
+
+				return path;
 			}
 		}
 
 		public string VPath {
 			get {
-				return AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
+				if (vpath == null)
+					vpath =  AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
+
+				return vpath;
 			}
 		}
 

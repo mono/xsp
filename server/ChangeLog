@@ -9,6 +9,8 @@
 	* server.cs: new options to set the root and virtual directory for the
 	application.
 
+	* XSPApplicationHost.cs: keep path and virtual path in instance fields.
+
 2003-02-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs: when running under MS runtime, closing 'stream'

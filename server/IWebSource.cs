@@ -3,7 +3,7 @@
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//  Lluis Sanchez Gual (lluis@ximian.com)
+// 	Lluis Sanchez Gual (lluis@ximian.com)
 //
 // (C) Copyright 2004 Novell, Inc
 //

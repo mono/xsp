@@ -39,6 +39,7 @@ modmono_only = ModMonoRequest.cs \
 	      ModMonoWorkerRequest.cs \
 	      ModMonoApplicationHost.cs \
 	      ModMonoRequest.cs \
+	      ModMonoTCPWebSource.cs \
 	      AssemblyInfoModMono.cs.in
 
 modmono_sources =  $(common) $(modmono_only:.in=)

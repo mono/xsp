@@ -1,3 +1,22 @@
+2004-07-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/Makefile.am: added ModMonoTCPWebSource.
+
+	* server/ModMonoApplicationHost.cs: in ModMonoWebSource, CreateSocket is now
+	virtual and the .ctor receives the file name as parameter.
+
+	* server/ModMonoRequest.cs: prevent absurd string sizes if the socket is not
+	in a expected state.
+
+	* server/ModMonoTCPWebSource.cs: supports mod_mono communication over a TCP
+	socket.
+
+	* server/XSPApplicationHost.cs: XSPWebSource .ctor receives address and port as
+	parameters.
+
+	* server/server.cs: updated help, handle address and port in mod-mono-server.
+	Choose TCP or unix socket IWebSource depending on the arguments.
+
 2004-07-09 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs: made the headers Hashtable case

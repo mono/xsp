@@ -24,8 +24,10 @@ namespace Mono.ASPNET
 	public class ModMonoWebSource: IWebSource, IDisposable
 	{
 		string filename;
-		
-		public void SetListenFile (string filename)
+
+		protected ModMonoWebSource () {}
+
+		public ModMonoWebSource (string filename)
 		{
 			if (filename == null)
 				throw new ArgumentNullException ("filename");
@@ -33,7 +35,7 @@ namespace Mono.ASPNET
 			this.filename = filename;
 		}
 		
-		public Socket CreateSocket ()
+		public virtual Socket CreateSocket ()
 		{
 			if (filename == null)
 				throw new InvalidOperationException ("filename not set");

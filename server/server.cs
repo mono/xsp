@@ -39,28 +39,35 @@ namespace Mono.ASPNET
 #if MODMONO_SERVER
 			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono.");
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    mod-mono-server.exe [--root rootdir] [--applications APPS] [--filename file]");
-			Console.WriteLine ("            [--appconfigdir DIR] [--appconfigfile FILE]");
+			Console.WriteLine ("    mod-mono-server.exe [...]");
 			Console.WriteLine ();
-			Console.WriteLine ("    --filename file: the unix socket file name.");
+			Console.WriteLine ("    The arguments --filename and --port are mutually exlusive.");
+			Console.WriteLine ("    --filename file: a unix socket filename to listen on.");
 			Console.WriteLine ("                    Default value: /tmp/mod_mono_server");
 			Console.WriteLine ("                    AppSettings key name: MonoUnixSocket");
+			Console.WriteLine ();
 #else
 			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
 			Console.WriteLine ("minimalistic HTTP server\n");
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    xsp.exe [--root rootdir] [--applications APPS]");
-			Console.WriteLine ("            [--appconfigdir DIR] [--appconfigfile FILE]");
-			Console.WriteLine ("            [--port N] [--address addr]");
+			Console.WriteLine ("    xsp.exe [...]");
 			Console.WriteLine ();
+#endif
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
+#if MODMONO_SERVER
+			Console.WriteLine ("                    Default value: none");
+#else
 			Console.WriteLine ("                    Default value: 8080");
+#endif
 			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
 			Console.WriteLine ();
 			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
+#if MODMONO_SERVER
+			Console.WriteLine ("                    Default value: 127.0.0.1");
+#else
 			Console.WriteLine ("                    Default value: 0.0.0.0");
-			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 #endif
+			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
 			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
 			Console.WriteLine ("                    anything else.");
@@ -132,6 +139,13 @@ namespace Mono.ASPNET
 			}
 
 			options |= value;
+			if ((options & Options.FileName) != 0 &&
+			    ((options & Options.Port) != 0 || (options & Options.Address) != 0)) {
+				ShowHelp ();
+				Console.WriteLine ();
+				Console.WriteLine ("ERROR: --port/--address and --filename are mutually exclusive");
+				Environment.Exit (1);
+			}
 		}
 		
 		public static int Main (string [] args)
@@ -143,12 +157,11 @@ namespace Mono.ASPNET
 			string appConfigDir = ConfigurationSettings.AppSettings ["MonoApplicationsConfigDir"];
 			string appConfigFile = ConfigurationSettings.AppSettings ["MonoApplicationsConfigFile"];
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
-#if MODMONO_SERVER
-			string filename = ConfigurationSettings.AppSettings ["MonoUnixSocket"];
-#else
 			object oport;
 			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];
-			
+#if MODMONO_SERVER
+			string filename = ConfigurationSettings.AppSettings ["MonoUnixSocket"];
+#endif
 			if (ip == "" || ip == null)
 				ip = "0.0.0.0";
 
@@ -156,7 +169,6 @@ namespace Mono.ASPNET
 			if (oport == null)
 				oport = 8080;
 
-#endif
 			Options options = 0;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
@@ -167,7 +179,7 @@ namespace Mono.ASPNET
 					CheckAndSetOptions (a, Options.FileName, ref options);
 					filename = args [++i];
 					break;
-#else
+#endif
 				case "--port":
 					CheckAndSetOptions (a, Options.Port, ref options);
 					oport = args [++i];
@@ -176,7 +188,6 @@ namespace Mono.ASPNET
 					CheckAndSetOptions (a, Options.Address, ref options);
 					ip = args [++i];
 					break;
-#endif
 				case "--root":
 					CheckAndSetOptions (a, Options.Root, ref options);
 					rootDir = args [++i];
@@ -213,9 +224,20 @@ namespace Mono.ASPNET
 			}
 
 #if MODMONO_SERVER
-			if (filename == null || filename == "")
-				filename = "/tmp/mod_mono_server";
-#else
+			bool useTCP = ((options & Options.Port) != 0);
+			if (!useTCP) {
+				if (filename == null || filename == "")
+					filename = "/tmp/mod_mono_server";
+
+				if ((options & Options.Address) != 0) {
+					ShowHelp ();
+					Console.WriteLine ();
+					Console.WriteLine ("ERROR: --address without --port");
+					Environment.Exit (1);
+				}
+			}
+#endif
+			IPAddress ipaddr = null;
 			ushort port;
 			try {
 				port = Convert.ToUInt16 (oport);
@@ -225,12 +247,12 @@ namespace Mono.ASPNET
 			}
 
 			try {
-				IPAddress.Parse (ip);
+				ipaddr = IPAddress.Parse (ip);
 			} catch (Exception) {
 				Console.WriteLine ("The value given for the address is not valid: " + ip);
 				return 1;
 			}
-#endif
+
 			if (rootDir != null && rootDir != "") {
 				try {
 					Environment.CurrentDirectory = rootDir;
@@ -242,15 +264,22 @@ namespace Mono.ASPNET
 
 			rootDir = Directory.GetCurrentDirectory ();
 			
+			IWebSource webSource;
 #if MODMONO_SERVER
-			ModMonoWebSource webSource = new ModMonoWebSource ();
+			if (useTCP) {
+				webSource = new ModMonoTCPWebSource (ipaddr, port);
+			} else {
+				webSource = new ModMonoWebSource (filename);
+			}
+
 			ApplicationServer server = new ApplicationServer (webSource);
 #else
-			XSPWebSource webSource = new XSPWebSource ();
+			webSource = new XSPWebSource (ipaddr, port);
 			ApplicationServer server = new ApplicationServer (webSource);
 #endif
 			server.Verbose = verbose;
 
+			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
 			if (apps != null)
 				server.AddApplicationsFromCommandLine (apps);
 
@@ -263,13 +292,14 @@ namespace Mono.ASPNET
 			if (apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 #if MODMONO_SERVER
-			webSource.SetListenFile (filename);
-			Console.WriteLine ("Listening on: {0}", filename);
-#else
-			webSource.SetListenAddress (IPAddress.Parse (ip), port);
-			Console.WriteLine ("Listening on port: {0}", port);
-			Console.WriteLine ("Listening on address: {0}", ip);
+			if (!useTCP) {
+				Console.WriteLine ("Listening on: {0}", filename);
+			} else
 #endif
+			{
+				Console.WriteLine ("Listening on port: {0}", port);
+				Console.WriteLine ("Listening on address: {0}", ip);
+			}
 			
 			Console.WriteLine ("Root directory: {0}", rootDir);
 

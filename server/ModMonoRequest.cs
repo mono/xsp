@@ -81,6 +81,7 @@ namespace Mono.ASPNET
 
 	public class ModMonoRequest : MarshalByRefObject
 	{
+		const int MAX_STRING_SIZE = 1024 * 10;
 		BinaryReader reader;
 		BinaryWriter writer;
 		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
@@ -136,6 +137,9 @@ namespace Mono.ASPNET
 		string ReadString ()
 		{
 			int size = reader.ReadInt32 ();
+			if (size < 0 || size > MAX_STRING_SIZE)
+				throw new ArgumentOutOfRangeException ("size", "Abnormal string size.");
+
 			byte [] buf = new byte [size];
 			string s;
 			if (size != 0) {

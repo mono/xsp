@@ -24,9 +24,9 @@ namespace Mono.ASPNET
 	{
 		IPEndPoint bindAddress;
 		
-		public XSPWebSource ()
+		public XSPWebSource (IPAddress address, int port)
 		{
-			SetListenAddress (80);
+			SetListenAddress (address, port);
 		}
 		
 		public void SetListenAddress (int port)

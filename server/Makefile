@@ -23,8 +23,6 @@ install: server.exe web.config global.asax
 	mkdir -p test/bin
 	cp server.exe web.config global.asax test
 	cp server.exe test/bin
-	-test -f server.dbg && cp server.dbg test
-	-test -f server.dbg && cp server.dbg test/bin
 	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png test
 	cp ../test/*.dll test/bin
 
@@ -36,6 +34,6 @@ trace:
 	$(MAKE) -C . CSCFLAGS=/d:WEBTRACE CSC=$(CSC)
 
 clean:
-	rm -f server.exe *~ *.pdb *.dbg
+	rm -f server.exe *~ *.pdb
 	rm -rf test
 

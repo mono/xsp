@@ -65,7 +65,6 @@ namespace Mono.ASPNET
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
 		IApplicationHost appHost;
-		string [][] unknownHeaders;
 		ArrayList response;
 		Encoding encoding;
 		string mappedPath;
@@ -153,16 +152,19 @@ namespace Mono.ASPNET
 
 		public override string MapPath (string path)
 		{
-			if (path == null || path.Length == 0 || path == "/")
+			if (path == null || path.Length == 0 || path == appHost.VPath)
 				return appHost.Path.Replace ('/', Path.DirectorySeparatorChar);
 
-			int len = path.Length;
-			if (path [0] == '/' && len > 1) {
+			if (path [0] == '~' && path.Length > 2 && path [1] == '/')
 				path = path.Substring (1);
-			} else if (path [0] == '~' && len > 2 && path [1] == '/') {
-				path = path.Substring (2);
-			}
-				
+
+			int len = appHost.VPath.Length;
+			if (path.StartsWith (appHost.VPath + "/"))
+				path = path.Substring (len + 1);
+
+			if (path.Length > 0 && path [0] == '/')
+				path = path.Substring (1);
+
 			return Path.Combine (appHost.Path, path.Replace ('/', Path.DirectorySeparatorChar));
 		}
 

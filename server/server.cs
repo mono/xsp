@@ -19,10 +19,21 @@ namespace Mono.ASPNET
 	{
 		public static void ShowHelp ()
 		{
-			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a\n");
-			Console.WriteLine ("minimalistic HTTP server\n\n");
+			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
+			Console.WriteLine ("minimalistic HTTP server\n");
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    xsp.exe [--port N]");
+			Console.WriteLine ("    xsp.exe [--port N] [--root rootdir] [--virtual virtualdir]");
+			Console.WriteLine ();
+			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
+			Console.WriteLine ("                    Default value: 8080");
+			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
+			Console.WriteLine ("    --root rootdir: rootdir is the root directory for the application.");
+			Console.WriteLine ("                    Default value: current directory");
+			Console.WriteLine ("                    AppSettings key name: MonoRootDir");
+			Console.WriteLine ("    --virtual virtualdir: virtualdir is the virtual directory mapped to rootdir.");
+			Console.WriteLine ("                    Default value: /");
+			Console.WriteLine ("                    AppSettings key name: MonoVirtualDir");
+			Console.WriteLine ();
 		}
 		
 		public static int Main (string [] args)
@@ -30,15 +41,9 @@ namespace Mono.ASPNET
 			object oport;
 			
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
-			Type type = typeof (XSPApplicationHost);
-			string cwd = Directory.GetCurrentDirectory ();
-			XSPApplicationHost host;
+			string virtualDir = ConfigurationSettings.AppSettings ["MonoServerVirtualDir"];
+			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
 
-			/**
-			 * FIXME: we should create application hosts for every application, ie, the "/"
-			 * should be different for each application we're running
-			 */
-			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, "/", cwd);
 			oport = ConfigurationSettings.AppSettings ["MonoServerPort"];
 			if (oport == null)
 				oport = 8080;
@@ -50,6 +55,12 @@ namespace Mono.ASPNET
 				case "--port":
 					oport = args [++i];
 					break;
+				case "--root":
+					rootDir = args [++i];
+					break;
+				case "--virtual":
+					virtualDir = args [++i];
+					break;
 				case "--help":
 					ShowHelp ();
 					return 0;
@@ -57,17 +68,34 @@ namespace Mono.ASPNET
 			}
 			
 			ushort port;
-
 			try {
 				port = Convert.ToUInt16 (oport);
-			} catch (Exception e) {
+			} catch (Exception) {
 				Console.WriteLine ("The value given for the listen port is not valid: " + oport);
 				return 1;
 			}
 			
-			Console.WriteLine ("Listening on port: " + port);
+			if (virtualDir == null || virtualDir == "")
+				virtualDir = "/";
+			else if (virtualDir [0] != '/')
+				virtualDir = "/" + virtualDir;
+
+			if (rootDir != null && rootDir != "")
+				Environment.CurrentDirectory = rootDir;
+
+			rootDir = Directory.GetCurrentDirectory ();
+			
+			Type type = typeof (XSPApplicationHost);
+			XSPApplicationHost host;
+			host =  (XSPApplicationHost) ApplicationHost.CreateApplicationHost (type, virtualDir, rootDir);
 			host.SetListenAddress (port);
+			
+			Console.WriteLine ("Listening on port: {0}", port);
+			Console.WriteLine ("Root directory: {0}", rootDir);
+			Console.WriteLine ("Virtual directory: {0}", virtualDir);
+
 			host.Start ();
+
 			return 0;
 		}
 	}

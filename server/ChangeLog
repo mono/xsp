@@ -1,3 +1,14 @@
+2003-02-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: .dbg files are gone.
+
+	* MonoWorkerRequest.cs: fixed MapPath to deal with virtual directories.
+	* XSPWorkerRequest.cs: some cosmetic changes along with a fix when
+	redirecting to location page.
+
+	* server.cs: new options to set the root and virtual directory for the
+	application.
+
 2003-02-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs: when running under MS runtime, closing 'stream'

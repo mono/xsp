@@ -172,8 +172,7 @@ namespace Mono.ASPNET
 					responseHeaders.Insert (0, serverHeader);
 					responseHeaders.Insert (0, status);
 					responseHeaders.Append ("\r\n");
-					byte [] b = Encoding.GetBytes (responseHeaders.ToString ());
-					stream.Write (b, 0, b.Length);
+					WriteString (responseHeaders.ToString ());
 					headersSent = true;
 				}
 
@@ -362,20 +361,41 @@ namespace Mono.ASPNET
 			if (!Directory.Exists (localPath))
 				return true;
 
-			if (localPath.EndsWith (dirSeparatorString)) {
-				foreach (string indexFile in indexFiles) {
-					if (File.Exists (localPath + indexFile)) {
-						path += indexFile;
-						break;
-					}
+			if (!path.EndsWith ("/"))
+				path += "/";
+
+			bool catOne = false;
+			foreach (string indexFile in indexFiles) {
+				string testfile = Path.Combine (localPath, indexFile);
+				if (File.Exists (testfile)) {
+					path += indexFile;
+					catOne = true;
+					break;
 				}
-				return true;
 			}
 
-			SendStatus (302, "Found");
-			SendUnknownResponseHeader ("Location", path + '/');
+			if (!catOne)
+				return true;
+
+			SendStatus (302, "Moved");
+			WriteString (status);
+			WriteString ("Location: " + path + "\r\n");
+			WriteString ("Content-Type: text/html\r\n");
+			string page = "<html><head><title>Object moved</title></head>" + 
+				      "<body><h1>Object Moved</h1>Document moved <a href=\"" +
+				      path + "\">here</a></body>";
+
+			WriteString ("Content-Length: " + page.Length + "\r\n\r\n");
+			WriteString (page);
+			headersSent = true;
 			FlushResponse (true);
 			return false;
+		}
+
+		void WriteString (string s)
+		{
+			byte [] b = Encoding.GetBytes (s);
+			stream.Write (b, 0, b.Length);
 		}
 
 		private bool GetRequestLine ()

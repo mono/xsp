@@ -1,3 +1,8 @@
+2003-03-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* MonoWorkerRequest.cs: added a MapPathEvent that is fired before doing
+	the normal MapPath stuff and can provide alternate mappings.
+
 2003-02-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile: .dbg files are gone.

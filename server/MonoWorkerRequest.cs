@@ -62,6 +62,37 @@ using System.Web.Hosting;
 
 namespace Mono.ASPNET
 {
+	public class MapPathEventArgs : EventArgs
+	{
+		string path;
+		string mapped;
+		bool isMapped;
+
+		public MapPathEventArgs (string path)
+		{
+			this.path = path;
+			isMapped = false;
+		}
+
+		public string Path {
+			get { return path; }
+		}
+		
+		public bool IsMapped {
+			get { return isMapped; }
+		}
+
+		public string MappedPath {
+			get { return mapped; }
+			set {
+				mapped = value;
+				isMapped = (value != null && value != "");
+			}
+		}
+	}
+
+	public delegate void MapPathEventHandler (object sender, MapPathEventArgs args);
+	
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
 		IApplicationHost appHost;
@@ -79,6 +110,8 @@ namespace Mono.ASPNET
 			this.appHost = appHost;
 			response = new ArrayList ();
 		}
+
+		public event MapPathEventHandler MapPathEvent;
 
 		protected virtual Encoding Encoding {
 			get {
@@ -150,8 +183,26 @@ namespace Mono.ASPNET
 			return path;
 		}
 
+		string DoMapPathEvent (string path)
+		{
+			if (MapPathEvent != null) {
+				MapPathEventArgs args = new MapPathEventArgs (path);
+				foreach (MapPathEventHandler evt in MapPathEvent.GetInvocationList ()) {
+					evt (this, args);
+					if (args.IsMapped)
+						return args.MappedPath;
+				}
+			}
+
+			return null;
+		}
+		
 		public override string MapPath (string path)
 		{
+			string eventResult = DoMapPathEvent (path);
+			if (eventResult != null)
+				return eventResult;
+
 			if (path == null || path.Length == 0 || path == appHost.VPath)
 				return appHost.Path.Replace ('/', Path.DirectorySeparatorChar);
 

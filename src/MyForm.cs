@@ -31,12 +31,8 @@ public class MyHtmlForm : System.Web.UI.HtmlControls.HtmlForm
 
 	protected override void RenderChildren (HtmlTextWriter writer)
 	{
-		foreach (Control c in Controls){
-			Console.WriteLine ("Rendering {0} {1}", c.GetType (), c.ID);
-			Console.WriteLine ("Parent: {0}", c.Parent.ID);
-			Console.WriteLine ("Page: {0}", c.Page.ID);
+		foreach (Control c in Controls)
 			c.RenderControl (writer);
-		}
 	}
 
 }

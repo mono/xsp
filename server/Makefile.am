@@ -1,7 +1,7 @@
 MCSFLAGS= -debug+ -debug:full -nologo
 
-xspdir = $(bindir)
-modmonoserverdir = $(bindir)
+xspdir = $(libdir)/mono/1.0
+modmonoserverdir = $(libdir)/mono/1.0
 
 xsp_SCRIPTS = xsp.exe
 modmonoserver_SCRIPTS = mod-mono-server.exe

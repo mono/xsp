@@ -1,6 +1,8 @@
 MCS=@MCS@
-MCSFLAGS+= -debug+ -debug:full -nologo
-MKINSTALLDIRS=@top_builddir@mkinstalldirs 
+MCSFLAGS+= -debug+ -debug:full -nologo \
+	   -lib:@top_srcdir@/tools/nunitasp/source/NUnitAsp
+
+MKINSTALLDIRS=@top_srcdir@/mkinstalldirs 
 DISTFILES=Makefile.in $(ASPNET_FILES) $(CS_FILES)
 
 ASPNET_FILES = \

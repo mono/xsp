@@ -207,7 +207,8 @@ namespace Mono.ASPNET
 		{
 			try {
 				string line;
-				headers = new Hashtable ();
+				headers = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
+							CaseInsensitiveComparer.Default);
 				while ((line = ReadLine ()) != null && line.Length > 0) {
 					int colon = line.IndexOf (':');
 					if (colon == -1 || line.Length < colon + 2)

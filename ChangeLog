@@ -1,3 +1,8 @@
+2004-07-09 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: made the headers Hashtable case
+	insensitive.
+
 2004-07-08 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/BaseRequestBroker.cs: Modified file.

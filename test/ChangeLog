@@ -1,3 +1,11 @@
+2002-07-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* mono.png: image for the index page.
+	* index.aspx: index.aspx page which shows the list of available .aspx
+	files in the current directory. Contributed by Alp Toker.
+
+	* validator1.aspx: first validator test working!
+
 2002-07-23  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* dbpage2.aspx: new sample. It uses tabcontrol2 and sets up a page

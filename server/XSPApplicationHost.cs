@@ -81,6 +81,19 @@ namespace Mono.ASPNET
 		{
 			return ((XSPWorker)GetWorker (requestId)).IsConnected ();
 		}
+
+		public int GetReuseCount (int requestId)
+		{
+			XSPWorker worker = (XSPWorker) GetWorker (requestId);
+			return worker.GetReuseCount ();
+		}
+
+		public void Close (int requestId, bool keepAlive)
+		{
+			XSPWorker worker = (XSPWorker) GetWorker (requestId);
+			if (worker != null)
+				worker.Close (keepAlive);
+		}
 	}
 	
 	//
@@ -167,16 +180,23 @@ namespace Mono.ASPNET
 		LingeringNetworkStream stream;
 		IPEndPoint remoteEP;
 		IPEndPoint localEP;
+		Socket sock;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server)
 		{
-			stream = new LingeringNetworkStream (client, true);
+			stream = new LingeringNetworkStream (client, false);
+			sock = client;
 			this.server = server;
 
 			try {
 				remoteEP = (IPEndPoint) client.RemoteEndPoint;
 			} catch { }
 			this.localEP = (IPEndPoint) localEP;
+		}
+
+		public int GetReuseCount ()
+		{
+			return server.GetAvailableReuses (sock);
 		}
 
 		public void Run (object state)
@@ -201,8 +221,8 @@ namespace Mono.ASPNET
 
 				if (host == null) {
 					byte [] nf = HttpErrors.NotFound (rdata.Path);
-					stream.Write (nf, 0, nf.Length);
-					stream.Close ();
+					Write (nf, 0, nf.Length);
+					Close ();
 					return;
 				}
 				
@@ -216,13 +236,17 @@ namespace Mono.ASPNET
 						rdata.Path, rdata.PathInfo, rdata.QueryString,
 						rdata.Protocol, rdata.InputBuffer, redirect);
 			} catch (Exception e) {
-				Console.WriteLine (e);
+				if (!(e is RequestLineException))
+					Console.WriteLine (e);
+
 				try {
 					if (!(e is IOException)) {
 						byte [] error = HttpErrors.ServerError ();
-						stream.Write (error, 0, error.Length);
+						Write (error, 0, error.Length);
 					}
-					stream.Close ();
+				} catch {}
+				try {
+					Close ();
 				} catch {}
 
 				if (broker != null && requestId != -1)
@@ -242,9 +266,23 @@ namespace Mono.ASPNET
 		
 		public void Close ()
 		{
-			stream.Close ();
+			Close (false);
 		}
-		
+
+		public void Close (bool keepAlive)
+		{
+			if (!keepAlive) {
+				stream.Close ();
+				sock.Close ();
+				server.RemoveSocket (sock);
+				return;
+			}
+
+			stream.EnableLingering = false;
+			stream.Close ();
+			server.ReuseSocket (sock);
+		}
+
 		public bool IsConnected ()
 		{
 			return stream.Connected;

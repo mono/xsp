@@ -10,6 +10,7 @@
 
 
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Xml;
 using System.Web;
@@ -275,30 +276,16 @@ namespace Mono.ASPNET
 #endif
 		}
 
-		ArrayList allSockets = new ArrayList ();
-		ArrayList wSockets = new ArrayList ();
-		Hashtable timeouts = new Hashtable ();
+		SocketPool spool = new SocketPool ();
 
 		void RunServer ()
 		{
-			allSockets.Add (listen_socket);
-			wSockets.Add (listen_socket);
+			spool.AddReadSocket (listen_socket);
 			started = true;
 			Socket client;
 			int w;
 			while (!stop){
-				w = wSockets.Count;
-				// A bug on MS (or is it just me?) makes the following select return immediately
-				// when there's only one socket (the listen socket) in the array:
-				//   Socket.Select (wSockets, null, null, (w == 1) ? -1 : 1000 * 1000); // 1s
-				// so i have to do this for the MS runtime not to hung all the CPU.
-				if  (w > 1) {
-					Socket.Select (wSockets, null, null, 1000 * 1000); // 1s
-				} else {
-					listen_socket.Poll (-1, SelectMode.SelectRead);
-					// wSockets already contains listen_socket.
-				}
-
+				ArrayList wSockets = spool.SelectRead ();
 				w = wSockets.Count;
 				for (int i = 0; i < w; i++) {
 					Socket s = (Socket) wSockets [i];
@@ -311,40 +298,13 @@ namespace Mono.ASPNET
 						}
 						WebTrace.WriteLine ("Accepted connection.");
 						SetSocketOptions (client);
-						allSockets.Add (client);
-						timeouts [client] = DateTime.UtcNow;
+						spool.AddReadSocket (client, DateTime.UtcNow);
 						continue;
 					}
 
-					allSockets.Remove (s);
-					timeouts.Remove (s);
+					spool.RemoveReadSocket (s);
 					IWorker worker = webSource.CreateWorker (s, this);
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
-				}
-
-				w = timeouts.Count;
-				if (w > 0) {
-					Socket [] socks_timeout = new Socket [w];
-					timeouts.Keys.CopyTo (socks_timeout, 0);
-					DateTime now = DateTime.UtcNow;
-					foreach (Socket k in socks_timeout) {
-						DateTime atime = (DateTime) timeouts [k];
-						TimeSpan diff = now - atime;
-						if (diff.TotalMilliseconds > 15 * 1000) {
-							k.Close ();
-							allSockets.Remove (k);
-							timeouts.Remove (k);
-							continue;
-						}
-					}
-				}
-				
-				wSockets.Clear ();
-				if (allSockets.Count == 1) {
-					// shortcut, no foreach
-					wSockets.Add (listen_socket);
-				} else {
-					wSockets.AddRange (allSockets);
 				}
 			}
 
@@ -399,6 +359,117 @@ namespace Mono.ASPNET
 		public override object InitializeLifetimeService ()
 		{
 			return null;
+		}
+
+		public int GetAvailableReuses (Socket sock)
+		{
+			int res = spool.GetReuseCount (sock);
+			if (res == -1 || res >= 100)
+				return -1;
+
+			return 100 - res;
+		}
+
+		public void ReuseSocket (Socket sock)
+		{
+			IWorker worker = webSource.CreateWorker (sock, this);
+			spool.IncrementReuseCount (sock);
+			ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
+		}
+
+		public void RemoveSocket (Socket sock)
+		{
+			spool.RemoveReadSocket (sock);
+		}
+	}
+
+	class SocketPool {
+		ArrayList readSockets = new ArrayList ();
+		Hashtable timeouts = new Hashtable ();
+		Hashtable uses = new Hashtable ();
+
+		public ArrayList SelectRead ()
+		{
+			if (readSockets.Count == 0)
+				throw new InvalidOperationException ("There are no sockets.");
+
+			ArrayList wSockets = new ArrayList (readSockets);
+			// A bug on MS (or is it just me?) makes the following select return immediately
+			// when there's only one socket (the listen socket) in the array:
+			//   Socket.Select (wSockets, null, null, (w == 1) ? -1 : 1000 * 1000); // 1s
+			// so i have to do this for the MS runtime not to hung all the CPU.
+			if  (wSockets.Count > 1) {
+				Socket.Select (wSockets, null, null, 1000 * 1000); // 1s
+			} else {
+				Socket sock = (Socket) wSockets [0];
+				sock.Poll (-1, SelectMode.SelectRead);
+				// wSockets already contains listen_socket.
+			}
+
+			int w = timeouts.Count;
+			if (w > 0) {
+				Socket [] socks_timeout = new Socket [w];
+				timeouts.Keys.CopyTo (socks_timeout, 0);
+				DateTime now = DateTime.UtcNow;
+				foreach (Socket k in socks_timeout) {
+					if (wSockets.Contains (k))
+						continue;
+
+					DateTime atime = (DateTime) timeouts [k];
+					TimeSpan diff = now - atime;
+					if (diff.TotalMilliseconds > 15 * 1000) {
+						k.Close ();
+						readSockets.Remove (k);
+						timeouts.Remove (k);
+						uses.Remove (k);
+						continue;
+					}
+				}
+			}
+
+			return wSockets;
+		}
+
+		public void IncrementReuseCount (Socket sock)
+		{
+			if (uses.ContainsKey (sock)) {
+				int n = (int) uses [sock];
+				uses [sock] = n + 1;
+			} else {
+				uses [sock] = 1;
+			}
+		}
+
+		public int GetReuseCount (Socket sock)
+		{
+			if (uses.ContainsKey (sock))
+				return (int) uses [sock];
+
+			uses [sock] = 1;
+			return 1;
+		}
+		
+		public void AddReadSocket (Socket sock)
+		{
+			readSockets.Add (sock);
+		}
+
+		public void AddReadSocket (Socket sock, DateTime time)
+		{
+			if (readSockets.Contains (sock)) {
+				timeouts [sock] = time;
+				return;
+			}
+
+			readSockets.Add (sock);
+			timeouts [sock] = time;
+		}
+
+		public void RemoveReadSocket (Socket sock)
+		{
+			readSockets.Remove (sock);
+			timeouts.Remove (sock);
+			uses.Remove (sock);
 		}
 	}
 	
@@ -527,7 +598,8 @@ namespace Mono.ASPNET
 
 		static HttpErrors ()
 		{
-			string s = "HTTP/1.0 500 Server error\r\n\r\n" +
+			string s = "HTTP/1.0 500 Server error\r\n" +
+				   "Connection: close\r\n\r\n" +
 				   "<html><head><title>500 Server Error</title><body><h1>Server error</h1>\r\n" +
 				   "Your client sent a request that was not understood by this server.\r\n" +
 				   "</body></html>\r\n";
@@ -536,7 +608,8 @@ namespace Mono.ASPNET
 
 		public static byte [] NotFound (string uri)
 		{
-			string s = String.Format ("HTTP/1.0 404 Not Found\r\n\r\n" + 
+			string s = String.Format ("HTTP/1.0 404 Not Found\r\n" + 
+				"Connection: close\r\n\r\n" +
 				"<html><head><title>404 Not Found</title></head>\r\n" +
 				"<body><h1>Not Found</h1>The requested URL {0} was not found on this " +
 				"server.<p>\r\n</body></html>\r\n", uri);

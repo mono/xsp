@@ -17,7 +17,6 @@ using System.Web;
 
 namespace Mono.ASPNET
 {
-	[Serializable]
 	public class RequestData
 	{
 		public string Verb;
@@ -45,7 +44,13 @@ namespace Mono.ASPNET
 			return sb.ToString ();
 		}
 	}
-	
+
+	class RequestLineException : ApplicationException {
+		public RequestLineException () : base ("Error reading request line")
+		{
+		}
+	}
+
 	public class InitialWorkerRequest
 	{
 		string verb;
@@ -233,7 +238,7 @@ namespace Mono.ASPNET
 		public void ReadRequestData ()
 		{
 			if (!GetRequestLine ())
-				throw new Exception ("Error reading request line");
+				throw new RequestLineException ();
 
 			if (protocol == null) {
 				protocol = "HTTP/1.0";

@@ -1,3 +1,14 @@
+2004-11-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: if the client is HTTP/1.1 or sends a
+	keep-alive connection header, we keep the connection opened for 15
+	seconds waiting for more requests.
+	* server/ApplicationServer.cs: Modified file.
+	* server/InitialWorkerRequest.cs: throw a different exception if
+	something fails reading the request line.
+	* server/XSPApplicationHost.cs: Don't print errors due to socket read
+	timeout. Handle keep-alive connections.
+
 2004-11-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: workaround a bug in MS socket Select

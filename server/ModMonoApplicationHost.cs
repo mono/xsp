@@ -21,7 +21,7 @@ namespace Mono.ASPNET
 	// ModMonoWebSource: Provides methods to get objects and types specific
 	// to mod_mono.
 	//
-	public class ModMonoWebSource: IWebSource
+	public class ModMonoWebSource: IWebSource, IDisposable
 	{
 		string filename;
 		
@@ -58,6 +58,25 @@ namespace Mono.ASPNET
 		public IRequestBroker CreateRequestBroker ()
 		{
 			return new ModMonoRequestBroker ();
+		}
+
+		public void Dispose ()
+		{
+			Dispose (true);
+		}
+
+		protected virtual void Dispose (bool expl)
+		{
+			if (filename != null) {
+				string f = filename;
+				filename = null;
+				File.Delete (f);
+			}
+		}
+		
+		~ModMonoWebSource ()
+		{
+			Dispose (false);
 		}
 	}
 	

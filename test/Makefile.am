@@ -82,7 +82,9 @@ testfiles = 	browsercaps.aspx \
 		body.inc \
 		header.inc \
 		CompressExtension.cs \
-		sample.webapp
+		sample.webapp \
+		favicon.ico \
+		mono-xsp.css
 
 typedesc_src = typedesc.cs
 tabcontrol_src = tabcontrol.cs

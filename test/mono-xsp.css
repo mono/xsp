@@ -1,40 +1,57 @@
-<!--
-   body { 
-     font-family: "trebuchet ms", lucida, verdana, helvetica; 
-     padding: 0;
-     margin:  0;
-     background-color: #f8f8f4;
-   }
-   body, td, table { font-family: "trebuchet ms", lucida, verdana, helvetica; 
-                     font-size: 14px; }
+body {
+	font-family: "Trebuchet MS", lucida, verdana, helvetica, sans-serif; 
+	font-size: 14px;
+	color: #000;
+	background-color: #f8f8f4;
+	padding: 0;
+	margin:  0;
+}
 
+.header {
+	font-family: "Trebuchet MS", sans-serif;
+	color: #fff;
+	font-size: 22px;
+	background: #555;
+	border: 0;
+	margin: 0px;
+	padding: 1em;
+}
 
-	.title {
-    font-size: 22px;
-    color: #ffffff;
-    font-weight: bolder;
-		border-bottom: 2px solid #dddddd;
-    width: 100%;
-	}
+h1.header {
+	color: #fff;
+	background: #555;
+	font-weight: bolder;
+}
 
-	.subtitle {
-    font-size: 14px;
-    font-weight: bold;
-    color: #dcdedc;
-	}
+h2.header {
+	font-size: 14px;
+	font-weight: bold;
+	color: #dcdedc;
+	background: #555;
+	vertical-align: top;
+	margin-left: 70px;
+	margin-top: 0;
+	border-top: 2px solid;
+}
 
-	pre { font-size: 12px; }
+ul.dirlist {
+	list-style: url(small-icon.png);
+}
 
+a.aspx { background: #f1f1ed; }
+a.ashx { background: #0cc; }
+a.asmx { background: #ee0; }
 
-  p { margin: 10px; }
+pre { font-size: 12px; }
 
-  a { color: #72716a; }
+p { margin: 10px; }
 
+a { color: #72716a; }
 
-	.shell { 
-	border-style: solid; background: #000000; color: #bbbbbb;
-	#777777; border-width:
-	1px; padding: 2pt; 
+.shell { 
+	border-style: solid; background: #000; color: #bbb;
+	border-width: 1px;
+	padding: 2pt; 
 	margin:15px;
-	}
-// --> 
+}
+

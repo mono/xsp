@@ -1,0 +1,23 @@
+This is the README file for xsp/nunit-tests.
+
+Directory layout:
+
+	standalone/
+		Contains tests that do not need anything special that may
+		conflict with other tests, such as a particular
+		web.config/global.asax.
+
+How to run standalone tests
+----------------------------
+
+1. Run make.
+2. cd standalone
+3. run 'xsp'
+4. From another terminal, go to standalone directory and run:
+	nunit-console standalone-tests.dll
+		or
+	gnunit standalone-tests.dll
+
+
+-Gonzalo
+

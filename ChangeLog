@@ -1,3 +1,9 @@
+2004-12-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: first remove the socket, then close it.
+	Seems like the GetHashCode method returns a different value after the
+	socket is closed. Fixes bug #70449.
+
 2004-12-10  Raja R Harinath  <rharinath@novell.com>
 
 	* doc/Makefile.am (mod-mono-server.1): Fix non-srcdir build.

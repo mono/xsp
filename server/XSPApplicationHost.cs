@@ -293,8 +293,8 @@ namespace Mono.ASPNET
 		{
 			if (!keepAlive) {
 				stream.Close ();
-				sock.Close ();
 				server.RemoveSocket (sock);
+				sock.Close ();
 				return;
 			}
 

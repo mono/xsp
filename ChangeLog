@@ -1,3 +1,10 @@
+2004-12-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs:
+	* server/XSPApplicationHost.cs: 
+	* server/LingeringNetworkStream.cs: the connection is now closed if we
+	get an error writing to the socket.
+
 2004-12-15  Raja R Harinath  <rharinath@novell.com>
 
 	* server/Makefile.am (CLEANFILES): Clean up *.exe and *.mdb.

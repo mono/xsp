@@ -291,10 +291,9 @@ namespace Mono.ASPNET
 
 		public void Close (bool keepAlive)
 		{
-			if (!keepAlive) {
+			if (!keepAlive || !IsConnected ()) {
 				stream.Close ();
-				server.RemoveSocket (sock);
-				sock.Close ();
+				server.CloseSocket (sock);
 				return;
 			}
 

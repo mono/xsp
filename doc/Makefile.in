@@ -1,7 +1,9 @@
 DESTDIR=
+PREFIX=@prefix@
+MKINSTALLDIRS=@top_builddir@mkinstalldirs 
 
 MANPAGES= xsp.1
-MANDIR = $(DESTDIR)@prefix@/man/man1 
+MANDIR = $(DESTDIR)$(PREFIX)/man/man1 
 
 .PHONY: all install clean uninstall
 
@@ -10,9 +12,9 @@ all:
 clean:
 
 install:
-	@top_builddir@mkinstalldirs $(MANDIR)
+	$(MKINSTALLDIRS) $(MANDIR)
 	cp $(MANPAGES) $(MANDIR)
 
 uninstall:
-	-test -d $(DESTDIR)@prefix@/man/man1 && cd $(MANDIR) && rm -f $(MANPAGES)
+	-test -d $(DESTDIR)$(PREFIX)/man/man1 && cd $(MANDIR) && rm -f $(MANPAGES)
 

@@ -1,5 +1,8 @@
 MCS=@MCS@
 MCSFLAGS+= -debug+ -debug:full -nologo
+PREFIX=@prefix@
+DESTDIR=
+MKINSTALLDIRS=@top_builddir@mkinstalldirs 
 
 # 
 XSP_REFERENCES= System.Web
@@ -26,14 +29,14 @@ MODMONO_SERVER_SOURCES =  IApplicationHost.cs \
 			  server.cs
 
 EXES = xsp.exe mod-mono-server.exe
-LOCAL_BIN_DIR=$(DESTDIR)@prefix@/bin
+LOCAL_BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 
 .PHONY: all install clean uninstall trace
 
 all: $(EXES)
 	
 install: $(EXES)
-	@top_builddir@mkinstalldirs $(LOCAL_BIN_DIR)
+	$(MKINSTALLDIRS) $(LOCAL_BIN_DIR)
 	cp $(EXES) $(LOCAL_BIN_DIR)
 
 xsp.exe: $(XSP_SOURCES)

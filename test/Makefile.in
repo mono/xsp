@@ -1,29 +1,35 @@
 MCS=@MCS@
+PREFIX=@prefix@
+DESTDIR=
+MKINSTALLDIRS=@top_builddir@mkinstalldirs 
 
 %.dll: %.cs
 	$(MCS) -r:System.Web.dll -target:library -out:$@ $^
 
 DLLS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll 
 EXES = ServiceClient.exe
-SAMPLES_DIR = $(DESTDIR)@prefix@/share/doc/xsp/test
+SAMPLES_DIR = $(DESTDIR)$(PREFIX)/share/doc/xsp/test
+SAMPLES_BIN_DIR = $(DESTDIR)$(PREFIX)/share/doc/xsp/test/bin
 
-EVERYTHING = $(DLLS) \
-	     $(EXES) \
+EVERYTHING = $(EXES) \
 	     *.aspx \
 	     *.ascx \
 	     *.asmx \
 	     *.ashx \
 	     *.config \
 	     *.asax \
-	     *.xml
+	     *.xml \
+	     *.png
 
 .PHONY: all install clean uninstall
 
 all: $(DLLS) $(EXES)
 
-install: $(EVERYTHING)
-	@top_builddir@mkinstalldirs $(SAMPLES_DIR)
+install: $(EVERYTHING) $(DLLS)
+	$(MKINSTALLDIRS) $(SAMPLES_DIR)
 	cp $(EVERYTHING) $(SAMPLES_DIR)
+	$(MKINSTALLDIRS) $(SAMPLES_BIN_DIR)
+	cp $(DLLS) $(SAMPLES_BIN_DIR)
 
 uninstall:
 	-test -d $(SAMPLES_DIR) && cd $(SAMPLES_DIR) && rm -f $(EVERYTHING)

@@ -1,3 +1,12 @@
+2003-10-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile.in:
+	* autogen.sh:
+	* configure.in:
+	* doc/Makefile.in:
+	* server/Makefile.in:
+	* test/Makefile.in: added 'dist' target to make a tarball.
+
 2003-09-27  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPApplicationHost.cs: really add the sponsors now.

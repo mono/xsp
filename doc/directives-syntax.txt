@@ -1,0 +1,134 @@
+Directives
+-----------
+They are usually located at the beginning of the ASPX page, but you can put
+them wherever you want. Directive and attribute names are case insensitive.
+
+The MS states that you can't prepend nor append an space to the equals sign 
+in an attribute=value pair. This rule is only applicable to the first attribute
+in the case that you don't include a directive name (which defaults to @Page).
+
+Also MS picks directives from inside comments!!! (<!--...-->).
+
+@ Page Directive
+-----------------
+Syntax: <%@ Page attribute="value" [attribute="value"] %>
+There can be only, at most, one page directive. Mutually exclusive with
+control.
+
+	Attributes
+	------------------
+	AspCompat 
+	AutoEventWireup 
+	Buffer 
+	ClassName 
+	ClientTarget 
+	CodePage 
+	CompilerOptions 
+	ContentType 
+	Culture 
+	Debug 
+	Description 
+	EnableSessionState 
+	EnableViewState 
+	EnableViewStateMac 
+	ErrorPage 
+	Explicit 
+	Inherits 
+	Language 
+	LCID 
+	ResponseEncoding 
+	Src 
+	SmartNavigation 
+	Strict 
+	Trace 
+	TraceMode 
+	Transaction 
+	UICulture 
+	WarningLevel 
+
+
+@ Control Directive
+--------------------
+Syntax: <%@ Control attribute="value" [attribute="value"] %>
+There can be only, at most, one control directive. Muttually exclusive with
+Page.
+
+	Attributes
+	------------------
+	AutoEventWireup 
+	ClassName 
+	CompilerOptions 
+	Debug 
+	Description 
+	EnableViewState 
+	Explicit 
+	Inherits 
+	Language 
+	Strict 
+	Src 
+	WarningLevel 
+
+
+@ Import Directive
+--------------------
+syntax: <%@ Import namespace="value" %>
+Adds a new namespace to the 'using' list of the generated program.
+
+There are already a list of 14 automagically added:
+
+	* System 
+	* System.Collections 
+	* System.Collections.Specialized 
+	* System.Configuration 
+	* System.IO 
+	* System.Text 
+	* System.Text.RegularExpressions 
+	* System.Web 
+	* System.Web.Caching 
+	* System.Web.Security 
+	* System.Web.SessionState 
+	* System.Web.UI 
+	* System.Web.UI.HtmlControls 
+	* System.Web.UI.WebControls 
+
+
+@ Implements Directive
+-----------------------
+Syntax: <%@ Implements interface="iface_name" %>
+Declare that the generated class implements iface_name.
+
+@ Register Directive
+----------------------
+Syntax: 
+<%@ Register tagprefix="tagprefix" Namespace="namespace" Assembly="assembly" %>
+<%@ Register tagprefix="tagprefix" Tagname="tagname" Src="pathname" %>
+
+Associate alias with namespace/class. So you can use <tagprefix:tagname..> for
+a custom control.
+
+
+@ Assembly Directive
+----------------------
+Syntax: 
+<%@ Assembly Name="assemblyname" %>
+<%@ Assembly Src="pathname" %>
+
+/r:assemblyname or compiles pathname and /r:pathname.dll
+
+@ OutputCache Directive
+--------------------------
+Syntax: 
+<%@ OutputCache Duration="#ofseconds" Location="Any | Client | Downstream | \
+Server | None" VaryByControl="controlname" VaryByCustom="browser | \
+customstring" VaryByHeader="headers" VaryByParam="parametername" %>
+
+Controls the output cache policies.
+
+
+@ Reference Directive
+--------------------------
+Syntax: <%@ Reference page | control="pathtofile" %>
+
+Declares a page or control source file which should be compiled and linked
+against.
+

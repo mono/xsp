@@ -65,6 +65,7 @@ testfiles = 	browsercaps.aspx \
 		registertest2.ascx \
 		ConverterService.asmx \
 		TestService.asmx \
+		chunked.ashx \
 		monodoc.ashx \
 		webhandler.ashx \
 		mod-mono-server.exe.config \

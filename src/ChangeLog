@@ -1,3 +1,13 @@
+2002-05-22  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* asp-tokenizer.cs: some cleanup and report correctly line/column
+	information on failure. Allow single quoted strings in attribute
+	values.
+
+	* asp-parser.cs: added support for HTML comments.
+
+	* generator.cs: added support for float and double properties.
+
 2002-05-21  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* aspelements.cs: 

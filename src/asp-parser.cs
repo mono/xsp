@@ -22,11 +22,13 @@ class AspParser {
 	private void error ()
 	{
 		Console.WriteLine ("Error: " + tokenizer.location);
+		Environment.Exit (-1);
 	}
 
 	private void error (string msg)
 	{
 		Console.WriteLine ("Error: "+ msg + "\n" + tokenizer.location);
+		Environment.Exit (-1);
 	}
 
 	public AspParser (AspTokenizer tokenizer)
@@ -52,126 +54,115 @@ class AspParser {
 		return true;
 	}
 
+	private void AddPlainText (string newText)
+	{
+		if (elements.Count > 0){
+			Element element = (Element) elements [elements.Count - 1];
+			if (element is PlainText){
+				((PlainText) element).Append (newText);
+				return;
+			}
+		}
+		elements.Add (new PlainText (newText));
+	}
+	
 	public void parse ()
 	{
 		int token;
+		Element element;
 		Tag tag_element;
-		PlainText text;
 		string tag = "";
 
 		while ((token = tokenizer.get_token ()) != Token.EOF){
 			if (tokenizer.Verbatim){
-				StringBuilder vb_text = new StringBuilder ();
-				string end_verbatim = "</" + tag.ToUpper () + ">";
-				int i = 0;
+				string end_verbatim = "</" + tag + ">";
+				string verbatim_text = get_verbatim (token, end_verbatim);
 
-				while (token != Token.EOF){
-					if (Char.ToUpper ((char) token) == end_verbatim [i]){
-						i++;
-						if (i >= end_verbatim.Length){
-							elements.Add (new PlainText (vb_text));
-							elements.Add (new CloseTag (tag));
-							tokenizer.Verbatim = false;
-							break;
-						}
-						token = tokenizer.get_token ();
-						continue;
-					} else {
-						for (int j = 0; j < i; j++)
-							vb_text.Append (end_verbatim [j]);
-					}
+				if (verbatim_text == null)
+					error ("Unexpected EOF processing " + tag);
 
-					i = 0;
-					vb_text.Append ((char) token);
-					token = tokenizer.get_token ();
-				} 
+				AddPlainText (verbatim_text);
+				elements.Add (new CloseTag (tag));
+				tokenizer.Verbatim = false;
+			}
+			else if (token == '<'){
+				element = get_tag ();
+				if (element == null)
+					error ();
+				elements.Add (element);
+				if (!(element is Tag)){
+					AddPlainText (((PlainText) element).Text);
+					continue;
+				}
 
-				if (token == Token.EOF)
-					throw new ApplicationException ("Unexpeted EOF processing " + tag);
-			} else if (token == '<'){
-				tag_element = get_tag ();
-				//TODO: nulls?
-				if (tag_element != null)
-					elements.Add (tag_element);
-
+				tag_element = element as Tag;
 				tag = tag_element.TagID.ToUpper ();
-				if (!tag_element.SelfClosing && 
-				    (tag.ToUpper () == "SCRIPT" || tag.ToUpper () == "PRE"))
+				if (!tag_element.SelfClosing && (tag == "SCRIPT" || tag == "PRE"))
 					tokenizer.Verbatim = true;
-			} else {
-				text = new PlainText ();
+			}
+			else {
+				StringBuilder text =  new StringBuilder ();
 				do {
 					text.Append (tokenizer.value);
 					token = tokenizer.get_token ();
 				} while (token != '<' && token != Token.EOF);
 				tokenizer.put_back ();
-				elements.Add (text);
+				AddPlainText (text.ToString ());
 			}
 		}
 	}
 
-	private Tag get_tag ()
+	private Element get_tag ()
 	{
 		int token = tokenizer.get_token ();
 		string id;
 		TagAttributes attributes;
 
 		switch (token){
-			case '%':
-				if (eat ('@')){
-					if (eat (Token.DIRECTIVE))
-						id = tokenizer.value;
-					else
-						id = "Page";
+		case '%':
+			if (eat ('@')){
+				id = (eat (Token.DIRECTIVE) ? tokenizer.value : "Page");
+				attributes = get_attributes ();
+				if (!eat ('%') || !eat ('>'))
+					error ("expecting '%>'");
 
-					attributes = get_attributes ();
-					if (!eat ('%')){
-						error ("expecting '%'");
-						return null;
-					}
-					if (!eat ('>')){
-						error ("expecting '>'");
-						return null;
-					}
-					return new Directive (id, attributes);
-				}
+				return new Directive (id, attributes);
+			}
 
-				if (eat ('=') || eat ('#')){
-					//FIXME: get var name
-					return null;
-				}
+			if (eat ('=')){
+				//FIXME: get var name
+			}
+			//FIXME: Code render block
+			return null;
+		case '/':
+			if (!eat (Token.IDENTIFIER))
+				error ("expecting TAGNAME");
+			id = tokenizer.value;
+			if (!eat ('>'))
+				error ("expecting '>'");
+			return new CloseTag (id);
+		case '!':
+			if (eat (Token.DOUBLEDASH)){
+				tokenizer.Verbatim = true;
+				string comment = get_verbatim ('-', "-->");
+				tokenizer.Verbatim = false;
+				if (comment == null)
+					error ("Unfinished HTML comment");
 
-				//FIXME: Code to insert directly
-				return null;
-			case '/':
-				if (!eat (Token.IDENTIFIER)){
-					error ("expecting TAGNAME");
-					return null;
-				}
-				id = tokenizer.value;
-				if (!eat ('>')){
-					error ("expecting '>'");
-					return null;
-				}
-				return new CloseTag (id);
-			case '!':
+				return new PlainText ("<!-" + comment + "-->");
+			} else {
 				//FIXME
-				if (eat ('-')){
-					// Comment
-				} else {
-					//  <!DOCTYPE...
-				}
-				return null;
-			case Token.IDENTIFIER:
-				id = tokenizer.value;
-				Tag tag = new Tag (id, get_attributes (), eat ('/'));
-				if (!eat ('>')){
-					error ("expecting '>'");
-					return null;
-				}
-				return tag;
-			default:
-				return null;
+				//  <!DOCTYPE...
+			}
+			return null;
+		case Token.IDENTIFIER:
+			id = tokenizer.value;
+			Tag tag = new Tag (id, get_attributes (), eat ('/'));
+			if (!eat ('>'))
+				error ("expecting '>'");
+			return tag;
+		default:
+			return null;
 		}
 	}
 
@@ -204,6 +195,34 @@ class AspParser {
 			return null;
 
 		return attributes;
+	}
+
+	private string get_verbatim (int token, string end)
+	{
+		StringBuilder vb_text = new StringBuilder ();
+		int i = 0;
+
+		while (token != Token.EOF){
+			if (Char.ToUpper ((char) token) == end [i]){
+				if (++i >= end.Length)
+					break;
+				token = tokenizer.get_token ();
+				continue;
+			}
+			else {
+				for (int j = 0; j < i; j++)
+					vb_text.Append (end [j]);
+			}
+
+			i = 0;
+			vb_text.Append ((char) token);
+			token = tokenizer.get_token ();
+		} 
+
+		if (token == Token.EOF)
+			return null;
+
+		return vb_text.ToString ();
 	}
 }
 

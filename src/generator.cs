@@ -360,34 +360,32 @@ public class Generator
 
 	private void ProcessDirective ()
 	{
-		Directive directive;
-
-		directive = (Directive) elements.Current;
+		Directive directive = (Directive) elements.Current;
 		TagAttributes att = directive.Attributes;
 		if (att == null)
 			return;
 
 		switch (directive.TagID.ToUpper ()){
-			case "PAGE":
-				PageDirective (att);
-				break;
-			case "IMPORT":
-				foreach (string key in att.Keys){
-					if (0 == String.Compare (key, "NAMESPACE", true)){
-						string _using = "using " + (string) att [key] + ";";
-						if (prolog.ToString ().IndexOf (_using) == -1)
-							prolog.AppendFormat ("\tusing {0};\n", (string) att [key]);
-						break;
-					}
+		case "PAGE":
+			PageDirective (att);
+			break;
+		case "IMPORT":
+			foreach (string key in att.Keys){
+				if (0 == String.Compare (key, "NAMESPACE", true)){
+					string _using = "using " + (string) att [key] + ";";
+					if (prolog.ToString ().IndexOf (_using) == -1)
+						prolog.AppendFormat ("\tusing {0};\n", (string) att [key]);
+					break;
 				}
-				break;
-			case "IMPLEMENTS":
-				string iface = (string) att ["interface"];
-				interfaces += ", " + iface;
-				break;
-			case "REGISTER":
-				RegisterDirective (att);
-				break;
+			}
+			break;
+		case "IMPLEMENTS":
+			string iface = (string) att ["interface"];
+			interfaces += ", " + iface;
+			break;
+		case "REGISTER":
+			RegisterDirective (att);
+			break;
 		}
 	}
 
@@ -566,6 +564,28 @@ public class Generator
 			} catch (Exception){
 				throw new ApplicationException (att + " is not a valid unsigned number " + 
 								"or is out of range.");
+			}
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
+		}
+		else if (prop_type == typeof (float)){
+			float value;
+			try {
+				value = Single.Parse (att);
+			} catch (Exception){
+				throw new ApplicationException (att + " is not  avalid float number or " +
+								"is out of range.");
+			}
+
+			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
+		}
+		else if (prop_type == typeof (double)){
+			double value;
+			try {
+				value = Double.Parse (att);
+			} catch (Exception){
+				throw new ApplicationException (att + " is not  avalid double number or " +
+								"is out of range.");
 			}
 
 			current_function.AppendFormat ("\t\t\t__ctrl.{0} = {1};\n", var_name, value);
@@ -1070,7 +1090,7 @@ public class Generator
 				else if (elements.Current is Tag)
 					ProcessHtmlTag ();
 				else
-					ProcessPlainText ();
+					throw new ApplicationException ("This place should not be reached.");
 			}
 		}
 	}

@@ -84,91 +84,89 @@ class AspTokenizer {
 		return (Char.IsLetterOrDigit (c) || c == '_' || c == '-');
 	}
 
+	private int read_char ()
+	{
+		int c = sr.Read ();
+
+		if (c == '\r' && sr.Peek () == '\n')
+			c = sr.Read ();
+
+		if (c == '\n'){
+			col = 0;
+			line++;
+		}
+		else if (c != -1)
+			col++;
+
+		return c;
+	}
+
 	private int NextToken ()
 	{
-		int c, previous;
+		int c;
 		
 		sb.Length = 0;
-		while ((c = sr.Read ()) != -1){
+		while ((c = read_char ()) != -1){
 			if (verbatim){
 				inTag = false;
 				sb.Append  ((char) c);
 				return c;
 			}
 
-			if (c == '"'){
-				if (!inTag)
-					sb.Append ((char) c);
+			if (inTag && (c == '"' || c == '\'')){
+				int previous;
+				int start = c;
 
 				previous = 0;
 				while ((c = sr.Peek ()) != -1) {
-					if (c != '"' || (c == '"' && previous == '\\')){
-						sb.Append ((char)sr.Read ());
-						col++;
-					} else 
+					if (c == start && previous != '\\'){
+						read_char ();
 						break;
+					}
+					sb.Append ((char) read_char ());
 					previous = c;
 				}
-
-				if (c == '"'){
-					sr.Read ();
-					if (!inTag)
-						sb.Append ((char) c);
-				}
-
-				return inTag ? Token.ATTVALUE : Token.TEXT;
-			}
 				
+				return Token.ATTVALUE;
+			}
+			
 			if (c == '<'){
 				inTag = true;
 				sb.Append ((char) c);
 				return c;
 			}
+
 			if (c == '>'){
 				inTag = false;
 				sb.Append ((char) c);
 				return c;
 			}
 
-			if (inTag && "%@=:/!".IndexOf ((char) c) != -1){
+			if (inTag && "%@=/!".IndexOf ((char) c) != -1){
 				sb.Append ((char) c);
 				return c;
 			}
 
 			if (inTag && c == '-' && sr.Peek () == '-'){
 				sb.Append ("--");
-				sr.Read ();
+				read_char ();
 				return Token.DOUBLEDASH;
 			}
 
 			if (!inTag){
-				previous = 0;
 				sb.Append ((char) c);
-				while ((c = sr.Peek ()) != -1) {
-					if (c != '<' && (c != '"' || (c == '"' && previous == '\\'))){
-						sb.Append ((char)sr.Read ());
-						if (c == '\n'){	line++; col = 0; }
-						col++;
-					} else 
-						break;
-					previous = c;
-				}
+				while ((c = sr.Peek ()) != -1 && c != '<')
+					sb.Append ((char) read_char ());
 
-				if (c == -1)
-					return 0;
-
-				return Token.TEXT;
+				return (c != -1) ? Token.TEXT : Token.EOF;
 			}
 
 			if (inTag && is_identifier_start_character ((char) c)){
 				sb.Append ((char) c);
 				while ((c = sr.Peek ()) != -1) {
-					if (is_identifier_part_character ((char) c) || c == ':'){
-						sb.Append ((char)sr.Read ());
-						if (c == '\n'){	line++; col = 0; }
-						col++;
-					} else 
+					if (!is_identifier_part_character ((char) c) && c != ':')
 						break;
+					sb.Append ((char) read_char ());
 				}
 
 				if (current_token == '@' && Directive.IsDirectiveID (sb.ToString ()))
@@ -179,14 +177,6 @@ class AspTokenizer {
 
 				return Token.IDENTIFIER;
 			}
-
-			if (c == '\r' && sr.Peek () == '\n')
-				c = sr.Read ();
-
-			if (c == '\n'){
-				col = 1;
-				line++;
-			}
 		}
 
 		return Token.EOF;
@@ -194,7 +184,7 @@ class AspTokenizer {
 
 	public string value 
 	{
-		get { return sb.ToString ();}
+		get { return sb.ToString (); }
 	}
 
 	public string location 

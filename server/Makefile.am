@@ -12,8 +12,11 @@ endif
 
 xsp_SCRIPTS = xsp.exe
 xsp2_SCRIPTS = $(XSP2_EXE)
+
+if !XSP_ONLY
 modmonoserver_SCRIPTS = mod-mono-server.exe $(MODMONOSERVER2_EXE)
 modmonoserver2_SCRIPTS = $(MODMONOSERVER2_EXE)
+endif
 
 CLEANFILES = *.exe *.mdb
 

@@ -1,3 +1,8 @@
+2005-01-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in:
+	* server/Makefile.am: don't build mod-mono-server if compiling with csc.
+
 2005-01-20  Lluis Sanchez Gual <lluis@ximian.com>
 
 	* configure.in: Added new test makefiles.

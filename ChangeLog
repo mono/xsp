@@ -1,5 +1,15 @@
 2003-10-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* configure.in:
+	* doc/Makefile.am:
+	* server/Makefile.in:
+	* test/Makefile.in: use automake.
+
+	* Makefile.in:
+	* doc/Makefile.in: Removed files.
+
+2003-10-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* Makefile.in: fix dist target.
 	* server/XSPApplicationHost.cs: re-added line removed by mistake.
 	* server/server.cs: added --nonstop argument to allow xsp be run with

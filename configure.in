@@ -1,12 +1,7 @@
 AC_PREREQ(2.57)
 AC_INIT(server/server.cs)
-
-PACKAGE_NAME=xsp
-PACKAGE_VERSION=0.6.99
-
-AC_SUBST(PACKAGE)
-AC_SUBST(PACKAGE_NAME)
-AC_SUBST(PACKAGE_VERSION)
+AM_INIT_AUTOMAKE(xsp, 0.6.99)
+AM_MAINTAINER_MODE
 
 AC_PROG_INSTALL
 
@@ -25,8 +20,8 @@ fi
 echo "$CS compiler: $MCS"
 
 AC_SUBST(MCS)
-AC_CONFIG_FILES([Makefile
-                 doc/Makefile
-                 server/Makefile
-                 test/Makefile])
-AC_OUTPUT
+AC_OUTPUT([Makefile
+	doc/Makefile
+	server/Makefile
+	test/Makefile])
+

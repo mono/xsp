@@ -55,7 +55,7 @@ ServiceClient.exe: extensions.dll ServiceClient.cs Reference.cs
 clean:
 	rm -f *.dll *~ *.pdb
 
-dist:
+distdir:
 	$(MKINSTALLDIRS) $(DESTDIR)$(PREFIX)/test
 	cp $(DISTFILES) $(DESTDIR)$(PREFIX)/test
 

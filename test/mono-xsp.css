@@ -14,7 +14,7 @@ body {
 	background: #555;
 	border: 0;
 	margin: 0px;
-	padding: 1em;
+	padding: 10px;
 }
 
 h1.header {
@@ -32,6 +32,7 @@ h2.header {
 	margin-left: 70px;
 	margin-top: 0;
 	border-top: 2px solid;
+	padding: 0;
 }
 
 ul.dirlist {

@@ -26,9 +26,9 @@ dist-hook:
 	cp -p $(srcdir)/TreeLineImages/*gif $(distdir)/TreeLineImages
 
 install-data-hook:
-	$(mkinstalldirs) $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
-	cp $(srcdir)/TreeLineImages/*gif $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
+	$(mkinstalldirs) $(DESTDIR)$(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
+	cp $(srcdir)/TreeLineImages/*gif $(DESTDIR)$(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
 
 uninstall-hook:
-	rm $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages/*gif
+	rm -f $(DESTDIR)$(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages/*gif
 

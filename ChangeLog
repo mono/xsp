@@ -1,3 +1,9 @@
+2004-06-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/Makefile.am: added typedesc.*
+	* test/typedesc.(aspx|cs): sample test control showing how a Type that
+	has a TypeDescriptor can be saved/restored to/from ViewState.
+
 2004-06-10  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: only send the Close to the module

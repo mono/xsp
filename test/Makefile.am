@@ -35,6 +35,7 @@ testfiles = 	browsercaps.aspx \
 		tabcontrol2.aspx \
 		tabcontrol.aspx \
 		temperature.aspx \
+		typedesc.aspx \
 		validator1.aspx \
 		web_adrotator.aspx \
 		web_button.aspx \
@@ -80,12 +81,14 @@ testfiles = 	browsercaps.aspx \
 		CompressExtension.cs \
 		sample.webapp
 
+typedesc_src = typedesc.cs
 tabcontrol_src = tabcontrol.cs
 tabcontrol2_src = tabcontrol2.cs
 codebehind_src = codebehind1.cs
 extensions_src = TraceExtension.cs EncryptExtension.cs DumpExtension.cs
 serviceclient_src = ServiceClient.cs Reference.cs
 
+typedesc_build = $(addprefix $(srcdir)/, $(typedesc_src))
 tabcontrol_build = $(addprefix $(srcdir)/, $(tabcontrol_src))
 tabcontrol2_build = $(addprefix $(srcdir)/, $(tabcontrol2_src))
 codebehind_build = $(addprefix $(srcdir)/, $(codebehind_src))
@@ -100,25 +103,28 @@ samplesexedir = $(datadir)/doc/xsp/test
 samplesexe_SCRIPTS = ServiceClient.exe
 
 samplesbindir = $(datadir)/doc/xsp/test/bin
-samplesbin_SCRIPTS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll
+samplesbin_SCRIPTS = tabcontrol.dll tabcontrol2.dll codebehind1.dll extensions.dll typedesc.dll
 
 CLEANFILES = $(samplesbin_SCRIPTS) $(samplesexe_SCRIPTS)
 
 EXTRA_DIST = $(testfiles) \
+	     $(typedesc_src) \
 	     $(tabcontrol_src) \
 	     $(tabcontrol2_src) \
 	     $(codebehind_src) \
 	     $(extensions_src) \
 	     $(serviceclient_src)
 
+%.dll: %.cs
+	$(MCS) -r:System.Web.dll -t:library -out:$@ $^
+
 tabcontrol.dll: $(tabcontrol_build)
-	$(MCS) -r:System.Web.dll -target:library -out:$@ $^
 
 tabcontrol2.dll: $(tabcontrol2_build)
-	$(MCS) -r:System.Web.dll -target:library -out:$@ $^
 
 codebehind1.dll: $(codebehind_build)
-	$(MCS) -r:System.Web.dll -target:library -out:$@ $^
+
+typedesc.dll: $(typedesc_build)
 
 extensions.dll: $(extensions_build)
 	$(MCS) -r:System.Web.dll -r:System.Web.Services.dll -target:library \

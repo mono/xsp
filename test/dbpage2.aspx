@@ -41,6 +41,16 @@
 			cncString = "server=127.0.0.1;user id=monotest;password=monotest;dbname=monotest";
 	}
 
+	void Page_Unload ()
+	{
+		if (cnc != null) {
+			try {
+				cnc.Close ();
+			} catch {}
+			cnc = null;
+		}
+	}
+
 	void ShowError (Exception exc)
 	{
 		noDBLine.InnerHtml += "<p><b>The error was:</b>\n<pre> " + exc + "</pre><p>";
@@ -71,7 +81,6 @@
 			cnc.Open ();
 		} catch (Exception exc) {
 			ShowError (exc);
-			cnc = null;
 		}
 	}
 

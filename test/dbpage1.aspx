@@ -66,6 +66,15 @@
 			cnc.Open ();
 		} catch (Exception exc) {
 			ShowError (exc);
+		}
+	}
+
+	void Page_Unload ()
+	{
+		if (cnc != null) {
+			try {
+				cnc.Close ();
+			} catch {}
 			cnc = null;
 		}
 	}

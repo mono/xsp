@@ -1,3 +1,9 @@
+2004-06-12 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* test/dbpage1.aspx:
+	* test/dbpage2.aspx: fixed connection leaks by adding a Page_Unload
+	method that closes the connection.
+
 2004-06-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/Makefile.am: added typedesc.*

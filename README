@@ -40,7 +40,7 @@
         If you are interested in hosting the ASP.NET classes for
     higher performance in an Apache module or your favorite web
     server, you could use the code in this module as a starting point
-    for it. 
+    for it. See mod_mono in mono CVS.
 
 	The code to look at is: server/MonoApplicationHost.cs and
     server/MonoWorkerRequest.cs.  

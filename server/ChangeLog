@@ -1,3 +1,10 @@
+2003-02-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* Makefile: removed installation of server.exe.config.
+	* XSPWorkerRequest.cs: buffered input from the socket.
+	* server.exe.config: Removed file. Yahoo!
+	* web.config: authentication mode set to Forms.
+
 2003-02-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPWorkerRequest.cs: fixed ReadEntityBody. Thanks to Brian Ritchie.

@@ -8,14 +8,11 @@ Steps for installing the server:
 	...and follow the instructions...
 
     You can change the listen port from the default (8080) using the
-    configuration file. Currently you have to change it in
-    server/test/server.exe.config file, but we recommend keeeping that
-    value synched with the one in server/test/web.config file because
-    the first one will be deprecated in favor of the latter.
+    configuration file (web.config).
 
     Or you can use the --port command line option.
 
     If you're gonna try the samples that use a database (such as dbpage1.aspx),
     you may need to modify the values of DBProviderAssembly, DBConnectionType
-    and/or DbConnectionString in server.exe.config file.
+    and/or DbConnectionString in web.config file.
 

@@ -35,7 +35,11 @@ namespace Mono.ASPNET
 		bool headersSent;
 		StringBuilder responseHeaders;
 		string status;
-		ArrayList response;
+		MemoryStream response;
+		byte [] inputBuffer;
+		int inputLength;
+		int position;
+		
 		static string serverHeader;
 
 		static string dirSeparatorString = Path.DirectorySeparatorChar.ToString ();
@@ -71,8 +75,47 @@ namespace Mono.ASPNET
 			this.appHost = appHost;
 			stream = client.GetStream ();
 			responseHeaders = new StringBuilder ();
-			response = new ArrayList ();
+			response = new MemoryStream ();
 			status = "HTTP/1.0 200 OK\r\n";
+		}
+
+		void FillBuffer ()
+		{
+			inputBuffer = new byte [2048];
+			inputLength = stream.Read (inputBuffer, 0, 2048);
+			position = 0;
+		}
+
+		int ReadInputByte ()
+		{
+			if (inputBuffer == null)
+				FillBuffer ();
+
+			if (position >= inputLength)
+				return stream.ReadByte ();
+
+			return (int) inputBuffer [position++];
+		}
+
+		int ReadInput (byte [] buffer, int offset, int size)
+		{
+			if (inputBuffer == null)
+				FillBuffer ();
+
+			int length = inputLength - position;
+			if (length > 0) {
+				if (length > size)
+					length = size;
+
+				Buffer.BlockCopy (inputBuffer, position, buffer, offset, length);
+				position += length;
+				offset += length;
+				size -= length;
+				if (size == 0)
+					return length;
+			}
+
+			return (length + stream.Read (buffer, offset, size));
 		}
 
 		string ReadLine ()
@@ -81,7 +124,7 @@ namespace Mono.ASPNET
 			StringBuilder text = new StringBuilder ();
 
 			while (true) {
-				int c = stream.ReadByte ();
+				int c = ReadInputByte ();
 
 				if (c == -1) {				// end of stream
 					if (text.Length == 0)
@@ -133,11 +176,11 @@ namespace Mono.ASPNET
 					headersSent = true;
 				}
 
-				foreach (byte [] bytes in response)
-					stream.Write (bytes, 0, bytes.Length);
+				byte [] bytes = response.GetBuffer ();
+				stream.Write (bytes, 0, bytes.Length);
 
 				stream.Flush ();
-				response.Clear ();
+				response.SetLength (0);
 				if (finalFlush)
 					CloseConnection ();
 			} catch (Exception e) {
@@ -430,7 +473,7 @@ namespace Mono.ASPNET
 			if (buffer == null || size == 0)
 				return 0;
 
-			return stream.Read (buffer, 0, size);
+			return ReadInput (buffer, 0, size);
 		}
 
 		public override void SendResponseFromMemory (byte [] data, int length)
@@ -439,9 +482,10 @@ namespace Mono.ASPNET
 			if (length <= 0)
 				return;
 
-			byte [] bytes = new byte [length];
-			Array.Copy (data, 0, bytes, 0, length);
-			response.Add (bytes);
+			if (data.Length < length)
+				length = data.Length;
+
+			response.Write (data, 0, length);
 		}
 		
 		public override void SendStatus (int statusCode, string statusDescription)

@@ -21,14 +21,12 @@ all: server.exe
 install: server.exe web.config global.asax
 	rm -rf test
 	mkdir -p test/bin
-	cp server.exe *.config global.asax test
+	cp server.exe web.config global.asax test
 	cp server.exe test/bin
 	-test -f server.dbg && cp server.dbg test
 	-test -f server.dbg && cp server.dbg test/bin
-	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png test
+	cp ../test/*.aspx ../test/*.ascx ../test/*.xml ../test/*.png ../test/*.xsl test
 	cp ../test/*.dll test/bin
-	# Remove next line once assembly loading is fixed.
-	cp ../test/*.dll test
 
 server.exe: $(SOURCES)
 	$(CSC) $(CSCFLAGS) $(REFS) /out:$@ $^

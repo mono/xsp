@@ -1,3 +1,8 @@
+2003-09-04  Lluis Sanchez Gual <lluis@ximian.com>
+
+	* XSPWorkerRequest.cs: GetServerName(): return the 
+	  address of the local server.
+
 2003-08-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* InitialWorkerRequest.cs: removed Console...
@@ -326,4 +331,3 @@
 	* web.config: new web server that uses ASP.NET hosting capabilities.
 	It works with MS runtime and will be used to debug our classes from
 	now on. xsp/src/* is now obsoleted and will stop working some time soon.
-

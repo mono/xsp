@@ -305,7 +305,8 @@ namespace Mono.ASPNET
 		public override string GetServerName ()
 		{
 			WebTrace.WriteLine ("GetServerName()");
-			return "localhost";
+			IPEndPoint ep = (IPEndPoint) client.LocalEndPoint;
+			return ep.Address.ToString ();
 		}
 
 		public override string GetServerVariable (string name)
@@ -437,4 +438,3 @@ namespace Mono.ASPNET
 		}
 	}
 }
-

@@ -7,11 +7,18 @@
 * Compiling and Running XSP
 ---------------------------
 
-	To compile XSP you need a `make' compatible tool, then type
-    the following commands:
+    To compile XSP type:
 
+	./configure 
 	make 
 	make install
+
+    Optionally, you can pass a prefix:
+
+	./configure --prefix=/mypath
+	make 
+	make install
+
 
     Then to run it, go to the directory that contains your .aspx
     files, and execute xsp:

@@ -3,7 +3,7 @@ Testing XSP
 
 Steps for installing the server:
 
-	./autogen.sh --prefix=/your/install/dir
+	./configure --prefix=/your/install/dir
 	make 
 	make install
 

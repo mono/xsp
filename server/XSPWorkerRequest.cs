@@ -4,8 +4,10 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Simon Waite (simon@psionics.demon.co.uk)
+//	Ben Maurer (bmaurer@users.sourceforge.net)
 //
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
+// (C) 2003 Ben Maurer
 //
 using System;
 using System.Collections;
@@ -382,38 +384,36 @@ namespace Mono.ASPNET
 			if (!Directory.Exists (localPath))
 				return true;
 
-			if (!path.EndsWith ("/"))
+			// Redirect /foo to /foo/ to make links like page.aspx go to /foo/page.aspx
+			// else, they would go to /page.aspx, which is wrong.
+			if (!path.EndsWith ("/")) {
 				path += "/";
-
-			bool catOne = false;
+				if (queryString != null && queryString != "")
+					path += "?" + queryString;
+				
+				SendStatus (302, "Moved");
+				WriteString (status);
+				WriteString ("Location: " + path + "\r\n");
+				WriteString ("Content-Type: text/html\r\n");
+				string page = "<html><head><title>Object moved</title></head>" + 
+					"<body><h1>Object Moved</h1>Document moved <a href=\"" +
+					path + "\">here</a></body>";
+				
+				WriteString ("Content-Length: " + page.Length + "\r\n\r\n");
+				WriteString (page);
+				headersSent = true;
+				FlushResponse (true);
+				return false;
+			}			
+			
 			foreach (string indexFile in indexFiles) {
 				string testfile = Path.Combine (localPath, indexFile);
 				if (File.Exists (testfile)) {
 					path += indexFile;
-					catOne = true;
-					break;
+					return true;
 				}
 			}
-
-			if (!catOne)
-				return true;
-
-			if (queryString != null && queryString != "")
-				path += "?" + queryString;
-
-			SendStatus (302, "Moved");
-			WriteString (status);
-			WriteString ("Location: " + path + "\r\n");
-			WriteString ("Content-Type: text/html\r\n");
-			string page = "<html><head><title>Object moved</title></head>" + 
-				      "<body><h1>Object Moved</h1>Document moved <a href=\"" +
-				      path + "\">here</a></body>";
-
-			WriteString ("Content-Length: " + page.Length + "\r\n\r\n");
-			WriteString (page);
-			headersSent = true;
-			FlushResponse (true);
-			return false;
+			return true;
 		}
 
 		void WriteString (string s)

@@ -21,11 +21,16 @@ fi
 echo "$CS compiler: $MCS"
 
 AC_SUBST(MCS)
-AC_OUTPUT([Makefile
+AC_OUTPUT([
+	Makefile
 	doc/Makefile
+        nunit-tests/Makefile
+        nunit-tests/standalone/Makefile
 	server/AssemblyInfo.cs
 	server/AssemblyInfoModMono.cs
 	server/Makefile
+	test/Makefile
+	test/authtest/Makefile
         tools/Makefile
         tools/asp_state/Makefile
         tools/asp_state/AssemblyInfo.cs
@@ -34,8 +39,11 @@ AC_OUTPUT([Makefile
         tools/nunitasp/Makefile
         tools/nunitasp/source/Makefile
         tools/nunitasp/source/NUnitAsp/Makefile
+        tools/nunitasp/source/NUnitAsp/AspTester/Makefile
+        tools/nunitasp/source/NUnitAsp/HtmlTester/Makefile
+        tools/nunitasp/source/NUnitAsp/Sgml/Makefile
         tools/nunitasp/source/NUnitAspTest/Makefile
-        nunit-tests/Makefile
-        nunit-tests/standalone/Makefile
-	test/Makefile])
+        tools/nunitasp/source/NUnitAspTest/AspTester/Makefile
+        tools/nunitasp/source/NUnitAspTest/HtmlTester/Makefile
+])
 

@@ -11,6 +11,7 @@ namespace WebServiceTests
 		[WebMethod]
 		public string Echo (string a)
 		{
+			Console.WriteLine ("{0}", AppDomain.CurrentDomain.FriendlyName);
 			return a;
 		}
 

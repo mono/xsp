@@ -1,3 +1,40 @@
+2004-04-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* AUTHORS:
+	* configure.in:
+	* nunit-tests/Makefile.am:
+	* nunit-tests/standalone/Makefile.am:
+	* server/Makefile.am:
+	* test/.cvsignore:
+	* test/Makefile.am:
+	* test/TestService.asmx:
+	* test/authtest/.cvsignore:
+	* test/authtest/Makefile.am:
+	* tools/asp_state/.cvsignore:
+	* tools/asp_state/Makefile.am:
+	* tools/dbsessmgr/.cvsignore:
+	* tools/dbsessmgr/Makefile.am:
+	* tools/nunitasp/source/Makefile.am:
+	* tools/nunitasp/source/NUnitAsp/.cvsignore:
+	* tools/nunitasp/source/NUnitAsp/Makefile.am:
+	* tools/nunitasp/source/NUnitAsp/AspTester/.cvsignore:
+	* tools/nunitasp/source/NUnitAsp/AspTester/Makefile.am:
+	* tools/nunitasp/source/NUnitAsp/HtmlTester/.cvsignore:
+	* tools/nunitasp/source/NUnitAspTest/.cvsignore:
+	* tools/nunitasp/source/NUnitAspTest/Makefile.am:
+	* tools/nunitasp/source/NUnitAspTest/AspTester/.cvsignore:
+	* tools/nunitasp/source/NUnitAspTest/AspTester/Makefile.am:
+	* tools/nunitasp/source/NUnitAspTest/HtmlTester/.cvsignore: makefile
+	love. distcheck works now. Fixes bug #53652.
+
+	* nunit-tests/standalone/Makefile.in:
+	* server/Makefile.in:
+	* test/Makefile.in:
+	* tools/asp_state/Makefile.in:
+	* tools/dbsessmgr/Makefile.in:
+	* tools/nunitasp/source/NUnitAsp/Makefile.in:
+	* tools/nunitasp/source/NUnitAspTest/Makefile.in: removed
+
 2004-04-04  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/MonoWorkerRequest.cs: HostVPath treated as HostVPath + "/".

@@ -1,3 +1,8 @@
+2003-11-24  Jackson Harper <jackson@ximian.com>
+
+	* tools/asp_state/asp_state.exe.config: Use same port as MS, load
+	the RemoteStateServer from System.Web.
+	
 2003-11-24  Jackson Harper <jackson@ximian.com)
 
 	* tools:

@@ -33,7 +33,9 @@ install: $(EXES) global.asax
 	mkdir -p test/bin
 	cp $(EXES) xsp.exe.config mod-mono-server.exe.config global.asax test
 	cp $(EXES) test/bin
-	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx ../test/*.xml ../test/*.xsl ../test/*.png ../test/*.inc test
+	cp ../test/*.aspx ../test/*.asmx ../test/*.config ../test/*.ascx test
+	cp ../test/*.xml ../test/*.xsl ../test/*.png ../test/*.inc test
+	cp ../test/*.ashx test
 	cp ../test/*.dll test/bin
 
 xsp.exe: $(XSP_SOURCES)

@@ -24,3 +24,8 @@ CLEANFILES = $(samplesbin_SCRIPTS)
 
 treeview.dll: $(treeview_build)
 	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
+
+dist-hook:
+	mkdir $(distdir)/TreeLineImages
+	cp -p $(srcdir)/TreeLineImages/*gif $(distdir)/TreeLineImages
+

@@ -75,7 +75,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("                            /blog:../myblog");
 			Console.WriteLine ("                           the virtual /blog is mapped to ../myblog");
 			Console.WriteLine ();
-			Console.WriteLine ("                            /:.;/blog:../myblog");
+			Console.WriteLine ("                            /:.,/blog:../myblog");
 			Console.WriteLine ("                           Two applications like the above ones are handled.");
 			Console.WriteLine ("                    Default value: /:.");
 			Console.WriteLine ("                    AppSettings key name: MonoApplications");

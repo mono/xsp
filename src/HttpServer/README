@@ -25,7 +25,7 @@ How to see it working
 
 * Create a directory ./testing
 
-* Copy ../xsp.exe, ../MyForm.dll, server.exe and xsp.bat to ./testing.
+* Copy ../xsp.exe, ../MyForm.dll and server.exe to ./testing.
 
 * Copy some aspx file to ./testing 
 

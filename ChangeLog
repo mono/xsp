@@ -1,3 +1,9 @@
+2004-10-29 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: redirect on directories that are not
+	the root virtual directory when the path does not end in '/'. Fixes bug
+	#68082.
+
 2004-10-17  Ben Maurer  <bmaurer@ximian.com>
 
 	* server/MonoWorkerRequest.cs (MapPath): avoid the

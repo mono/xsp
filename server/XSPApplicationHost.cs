@@ -98,6 +98,10 @@ namespace Mono.ASPNET
 			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
 								pathInfo, queryString, protocol, inputBuffer);
 
+			string translated = mwr.GetFilePathTranslated ();
+			if (path [path.Length - 1] != '/' && Directory.Exists (translated))
+				redirect = path + '/';
+
 			if (redirect != null) {
 				Redirect (mwr, redirect);
 				broker.UnregisterRequest (reqId);

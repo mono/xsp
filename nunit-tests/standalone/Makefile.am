@@ -11,7 +11,8 @@ CLEANFILES = $(DLLNAME)
 aspnet_files = \
 	test1.aspx \
 	test2.aspx \
-	test3.aspx
+	test3.aspx \
+	test4.aspx
 
 cs_files = test1.cs
 

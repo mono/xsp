@@ -53,5 +53,16 @@ namespace Mono.ASPNET
 			label = new LabelTester ("Label1", CurrentWebForm);
 			AssertEquals ("#01", "", label.Text);
 		}
+
+		[Test]
+		public void Bug58497 ()
+		{
+			Browser.GetPage ("http://127.0.0.1:8080/test4.aspx");
+			button = new ButtonTester ("btn", CurrentWebForm);
+			button.Click ();
+			TextBoxTester tb = new TextBoxTester ("MyText", CurrentWebForm);
+			AssertEquals ("#01", "Hi Friends", tb.Text);
+
+		}
 	}
 }

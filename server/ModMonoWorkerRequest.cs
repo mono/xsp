@@ -99,6 +99,8 @@ namespace Mono.ASPNET
 		int [] headersHash;
 		string[] headerValues;
 		int requestId;
+		bool gotSecure;
+		bool isSecure;
 
 		string [][] unknownHeaders;
 		static string [] indexFiles = { "index.aspx",
@@ -224,6 +226,17 @@ namespace Mono.ASPNET
 		public override void FlushResponse (bool finalFlush)
 		{
 			requestBroker.Flush (requestId);
+		}
+
+		public override bool IsSecure ()
+		{
+			if (!gotSecure) {
+				string val = requestBroker.GetServerVariable (requestId, "SERVER_PORT_SECURE");
+				isSecure =  (val != null && val != "");
+				gotSecure = true;
+			}
+
+			return isSecure;
 		}
 
 		public override void CloseConnection ()

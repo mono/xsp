@@ -1,5 +1,10 @@
 2005-02-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* server/ModMonoWorkerRequest.cs: override IsSecure and implement it.
+	Part of the fix for bug #71680.
+
+2005-02-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* configure.in: detect if gmcs actually works. Patch by Robert Jordan.
 
 2005-02-08  Raja R Harinath  <rharinath@novell.com>

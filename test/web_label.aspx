@@ -7,7 +7,7 @@
 	}
 </script>
 <head>
-<title>Button</title>
+<title>Label</title>
 </head>
 <body>
 <form runat="server">

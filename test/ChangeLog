@@ -1,5 +1,12 @@
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* web_label.aspx: fixed cut&paste error in title.
+
+	* web_literal.aspx:
+	* web_placeholder.aspx: New files.
+
+2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* web_label.aspx: one more.
 
 2002-06-12  Gonzalo Paniagua Javier <gonzalo@ximian.com>

@@ -1,5 +1,21 @@
 2004-05-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* configure.in:
+	* doc/.cvsignore:
+	* doc/Makefile.am:
+	* doc/dbsessmgr.1.in:
+	* doc/xsp.1.in: added dbsessmgr manual page.
+
+	* nunit-tests/standalone/Makefile.am:
+	* tools/dbsessmgr/AssemblyInfo.cs.in:
+	* tools/nunitasp/source/NUnitAsp/Makefile.am:
+	* tools/nunitasp/source/NUnitAspTest/Makefile.am: build fixes.
+
+	* tools/asp_state/asp_state.exe.config: added ?xml stuff.
+	* tools/dbsessmgr/dbsessmgr.cs: use LoadWithPartialName.
+
+2004-05-28  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* INSTALL:
 	* README: updated.
 

@@ -17,7 +17,8 @@ aspnet_files = \
 cs_files = test1.cs
 
 # 
-REFS= -r:System.Web.dll -r:NUnit.Framework.dll -r:NUnitAsp.dll
+REFS= -r:System.Web.dll -r:nunit.framework.dll \
+	-r:NUnitAsp.dll -r:nunit.core.dll -r:nunit.util.dll
 
 all: $(DLLNAME)
 

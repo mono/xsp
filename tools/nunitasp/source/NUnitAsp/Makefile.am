@@ -64,7 +64,7 @@ files=$(nunitasp_sources)
 endif
 
 NUnitAsp.dll: $(nunitasp_sources)
-	$(MCS) $(MCSFLAGS) -r:System.Web.dll -r:NUnit.Framework.dll \
+	$(MCS) $(MCSFLAGS) -r:System.Web.dll -r:nunit.framework.dll \
 		-resource:"$(htmldtd)",NUnit.Extensions.Asp.Sgml.Html.dtd \
 		-target:library -out:$@ $(files)
 

@@ -104,7 +104,7 @@ namespace Mono.ASPNET.Tools {
 			
 			GetConnectionData (out asm, out type, out conn_str);
 			
-			Assembly dbAssembly = Assembly.Load (asm);
+			Assembly dbAssembly = Assembly.LoadWithPartialName (asm);
 			Type cnc_type = dbAssembly.GetType (type, true);
 			if (!typeof (IDbConnection).IsAssignableFrom (cnc_type))
 				throw new ApplicationException ("The type '" + cnc_type +

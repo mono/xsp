@@ -5,7 +5,7 @@
 .\" Author:
 .\"   Gonzalo Paniagua Javier (gonzalo@ximian.com)
 .\"
-.TH xsp "1" "19 May 2004" "xsp @VERSION@" "User Commands"
+.TH xsp "1" "28 May 2004" "xsp @VERSION@" "User Commands"
 .SH NAME 
 XSP \- Mono ASP.NET Web Server
 .SH SYNOPSIS

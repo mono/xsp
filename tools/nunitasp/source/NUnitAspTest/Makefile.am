@@ -57,7 +57,7 @@ endif
 
 NUnitAspTest.dll: $(nunitasptest_sources)
 	$(MCS) $(MCSFLAGS) -r:System.Web.dll -lib:../AspTest \
-		-r:NUnitAsp.dll -r:NUnit.Framework.dll \
+		-r:NUnitAsp.dll -r:nunit.framework.dll \
 		-r:System.DirectoryServices.dll \
 		-target:library -out:$@ $(files)
 

@@ -32,6 +32,7 @@ AC_SUBST(MCS)
 AC_OUTPUT([
 	Makefile
 	doc/xsp.1
+	doc/dbsessmgr.1
 	doc/Makefile
         nunit-tests/Makefile
         nunit-tests/standalone/Makefile

@@ -1,6 +1,10 @@
+2002-06-06  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* htmlinputbutton.aspx: New file. Renders fine with our System.Web.
+
 2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
-	* htmlimage.cs: New file. Renders fine with out System.Web.
+	* htmlimage.aspx: New file. Renders fine with our System.Web.
 
 2002-06-05  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 

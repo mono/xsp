@@ -1,3 +1,8 @@
+2003-06-20  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* XSPWorkerRequest.cs: reverted latest Ben's patch as it causes an
+	annoying bug when testing under windows.
+
 2003-05-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* XSPApplicationHost.cs:

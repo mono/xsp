@@ -4,10 +4,8 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Simon Waite (simon@psionics.demon.co.uk)
-//	Ben Maurer (bmaurer@users.sourceforge.net)
 //
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
-// (C) 2003 Ben Maurer
 //
 using System;
 using System.Collections;
@@ -402,36 +400,38 @@ namespace Mono.ASPNET
 			if (!Directory.Exists (localPath))
 				return true;
 
-			// Redirect /foo to /foo/ to make links like page.aspx go to /foo/page.aspx
-			// else, they would go to /page.aspx, which is wrong.
-			if (!path.EndsWith ("/")) {
+			if (!path.EndsWith ("/"))
 				path += "/";
-				if (queryString != null && queryString != "")
-					path += "?" + queryString;
-				
-				SendStatus (302, "Moved");
-				WriteString (status);
-				WriteString ("Location: " + path + "\r\n");
-				WriteString ("Content-Type: text/html\r\n");
-				string page = "<html><head><title>Object moved</title></head>" + 
-					"<body><h1>Object Moved</h1>Document moved <a href=\"" +
-					path + "\">here</a></body>";
-				
-				WriteString ("Content-Length: " + page.Length + "\r\n\r\n");
-				WriteString (page);
-				headersSent = true;
-				FlushResponse (true);
-				return false;
-			}			
-			
+
+			bool catOne = false;
 			foreach (string indexFile in indexFiles) {
 				string testfile = Path.Combine (localPath, indexFile);
 				if (File.Exists (testfile)) {
 					path += indexFile;
-					return true;
+					catOne = true;
+					break;
 				}
 			}
-			return true;
+
+			if (!catOne)
+				return true;
+
+			if (queryString != null && queryString != "")
+				path += "?" + queryString;
+
+			SendStatus (302, "Moved");
+			WriteString (status);
+			WriteString ("Location: " + path + "\r\n");
+			WriteString ("Content-Type: text/html\r\n");
+			string page = "<html><head><title>Object moved</title></head>" + 
+				      "<body><h1>Object Moved</h1>Document moved <a href=\"" +
+				      path + "\">here</a></body>";
+
+			WriteString ("Content-Length: " + page.Length + "\r\n\r\n");
+			WriteString (page);
+			headersSent = true;
+			FlushResponse (true);
+			return false;
 		}
 
 		void WriteString (string s)
@@ -553,7 +553,7 @@ namespace Mono.ASPNET
 		
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			status = String.Format ("HTTP/1.0 {1} {2}\r\n", protocol, statusCode, statusDescription);
+			status = String.Format ("HTTP/1.0 {0} {1}\r\n", statusCode, statusDescription);
 			WebTrace.WriteLine ("SendStatus() -> " + status);
 		}
 

@@ -553,7 +553,7 @@ namespace Mono.ASPNET
 		
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			status = String.Format ("{0} {1} {2}\r\n", protocol, statusCode, statusDescription);
+			status = String.Format ("HTTP/1.0 {1} {2}\r\n", protocol, statusCode, statusDescription);
 			WebTrace.WriteLine ("SendStatus() -> " + status);
 		}
 

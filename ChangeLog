@@ -1,3 +1,9 @@
+2004-09-28 Ben Maurer  <bmaurer@ximian.com>
+
+	* server/XSPApplicationHost.cs: rather than pass an ip addr
+	across appdomains as a string, pass it as a long. this avoids
+	the cost of making it into a string, and related allocations.
+
 2004-09-28 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: application server never dies.

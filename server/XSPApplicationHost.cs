@@ -88,13 +88,13 @@ namespace Mono.ASPNET
 	//
 	public class XSPApplicationHost : BaseApplicationHost
 	{
-		public void ProcessRequest (int reqId, string localEPAddr, int localEPPort, string remoteEPAdds,
+		public void ProcessRequest (int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
 					int remoteEPPort, string verb, string path, string pathInfo,
 					string queryString, string protocol, byte [] inputBuffer, string redirect)
 		{
 			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
-			IPEndPoint localEP = new IPEndPoint (IPAddress.Parse (localEPAddr), localEPPort);
-			IPEndPoint remoteEP = new IPEndPoint (IPAddress.Parse (remoteEPAdds), remoteEPPort);
+			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
+			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
 								pathInfo, queryString, protocol, inputBuffer);
 
@@ -207,8 +207,8 @@ namespace Mono.ASPNET
 				
 				string redirect;
 				vapp.Redirect (rdata.Path, out redirect);
-				host.ProcessRequest (requestId, localEP.Address.ToString(), localEP.Port,
-						remoteEP.Address.ToString(), remoteEP.Port, rdata.Verb,
+				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
+						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
 						rdata.Path, rdata.PathInfo, rdata.QueryString,
 						rdata.Protocol, rdata.InputBuffer, redirect);
 			} catch (Exception e) {

@@ -3,10 +3,18 @@ MCSFLAGS= -debug+ -debug:full -nologo
 xspdir = $(libdir)/mono/1.0
 modmonoserverdir = $(libdir)/mono/1.0
 
-xsp_SCRIPTS = xsp.exe
-modmonoserver_SCRIPTS = mod-mono-server.exe
+if NET_2_0
+XSP2_EXE = xsp2.exe
+MODMONOSERVER2_EXE = mod-mono-server2.exe
+endif
 
-CLEANFILES = xsp.exe mod-mono-server.exe xsp.exe.mdb mod-mono-server.exe.mdb
+xsp_SCRIPTS = xsp.exe $(XSP2_EXE)
+modmonoserver_SCRIPTS = mod-mono-server.exe $(MODMONOSERVER2_EXE)
+
+CLEANFILES = $(xsp_SCRIPTS) $(modmonoserver_SCRIPTS) \
+		xsp.exe.mdb mod-mono-server.exe.mdb \
+		xsp2.exe.mdb mod-mono-server2.exe.mdb
+
 EXTRA_DIST = $(common) $(xsp_only) $(modmono_only) AssemblyInfo.cs.in AssemblyInfoModMono.cs.in
 
 # 
@@ -38,7 +46,6 @@ xsp_build_sources = $(addprefix $(srcdir)/, $(xsp_sources)) AssemblyInfo.cs
 modmono_only = ModMonoRequest.cs \
 	      ModMonoWorkerRequest.cs \
 	      ModMonoApplicationHost.cs \
-	      ModMonoRequest.cs \
 	      ModMonoTCPWebSource.cs
 
 modmono_sources =  $(common) $(modmono_only)
@@ -49,4 +56,10 @@ xsp.exe: $(xsp_build_sources)
 
 mod-mono-server.exe: $(modmono_build_sources)
 	$(MCS) $(MCSFLAGS) $(modmono_references) /d:MODMONO_SERVER /out:$@ $(modmono_build_sources)
+
+xsp2.exe: $(xsp_build_sources)
+	$(GMCS) $(MCSFLAGS) $(xsp_references) /out:$@ $(xsp_build_sources)
+
+mod-mono-server2.exe: $(modmono_build_sources)
+	$(GMCS) $(MCSFLAGS) $(modmono_references) /d:MODMONO_SERVER /out:$@ $(modmono_build_sources)
 

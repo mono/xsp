@@ -1,3 +1,14 @@
+2004-06-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPApplicationHost.cs: allow wilcard for vhosts, fixed matching
+	of /xxx when we have a vhost for /xxx/, matching moved to VPathToHost
+	class and improved. When creating a new host, lock on the VPathToHost
+	object, not the entire array of vhosts.
+
+	* server/server.cs: don't allow duplicated options passed in the command
+	line. No need to wait on a handle when --nonstop. Just make the runner
+	thread have IsBackGround to false and finish the main one.
+
 2004-06-12 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/dbpage1.aspx:

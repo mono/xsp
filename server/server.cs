@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Threading;
 using System.Web.Hosting;
 
 namespace Mono.ASPNET
@@ -109,6 +108,31 @@ namespace Mono.ASPNET
 
 			Console.WriteLine ();
 		}
+
+		[Flags]
+		enum Options {
+			NonStop = 1,
+			Verbose = 1 << 1,
+			Applications = 1 << 2,
+			AppConfigDir = 1 << 3,
+			AppConfigFile = 1 << 4,
+			Root = 1 << 5,
+			FileName = 1 << 6,
+			Address = 1 << 7,
+			Port = 1 << 8
+		}
+
+		static void CheckAndSetOptions (string name, Options value, ref Options options)
+		{
+			if ((options & value) != 0) {
+				ShowHelp ();
+				Console.WriteLine ();
+				Console.WriteLine ("ERROR: Option '{0}' duplicated.", name);
+				Environment.Exit (1);
+			}
+
+			options |= value;
+		}
 		
 		public static int Main (string [] args)
 		{
@@ -133,32 +157,40 @@ namespace Mono.ASPNET
 				oport = 8080;
 
 #endif
+			Options options = 0;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
 				
 				switch (a){
 #if MODMONO_SERVER
 				case "--filename":
+					CheckAndSetOptions (a, Options.FileName, ref options);
 					filename = args [++i];
 					break;
 #else
 				case "--port":
+					CheckAndSetOptions (a, Options.Port, ref options);
 					oport = args [++i];
 					break;
 				case "--address":
+					CheckAndSetOptions (a, Options.Address, ref options);
 					ip = args [++i];
 					break;
 #endif
 				case "--root":
+					CheckAndSetOptions (a, Options.Root, ref options);
 					rootDir = args [++i];
 					break;
 				case "--applications":
+					CheckAndSetOptions (a, Options.Applications, ref options);
 					apps = args [++i];
 					break;
 				case "--appconfigfile":
+					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
 					appConfigFile = args [++i];
 					break;
 				case "--appconfigdir":
+					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
 					appConfigDir = args [++i];
 					break;
 				case "--nonstop":
@@ -210,17 +242,20 @@ namespace Mono.ASPNET
 
 			rootDir = Directory.GetCurrentDirectory ();
 			
-			XSPApplicationServer server =  new XSPApplicationServer ();
-			if (verbose)
-				server.Verbose = true;
+			XSPApplicationServer server = new XSPApplicationServer ();
+			server.Verbose = verbose;
+
 			if (apps != null)
-				server.AddApplicationsFromCommandLine(apps);
+				server.AddApplicationsFromCommandLine (apps);
+
 			if (appConfigFile != null)
-				server.AddApplicationsFromConfigFile(appConfigFile);
+				server.AddApplicationsFromConfigFile (appConfigFile);
+
 			if (appConfigDir != null)
-				server.AddApplicationsFromConfigDirectory(appConfigDir);
+				server.AddApplicationsFromConfigDirectory (appConfigDir);
+
 			if (apps == null && appConfigDir == null && appConfigFile == null)
-				server.AddApplicationsFromCommandLine("/:.");
+				server.AddApplicationsFromCommandLine ("/:.");
 #if MODMONO_SERVER
 			server.SetListenFile (filename);
 			Console.WriteLine ("Listening on: {0}", filename);
@@ -232,31 +267,19 @@ namespace Mono.ASPNET
 			
 			Console.WriteLine ("Root directory: {0}", rootDir);
 
-			ManualResetEvent evt = null;
 			try {
-				if (server.Start () == false)
+				if (server.Start (!nonstop) == false)
 					return 2;
 
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();
-				} else {
-					evt = new ManualResetEvent (false);
-					evt.WaitOne ();
 				}
 			} catch (Exception e) {
 				Console.WriteLine ("Error: {0}", e.Message);
-				if (evt != null)
-					evt.Set ();
-
-				Environment.Exit (1); // Temp. workaround for errors finishing
 				return 1;
 			}
-			
-			if (evt != null)
-				evt.Set ();
 
-			Environment.Exit (0); // Temp. workaround for errors finishing
 			return 0;
 		}
 	}

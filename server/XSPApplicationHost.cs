@@ -9,6 +9,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -245,21 +246,64 @@ namespace Mono.ASPNET
 		public readonly int vport;
 		public readonly string vpath;
 		public readonly string realPath;
+		public readonly bool haveWildcard;
 
 		public IApplicationHost appHost;
 
 		public VPathToHost (string vhost, int vport, string vpath, string realPath)
 		{
-			this.vhost = vhost;
+			this.vhost = (vhost != null) ? vhost.ToLower (CultureInfo.InvariantCulture) : null;
 			this.vport = vport;
 			this.vpath = vpath;
+			if (vpath == null || vpath == "" || vpath [0] != '/')
+				throw new ArgumentException ("Virtual path must begin with '/': " + vpath,
+								"vpath");
+
 			this.realPath = realPath;
 			this.appHost = null;
+			if (vhost != null && vhost.Length != 0 && vhost [0] == '*') {
+				haveWildcard = true;
+				if (vhost.Length > 2 && vhost [1] == '.')
+					vhost = vhost.Substring (2);
+			}
 		}
 
 		public void ClearHost ()
 		{
 			this.appHost = null;
+		}
+
+		public bool Match (string vhost, int vport, string vpath)
+		{
+			if (vport != -1 && vport != this.vport)
+				return false;
+
+			if (vhost != null && this.vhost != null) {
+				int length = this.vhost.Length;
+				if (haveWildcard) {
+					if (this.vhost == "*")
+						return true;
+
+					length = vhost.Length;
+				}
+
+				if (length != vhost.Length ||
+					!this.vhost.EndsWith (vhost.ToLower (CultureInfo.InvariantCulture))) {
+					return false;
+				}
+			}
+
+			int local = vpath.Length;
+			int vlength = this.vpath.Length;
+			if (vlength > local) {
+				// Check for /xxx requests to be redirected to /xxx/
+				if (this.vpath [vlength - 1] != '/')
+					return false;
+
+				return (vlength - 1 == local && this.vpath.Substring (0, vlength - 1) == vpath);
+			}
+
+			return (vpath.StartsWith (this.vpath));
 		}
 
 		public void CreateHost ()
@@ -287,10 +331,8 @@ namespace Mono.ASPNET
 #endif
 		Thread runner;
 
-		// a sorted list of mappings. This is much faster than hashtable for typical cases.
+		// This is much faster than hashtable for typical cases.
 		ArrayList vpathToHost = new ArrayList ();
-		
- 		object marker = new object ();
 
 #if MODMONO_SERVER
 		string filename;
@@ -341,6 +383,10 @@ namespace Mono.ASPNET
 
 		private void AddApplication (string vhost, int vport, string vpath, string fullPath)
 		{
+			// TODO - check for duplicates, sort, optimize, etc.
+			if (started)
+				throw new InvalidOperationException ("The server is already started.");
+
 			if (verbose) {
 				Console.WriteLine("Registering application:");
 				Console.WriteLine("    Host:          {0}", (vhost != null) ? vhost : "any");
@@ -373,11 +419,16 @@ namespace Mono.ASPNET
 				Console.WriteLine ("Adding applications from config file '{0}'", fileName);
 			}
 
-			XmlDocument doc = new XmlDocument ();
-			doc.Load (fileName);
+			try {
+				XmlDocument doc = new XmlDocument ();
+				doc.Load (fileName);
 
-			foreach (XmlElement el in doc.SelectNodes ("//web-application")) {
-				AddApplicationFromElement (el);
+				foreach (XmlElement el in doc.SelectNodes ("//web-application")) {
+					AddApplicationFromElement (el);
+				}
+			} catch {
+				Console.WriteLine ("Error loading '{0}'", fileName);
+				throw;
 			}
 		}
 
@@ -462,16 +513,18 @@ namespace Mono.ASPNET
  				string fullPath = System.IO.Path.GetFullPath (realpath);
 				AddApplication (vhost, vport, vpath, fullPath);
  			}
-			// TODO - check for duplicates, sort, optimize, etc.
  		}
  
-		public bool Start ()
+		public bool Start (bool bgThread)
 		{
 			if (started)
 				throw new InvalidOperationException ("The server is already started.");
 
  			if (vpathToHost == null)
- 				throw new InvalidOperationException ("SetApplications must be called first");
+ 				throw new InvalidOperationException ("SetApplications must be called first.");
+
+ 			if (vpathToHost.Count == 0)
+ 				throw new InvalidOperationException ("No applications defined.");
 
 #if MODMONO_SERVER
 			if (filename == null)
@@ -487,7 +540,7 @@ namespace Mono.ASPNET
 #endif
 			listen_socket.Listen (5);
 			runner = new Thread (new ThreadStart (RunServer));
-			runner.IsBackground = true;
+			runner.IsBackground = bgThread;
 			runner.Start ();
 			stop = false;
 			WebTrace.WriteLine ("Server started.");
@@ -531,42 +584,32 @@ namespace Mono.ASPNET
 
 			// Console.WriteLine("GetApplicationForPath({0},{1},{2},{3})", vhost, port,
 			//			path, defaultToRoot);
-			foreach (VPathToHost v in vpathToHost) {
-				if (v.vport != -1 && v.vport != port) {
-					// ports don't match - ignore
+			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
+				VPathToHost v = (VPathToHost) vpathToHost [i];
+				int matchLength = v.vpath.Length;
+				if (matchLength <= bestMatchLength || !v.Match (vhost, port, path))
 					continue;
-				}
 
-				if (vhost != null && v.vhost != null &&
-				    0 != String.CompareOrdinal(vhost, v.vhost)) {
-					// vhosts don't match - ignore
-					continue;
-				}
-
-				if (path.StartsWith (v.vpath)) {
-					int matchLength = v.vpath.Length;
-					if (matchLength > bestMatchLength) {
-						bestMatchLength = matchLength;
-						bestMatch = v;
-					}
-				}
+				bestMatchLength = matchLength;
+				bestMatch = v;
 			}
 
 			if (bestMatch != null) {
-				if (bestMatch.appHost == null) {
-					lock (vpathToHost) {
-						if (bestMatch.appHost == null) {
-							bestMatch.CreateHost();
-						}
-					}
+				lock (bestMatch) {
+					if (bestMatch.appHost == null)
+						bestMatch.CreateHost ();
 				}
+
 				return bestMatch.appHost;
-			} else if (defaultToRoot) {
-				return GetApplicationForPath (vhost, port, "/", false);
-			} else {
-				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
-				return null;
 			}
+			
+			if (defaultToRoot)
+				return GetApplicationForPath (vhost, port, "/", false);
+
+			if (verbose)
+				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
+
+			return null;
 		}
 	}
 }

@@ -114,6 +114,7 @@ namespace Mono.ASPNET
 		string remoteName;
 		ModMonoRequestBroker requestBroker;
 		string[] headers;
+		int [] headersHash;
 		string[] headerValues;
 		int requestId;
 
@@ -382,11 +383,18 @@ namespace Mono.ASPNET
 			return GetRequestHeader (GetKnownRequestHeaderName (index));
 		}
 		
-		private string GetRequestHeader (string name)
+		string GetRequestHeader (string name)
 		{
-			int i = Array.IndexOf (headers, name);
-			if (i == -1) return null;
-			else return headerValues [i];			
+			IHashCodeProvider hp = CaseInsensitiveHashCodeProvider.Default;
+			if (headersHash == null) {
+				headersHash = new int [headers.Length];
+				for (int i = 0; i < headers.Length; i++) {
+					headersHash [i] = hp.GetHashCode (headers [i]);
+				}
+			}
+
+			int k = Array.IndexOf (headersHash, hp.GetHashCode (name));
+			return (k == -1) ? null : headerValues [k];
 		}
 
 		public override void SendCalculatedContentLength (int contentLength) 

@@ -1,3 +1,8 @@
+2004-08-04 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs: GetRequestHeader is case insensitive
+	now. Thanks to Jan Jaros.
+
 2004-08-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile.am:

@@ -53,6 +53,7 @@ class PageFactory
 		private string fileName;
 		private string csFileName;
 		private string className;
+		private static char dirSeparator = Path.DirectorySeparatorChar;
 
 		private PageBuilder ()
 		{
@@ -64,6 +65,13 @@ class PageFactory
 			csFileName = fileName.Replace (".aspx", ".cs");
 
 			cscOptions = new ArrayList ();
+#if MONO
+			cscOptions.Add ("--target library");
+			cscOptions.Add ("-L .");
+			AddReference ("corlib");
+			AddReference ("System");
+			AddReference ("MyForm");
+#else
 			cscOptions.Add ("/noconfig");
 			cscOptions.Add ("/nologo");
 			cscOptions.Add ("/debug+");
@@ -72,6 +80,7 @@ class PageFactory
 			AddReference ("mscorlib.dll");
 			AddReference ("System.dll");
 			AddReference (".\\MyForm.dll");
+#endif
 			AddReference (Server.SystemWeb);
 			AddReference (Server.SystemDrawing);
 		}
@@ -83,7 +92,7 @@ class PageFactory
 				return null;
 			}
 
-			StreamReader st_file = new StreamReader (File.OpenRead ("output\\" + csFileName));
+			StreamReader st_file = new StreamReader (File.OpenRead ("output" + dirSeparator + csFileName));
 			StringReader file_content = new StringReader (st_file.ReadToEnd ()); //FIXME
 			st_file.Close ();
 			if (GetBuildOptions (file_content) == false)
@@ -95,19 +104,39 @@ class PageFactory
 
 		private static bool Xsp (string fileName, string csFileName)
 		{
+#if MONO
+			return RunProcess ("mono", 
+					   "xsp.exe " + fileName, 
+					   "output" + dirSeparator + csFileName, 
+					   "output" + dirSeparator + "xsp_" + fileName + 
+					   ".sh");
+#else
 			return RunProcess ("xsp", 
 					   fileName, 
-					   "output\\" + csFileName, 
-					   "output\\xsp_" + fileName + ".bat");
+					   "output" + dirSeparator + csFileName, 
+					   "output" + dirSeparator + "xsp_" + fileName + 
+					   ".bat");
+#endif
 		}
 
-		private static bool RunProcess (string exe, string arguments, string output_file, string bat_file)
+		private static bool RunProcess (string exe, string arguments, string output_file, string script_file)
 		{
 			Console.WriteLine ("{0} {1}", exe, arguments);
 			Console.WriteLine ("Output goes to {0}", output_file);
-			Console.WriteLine ("Bat file is {0}", bat_file);
-
+			Console.WriteLine ("Script file is {0}", script_file);
 			Process proc = new Process ();
+#if MONO
+			proc.StartInfo.FileName = "redirector.sh";
+			proc.StartInfo.Arguments = exe + " " + output_file + " " + arguments;
+			proc.Start ();
+			proc.WaitForExit ();
+			int result = proc.ExitCode;
+			proc.Close ();
+
+			StreamWriter bat_output = new StreamWriter (File.Create (script_file));
+			bat_output.Write ("redirector.sh" + " " + exe + " " + output_file + " " + arguments);
+			bat_output.Close ();
+#else
 			proc.StartInfo.FileName = exe;
 			proc.StartInfo.Arguments = arguments;
 			proc.StartInfo.UseShellExecute = false;
@@ -121,9 +150,10 @@ class PageFactory
 			StreamWriter cmd_output = new StreamWriter (File.Create (output_file));
 			cmd_output.Write (poutput);
 			cmd_output.Close ();
-			StreamWriter bat_output = new StreamWriter (File.Create (bat_file));
+			StreamWriter bat_output = new StreamWriter (File.Create (script_file));
 			bat_output.Write (exe + " " + arguments);
 			bat_output.Close ();
+#endif
 
 			return (result == 0);
 		}
@@ -162,7 +192,11 @@ class PageFactory
 
 		private void AddReference (string reference)
 		{
+#if MONO
+			cscOptions.Add ("-r " + reference);
+#else
 			cscOptions.Add ("/r:" + reference);
+#endif
 		}
 		
 		private string GetAttributeValue (string line, string att)
@@ -178,7 +212,7 @@ class PageFactory
 		
 		private Page GetInstance ()
 		{
-			string dll = "output\\" + fileName.Replace (".aspx", ".dll");
+			string dll = "output" + dirSeparator + fileName.Replace (".aspx", ".dll");
 			//File.Delete (dll);
 			Compile (csFileName, dll); // May be this fails cause we are locking 
 									  // the dll
@@ -205,17 +239,25 @@ class PageFactory
 			foreach (string option in cscOptions)
 				args [i++] = option;
 
+#if MONO
+			args [i++] = "-o " + dllName;
+#else
 			args [i++] = "/out:" + dllName;
-			args [i] = "output\\" + csName;
+#endif
+			args [i] = "output" + dirSeparator + csName;
 
 			string cmdline = "";
 			foreach (string arg in args)
 				cmdline += " " + arg;
 
 			string noext = csName.Replace (".cs", "");
-			string output_file = "output\\output_from_compilation_" + noext + ".txt";
-			string bat_file = "output\\last_compilation_" + noext + ".bat";
+			string output_file = "output" + dirSeparator + "output_from_compilation_" + noext + ".txt";
+			string bat_file = "output" + dirSeparator + "last_compilation_" + noext + ".bat";
+#if MONO
+			return RunProcess ("mcs", cmdline, output_file, bat_file);
+#else
 			return RunProcess ("csc.exe", cmdline, output_file, bat_file);
+#endif
 		}
 	}
 
@@ -548,13 +590,20 @@ public class Server
 
 	public static string SystemWeb
 	{
+#if MONO
 		get { return (!useMonoClasses ? "System.Web.dll" : ".\\System.Web.dll"); }
+#else
+		get { return (!useMonoClasses ? "System.Web" : ".\\System.Web"); }
+#endif
 	}
 
 	public static string SystemDrawing
 	{
-		//get { return (!useMonoClasses ? "System.Drawing.dll" : ".\\lib\\System.Drawing.dll"); }
+#if MONO
+		get { return "System.Drawing"; }
+#else
 		get { return "System.Drawing.dll"; }
+#endif
 	}
 
 	private static void Usage ()

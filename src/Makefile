@@ -1,5 +1,14 @@
+ifdef MONO
+_OUT=-o 
+CSC=mcs
+CSCFLAGS= $(REFS) --define MONO
+REFS= -r System.Web -r System.Drawing
+LIBTARGET=--target library
+else
+_OUT=/out:
 CSC=csc.exe
 CSCFLAGS=/nologo /debug+ /debug:full /optimize $(REFS)
+LIBTARGET=/target:library
 ifdef DEBUGMONOSW
 REFERENCES= .\\System.Web		\
 	    System.Drawing
@@ -9,6 +18,8 @@ REFERENCES= System.Web \
 	    System.Drawing
 SYSTEM_WEB= remove_system_web
 endif
+REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
+endif
 
 SOURCES = asp-parser.cs \
 	  asp-tokenizer.cs \
@@ -16,15 +27,13 @@ SOURCES = asp-parser.cs \
 	  driver.cs \
 	  generator.cs
 
-REFS= $(addsuffix .dll, $(addprefix /r:, $(REFERENCES)))
-
 all:  $(SYSTEM_WEB) MyForm.dll xsp.exe
 
 xsp.exe: $(SOURCES)
-	$(CSC) $(CSCFLAGS) /out:$@ $^
+	$(CSC) $(CSCFLAGS) $(_OUT)$@ $^
 
 MyForm.dll: MyForm.cs $(SYSTEM_WEB)
-	$(CSC) $(CSCFLAGS) /t:library $<
+	$(CSC) $(CSCFLAGS) $(LIBTARGET) $(_OUT)$@ $<
 
 remove_system_web:
 	rm -f System.Web.dll

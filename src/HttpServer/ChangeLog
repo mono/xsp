@@ -1,3 +1,15 @@
+2002-07-04  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* HttpServer/Makefile: added conditional compilation to use mcs (make 
+	MONO=0).
+
+	* HttpServer/README: some lines about unix setup.
+
+	* HttpServer/redirector.sh: shell script used to redirect output.
+
+	* HttpServer/server.cs: some conditional compilation to choose between
+	mono/mcs and MS runtime.
+
 2002-07-02  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server.cs: fixed error when no ':' found.

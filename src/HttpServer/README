@@ -19,8 +19,8 @@ and send it back to the client. It does not use System.Web.Hosting classes
 when rendering.
 
 
-How to see it working
------------------------
+How to see it working (Windows)
+---------------------------------
 * Run make in xsp/src and xsp/src/HttpServer
 
 * Create a directory ./testing
@@ -42,8 +42,8 @@ BAT files run from testing directory which create them.
 * For the rest, use your browser: http://127.0.0.1:PORTNUMBER/yourfile.aspx
 
 
-How to help debugging mono System.Web
-----------------------------------------
+How to help debugging mono System.Web (Windows)
+------------------------------------------------
 * Set the environment variable DEBUGMONOSW to any value.
 
 * Run make in mcs/class and copy mcs/class/System.Web.dll to ./testingMono,
@@ -82,6 +82,16 @@ server on every access to a given page.
 		-Congratulations! Put your sample page under xsp/tests if you
 		want.
 
+
+How to see it working (Unix)
+-----------------------------
+
+* Apart from the usual setup, you gotta copy System.Drawing.dll to the testing
+directory. Also MyForm.dll to the mono lib directory.
+
+* Compile the xsp and the server using 'make MONO=1' (well, 1 or whatever).
+
+* Copy redirector.sh to the directory where you run the server.
 
 - Enjoy!
 

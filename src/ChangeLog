@@ -1,3 +1,10 @@
+2002-07-04  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* generator.cs: readded conditional generation of 
+	VerifyRenderingInServerForm (needed for testing with MS runtime).
+
+	* Makefile: added conditional compilation to use mcs (make MONO=0).
+
 2002-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* generator.cs: no need to generate code for

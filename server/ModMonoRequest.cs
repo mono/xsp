@@ -65,18 +65,14 @@ namespace Mono.ASPNET
 	enum Cmd
 	{
 		FIRST_COMMAND,
-		GET_PROTOCOL = 0,
-		GET_METHOD,
+		GET_REQUEST_LINE = 0,
 		SEND_FROM_MEMORY,
 		GET_PATH_INFO,
 		GET_SERVER_VARIABLE,
 		GET_PATH_TRANSLATED,
 		GET_SERVER_PORT,
 		SET_RESPONSE_HEADER,
-		GET_REQUEST_HEADER,
 		GET_FILENAME,
-		GET_URI,
-		GET_QUERY_STRING,
 		GET_REMOTE_ADDRESS,
 		GET_LOCAL_ADDRESS,
 		GET_REMOTE_PORT,
@@ -105,7 +101,7 @@ namespace Mono.ASPNET
 		string verb;
 		string queryString;
 		string protocol;
-		string path;
+		string uri;
 		string pathInfo;
 		string localAddress;
 		string remoteAddress;
@@ -114,11 +110,27 @@ namespace Mono.ASPNET
 		int remotePort;
 		int serverPort;
 		bool setupClientBlockCalled;
+		Hashtable headers;
 
 		public ModMonoRequest (NetworkStream ns)
 		{
 			reader = new BinaryReader (ns);
 			writer = new BinaryWriter (ns);
+			GetInitialData ();
+		}
+
+		void GetInitialData ()
+		{
+			verb = ReadString ();
+			uri = ReadString ();
+			queryString = ReadString ();
+			protocol = ReadString ();
+			int nheaders = reader.ReadInt32 ();
+			headers = new Hashtable ();
+			for (int i = 0; i < nheaders; i++) {
+				string key = ReadString ();
+				headers [key] = ReadString ();
+			}
 		}
 
 		void SendSimpleCommand (Cmd cmd)
@@ -163,23 +175,11 @@ namespace Mono.ASPNET
 
 		public string GetProtocol ()
 		{
-			if (protocol != null)
-				return protocol;
-
-			SendSimpleCommand (Cmd.GET_PROTOCOL);
-			ReadEnd ();
-			protocol = ReadString ();
 			return protocol;
 		}
 
 		public string GetHttpVerbName ()
 		{
-			if (verb != null)
-				return verb;
-
-			SendSimpleCommand (Cmd.GET_METHOD);
-			ReadEnd ();
-			verb = ReadString ();
 			return verb;
 		}
 
@@ -199,19 +199,14 @@ namespace Mono.ASPNET
 			ReadEnd ();
 		}
 
+		public Hashtable GetAllRequestHeaders ()
+		{
+			return headers;
+		}
+
 		public string GetRequestHeader (string name)
 		{
-			object o = reqHeaders [name];
-			if (o != null)
-				return (string) o;
-
-			SendSimpleCommand (Cmd.GET_REQUEST_HEADER);
-			WriteString (name);
-			ReadEnd ();
-			o = ReadString ();
-			reqHeaders [name] = o;
-
-			return (string) o;
+			return headers [name] as string;
 		}
 
 		public string GetServerVariable (string name)
@@ -231,13 +226,7 @@ namespace Mono.ASPNET
 
 		public string GetUri ()
 		{
-			if (path != null)
-				return path;
-
-			SendSimpleCommand (Cmd.GET_URI);
-			ReadEnd ();
-			path = ReadString ();
-			return path;
+			return uri;
 		}
 
 		public string GetFileName ()
@@ -250,12 +239,6 @@ namespace Mono.ASPNET
 
 		public string GetQueryString ()
 		{
-			if (queryString != null)
-				return queryString;
-
-			SendSimpleCommand (Cmd.GET_QUERY_STRING);
-			ReadEnd ();
-			queryString = ReadString ();
 			return queryString;
 		}
 

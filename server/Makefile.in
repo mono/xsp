@@ -3,6 +3,7 @@ MCSFLAGS+= -debug+ -debug:full -nologo
 PREFIX=@prefix@
 DESTDIR=
 MKINSTALLDIRS=@top_builddir@mkinstalldirs 
+DISTFILES=Makefile.in $(XSP_SOURCES) $(MODMONO_SERVER_SOURCES)
 
 # 
 XSP_REFERENCES= System.Web
@@ -54,4 +55,8 @@ clean:
 
 uninstall:
 	-test -d $(LOCAL_BIN_DIR) && cd $(LOCAL_BIN_DIR) && rm -f $(EXES)
+
+dist:
+	$(MKINSTALLDIRS) $(DESTDIR)$(PREFIX)/server
+	cp $(DISTFILES) $(DESTDIR)$(PREFIX)/server
 

@@ -2,8 +2,9 @@ AC_PREREQ(2.57)
 AC_INIT(server/server.cs)
 
 PACKAGE_NAME=xsp
-PACKAGE_VERSION=0.6
+PACKAGE_VERSION=0.6.99
 
+AC_SUBST(PACKAGE)
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
 
@@ -18,7 +19,7 @@ if test "x$CSC" = "xno" -a "x$MCS" = "xno"  ; then
 fi
 
 if test "x$MCS" = "xno" ; then
-	MCS = $CSC
+	MCS=$CSC
 fi
 
 echo "$CS compiler: $MCS"

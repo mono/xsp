@@ -99,6 +99,8 @@ namespace Mono.ASPNET
 		IApplicationHost appHostBase;
 		Encoding encoding;
 		byte [] queryStringBytes;
+		string hostVPath;
+		string hostPath;
 
 		public MonoWorkerRequest (IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
@@ -110,6 +112,24 @@ namespace Mono.ASPNET
 		}
 
 		public event MapPathEventHandler MapPathEvent;
+		
+		string HostPath {
+			get { 
+				if (hostPath == null)
+					hostPath = appHostBase.Path;
+
+				return hostPath;
+			}
+		}
+
+		string HostVPath {
+			get { 
+				if (hostVPath == null)
+					hostVPath = appHostBase.VPath;
+
+				return hostVPath;
+			}
+		}
 
 		protected virtual Encoding Encoding {
 			get {
@@ -124,12 +144,12 @@ namespace Mono.ASPNET
 
 		public override string GetAppPath ()
 		{
-			return appHostBase.VPath;
+			return HostVPath;
 		}
 
 		public override string GetAppPathTranslated ()
 		{
-			return appHostBase.Path;
+			return HostPath;
 		}
 
 		public override string GetFilePathTranslated ()
@@ -183,20 +203,20 @@ namespace Mono.ASPNET
 			if (eventResult != null)
 				return eventResult;
 
-			if (path == null || path.Length == 0 || path == appHostBase.VPath)
-				return appHostBase.Path.Replace ('/', Path.DirectorySeparatorChar);
+			if (path == null || path.Length == 0 || path == HostVPath)
+				return HostPath.Replace ('/', Path.DirectorySeparatorChar);
 
 			if (path [0] == '~' && path.Length > 2 && path [1] == '/')
 				path = path.Substring (1);
 
-			int len = appHostBase.VPath.Length;
-			if (path.StartsWith (appHostBase.VPath + "/"))
+			int len = HostVPath.Length;
+			if (path.StartsWith (HostVPath + "/"))
 				path = path.Substring (len + 1);
 
 			if (path.Length > 0 && path [0] == '/')
 				path = path.Substring (1);
 
-			return Path.Combine (appHostBase.Path, path.Replace ('/', Path.DirectorySeparatorChar));
+			return Path.Combine (HostPath, path.Replace ('/', Path.DirectorySeparatorChar));
 		}
 
 		protected abstract bool GetRequestData ();

@@ -1,6 +1,7 @@
 DESTDIR=
 PREFIX=@prefix@
 MKINSTALLDIRS=@top_builddir@mkinstalldirs 
+DISTFILES=Makefile.in xsp.1
 
 MANPAGES= xsp.1
 MANDIR = $(DESTDIR)$(PREFIX)/man/man1 
@@ -17,4 +18,8 @@ install:
 
 uninstall:
 	-test -d $(DESTDIR)$(PREFIX)/man/man1 && cd $(MANDIR) && rm -f $(MANPAGES)
+
+dist:
+	$(MKINSTALLDIRS) $(DESTDIR)$(PREFIX)/doc
+	cp $(DISTFILES) $(DESTDIR)$(PREFIX)/doc
 

@@ -11,8 +11,8 @@ using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Web.Hosting;
 using System.Net;
+using System.Web.Hosting;
 
 namespace Mono.ASPNET
 {
@@ -47,6 +47,7 @@ namespace Mono.ASPNET
 			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
 			Console.WriteLine ("                    anything else.");
 			Console.WriteLine ("                    Default value: current directory.");
+			Console.WriteLine ("                    AppSettings key name: MonoServerRootDir");
 			Console.WriteLine ();
 			Console.WriteLine ("    --applications APPS: a semicolon separated list of virtual directory and");
 			Console.WriteLine ("                    real directory for all the applications we want to manage");
@@ -147,8 +148,15 @@ namespace Mono.ASPNET
 			
 			Console.WriteLine ("Root directory: {0}", rootDir);
 
-			host.Start ();
-
+			try {
+				host.Start ();
+				Console.WriteLine ("Hit Return to stop the server.");
+				Console.ReadLine ();
+			} catch (Exception e) {
+				Console.WriteLine ("Error: {0}", e.Message);
+				return 1;
+			}
+			
 			return 0;
 		}
 	}

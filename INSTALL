@@ -28,7 +28,7 @@ You can configure Mono.Security.Win32.dll as detailled in
 /mcs/class/Mono.Security.Win32/README to use an alternative (CryptoAPI) RNG.
 
 
-If you're compiling under windows, you may need to copy 
+If you're compiling under windows, you may need to copy xsp.exe,
 ICSharpCode.SharpZipLib.dll and Mono.Http.dll (distributed with mono) to
 xsp/server and xsp/server/test/bin directories if it's not installed for
 the system.

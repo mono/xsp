@@ -1,3 +1,24 @@
+2003-10-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* INSTALL: updated.
+	* NEWS: updated.
+
+	* Makefile.in:
+	* doc/Makefile.in:
+	* server/Makefile.in:
+	* test/Makefile.in:
+	* autogen.sh:
+	* configure.in: do a real dist target. Make it work on windows.
+	
+	* server/ModMonoRequest.cs: read basic request data upon connection.
+	* server/ModMonoWorkerRequest.cs: implemented GetUnknownHeaders.
+	* server/MonoWorkerRequest.cs: minimize cross-appdomain calls.
+	* server/XSPApplicationHost.cs: Worker is now MarshalByRef, not
+	[Serializable]. Set the server thread as background.
+	* server/server.cs: the server is now stopped by pressing enter. You
+	can disable this behavior with --nonstop argument.
+	* test/DefaultWsdlHelpGenerator.aspx: this has been moved to mono/data.
+
 2003-10-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* Makefile.in:

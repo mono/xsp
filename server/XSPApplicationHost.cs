@@ -23,8 +23,7 @@ using Mono.Posix;
 
 namespace Mono.ASPNET
 {
-	[Serializable]
-	class Worker : ISponsor
+	class Worker : MarshalByRefObject, ISponsor
 	{
 		IApplicationHost host;
 		NetworkStream ns;
@@ -77,11 +76,11 @@ namespace Mono.ASPNET
 				XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host);
 				mwr.ReadRequestData ();
 				host = host.GetApplicationForPath (mwr.GetUriPath (), false);
-				modRequest = mwr.Request;
 				if (host == null) {
 					mwr.Decline ();
 					return;
 				}
+				modRequest = mwr.Request;
 #endif
 				CrossAppDomainDelegate pr = new CrossAppDomainDelegate (ProcessRequest);
 				host.Domain.DoCallBack (pr);
@@ -100,17 +99,14 @@ namespace Mono.ASPNET
 
 		public void ProcessRequest ()
 		{
-			ILease l = (ILease) ns.GetLifetimeService ();
-			l.Register (this);
 #if !MODMONO_SERVER
 			XSPWorkerRequest mwr = new XSPWorkerRequest (ns, host, localEP, remoteEP, rdata);
 #else
-			l = (ILease) modRequest.GetLifetimeService ();
-			l.Register (this);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (modRequest, host);
 #endif
+			ILease l = (ILease) GetLifetimeService ();
+			l.Register (this);
 			if (!mwr.ReadRequestData ()) {
-				requestFinished = true;
 				return;
 			}
 
@@ -119,15 +115,11 @@ namespace Mono.ASPNET
 
 		TimeSpan ISponsor.Renewal (ILease lease)
 		{
-			TimeSpan result;
+			if (requestFinished) {
+				return TimeSpan.Zero;
+			}
 
-			if (requestFinished)
-				result = new TimeSpan (0);
-			else
-				result = new TimeSpan (0, 2, 0);
-
-			Console.WriteLine ("Renewal called: {0} Returning: {1}", lease.GetType (), result);
-			return result;
+			return new TimeSpan (0, 1, 0);
 		}
 	}
 
@@ -235,6 +227,7 @@ namespace Mono.ASPNET
 #endif
 			listen_socket.Listen (5);
 			runner = new Thread (new ThreadStart (RunServer));
+			runner.IsBackground = true;
 			runner.Start ();
 			stop = false;
 			WebTrace.WriteLine ("Server started.");

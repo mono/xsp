@@ -70,6 +70,7 @@ namespace Mono.ASPNET
 		string protocol;
 		string path;
 		string pathInfo;
+		string [][] unknownHeaders;
 
 		public ModMonoRequest Request {
 			get { return request; }
@@ -240,6 +241,33 @@ namespace Mono.ASPNET
 
 		public override string [][] GetUnknownRequestHeaders ()
 		{
+			if (unknownHeaders == null) {
+				Hashtable headers = request.GetAllRequestHeaders ();
+				ICollection keysColl = headers.Keys;
+				ICollection valuesColl = headers.Values;
+				string [] keys = new string [keysColl.Count];
+				string [] values = new string [valuesColl.Count];
+				keysColl.CopyTo (keys, 0);
+				valuesColl.CopyTo (values, 0);
+
+				int count = keys.Length;
+				ArrayList pairs = new ArrayList ();
+				for (int i = 0; i < count; i++) {
+					int index = HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]);
+					if (index != -1)
+						continue;
+					pairs.Add (new string [] { keys [i], values [i]});
+				}
+				
+				if (pairs.Count != 0) {
+					unknownHeaders = new string [pairs.Count][];
+					for (int i = 0; i < pairs.Count; i++)
+						unknownHeaders [i] = (string []) pairs [i];
+					//unknownHeaders = (string [][]) pairs.ToArray (typeof (string [][]));
+				}
+			}
+
+			return unknownHeaders;
 			/**
 			 *FIXME: this should return all the headers whose index in:
 			 *   HttpWorkerRequest.GetKnownRequestHeaderIndex (headerName);

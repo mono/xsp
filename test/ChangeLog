@@ -1,3 +1,7 @@
+2002-05-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* calendar.aspx: new file. Style properties inside component.
+
 2002-05-15  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* README, ChangeLog: changed line ending to unix format.

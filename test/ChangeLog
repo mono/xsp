@@ -1,3 +1,7 @@
+2002-06-17  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* web_table.aspx: New file. Renders Table, TableRow and TableCell.
+
 2002-06-16  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web_panel.aspx: New file.

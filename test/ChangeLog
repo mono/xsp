@@ -1,3 +1,7 @@
+2002-08-01  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* temperature.aspx: Duncan asked for this temperature converter.
+
 2002-07-31  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web_dropdownlist.aspx: New file.

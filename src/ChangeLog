@@ -1,3 +1,8 @@
+2002-07-03  Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* generator.cs: no need to generate code for
+	VerifyRenderingInServerForm as now our System.Web has it.
+
 2002-06-29  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* MyForm.cs: don't need RenderAttributes.

@@ -1459,8 +1459,6 @@ public class Generator
 			"\t\t}\n\n");
 
 		Random rnd = new Random ();
-		epilog.Append ("\n\t\tpublic override void VerifyRenderingInServerForm (Control control)\n" +
-				"\t\t{\n\t\t}\n\n");
 		epilog.AppendFormat (
 			"\n" +
 			"\t\tprotected override void FrameworkInitialize ()\n\t\t{{\n" +

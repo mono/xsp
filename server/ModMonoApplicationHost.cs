@@ -146,6 +146,9 @@ namespace Mono.ASPNET
 			
 			try {
 				RequestReader rr = new RequestReader (Stream);
+				if (rr.ShuttingDown)
+					server.Stop ();
+
 				string vhost = rr.Request.GetRequestHeader ("Host");
 				int port = -1;
 				if (vhost != null) {

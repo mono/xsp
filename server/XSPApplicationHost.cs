@@ -161,7 +161,6 @@ namespace Mono.ASPNET
 	{
 		ApplicationServer server;
 		LingeringNetworkStream stream;
-		RequestData rdata;
 		IPEndPoint remoteEP;
 		IPEndPoint localEP;
 

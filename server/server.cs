@@ -25,7 +25,7 @@ namespace Mono.ASPNET
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string version = assembly.GetName ().Version.ToString ();
 			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
-			string title = ((AssemblyTitleAttribute) att [0]).Title;
+			//string title = ((AssemblyTitleAttribute) att [0]).Title;
 			att = assembly.GetCustomAttributes (typeof (AssemblyCopyrightAttribute), false);
 			string copyright = ((AssemblyCopyrightAttribute) att [0]).Copyright;
 			att = assembly.GetCustomAttributes (typeof (AssemblyDescriptionAttribute), false);
@@ -310,6 +310,7 @@ namespace Mono.ASPNET
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();
+					server.Stop ();
 					// workaround for 65533
 					Environment.Exit (0);
 				}

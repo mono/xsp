@@ -100,6 +100,7 @@ namespace Mono.ASPNET
 		bool setupClientBlockCalled;
 		Hashtable headers;
 		int clientBlock;
+		bool shutdown;
 
 		public ModMonoRequest (NetworkStream ns)
 		{
@@ -108,8 +109,20 @@ namespace Mono.ASPNET
 			GetInitialData ();
 		}
 
+		public bool ShuttingDown {
+			get { return shutdown; }
+		}
+		
 		void GetInitialData ()
 		{
+			byte cmd = reader.ReadByte ();
+			shutdown = (cmd == 0);
+			if (shutdown)
+				return;
+
+			if (cmd != 1)
+				throw new InvalidOperationException ("mod_mono and xsp have different versions.");
+
 			verb = ReadString ();
 			uri = ReadString ();
 			queryString = ReadString ();

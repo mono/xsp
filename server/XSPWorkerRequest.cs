@@ -24,7 +24,6 @@ namespace Mono.ASPNET
 {
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
-		IApplicationHost appHost;
 		string verb;
 		string path;
 		string pathInfo;
@@ -39,7 +38,6 @@ namespace Mono.ASPNET
 		byte [] inputBuffer;
 		int inputLength;
 		int position;
-		EndPoint localEP;
 		EndPoint remoteEP;
 		bool sentConnection;
 		int localPort;
@@ -47,11 +45,7 @@ namespace Mono.ASPNET
 		int requestId;
 		XSPRequestBroker requestBroker;
 		
-		static byte [] error500;
-
 		static string serverHeader;
-
-		static string dirSeparatorString = Path.DirectorySeparatorChar.ToString ();
 
 		static string [] indexFiles = { "index.aspx",
 						"Default.aspx",
@@ -78,14 +72,6 @@ namespace Mono.ASPNET
 
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);
-
-			string s = "HTTP/1.0 500 Server error\r\n" +
-				   serverHeader + 
-				    "<html><body><h1>500 Server error</h1>\r\n" +
-				   "Your client sent a request that was not understood by this server.\r\n" +
-				   "</body></html>\r\n";
-			
-			error500 = Encoding.Default.GetBytes (s);
 		}
 
 		static void SetDefaultIndexFiles (string list)
@@ -140,8 +126,6 @@ namespace Mono.ASPNET
 		{
 			this.requestId = requestId;
 			this.requestBroker = requestBroker;
-			this.appHost = appHost;
-			this.localEP = localEP;
 			this.remoteEP = remoteEP;
 			this.verb = verb;
 			this.path = path;

@@ -61,7 +61,7 @@ namespace Mono.ASPNET
 	//    it locates the IWorker registered with the provided request id and
 	//    forwards the call to it.
 	
-	public class ApplicationServer
+	public class ApplicationServer : MarshalByRefObject
 	{
 		IWebSource webSource;
 		bool started;
@@ -139,7 +139,6 @@ namespace Mono.ASPNET
 		{
 			XmlNode n;
 
-			string name = el.SelectSingleNode ("name").InnerText;
 			string vpath = el.SelectSingleNode ("vpath").InnerText;
 			string path = el.SelectSingleNode ("path").InnerText;
 
@@ -150,6 +149,7 @@ namespace Mono.ASPNET
 				vhost = n.InnerText;
 #else
 			// TODO: support vhosts in xsp.exe
+			string name = el.SelectSingleNode ("name").InnerText;
 			if (verbose)
 				Console.WriteLine ("Ignoring vhost {0} for {1}", n.InnerText, name);
 #endif
@@ -247,13 +247,20 @@ namespace Mono.ASPNET
 				throw new InvalidOperationException ("The server is not started.");
 
 			stop = true;	
+			runner.Abort ();
 			listen_socket.Close ();
+			UnloadAll ();
+			WebTrace.WriteLine ("Server stopped.");
+			Environment.Exit (0);
+		}
+
+		public void UnloadAll ()
+		{
 			lock (vpathToHost) {
 				foreach (VPathToHost v in vpathToHost) {
-					v.ClearHost ();
+					v.UnloadHost ();
 				}
 			}
-			WebTrace.WriteLine ("Server stopped.");
 		}
 
 		void SetSocketOptions (Socket sock)
@@ -354,7 +361,7 @@ namespace Mono.ASPNET
 			if (bestMatch != null) {
 				lock (bestMatch) {
 					if (bestMatch.AppHost == null)
-						bestMatch.CreateHost (webSource);
+						bestMatch.CreateHost (this, webSource);
 				}
 				return bestMatch;
 			}
@@ -366,6 +373,16 @@ namespace Mono.ASPNET
 				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
 
 			return null;
+		}
+
+		public void DestroyHost (IApplicationHost host)
+		{
+			// Called when the host appdomain is being unloaded
+			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
+				VPathToHost v = (VPathToHost) vpathToHost [i];
+				if (v.TryClearHost (host))
+					break;
+			}
 		}
 	}
 	
@@ -399,9 +416,23 @@ namespace Mono.ASPNET
 			}
 		}
 
-		public void ClearHost ()
+
+		public bool TryClearHost (IApplicationHost host)
 		{
-			this.AppHost = null;
+			if (this.AppHost == host) {
+				this.AppHost = null;
+				return true;
+			}
+
+			return false;
+		}
+
+		public void UnloadHost ()
+		{
+			if (AppHost != null)
+				AppDomain.Unload (AppHost.Domain);
+
+			AppHost = null;
 		}
 
 		public bool Redirect (string path, out string redirect)
@@ -458,7 +489,7 @@ namespace Mono.ASPNET
 			return (vpath.StartsWith (this.vpath));
 		}
 
-		public void CreateHost (IWebSource webSource)
+		public void CreateHost (ApplicationServer server, IWebSource webSource)
 		{
 			string v = vpath;
 			if (v != "/" && v.EndsWith ("/")) {
@@ -466,6 +497,7 @@ namespace Mono.ASPNET
 			}
 			
 			AppHost = ApplicationHost.CreateApplicationHost (webSource.GetApplicationHostType(), v, realPath) as IApplicationHost;
+			AppHost.Server = server;
 			
 			// Link the host in the application domain with a request broker in the main domain
 			RequestBroker = webSource.CreateRequestBroker ();

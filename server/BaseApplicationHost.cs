@@ -1,9 +1,9 @@
-//
+
 // Mono.ASPNET.BaseApplicationHost
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//  Lluis Sanchez Gual (lluis@ximian.com)
+//	Lluis Sanchez Gual (lluis@ximian.com)
 //
 // (C) Copyright 2004 Novell, Inc
 //
@@ -17,15 +17,27 @@ namespace Mono.ASPNET
 		string vpath;
 		IRequestBroker requestBroker;
 		EndOfRequestHandler endOfRequest;
+		ApplicationServer appserver;
 		
 		public BaseApplicationHost ()
 		{
 			endOfRequest = new EndOfRequestHandler (EndOfRequest);
+			AppDomain.CurrentDomain.DomainUnload += new EventHandler (OnUnload);
+		}
+
+		public void OnUnload (object o, EventArgs args)
+		{
+			appserver.DestroyHost (this);
 		}
 
 		public override object InitializeLifetimeService ()
 		{
 			return null; // who wants to live forever?
+		}
+
+		public ApplicationServer Server {
+			get { return appserver; }
+			set { appserver = value; }
 		}
 		
 		public string Path {

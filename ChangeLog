@@ -1,3 +1,28 @@
+2004-09-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: 1.0.2.99
+
+	* server/ApplicationServer.cs: allow unloading applications. Fixed
+	warnings.
+
+	* server/BaseApplicationHost.cs: when the domain is unloaded, tell
+	the application server we don't exist any more.
+
+	* server/BaseRequestBroker.cs: added some sanity checks.
+
+	* server/IApplicationHost.cs: added Server to the interface.
+
+	* server/ModMonoRequest.cs:
+	* server/ModMonoWorkerRequest.cs:
+	* server/ModMonoApplicationHost.cs: if apache is stopping, tell the
+	application server to finish everything off.
+
+	* server/XSPWorkerRequest.cs:
+	* server/XSPApplicationHost.cs: fixed warnings.
+
+	* server/server.cs: if running interactive, unload all applications
+	before exiting.
+
 2004-09-12 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ApplicationServer.cs: make the server socket non-blocking and

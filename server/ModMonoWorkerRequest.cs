@@ -97,6 +97,10 @@ namespace Mono.ASPNET
 		{
 			request.NotFound ();
 		}
+
+		public bool ShuttingDown {
+			get { return request.ShuttingDown; }
+		}
 	}
 
 	public class ModMonoWorkerRequest : MonoWorkerRequest

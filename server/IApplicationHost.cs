@@ -18,6 +18,7 @@ namespace Mono.ASPNET
 		string VPath { get; }	
 		AppDomain Domain { get; }	
 		IRequestBroker RequestBroker { get; set; }
+		ApplicationServer Server { get; set; }
 	}
 	
 	public interface IRequestBroker

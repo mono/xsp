@@ -12,7 +12,7 @@ tabcontrol2.dll: tabcontrol2.cs
 codebehind1.dll: codebehind1.cs
 
 extensions.dll: TraceExtension.cs EncryptExtension.cs DumpExtension.cs
-	$(CSC) TraceExtension.cs EncryptExtension.cs DumpExtension.cs /r:System.Web.dll /r:System.Web.Services.dll /target:library /out:extensions.dll
+	$(CSC) /target:library /out:extensions.dll TraceExtension.cs EncryptExtension.cs DumpExtension.cs /r:System.Web.dll /r:System.Web.Services.dll 
 
 ServiceClient.exe: extensions.dll ServiceClient.cs Reference.cs
 	$(CSC) ServiceClient.cs Reference.cs /r:System.Web.dll /r:System.Web.Services.dll /r:extensions.dll

@@ -1,3 +1,8 @@
+2003-07-30  Sebastien Pouliot  <spouliot@videotron.ca>
+
+	* Makefile: Corrected extensions.dll for csc, error: Options '/out' and '/target' 
+	must appear before source file names
+
 2003-07-24  Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* web.config: update to new type/assembly name and make it use gzip by

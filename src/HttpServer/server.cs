@@ -45,6 +45,53 @@ class MyCapabilities : HttpBrowserCapabilities
 	}
 }
 
+class CacheData
+{
+	private AppDomain domain;
+	private string dllName;
+	private string className;
+	private string fileName;
+	private DateTime writeTime;
+	private bool unloaded;
+
+	public CacheData (string fileName, string dllName, string className, DateTime writeTime)
+	{
+		DateTime dt = DateTime.Now;
+		this.dllName = dllName;
+		domain = AppDomain.CreateDomain (dllName);
+		this.fileName = fileName;
+		this.dllName = dllName;
+		this.className = className;
+		this.writeTime = writeTime;
+	}
+
+	public bool OlderThan (DateTime date)
+	{
+		if (unloaded)
+			throw new ApplicationException ("This domain is unloaded: " + dllName);
+
+		return (writeTime < date);
+	}
+
+	public object CreateInstance ()
+	{
+		if (unloaded)
+			throw new ApplicationException ("This domain is unloaded: " + dllName);
+
+		return domain.CreateInstanceFromAndUnwrap (dllName, className);
+	}
+
+	public void Unload ()
+	{
+		if (unloaded)
+			throw new ApplicationException ("This domain is unloaded: " + dllName);
+
+		unloaded = true;
+		AppDomain.Unload (domain);
+		domain = null;
+	}
+}
+
 class PageFactory
 {
 	class PageBuilder
@@ -54,7 +101,23 @@ class PageFactory
 		private string csFileName;
 		private string className;
 		private static char dirSeparator = Path.DirectorySeparatorChar;
-		private static Hashtable compiled_dlls = new Hashtable ();
+		private static Hashtable cachedData = new Hashtable ();
+		private static Random rnd_file = new Random ();
+
+		public static bool CheckDate (string fileName)
+		{
+			CacheData cached = cachedData [fileName] as CacheData;
+			DateTime fileWriteTime = File.GetLastWriteTime (fileName);
+
+			if (cached != null && cached.OlderThan (fileWriteTime)) {
+				cachedData.Remove (fileName);
+				cached.Unload ();
+				cached = null;
+				return false;
+			}
+
+			return true;
+		}
 
 		private PageBuilder ()
 		{
@@ -89,8 +152,15 @@ class PageFactory
 
 		public Page Build ()
 		{
-			Pair cached = compiled_dlls [fileName] as Pair;
+			CacheData cached = cachedData [fileName] as CacheData;
 			string dll;
+			DateTime fileWriteTime = File.GetLastWriteTime (fileName);
+
+			if (cached != null && cached.OlderThan (fileWriteTime)) {
+				cachedData.Remove (fileName);
+				cached.Unload ();
+				cached = null;
+			}
 			
 			if (cached == null) {
 				if (Xsp (fileName, csFileName) == false){
@@ -108,15 +178,21 @@ class PageFactory
 				if (GetBuildOptions (file_content) == false)
 					return null;
 
-				dll = "output" + dirSeparator + fileName.Replace (".aspx", ".dll");
-				if (Compile (csFileName, dll) == true)
-					compiled_dlls.Add (fileName, new Pair (className, dll));
-			} else {
-				className = (string) cached.First;
-				dll = (string) cached.Second;
+				dll = "output" + dirSeparator;
+				dll += rnd_file.Next () + fileName.Replace (".aspx", ".dll");
+				if (Compile (csFileName, dll) == true){
+					cached = new CacheData (fileName,
+								dll,
+								"ASP." + className,
+								fileWriteTime);
+					cachedData.Add (fileName, cached);
+				}
 			}
 
-			return GetInstance (dll);
+			if (cached == null)
+				return null;
+
+			return GetInstance (cached);
 		}
 
 		private static bool Xsp (string fileName, string csFileName)
@@ -229,22 +305,9 @@ class PageFactory
 			return line.Substring (begin + att_start.Length, end);
 		}
 		
-		private Page GetInstance (string dll)
+		private Page GetInstance (CacheData cached)
 		{
-			Assembly page_dll = Assembly.LoadFrom (dll);
-			if (page_dll == null){
-				Console.WriteLine ("Error loading generated dll: " + dll);
-				return null;
-			}
-
-			Type page_type = page_dll.GetType ("ASP." + className);
-			if (page_type == null){
-				Console.WriteLine ("Error looking for type ASP." + className);
-				return null;
-			}
-
-			Console.WriteLine ("Loaded type: {0}", page_type);
-			return Activator.CreateInstance (page_type) as Page;
+			return cached.CreateInstance () as Page;
 		}
 
 		private bool Compile (string csName, string dllName)
@@ -285,7 +348,11 @@ class PageFactory
 			Page p = null;
 			foreach (Page _p in loadedPages.Keys){
 				if (view_state == loadedPages [_p] as string){
-					p = _p;
+					if (PageBuilder.CheckDate (fileName)) {
+						p = _p;
+					} else {
+						loadedPages.Remove (_p);
+					}
 					break;
 				}
 			}
@@ -348,15 +415,13 @@ class MyWorkerRequest
 			return;
 
 		Page page = PageFactory.GetPage (fileName, query_options);
-#if MONO
-		string old_view_state = page.GetViewStateString ();
-#endif
-
 		if (page == null){
 			Console.WriteLine ("Error creating the instace of the generated class.");
 			return;
 		}
-
+#if MONO
+		string old_view_state = page.GetViewStateString ();
+#endif
 		RenderPage (page);
 #if MONO
 		string new_view_state = page.GetViewStateString ();
@@ -452,8 +517,6 @@ class MyWorkerRequest
 		int end = fileName.IndexOf (' ');
 		if (end != -1)
 			fileName = fileName.Substring (0, end);
-
-		Console.WriteLine ("File name: {0}", fileName);
 	}
 	
 	private void RenderPage (Page page)
@@ -654,7 +717,7 @@ public class Server
 			proc.ProcessRequest ();
 			output.Flush ();
 		} catch (Exception e) {
-			Console.WriteLine ("Caught exception in processing request.");
+			Console.WriteLine ("Caught exception processing request.");
 			Console.WriteLine (e.ToString ());
 		}
 	}

@@ -1,3 +1,8 @@
+2002-07-11  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
+
+	* server.cs: now uses AppDomain to load generated classes and recreates
+	the dll when the aspx file has changed.
+
 2002-07-08  Gonzalo Paniagua Javier <gonzalo@gnome-db.org>
 
 	* server.cs: fixed page caching. Also keep track of loaded dlls.

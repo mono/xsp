@@ -1,3 +1,19 @@
+2004-11-24 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs: max. line length for headers is now 8kB.
+
+	* server/ApplicationServer.cs: don't Exit in Stop(). Call the new 
+	AppHost.Unload instead of just AppDomain.Unload, as that does not seem
+	to trigger the Application_End event under MS runtime. Fixes bug #68709.
+
+	* server/BaseApplicationHost.cs: new method Unload() that calls
+	HttpRuntime.UnloadAppDomain for the current application.
+
+	* server/InitialWorkerRequest.cs: maximum length for the request line
+	is now 8kB.
+
+	* server/IApplicationHost.cs: added Unload() to the interface.
+
 2004-11-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* test/global.asax: added code here.

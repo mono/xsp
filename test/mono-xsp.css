@@ -56,3 +56,10 @@ a { color: #72716a; }
 	margin:15px;
 }
 
+table {
+	font-family: "Trebuchet MS", lucida, verdana, helvetica, sans-serif; 
+	font-size: 14px;
+	color: #000;
+	background-color: #f8f8f4;
+}
+

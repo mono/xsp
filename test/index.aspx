@@ -14,17 +14,31 @@
 		DirectoryInfo dir = new DirectoryInfo (Path.GetDirectoryName (Request.PhysicalPath));
 		StringBuilder sb = new StringBuilder ();
 		sb.Append ("<ul class=\"dirlist\">\n");
-		foreach (FileInfo file in dir.GetFiles ()) {
-			string fileName = Path.GetFileName (file.FullName);
-			string extension = Path.GetExtension (file.FullName);
-			if (extension == ".aspx" || extension == ".ashx" || extension == ".asmx") {
-				sb.AppendFormat ("<li><a class=\"{1}\" href=\"{0}\">{0}</a></li>\n",
-						fileName, extension.Substring (1));
-			}
-		}
+		sb.Append (ReadDirectory (Path.Combine (Path.GetDirectoryName (Request.PhysicalPath), "1.1"), ""));
 		sb.Append ("</ul>");
 		fileList.Text = sb.ToString ();
 	}
+	
+	public string ReadDirectory (string path, string basePath)
+	{
+		StringBuilder sb = new StringBuilder ();
+		foreach (string sdir in Directory.GetDirectories (path)) {
+			string s = ReadDirectory (sdir, basePath + Path.GetFileName (sdir) + "/");
+			if (s != "")
+				sb.AppendFormat ("<li><b>{0}</b><ul>{1}</ul></li>", Path.GetFileName (sdir), s);
+		}
+		foreach (string file in Directory.GetFiles (path)) {
+			string fileName = basePath + Path.GetFileName (file);
+			if (fileName == "index.aspx") continue;
+			string extension = Path.GetExtension (file);
+			if (extension == ".aspx" || extension == ".ashx" || extension == ".asmx") {
+				sb.AppendFormat ("<li><a class=\"{2}\" href=\"{1}\">{0}</a></li>\n",
+						Path.GetFileName (fileName), fileName, extension.Substring (1));
+			}
+		}
+		return sb.ToString ();
+	}
+	
 </script>
 </head>
 <body>

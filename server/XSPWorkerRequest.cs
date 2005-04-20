@@ -71,7 +71,8 @@ namespace Mono.ASPNET
 		long contentSent;
 		long contentLength;
 		bool isclosed;
-		
+
+		static string server_software;
 		static string serverHeader;
 
 		static string [] indexFiles = { "index.aspx",
@@ -94,8 +95,8 @@ namespace Mono.ASPNET
 			if (plat == "128")
 				plat = "Unix";
 
-			serverHeader = String.Format ("Server: {0}/{1} {2}\r\n",
-						      title, version, plat); 
+			server_software = String.Format ("{0}/{1}", title, version); 
+			serverHeader = String.Format ("Server: {0} {1}\r\n", server_software, plat);
 
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);
@@ -513,8 +514,23 @@ namespace Mono.ASPNET
 
 		public override string GetServerVariable (string name)
 		{
-			WebTrace.WriteLine ("GetServerVariable()");
-			return "GetServerVariable -> " + name;
+			string result = null;
+			switch (name) {
+			case "GATEWAY_INTERFACE":
+				result = "CGI/1.1";
+				break;
+			case "HTTPS":
+				result = (IsSecure ()) ? "on" : "off";
+				break;
+			case "SERVER_SOFTWARE":
+				result = server_software;
+				break;
+			default:
+				result = base.GetServerVariable (name);
+				break;
+			}
+
+			return result;
 		}
 
 		public override string GetUriPath ()

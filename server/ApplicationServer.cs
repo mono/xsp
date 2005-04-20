@@ -467,6 +467,7 @@ namespace Mono.ASPNET
 					TimeSpan diff = now - atime;
 					if (diff.TotalMilliseconds > 15 * 1000) {
 						RemoveReadSocket (k);
+						wSockets.Remove (k);
 						k.Close ();
 						continue;
 					}

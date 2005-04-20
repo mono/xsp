@@ -284,7 +284,20 @@ namespace Mono.ASPNET
 
 		public override string GetServerVariable (string name)
 		{
-			return requestBroker.GetServerVariable (requestId, name);
+			string result = requestBroker.GetServerVariable (requestId, name);
+			if (result != null && result.Length > 0)
+				return result;
+
+			switch (name) {
+			case "HTTPS":
+				result = (IsSecure ()) ? "on" : "off";
+				break;
+			default:
+				result = base.GetServerVariable (name);
+				break;
+			}
+
+			return result;
 		}
 
 		public override void SendResponseFromMemory (byte [] data, int length)

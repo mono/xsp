@@ -1,3 +1,9 @@
+2005-04-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/XSPWorkerRequest.cs:
+	* server/XSPApplicationHost.cs: fix warnings and ensure we call Close
+	if an error happens when writing to the stream.
+
 2005-04-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs:

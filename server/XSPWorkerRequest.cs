@@ -70,7 +70,6 @@ namespace Mono.ASPNET
 		bool haveContentLength;
 		long contentSent;
 		long contentLength;
-		bool isclosed;
 
 		static string server_software;
 		static string serverHeader;

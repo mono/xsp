@@ -114,8 +114,11 @@ namespace Mono.ASPNET
 		public void Close (int requestId, bool keepAlive)
 		{
 			XSPWorker worker = (XSPWorker) GetWorker (requestId);
-			if (worker != null)
-				worker.Close (keepAlive);
+			if (worker != null) {
+				try {
+					worker.Close (keepAlive);
+				} catch {}
+			}
 		}
 	}
 	
@@ -168,28 +171,6 @@ namespace Mono.ASPNET
 			wr.SendResponseFromMemory (contentBytes, contentBytes.Length);
 			wr.FlushResponse (true);
 			wr.CloseConnection ();
-		}
-
-		static string GetValueFromHeader (string header, string attr)
-		{
-			int where = header.IndexOf (attr + '=');
-			if (where == -1)
-				return null;
-
-			where += attr.Length + 1;
-			int max = header.Length;
-			if (where >= max)
-				return String.Empty;
-
-			char ending = header [where];
-			if (ending != '"')
-				ending = ' ';
-
-			int end = header.Substring (where + 1).IndexOf (ending);
-			if (end == -1)
-				return (ending == '"') ? null : header.Substring (where);
-
-			return header.Substring (where, end);
 		}
 	}
 	
@@ -295,7 +276,12 @@ namespace Mono.ASPNET
 		
 		public void Write (byte[] buffer, int position, int size)
 		{
-			stream.Write (buffer, position, size);
+			try {
+				stream.Write (buffer, position, size);
+			} catch (Exception e) {
+				Close ();
+				throw;
+			}
 		}
 		
 		public void Close ()

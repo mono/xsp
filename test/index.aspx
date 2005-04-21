@@ -60,5 +60,6 @@ Welcome to Mono XSP!
 <img style="float:right" src="mono-powered-big.png" alt="Mono Powered">
 <div style="text-align: left; font-size: small;">Generated: <%= DateTime.Now %></div>
 </div>
+</body>
 </html>
 

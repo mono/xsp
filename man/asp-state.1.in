@@ -8,7 +8,7 @@
 .SH NAME 
 XSP \- Mono ASP.NET Session State Server
 .SH SYNOPSIS
-.B asp_state
+.B asp-state
 [options]
 .SH DESCRIPTION
 asp-state is an out of process ASP.NET session state server.

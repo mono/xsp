@@ -1,3 +1,10 @@
+2005-04-27 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs:
+	* server/ModMonoRequest.cs: Default -> DefaultInvariant. Also don't
+	send a FLUSH command to mod_mono, as it's ignored.
+
 2005-04-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/XSPWorkerRequest.cs:

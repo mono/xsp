@@ -63,8 +63,8 @@ namespace Mono.ASPNET
 		const int MAX_STRING_SIZE = 1024 * 10;
 		BinaryReader reader;
 		BinaryWriter writer;
-		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
-							   CaseInsensitiveComparer.Default);
+		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
+							   CaseInsensitiveComparer.DefaultInvariant);
 		string verb;
 		string queryString;
 		string protocol;
@@ -110,8 +110,8 @@ namespace Mono.ASPNET
 			queryString = ReadString ();
 			protocol = ReadString ();
 			int nheaders = reader.ReadInt32 ();
-			headers = new Hashtable (CaseInsensitiveHashCodeProvider.Default,
-						 CaseInsensitiveComparer.Default);
+			headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
+						 CaseInsensitiveComparer.DefaultInvariant);
 			for (int i = 0; i < nheaders; i++) {
 				string key = ReadString ();
 				headers [key] = ReadString ();
@@ -272,7 +272,8 @@ namespace Mono.ASPNET
 
 		public void Flush ()
 		{
-			SendSimpleCommand (Cmd.FLUSH);
+			// No-op in mod_mono. Not needed.
+			// SendSimpleCommand (Cmd.FLUSH);
 		}
 
 		public void Close ()

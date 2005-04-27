@@ -225,7 +225,8 @@ namespace Mono.ASPNET
 		
 		public override void FlushResponse (bool finalFlush)
 		{
-			requestBroker.Flush (requestId);
+			// FLUSH is a no-op in mod_mono. Apache takes care of it.
+			// requestBroker.Flush (requestId);
 		}
 
 		public override bool IsSecure ()
@@ -382,7 +383,7 @@ namespace Mono.ASPNET
 		
 		string GetRequestHeader (string name)
 		{
-			IHashCodeProvider hp = CaseInsensitiveHashCodeProvider.Default;
+			IHashCodeProvider hp = CaseInsensitiveHashCodeProvider.DefaultInvariant;
 			if (headersHash == null) {
 				headersHash = new int [headers.Length];
 				for (int i = 0; i < headers.Length; i++) {

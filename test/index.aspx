@@ -17,6 +17,9 @@
 		sb.Append (ReadDirectory (Path.Combine (Path.GetDirectoryName (Request.PhysicalPath), "1.1"), "1.1/"));
 		sb.Append ("</ul>");
 		fileList.Text = sb.ToString ();
+		if (File.Exists ("Makefile") && File.Exists ("Makefile.am")){
+			warning.InnerText = "You are running XSP on the distribution directory, not the installed directory.  Not all samples will work";
+		}
 	}
 	
 	public string ReadDirectory (string path, string basePath)
@@ -52,6 +55,8 @@ Welcome to Mono XSP!
 </h2>
 </div>
 </div>
+
+<div id="warning" runat="server" style="background: red;"></div>
 
 <p>Here are some ASP.NET examples:</p>
 <asp:Literal id="fileList" runat="server" />

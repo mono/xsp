@@ -1,9 +1,9 @@
 MCSFLAGS= -debug+ -debug:full -nologo
 
-xspdir = $(libdir)/mono/1.0
-modmonoserverdir = $(libdir)/mono/1.0
-xsp2dir = $(libdir)/mono/2.0
-modmonoserver2dir = $(libdir)/mono/2.0
+xspdir = $(prefix)/lib/mono/1.0
+modmonoserverdir = $(prefix)/lib/mono/1.0
+xsp2dir = $(prefix)/lib/mono/2.0
+modmonoserver2dir = $(prefix)/lib/mono/2.0
 
 if NET_2_0
 XSP2_EXE = xsp2.exe
@@ -25,7 +25,7 @@ EXTRA_DIST = $(common) $(xsp_only) $(modmono_only) AssemblyInfo.cs.in AssemblyIn
 # 
 xsp_references= -r:System.Web.dll
 if PLATFORM_WIN32
-modmono_references= -lib:"$(libdir)" -r:System.Web.dll -r:Mono.Posix.dll
+modmono_references= -lib:"$(prefix)/lib" -r:System.Web.dll -r:Mono.Posix.dll
 else
 modmono_references= -r:System.Web.dll -r:Mono.Posix.dll
 endif

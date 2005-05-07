@@ -10,16 +10,18 @@ bin_SCRIPTS = $(bin1_scripts) $(bin2_scripts)
 
 CLEANFILES = $(bin1_scripts) $(bin2_scripts_real)
 
-plat_bindir = $(libdir)/mono/1.0
-plat_bindir2 = $(libdir)/mono/2.0
+plat_bindir = $(prefix)/lib/mono/1.0
+plat_bindir2 = $(prefix)/lib/mono/2.0
 
 REWRITE = sed \
 	-e 's,@''plat_bindir@,$(plat_bindir),g'		\
-	-e 's,@''exe_file@,$@.exe,g'
+	-e 's,@''exe_file@,$@.exe,g'			\
+	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
 REWRITE2 = sed \
 	-e 's,@''plat_bindir@,$(plat_bindir2),g'		\
-	-e 's,@''exe_file@,$@.exe,g'
+	-e 's,@''exe_file@,$@.exe,g'				\
+	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
 $(bin1_scripts): $(srcdir)/script.in Makefile.am
 	$(REWRITE) $(srcdir)/script.in > $@.tmp

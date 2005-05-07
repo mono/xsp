@@ -1,3 +1,9 @@
+2005-05-07  Ben Maurer  <bmaurer@ximian.com>
+
+	* configure.in: put the full path to mono in RUNTIME
+	* */Makefile.am: s.$libdir.$prefix/lib, since that's what mono
+	uses. Also, for scripts, use RUNTIME rather than just `mono'.
+
 2005-05-07 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/ModMonoWorkerRequest.cs: implemented IsClientConnected.

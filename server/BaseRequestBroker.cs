@@ -97,6 +97,11 @@ namespace Mono.ASPNET
 				worker.Flush ();
 		}
 
+		public bool IsConnected (int requestId)
+		{
+			return (GetWorker (requestId)).IsConnected ();
+		}
+
 		public override object InitializeLifetimeService ()
 		{
 			return null;

@@ -324,8 +324,8 @@ namespace Mono.ASPNET
 
 		public override bool IsClientConnected ()
 		{
-			//TODO
-			return true;
+			WebTrace.WriteLine ("IsClientConnected()");
+			return (requestBroker != null && requestBroker.IsConnected (requestId));
 		}
 
 		public override string GetUriPath ()

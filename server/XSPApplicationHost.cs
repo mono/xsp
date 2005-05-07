@@ -100,11 +100,6 @@ namespace Mono.ASPNET
 	//
 	public class XSPRequestBroker: BaseRequestBroker
 	{
-		public bool IsConnected (int requestId)
-		{
-			return ((XSPWorker)GetWorker (requestId)).IsConnected ();
-		}
-
 		public int GetReuseCount (int requestId)
 		{
 			XSPWorker worker = (XSPWorker) GetWorker (requestId);

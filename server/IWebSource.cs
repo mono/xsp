@@ -49,6 +49,7 @@ namespace Mono.ASPNET
 		void Write (byte[] buffer, int position, int size);
 		void Close ();
 		void Flush ();
+		bool IsConnected ();
 	}
 }
 

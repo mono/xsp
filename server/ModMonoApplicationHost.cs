@@ -226,8 +226,8 @@ namespace Mono.ASPNET
 			try {
 				RequestReader rr = new RequestReader (Stream);
 				if (rr.ShuttingDown) {
-					server.Stop ();
 					Close ();
+					server.Stop ();
 					return;
 				}
 
@@ -318,9 +318,14 @@ namespace Mono.ASPNET
 		
 		public void Flush ()
 		{
-			modRequest.Flush ();
+			//modRequest.Flush (); No-op
 		}
-		
+
+		public bool IsConnected ()
+		{
+			return modRequest.IsConnected ();
+		}
+
 		public string GetServerVariable (string name)
 		{
 			return modRequest.GetServerVariable (name);

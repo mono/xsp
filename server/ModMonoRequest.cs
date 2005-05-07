@@ -55,6 +55,7 @@ namespace Mono.ASPNET
 		SET_STATUS,
 		DECLINE_REQUEST,
 		NOT_FOUND,
+		IS_CONNECTED,
 		LAST_COMMAND
 	}
 
@@ -98,7 +99,7 @@ namespace Mono.ASPNET
 			if (shutdown)
 				return;
 
-			if (cmd != 1) {
+			if (cmd != 2) {
 				string msg = "mod_mono and xsp have different versions.";
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
@@ -292,6 +293,13 @@ namespace Mono.ASPNET
 			clientBlock = i;
 			return i;
 		} 
+
+		public bool IsConnected ()
+		{
+			SendSimpleCommand (Cmd.IS_CONNECTED);
+			int i = reader.ReadInt32 ();
+			return (i != 0);
+		}
 
 		public bool ShouldClientBlock () 
 		{

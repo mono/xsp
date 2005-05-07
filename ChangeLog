@@ -1,3 +1,15 @@
+2005-05-07 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* server/ModMonoWorkerRequest.cs: implemented IsClientConnected.
+	* server/ModMonoRequest.cs: added IsConnected and increased version
+	number.
+
+	* server/BaseRequestBroker.cs:
+	* server/ModMonoApplicationHost.cs: Close the current connection before
+	stopping the server when a shutdown request is received.
+	* server/XSPApplicationHost.cs:
+	* server/IWebSource.cs: IsConnected is now part if IWorker interface.
+
 2005-05-03  Ben Maurer  <bmaurer@ximian.com>
 
 	* configure.in: 1.0.9

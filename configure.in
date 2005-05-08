@@ -59,6 +59,7 @@ test x$GMCS = xno || echo "$CS 2.0 compiler: $GMCS"
 
 AC_SUBST(MCS)
 AC_SUBST(GMCS)
+AC_SUBST(RUNTIME)
 AC_OUTPUT([
 	Makefile
 	man/xsp.1

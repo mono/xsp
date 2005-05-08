@@ -239,13 +239,9 @@ namespace Mono.ASPNET
 
 		static void OnEndOfRequest (HttpWorkerRequest req)
 		{
-			try {
 			MonoWorkerRequest mwr = (MonoWorkerRequest) req;
 			if (mwr.end_send != null)
 				mwr.end_send (mwr, mwr.end_send_data);
-			} catch (Exception e) {
-				Console.WriteLine (e);
-			}
 		}
 
 		public override void EndOfRequest ()

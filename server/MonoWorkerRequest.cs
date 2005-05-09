@@ -86,7 +86,6 @@ namespace Mono.ASPNET
 		string hostPath;
 		EndOfSendNotification end_send;
 		object end_send_data;
-		static EndOfRequestHandler eor = new EndOfRequestHandler (OnEndOfRequest);
 
 		public MonoWorkerRequest (IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
@@ -95,7 +94,6 @@ namespace Mono.ASPNET
 				throw new ArgumentNullException ("appHost");
 
 			appHostBase = appHost;
-			EndOfRequestEvent += eor;
 		}
 
 		public event MapPathEventHandler MapPathEvent;
@@ -237,17 +235,13 @@ namespace Mono.ASPNET
 			HttpRuntime.ProcessRequest (this);
 		}
 
-		static void OnEndOfRequest (HttpWorkerRequest req)
-		{
-			MonoWorkerRequest mwr = (MonoWorkerRequest) req;
-			if (mwr.end_send != null)
-				mwr.end_send (mwr, mwr.end_send_data);
-		}
-
 		public override void EndOfRequest ()
 		{
 			if (EndOfRequestEvent != null)
 				EndOfRequestEvent (this);
+
+			if (end_send != null)
+				end_send (this, end_send_data);
 		}
 		
 		public override void SetEndOfSendNotification (EndOfSendNotification callback, object extraData)

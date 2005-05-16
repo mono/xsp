@@ -13,7 +13,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	internal class WebTrace
 	{

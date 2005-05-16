@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.ModMonoApplicationHost
+// Mono.WebServer.ModMonoApplicationHost
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -33,7 +33,7 @@ using System.Net;
 using System.Net.Sockets;
 using Mono.Posix;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	//
 	// ModMonoWebSource: Provides methods to get objects and types specific

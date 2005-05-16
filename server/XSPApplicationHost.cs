@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.XSPApplicationHost
+// Mono.WebServer.XSPApplicationHost
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -33,8 +33,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Web;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using Mono.Security.Authenticode;
+using Mono.Security.Protocol.Tls;
+using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
+using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	//
 	// XSPWebSource: Provides methods to get objects and types specific
@@ -43,7 +49,23 @@ namespace Mono.ASPNET
 	public class XSPWebSource: IWebSource
 	{
 		IPEndPoint bindAddress;
-		
+		bool secureConnection;
+		SecurityProtocolType SecurityProtocol;
+		X509Certificate cert;
+		PrivateKeySelectionCallback keyCB;
+		bool requireClientCert;
+
+		public XSPWebSource(IPAddress address, int port, SecurityProtocolType securityProtocol,
+					X509Certificate cert, PrivateKeySelectionCallback keyCB, bool requireClientCert)
+		{			
+			secureConnection = (cert != null && keyCB != null);
+			this.bindAddress = new IPEndPoint (address, port);
+			this.SecurityProtocol = securityProtocol;
+			this.cert = cert;
+			this.keyCB = keyCB;
+			this.requireClientCert = requireClientCert;
+		}
+
 		public XSPWebSource (IPAddress address, int port)
 		{
 			SetListenAddress (address, port);
@@ -76,7 +98,8 @@ namespace Mono.ASPNET
  
 		public IWorker CreateWorker (Socket client, ApplicationServer server)
 		{
-			return new XSPWorker (client, client.LocalEndPoint, server);
+			return new XSPWorker (client, client.LocalEndPoint, server,
+				secureConnection, SecurityProtocol, cert, keyCB, requireClientCert);
 		}
 		
 		public Type GetApplicationHostType ()
@@ -176,17 +199,31 @@ namespace Mono.ASPNET
 	internal class XSPWorker: IWorker
 	{
 		ApplicationServer server;
-		LingeringNetworkStream stream;
+		LingeringNetworkStream netStream;
+		Stream stream;
 		IPEndPoint remoteEP;
 		IPEndPoint localEP;
 		Socket sock;
 
-		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server)
+		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
+			bool secureConnection,
+			Mono.Security.Protocol.Tls.SecurityProtocolType SecurityProtocol,
+			X509Certificate cert,
+			PrivateKeySelectionCallback keyCB,
+			bool requireClientCert) 
 		{
-			stream = new LingeringNetworkStream (client, false);
+			if (secureConnection) {
+				netStream = new LingeringNetworkStream (client, true);
+				SslServerStream s = new SslServerStream (netStream, cert, requireClientCert, false);
+				s.PrivateKeyCertSelectionDelegate += keyCB;
+				stream = s;
+			} else {
+				netStream = new LingeringNetworkStream (client, false);
+				stream = netStream;
+			}
+
 			sock = client;
 			this.server = server;
-
 			try {
 				remoteEP = (IPEndPoint) client.RemoteEndPoint;
 			} catch { }
@@ -288,23 +325,30 @@ namespace Mono.ASPNET
 		{
 			if (!keepAlive || !IsConnected ()) {
 				stream.Close ();
+				if (stream != netStream)
+					netStream.Close ();
+
 				server.CloseSocket (sock);
 				return;
 			}
 
-			stream.EnableLingering = false;
+			netStream.EnableLingering = false;
 			stream.Close ();
+			if (stream != netStream)
+				netStream.Close ();
+
 			server.ReuseSocket (sock);
 		}
 
 		public bool IsConnected ()
 		{
-			return stream.Connected;
+			return netStream.Connected;
 		}
 
 		public void Flush ()
 		{
-			stream.Flush ();
+			if (stream != netStream)
+				stream.Flush ();
 		}
 	}
 }

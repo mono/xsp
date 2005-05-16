@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.IWebSource
+// Mono.WebServer.IWebSource
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -32,7 +32,7 @@
 using System;
 using System.Net.Sockets;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public interface IWebSource : IDisposable
 	{

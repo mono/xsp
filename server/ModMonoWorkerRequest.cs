@@ -39,7 +39,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class RequestReader
 	{

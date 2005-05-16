@@ -43,7 +43,7 @@ using System.Threading;
 using System.Web;
 using System.Web.Hosting;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class MapPathEventArgs : EventArgs
 	{

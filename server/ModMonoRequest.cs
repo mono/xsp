@@ -38,7 +38,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	enum Cmd
 	{

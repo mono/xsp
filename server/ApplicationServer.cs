@@ -41,7 +41,7 @@ using System.IO;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	// ApplicationServer runs the main server thread, which accepts client 
 	// connections and forwards the requests to the correct web application.

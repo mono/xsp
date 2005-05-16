@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.InitialWorkerRequest
+// Mono.WebServer.InitialWorkerRequest
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -35,7 +35,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Web;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class RequestData
 	{
@@ -77,7 +77,7 @@ namespace Mono.ASPNET
 		string path;
 		string queryString;
 		string protocol;
-		NetworkStream stream;
+		Stream stream;
 		bool gotSomeInput;
 
 		byte [] inputBuffer;
@@ -103,7 +103,7 @@ namespace Mono.ASPNET
 			}
 		}
 		
-		public InitialWorkerRequest (NetworkStream ns)
+		public InitialWorkerRequest (Stream ns)
 		{
 			if (ns == null)
 				throw new ArgumentNullException ("ns");
@@ -190,7 +190,7 @@ namespace Mono.ASPNET
 					if (req != "")
 						break;
 				}
-			} catch {
+			} catch (Exception) {
 				gotSomeInput = false;
 				return false;
 			}

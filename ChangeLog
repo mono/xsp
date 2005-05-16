@@ -1,3 +1,15 @@
+2005-05-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in: HEAD is now 1.1.x
+	* server/AssemblyInfoModMono.cs.in:
+	* server/XSPApplicationHost.cs:
+	* server/InitialWorkerRequest.cs:
+	* server/AssemblyInfo.cs.in:
+	* server/Makefile.am:
+	* server/server.cs: this is now Mono.WebServer.dll. xsp.exe is there
+	just to pass the options to the new assembly. Most of the patch by
+	Brian Ritchie.
+
 2005-05-08 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* server/MonoWorkerRequest.cs: call the EndOfSend notification when

@@ -1,4 +1,4 @@
-// Mono.ASPNET.BaseApplicationHost
+// Mono.WebServer.BaseApplicationHost
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -29,7 +29,7 @@
 using System;
 using System.Web;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class BaseApplicationHost : MarshalByRefObject, IApplicationHost
 	{

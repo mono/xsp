@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.ApplicationServer
+// Mono.WebServer.ApplicationServer
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -29,7 +29,7 @@
 using System;
 using System.Net.Sockets;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class LingeringNetworkStream : NetworkStream 
 	{

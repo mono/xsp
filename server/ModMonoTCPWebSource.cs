@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.ModMonoTCPWebSource
+// Mono.WebServer.ModMonoTCPWebSource
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -31,7 +31,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class ModMonoTCPWebSource: ModMonoWebSource
 	{

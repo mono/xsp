@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.IApplicationHost
+// Mono.WebServer.IApplicationHost
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -31,7 +31,7 @@
 using System;
 using System.Web;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public interface IApplicationHost
 	{

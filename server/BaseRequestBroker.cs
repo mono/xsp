@@ -1,5 +1,5 @@
 //
-// Mono.ASPNET.BaseRequestBroker
+// Mono.WebServer.BaseRequestBroker
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -31,7 +31,7 @@
 using System;
 using System.Collections;
 
-namespace Mono.ASPNET
+namespace Mono.WebServer
 {
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{

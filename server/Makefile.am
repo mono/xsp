@@ -13,7 +13,7 @@ endif
 
 xsp_SCRIPTS = xsp.exe
 xsp2_SCRIPTS = $(XSP2_EXE)
-monoaspnet_SCRIPTS = Mono.ASPNET.dll
+monoaspnet_SCRIPTS = Mono.WebServer.dll
 
 if !XSP_ONLY
 modmonoserver_SCRIPTS = mod-mono-server.exe
@@ -26,7 +26,7 @@ EXTRA_DIST = $(common) $(xsp_only) $(modmono_only) AssemblyInfo.cs.in AssemblyIn
 
 # 
 monoaspnet_references= -r:System.Web.dll -r:Mono.Security.dll
-xsp_references= -r:System.Web.dll -r:Mono.ASPNET.dll -r:Mono.Security.dll 
+xsp_references= -r:System.Web.dll -r:Mono.WebServer.dll -r:Mono.Security.dll 
 if PLATFORM_WIN32
 modmono_references= -lib:"$(prefix)/lib" -r:System.Web.dll -r:Mono.Posix.dll
 else
@@ -62,7 +62,7 @@ modmono_only = ModMonoRequest.cs \
 modmono_sources =  $(common) $(modmono_only) $(xspexe_only)
 modmono_build_sources = $(addprefix $(srcdir)/, $(modmono_sources)) AssemblyInfoModMono.cs
 
-Mono.ASPNET.dll: $(monoaspnet_build_sources)
+Mono.WebServer.dll: $(monoaspnet_build_sources)
 	$(MCS) $(MCSFLAGS) $(monoaspnet_references) /target:library /out:$@ $(monoaspnet_build_sources)
 
 xsp.exe: $(xsp_build_sources)

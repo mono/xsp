@@ -1,3 +1,23 @@
+2005-05-30 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in:
+	* server/MonoWorkerRequest.cs:
+	* server/ModMonoWorkerRequest.cs:
+	* server/XSPWorkerRequest.cs:
+	* server/Tracing.cs:
+	* server/BaseRequestBroker.cs:
+	* server/ApplicationServer.cs:
+	* server/BaseApplicationHost.cs:
+	* server/LingeringNetworkStream.cs:
+	* server/Makefile.am:
+	* server/IWebSource.cs:
+	* server/Mono.WebServer:
+	* server/Mono.WebServer/AssemblyInfo.cs:
+	* server/Mono.WebServer/Makefile.am:
+	* server/IApplicationHost.cs:
+	* server/Mono.WebServer/*: moved Mono.WebServer.dll files into a new
+	directory.
+
 2005-05-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in: HEAD is now 1.1.x

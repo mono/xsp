@@ -268,7 +268,6 @@ namespace Mono.WebServer
 
 		public override void CloseConnection ()
 		{
-			WebTrace.WriteLine ("CloseConnection()");
 			if (requestBroker != null) {
 				// We check for headersSent as broken user code might call
 				// CloseConnection at an early stage.
@@ -359,26 +358,22 @@ namespace Mono.WebServer
 					response.SetLength (0);
 				}
 			} catch (Exception e) {
-				WebTrace.WriteLine (e.ToString ());
 				CloseConnection ();
 			}
 		}
 
 		public override string GetFilePath ()
 		{
-			WebTrace.WriteLine ("GetFilePath()");
 			return path;
 		}
 
 		public override string GetHttpVerbName ()
 		{
-			WebTrace.WriteLine ("GetHttpVerbName()");
 			return verb;
 		}
 
 		public override string GetHttpVersion ()
 		{
-			WebTrace.WriteLine ("GetHttpVersion()");
 			return protocol;
 		}
 
@@ -388,7 +383,6 @@ namespace Mono.WebServer
 				return null;
 
 			string headerName = HttpWorkerRequest.GetKnownRequestHeaderName (index);
-			WebTrace.WriteLine (String.Format ("GetKnownRequestHeader({0}) -> {1}", index, headerName));
 			return headers [headerName] as string;
 		}
 
@@ -435,37 +429,31 @@ namespace Mono.WebServer
 
 		public override string GetLocalAddress ()
 		{
-			WebTrace.WriteLine ("GetLocalAddress()");
 			return localAddress;
 		}
 
 		public override int GetLocalPort ()
 		{
-			WebTrace.WriteLine ("GetLocalPort()");
 			return localPort;
 		}
 
 		public override string GetPathInfo ()
 		{
-			WebTrace.WriteLine ("GetPathInfo()");
 			return pathInfo;
 		}
 
 		public override byte [] GetPreloadedEntityBody ()
 		{
-			WebTrace.WriteLine ("GetPreloadedEntityBody");
 			return null;
 		}
 
 		public override string GetQueryString ()
 		{
-			WebTrace.WriteLine ("GetQueryString()");
 			return queryString;
 		}
 
 		public override byte [] GetQueryStringRawBytes ()
 		{
-			WebTrace.WriteLine ("GetQueryStringRawBytes()");
 			if (queryString == null)
 				return null;
 			return Encoding.GetBytes (queryString);
@@ -473,7 +461,6 @@ namespace Mono.WebServer
 
 		public override string GetRawUrl ()
 		{
-			WebTrace.WriteLine ("GetRawUrl()");
 			string result = path;
 			if (pathInfo != null && pathInfo.Length > 0)
 				result += pathInfo;
@@ -486,7 +473,6 @@ namespace Mono.WebServer
 
 		public override string GetRemoteAddress ()
 		{
-			WebTrace.WriteLine ("GetRemoteAddress()");
 			return ((IPEndPoint) remoteEP).Address.ToString ();
 		}
 
@@ -506,7 +492,6 @@ namespace Mono.WebServer
 		
 		public override int GetRemotePort ()
 		{
-			WebTrace.WriteLine ("GetRemotePort()");
 			return ((IPEndPoint) remoteEP).Port;
 		}
 
@@ -534,8 +519,6 @@ namespace Mono.WebServer
 
 		public override string GetUriPath ()
 		{
-			WebTrace.WriteLine ("GetUriPath()");
-
 			string result = path;
 			if (pathInfo != null && pathInfo.Length > 0)
 				result += pathInfo;
@@ -545,13 +528,11 @@ namespace Mono.WebServer
 
 		public override bool HeadersSent ()
 		{
-			WebTrace.WriteLine ("HeadersSent() -> " + headersSent);
 			return headersSent;
 		}
 
 		public override bool IsClientConnected ()
 		{
-			WebTrace.WriteLine ("IsClientConnected()");
 			return (requestBroker != null && requestBroker.IsConnected (requestId));
 		}
 
@@ -621,7 +602,6 @@ namespace Mono.WebServer
 
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
-			WebTrace.WriteLine ("ReadEntityBody()");
 			if (size == 0)
 				return 0;
 
@@ -630,7 +610,6 @@ namespace Mono.WebServer
 
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
-			WebTrace.WriteLine ("SendResponseFromMemory ()");
 			if (requestBroker == null || length <= 0)
 				return;
 
@@ -647,7 +626,6 @@ namespace Mono.WebServer
 
 		public override void SendUnknownResponseHeader (string name, string value)
 		{
-			WebTrace.WriteLine ("SendUnknownResponseHeader (" + name + ", " + value + ")");
 			if (String.Compare (name, "connection", true, CultureInfo.InvariantCulture) == 0) {
 				sentConnection = true;
 				if (value.ToLower ().IndexOf ("keep-alive") == -1) {

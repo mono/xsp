@@ -6,6 +6,12 @@ AM_MAINTAINER_MODE
 
 AC_PROG_INSTALL
 
+AC_PATH_PROG(GACUTIL, gacutil, no)
+if test "x$GACUTIL" = "xno" ; then
+	AC_MSG_ERROR([No gacutil tool found])
+fi
+
+
 AC_PATH_PROG(CSC, csc, no)
 AC_PATH_PROG(MCS, mcs, no)
 AC_PATH_PROG(GMCS, gmcs, no)
@@ -60,6 +66,7 @@ test x$GMCS = xno || echo "$CS 2.0 compiler: $GMCS"
 AC_SUBST(MCS)
 AC_SUBST(GMCS)
 AC_SUBST(RUNTIME)
+AC_SUBST(GACUTIL)
 AC_OUTPUT([
 	Makefile
 	man/xsp.1
@@ -67,9 +74,10 @@ AC_OUTPUT([
         man/asp-state.1
 	man/Makefile
 	scripts/Makefile
+	server/Makefile
 	server/AssemblyInfo.cs
 	server/AssemblyInfoModMono.cs
-	server/Makefile
+	server/Mono.WebServer/Makefile
 	test/Makefile
 	test/1.1/Makefile
 	test/1.1/authtest/Makefile

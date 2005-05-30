@@ -37,7 +37,7 @@ namespace Mono.WebServer
 	{
 		Hashtable requests = new Hashtable ();
 		
-		internal int RegisterRequest (IWorker worker)
+		public int RegisterRequest (IWorker worker)
 		{
 			int result = worker.GetHashCode ();
 			lock (requests) {
@@ -47,7 +47,7 @@ namespace Mono.WebServer
 			return result;
 		}
 		
-		internal void UnregisterRequest (int id)
+		public void UnregisterRequest (int id)
 		{
 			lock (requests) {
 				requests.Remove (id);

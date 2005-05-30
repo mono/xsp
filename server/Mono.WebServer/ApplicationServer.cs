@@ -265,7 +265,6 @@ namespace Mono.WebServer
 			runner.IsBackground = bgThread;
 			runner.Start ();
 			stop = false;
-			WebTrace.WriteLine ("Server started.");
 			return true;
 		}
 
@@ -291,7 +290,6 @@ namespace Mono.WebServer
 			listen_socket.Close ();
 			UnloadAll ();
 			Thread.Sleep (1000);
-			WebTrace.WriteLine ("Server stopped.");
 		}
 
 		public void UnloadAll ()
@@ -335,7 +333,6 @@ namespace Mono.WebServer
 						} catch (Exception e) {
 							continue;
 						}
-						WebTrace.WriteLine ("Accepted connection.");
 						SetSocketOptions (client);
 						spool.AddReadSocket (client, DateTime.UtcNow);
 						continue;
@@ -646,7 +643,7 @@ namespace Mono.WebServer
 		}
 	}
 	
-	class HttpErrors
+	public class HttpErrors
 	{
 		static byte [] error500;
 		static byte [] badRequest;
@@ -691,7 +688,7 @@ namespace Mono.WebServer
 		}
 	}
 
-	class Paths {
+	public class Paths {
 		private Paths ()
 		{
 		}

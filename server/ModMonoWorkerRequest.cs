@@ -324,14 +324,11 @@ namespace Mono.WebServer
 
 		public override bool IsClientConnected ()
 		{
-			WebTrace.WriteLine ("IsClientConnected()");
 			return (requestBroker != null && requestBroker.IsConnected (requestId));
 		}
 
 		public override string GetUriPath ()
 		{
-			WebTrace.WriteLine ("GetUriPath()");
-
 			string result = path;
 			if (pathInfo != null && pathInfo.Length > 0)
 				result += pathInfo;

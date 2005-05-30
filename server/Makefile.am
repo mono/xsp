@@ -1,8 +1,9 @@
+SUBDIRS=Mono.WebServer
+
 MCSFLAGS= -debug+ -debug:full -nologo
 
 xspdir = $(prefix)/lib/mono/1.0
 modmonoserverdir = $(prefix)/lib/mono/1.0
-monoaspnetdir = $(prefix)/lib/mono/1.0
 xsp2dir = $(prefix)/lib/mono/2.0
 modmonoserver2dir = $(prefix)/lib/mono/2.0
 
@@ -13,7 +14,6 @@ endif
 
 xsp_SCRIPTS = xsp.exe
 xsp2_SCRIPTS = $(XSP2_EXE)
-monoaspnet_SCRIPTS = Mono.WebServer.dll
 
 if !XSP_ONLY
 modmonoserver_SCRIPTS = mod-mono-server.exe
@@ -22,48 +22,30 @@ endif
 
 CLEANFILES = *.exe *.mdb
 
-EXTRA_DIST = $(common) $(xsp_only) $(modmono_only) AssemblyInfo.cs.in AssemblyInfoModMono.cs.in
+EXTRA_DIST = $(xsp_sources) $(modmono_only) AssemblyInfo.cs.in AssemblyInfoModMono.cs.in
 
 # 
-monoaspnet_references= -r:System.Web.dll -r:Mono.Security.dll
-xsp_references= -r:System.Web.dll -r:Mono.WebServer.dll -r:Mono.Security.dll 
+xsp_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Security.dll 
 if PLATFORM_WIN32
-modmono_references= -lib:"$(prefix)/lib" -r:System.Web.dll -r:Mono.Posix.dll
+modmono_references= -lib:"$(prefix)/lib" -r:Mono.WebServer/Mono.WebServer.dll \
+			-r:System.Web.dll -r:Mono.Posix.dll
 else
-modmono_references= -r:System.Web.dll -r:Mono.Posix.dll
+modmono_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Posix.dll
 endif
 
-common  = IApplicationHost.cs \
-	  MonoWorkerRequest.cs \
-	  Tracing.cs \
-	  ApplicationServer.cs \
-	  LingeringNetworkStream.cs \
-	  BaseApplicationHost.cs \
-	  BaseRequestBroker.cs \
-	  IWebSource.cs 
-
-xsp_only = \
+xsp_sources = server.cs \
 	  InitialWorkerRequest.cs \
 	  XSPApplicationHost.cs \
 	  XSPWorkerRequest.cs
-
-xspexe_only = server.cs
-
-xsp_sources = $(xspexe_only)
-monoaspnet_sources = $(common) $(xsp_only)
 xsp_build_sources = $(addprefix $(srcdir)/, $(xsp_sources)) AssemblyInfo.cs
-monoaspnet_build_sources = $(addprefix $(srcdir)/, $(monoaspnet_sources)) AssemblyInfo.cs
 
 modmono_only = ModMonoRequest.cs \
 	      ModMonoWorkerRequest.cs \
 	      ModMonoApplicationHost.cs \
 	      ModMonoTCPWebSource.cs
 
-modmono_sources =  $(common) $(modmono_only) $(xspexe_only)
+modmono_sources =  $(modmono_only) server.cs
 modmono_build_sources = $(addprefix $(srcdir)/, $(modmono_sources)) AssemblyInfoModMono.cs
-
-Mono.WebServer.dll: $(monoaspnet_build_sources)
-	$(MCS) $(MCSFLAGS) $(monoaspnet_references) /target:library /out:$@ $(monoaspnet_build_sources)
 
 xsp.exe: $(xsp_build_sources)
 	$(MCS) $(MCSFLAGS) $(xsp_references) /out:$@ $(xsp_build_sources)

@@ -74,10 +74,10 @@ AC_OUTPUT([
         man/asp-state.1
 	man/Makefile
 	scripts/Makefile
-	server/Makefile
-	server/AssemblyInfo.cs
-	server/AssemblyInfoModMono.cs
-	server/Mono.WebServer/Makefile
+	src/Makefile
+	src/AssemblyInfo.cs
+	src/AssemblyInfoModMono.cs
+	src/Mono.WebServer/Makefile
 	test/Makefile
 	test/1.1/Makefile
 	test/1.1/authtest/Makefile

@@ -1,2 +1,2 @@
-SUBDIRS=man server test tools scripts
+SUBDIRS=man src test tools scripts
 

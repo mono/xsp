@@ -4,7 +4,7 @@ monowebserverdir = $(prefix)/lib/mono/1.0
 
 monowebserver_SCRIPTS = Mono.WebServer.dll
 
-CLEANFILES = Mono.WebServer.dll Mono.WebServer.mdb Mono.WebServer.pdb
+CLEANFILES = Mono.WebServer.dll Mono.WebServer.dll.mdb Mono.WebServer.dll.pdb
 
 EXTRA_DIST = $(monowebserver_sources)
 

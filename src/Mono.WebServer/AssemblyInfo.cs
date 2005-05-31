@@ -34,4 +34,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCopyright ("(c) 2002-2005 Novell, Inc.")]
 [assembly: AssemblyCompany ("Novell, Inc.")]
 
-[assembly: AssemblyKeyFileAttribute ("key.snk")]
+// We use the /keyfile option instead, so that we can support distcheck
+//[assembly: AssemblyKeyFileAttribute ("key.snk")]

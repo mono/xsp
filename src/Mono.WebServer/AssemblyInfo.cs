@@ -34,3 +34,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCopyright ("(c) 2002-2005 Novell, Inc.")]
 [assembly: AssemblyCompany ("Novell, Inc.")]
 
+[assembly: AssemblyKeyFileAttribute ("key.snk")]

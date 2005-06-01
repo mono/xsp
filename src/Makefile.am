@@ -33,10 +33,8 @@ else
 modmono_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Posix.dll
 endif
 
-xsp_sources = server.cs \
-	  InitialWorkerRequest.cs \
-	  XSPApplicationHost.cs \
-	  XSPWorkerRequest.cs
+xsp_sources = server.cs
+
 xsp_build_sources = $(addprefix $(srcdir)/, $(xsp_sources)) AssemblyInfo.cs
 
 modmono_only = ModMonoRequest.cs \

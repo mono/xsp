@@ -1,3 +1,12 @@
+2005-06-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/XSPApplicationHost.cs: Removed file.
+	* src/InitialWorkerRequest.cs: Removed file.
+	* src/XSPWorkerRequest.cs: Removed file.
+	* src/Makefile.am: Modified file.
+	* src/Mono.WebServer/Makefile.am: moved some 'meat' to Mono.WebServer.
+	xsp.exe is now just 'server.cs' + classes in Mono.WebServer.
+
 2005-05-31  Raja R Harinath  <rharinath@novell.com>
 
 	Fix 'make distcheck'.

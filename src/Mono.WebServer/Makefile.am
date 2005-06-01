@@ -16,14 +16,18 @@ EXTRA_DIST = $(monowebserver_sources) key.snk
 # 
 monowebserver_references= -r:System.Web.dll -r:Mono.Security.dll
 
-monowebserver_sources  = IApplicationHost.cs \
-			MonoWorkerRequest.cs \
+monowebserver_sources  = \
+			AssemblyInfo.cs \
 			ApplicationServer.cs \
-			LingeringNetworkStream.cs \
 			BaseApplicationHost.cs \
 			BaseRequestBroker.cs \
+			IApplicationHost.cs \
+			InitialWorkerRequest.cs \
 			IWebSource.cs \
-			AssemblyInfo.cs
+			LingeringNetworkStream.cs \
+			MonoWorkerRequest.cs \
+			XSPApplicationHost.cs \
+			XSPWorkerRequest.cs
 
 monowebserver_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources))
 

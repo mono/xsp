@@ -77,6 +77,7 @@ AC_OUTPUT([
 	src/Makefile
 	src/AssemblyInfo.cs
 	src/AssemblyInfoModMono.cs
+	src/Mono.WebServer/AssemblyInfo.cs
 	src/Mono.WebServer/Makefile
 	test/Makefile
 	test/1.1/Makefile

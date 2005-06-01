@@ -1,5 +1,13 @@
 2005-06-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* configure.in:
+	* src/Mono.WebServer/AssemblyInfo.cs: renamed into...
+	* src/Mono.WebServer/AssemblyInfo.cs.in: ...this.
+	* src/Mono.WebServer/Makefile.am: don't use -keyfile, as csc does not
+	support it. Now 'distcheck' passes and the build works on windows.
+
+2005-06-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/XSPApplicationHost.cs: Removed file.
 	* src/InitialWorkerRequest.cs: Removed file.
 	* src/XSPWorkerRequest.cs: Removed file.

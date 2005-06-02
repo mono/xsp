@@ -34,8 +34,8 @@ Mono.WebServer.dll: $(monowebserver_build_sources) key.snk
 	$(MCS) $(MCSFLAGS) $(monowebserver_references) /target:library /out:$@ $(monowebserver_build_sources)
 
 install-data-local:
-	$(GACUTIL) -i Mono.WebServer.dll
+	$(GACUTIL) $(GACUTIL_FLAGS) -i Mono.WebServer.dll 
 
 uninstall-local:
-	$(GACUTIL) -u Mono.WebServer
+	$(GACUTIL) $(GACUTIL_FLAGS) -u Mono.WebServer
 

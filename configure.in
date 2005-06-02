@@ -11,6 +11,10 @@ if test "x$GACUTIL" = "xno" ; then
 	AC_MSG_ERROR([No gacutil tool found])
 fi
 
+GACUTIL_FLAGS='/gacdir $(prefix)/lib /root $(DESTDIR)$(prefix)/lib'
+
+AC_SUBST(GACUTIL_FLAGS)
+
 
 AC_PATH_PROG(CSC, csc, no)
 AC_PATH_PROG(MCS, mcs, no)

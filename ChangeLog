@@ -1,3 +1,10 @@
+2005-06-02  Ben Maurer  <bmaurer@ximian.com>
+
+	* src/Mono.WebServer/Makefile.am: Handle gacutil and destdir
+	correctly.
+
+	* configure.in: GACUTIL flags
+
 2005-06-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:

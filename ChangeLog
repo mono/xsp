@@ -1,3 +1,7 @@
+2005-06-05  Ben Maurer  <bmaurer@ximian.com>
+
+	* configure.in: handle gacutil more correctly :-)
+
 2005-06-02  Ben Maurer  <bmaurer@ximian.com>
 
 	* src/Mono.WebServer/Makefile.am: Handle gacutil and destdir

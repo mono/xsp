@@ -1,5 +1,5 @@
 //
-// Mono.WebServer.ApplicationServer
+// Mono.WebServer.LingeringNetworkStream
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -57,6 +57,7 @@ namespace Mono.WebServer
 				return;
 
 			Socket.Shutdown (SocketShutdown.Send);
+			DateTime start = DateTime.UtcNow;
 			while (waited < max_useconds_to_linger) {
 				int nread = 0;
 				try {
@@ -72,7 +73,7 @@ namespace Mono.WebServer
 				if (nread == 0)
 					break;
 
-				waited += useconds_to_linger;
+				waited += (int) (DateTime.UtcNow - start).TotalMilliseconds * 1000;
 			}
 		}
 

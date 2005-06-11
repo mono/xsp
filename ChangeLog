@@ -1,3 +1,7 @@
+2005-06-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: platform check.
+
 2005-06-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/LingeringNetworkStream.cs: really keep lingering

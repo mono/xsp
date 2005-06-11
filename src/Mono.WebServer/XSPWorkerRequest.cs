@@ -90,9 +90,12 @@ namespace Mono.WebServer
 			if (att.Length > 0)
 				title = ((AssemblyTitleAttribute) att [0]).Title;
 
-			string plat = Environment.OSVersion.Platform.ToString ();
-			if (plat == "128")
+			int platform = (int) Environment.OSVersion.Platform;
+			string plat;
+			if (platform == 4 || platform == 128)
 				plat = "Unix";
+			else
+				plat = ((PlatformID) platform).ToString ();
 
 			server_software = String.Format ("{0}/{1}", title, version); 
 			serverHeader = String.Format ("Server: {0} {1}\r\n", server_software, plat);

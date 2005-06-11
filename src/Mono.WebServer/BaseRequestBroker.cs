@@ -36,12 +36,28 @@ namespace Mono.WebServer
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{
 		Hashtable requests = new Hashtable ();
-		
+		Hashtable buffers = new Hashtable ();
+
+		static Stack stk = new Stack ();
+		static byte [] Allocate16k ()
+		{
+			if (stk.Count > 0)
+				return (byte []) stk.Pop ();
+
+			return new byte [16384];
+		}
+
+		static void ReleaseBuffer (byte [] buffer)
+		{
+			stk.Push (buffer);
+		}
+
 		public int RegisterRequest (IWorker worker)
 		{
 			int result = worker.GetHashCode ();
 			lock (requests) {
 				requests [result] = worker;
+				buffers [result] = Allocate16k ();
 			}
 
 			return result;
@@ -51,12 +67,18 @@ namespace Mono.WebServer
 		{
 			lock (requests) {
 				requests.Remove (id);
+				ReleaseBuffer ((byte []) buffers [id]);
+				buffers.Remove (id);
 			}
 		}
-		
+
 		public int Read (int requestId, int size, out byte[] buffer)
 		{
-			buffer = new byte[size];
+			if (size == 16384) {
+				buffer = (byte []) buffers [requestId];
+			} else {
+				buffer = new byte[size];
+			}
 			IWorker w;
 			lock (requests) {
 				w = (IWorker) requests [requestId];

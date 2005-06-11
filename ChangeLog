@@ -1,5 +1,10 @@
 2005-06-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* src/Mono.WebServer/BaseRequestBroker.cs: keep a cache of the buffers
+	passed through remoting instead of creating a new one in all the cases.
+
+2005-06-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/Mono.WebServer/XSPWorkerRequest.cs: platform check.
 
 2005-06-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>

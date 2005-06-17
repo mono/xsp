@@ -1,3 +1,6 @@
+2005-06-17:2  Rafael Teixeira  <rafaelteixeirabr@hotmail.com>
+	* test/button-vb.aspx: small typo correction
+	
 2005-06-17  Rafael Teixeira  <rafaelteixeirabr@hotmail.com>
 	* tools/asp_state/asp_state.cs: find configuration filename to match the
 	executable name and path plus ".config", that fix not finding the oldnamed

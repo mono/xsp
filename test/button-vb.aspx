@@ -1,4 +1,4 @@
-<%@ Page Language="VB" Explicit="true" Strict="True" %>
+<%@ Page Language="VB" Explicit="true" Strict="true" %> 
 <html>
 <head>
 	<script runat="server">

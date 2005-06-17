@@ -1,3 +1,12 @@
+2005-06-17  Rafael Teixeira  <rafaelteixeirabr@hotmail.com>
+	* tools/asp_state/asp_state.cs: find configuration filename to match the
+	executable name and path plus ".config", that fix not finding the oldnamed
+	"asp_state.exe.config" what make it work for asp-state2.exe, besides it was 
+	looking for the configuration file in the current dir, not the dir containing
+	the executable. Also for first timers like me be a bit more verbose and don't
+	start if some command line arguments are passed (I tried a asp-state --help 
+	and got baffled).
+
 2005-06-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/BaseRequestBroker.cs: keep a cache of the buffers

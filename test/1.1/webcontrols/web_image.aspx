@@ -6,9 +6,9 @@
 <body>
 <form runat="server">
 <asp:Image id="im" runat="server"
-	AlternateText="Yes, again the dancing monkey"
+	AlternateText="Yes, powered by Mono"
 	ImageAlign="left"
-	ImageUrl="http://www.ximian.com/images/index/button-top.gif"/>
+	ImageUrl="http://www.mono-project.com/files/0/08/Mono-powered.png"/>
 </form>
 </body>
 </html>

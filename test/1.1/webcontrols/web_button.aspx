@@ -11,7 +11,7 @@
 <body>
 <form runat="server">
 <asp:Button id="btn"
-     Text="Submit"
+     Text="Envia la petició"
      OnClick="Clicked"
      runat="server"/>
 </form>

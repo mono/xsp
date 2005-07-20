@@ -53,7 +53,7 @@ RepeatColumns="5">
 
 				<ItemTemplate>
 
-					<asp:Label Text="<%# DataBinder.Eval (Container.DataItem,"Name") %>"
+					<asp:Label Text='<%# DataBinder.Eval (Container.DataItem,"Name") %>'
 					runat="server" />
 
 				</ItemTemplate>

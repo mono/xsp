@@ -1,4 +1,4 @@
-samplesdir = $(datadir)/doc/xsp/test/1.1/customcontrol
+samplesdir = $(pkglibdir)/test/1.1/customcontrol
 
 testfiles = \
 		tabcontrol2.aspx \
@@ -12,7 +12,7 @@ tabcontrol2_build = $(addprefix $(srcdir)/, $(tabcontrol2_src))
 
 samples_DATA = $(testfiles)
 
-samplesbindir = $(datadir)/doc/xsp/test/bin
+samplesbindir = $(pkglibdir)/test/bin
 samplesbin_SCRIPTS = tabcontrol.dll tabcontrol2.dll
 
 EXTRA_DIST = $(testfiles) \

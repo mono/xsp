@@ -19,7 +19,7 @@ testfiles = \
 		favicon.ico \
 		mono-xsp.css
 
-samplesdir = $(datadir)/doc/xsp/test
+samplesdir = $(pkglibdir)/test
 samples_DATA = $(testfiles)
 
 EXTRA_DIST = $(testfiles)

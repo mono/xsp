@@ -1,4 +1,4 @@
-samplesdir = $(datadir)/doc/xsp/test/2.0/masterpages
+samplesdir = $(pkglibdir)/test/2.0/masterpages
 samples_DATA = \
 		simple.master \
 		simple.aspx \

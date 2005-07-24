@@ -1,4 +1,4 @@
-samplesdir = $(datadir)/doc/xsp/test/1.1/webservice
+samplesdir = $(pkglibdir)/test/1.1/webservice
 
 testfiles = \
 		ConverterService.asmx \
@@ -15,10 +15,10 @@ serviceclient_build = $(addprefix $(srcdir)/, $(serviceclient_src))
 
 samples_DATA = $(testfiles)
 
-samplesexedir = $(datadir)/doc/xsp/test
+samplesexedir = $(pkglibdir)/test
 samplesexe_SCRIPTS = ServiceClient.exe extensions.dll
 
-samplesbindir = $(datadir)/doc/xsp/test/bin
+samplesbindir = $(pkglibdir)/test/bin
 samplesbin_SCRIPTS = extensions.dll
 
 CLEANFILES = $(samplesbin_SCRIPTS) $(samplesexe_SCRIPTS)

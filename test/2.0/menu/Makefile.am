@@ -1,4 +1,4 @@
-samplesdir = $(datadir)/doc/xsp/test/2.0/menu
+samplesdir = $(pkglibdir)/test/2.0/menu
 samples_DATA = \
 		menu1.aspx \
 		menu2.aspx \

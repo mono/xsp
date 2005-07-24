@@ -7,10 +7,10 @@ testfiles = \
 treeview_src = populate.cs
 treeview_build = $(addprefix $(srcdir)/, $(treeview_src))
 
-samplesdir = $(datadir)/doc/xsp/test/2.0/treeview
+samplesdir = $(pkglibdir)/test/2.0/treeview
 samples_DATA = $(testfiles)
 
-samplesbindir = $(datadir)/doc/xsp/test/bin
+samplesbindir = $(pkglibdir)/test/bin
 samplesbin_SCRIPTS = treeview.dll
 
 EXTRA_DIST = $(testfiles) \
@@ -26,9 +26,9 @@ dist-hook:
 	cp -p $(srcdir)/TreeLineImages/*gif $(distdir)/TreeLineImages
 
 install-data-hook:
-	$(mkinstalldirs) $(DESTDIR)$(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
-	cp $(srcdir)/TreeLineImages/*gif $(DESTDIR)$(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/test/2.0/treeview/TreeLineImages
+	cp $(srcdir)/TreeLineImages/*gif $(DESTDIR)$(pkglibdir)/test/2.0/treeview/TreeLineImages
 
 uninstall-hook:
-	rm -f $(DESTDIR)$(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages/*gif
+	rm -f $(DESTDIR)$(pkglibdir)/test/2.0/treeview/TreeLineImages/*gif
 

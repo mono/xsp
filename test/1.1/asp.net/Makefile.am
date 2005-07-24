@@ -1,4 +1,4 @@
-samplesdir = $(datadir)/doc/xsp/test/1.1/asp.net
+samplesdir = $(pkglibdir)/test/1.1/asp.net
 
 testfiles = \
 		browsercaps.aspx \
@@ -20,14 +20,14 @@ codebehind_src = codebehind1.cs
 typedesc_build = $(addprefix $(srcdir)/, $(typedesc_src))
 codebehind_build = $(addprefix $(srcdir)/, $(codebehind_src))
 
-samplesbindir = $(datadir)/doc/xsp/test/bin
+samplesbindir = $(pkglibdir)/test/bin
 samplesbin_SCRIPTS = codebehind1.dll typedesc.dll
 
 samples_DATA = $(testfiles)
 EXTRA_DIST = $(testfiles) \
 	     $(codebehind_src) \
 	     $(typedesc_src)
-		 
+
 CLEANFILES = $(samplesbin_SCRIPTS)
 
 %.dll: %.cs

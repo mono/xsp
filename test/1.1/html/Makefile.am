@@ -1,4 +1,4 @@
-authsampledir = $(datadir)/doc/xsp/test/1.1/html
+authsampledir = $(pkglibdir)/test/1.1/html
 authsample_DATA = \
 		button.aspx \
 		htmlanchor.aspx \

@@ -1,4 +1,4 @@
-authsampledir = $(datadir)/doc/xsp/test/1.1/handlers
+authsampledir = $(pkglibdir)/test/1.1/handlers
 authsample_DATA = \
 		chunked.ashx \
 		empty.ashx \

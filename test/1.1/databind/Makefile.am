@@ -1,4 +1,4 @@
-authsampledir = $(datadir)/doc/xsp/test/1.1/databind
+authsampledir = $(pkglibdir)/test/1.1/databind
 authsample_DATA = \
 		databind-arraylist.aspx \
 		databind-attribute.aspx \

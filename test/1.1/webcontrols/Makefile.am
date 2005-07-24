@@ -1,4 +1,4 @@
-authsampledir = $(datadir)/doc/xsp/test/1.1/webcontrols
+authsampledir = $(pkglibdir)/test/1.1/webcontrols
 authsample_DATA = \
 		listitem.aspx \
 		temperature.aspx \

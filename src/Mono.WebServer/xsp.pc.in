@@ -1,0 +1,9 @@
+prefix=@prefix@
+assemblies_dir=${prefix}/lib/xsp/1.0
+Libraries=${assemblies_dir}/Mono.WebServer.dll
+Executable=${assemblies_dir}/xsp.exe
+ 
+Name: xsp
+Description: Mono.WebServer.dll - ASP.NET hosting support classes for .NET 1.1
+Version: 0.1
+Libs: -r:Mono.WebServer.dll

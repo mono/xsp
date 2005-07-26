@@ -10,8 +10,8 @@ bin_SCRIPTS = $(bin1_scripts) $(bin2_scripts)
 
 CLEANFILES = $(bin1_scripts) $(bin2_scripts_real)
 
-plat_bindir = $(prefix)/lib/mono/1.0
-plat_bindir2 = $(prefix)/lib/mono/2.0
+plat_bindir = $(prefix)/lib/xsp/1.0
+plat_bindir2 = $(prefix)/lib/xsp/2.0
 
 REWRITE = sed \
 	-e 's,@''plat_bindir@,$(plat_bindir),g'		\

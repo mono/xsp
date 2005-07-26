@@ -1,3 +1,16 @@
+2005-07-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* configure.in:
+	* src/Makefile.am:
+	* src/Mono.WebServer/xsp-2.pc.in:
+	* src/Mono.WebServer/xsp.pc.in:
+	* src/Mono.WebServer/key.snk:
+	* src/Mono.WebServer/AssemblyInfo2.cs.in:
+	* src/Mono.WebServer/AssemblyInfo.cs.in:
+	* src/Mono.WebServer/Makefile.am:
+	* scripts/Makefile.am: bye bye gacutil, welcome "Application Deployment
+	Guidelines".
+
 2005-06-22 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/XSPApplicationHost.cs: if reading from the socket

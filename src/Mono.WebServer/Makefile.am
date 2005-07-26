@@ -1,17 +1,19 @@
+pkgconfigdir=$(libdir)/pkgconfig
 MCSFLAGS= -debug+ -debug:full -nologo
 
-monowebserverdir = $(prefix)/lib/mono/1.0
-monowebserver2dir = $(prefix)/lib/mono/2.0
+monowebserverdir = $(prefix)/lib/xsp/1.0
+monowebserver2dir = $(prefix)/lib/xsp/2.0
 
+pkgconfig_DATA = xsp.pc xsp-2.pc
 monowebserver_SCRIPTS = Mono.WebServer.dll
 monowebserver2_SCRIPTS = $(monowebserver2_install)
 
 if NET_2_0
-monowebserver2_install = Mono.WebServer.dll
+monowebserver2_install = Mono.WebServer2.dll
 endif
 
-CLEANFILES = Mono.WebServer.dll Mono.WebServer.dll.mdb Mono.WebServer.dll.pdb
-EXTRA_DIST = $(monowebserver_sources) key.snk AssemblyInfo.cs.in
+CLEANFILES = Mono.WebServer.dll* Mono.WebServer2.dll*
+EXTRA_DIST = $(monowebserver_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in
 
 # 
 monowebserver_references= -r:System.Web.dll -r:Mono.Security.dll
@@ -29,13 +31,11 @@ monowebserver_sources  = \
 			XSPWorkerRequest.cs
 
 monowebserver_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo.cs)
+monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 
-Mono.WebServer.dll: $(monowebserver_build_sources) key.snk
+Mono.WebServer.dll: $(monowebserver_build_sources)
 	$(MCS) $(MCSFLAGS) $(monowebserver_references) /target:library /out:$@ $(monowebserver_build_sources)
 
-install-data-local:
-	$(GACUTIL) $(GACUTIL_FLAGS) -i Mono.WebServer.dll 
-
-uninstall-local:
-	$(GACUTIL) $(GACUTIL_FLAGS) -u Mono.WebServer
+Mono.WebServer2.dll: $(monowebserver2_build_sources)
+	$(GMCS) $(MCSFLAGS) $(monowebserver_references) /target:library /out:$@ $(monowebserver2_build_sources)
 

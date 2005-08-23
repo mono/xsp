@@ -71,6 +71,7 @@ namespace Mono.WebServer
 		long contentSent;
 		long contentLength;
 
+		static bool running_tests;
 		static string server_software;
 		static string serverHeader;
 
@@ -83,6 +84,7 @@ namespace Mono.WebServer
 
 		static XSPWorkerRequest ()
 		{
+			running_tests = (Environment.GetEnvironmentVariable ("XSP_RUNNING_TESTS") != null);
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string title = "Mono-XSP Server";
 			string version = assembly.GetName ().Version.ToString ();
@@ -160,7 +162,8 @@ namespace Mono.WebServer
 			Paths.GetPathsFromUri (path, out this.path, out pathInfo);
 			this.protocol = protocol;
 			if (protocol == "HTTP/1.1") {
-				this.protocol = "HTTP/1.0";	// Only 1.0 supported by xsp standalone.
+				if (!running_tests)
+					this.protocol = "HTTP/1.0";
 				keepAlive = true;
 			}
 
@@ -183,7 +186,7 @@ namespace Mono.WebServer
 			responseHeaders = new StringBuilder ();
 			responseHeaders.Append (serverHeader);
 			response = AllocateMemoryStream ();
-			status = "HTTP/1.0 200 OK\r\n";
+			status = protocol + " 200 OK\r\n";
 			
 			localPort = ((IPEndPoint) localEP).Port;
 			localAddress = ((IPEndPoint) localEP).Address.ToString();
@@ -624,7 +627,7 @@ namespace Mono.WebServer
 		
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			status = String.Format ("HTTP/1.0 {0} {1}\r\n", statusCode, statusDescription);
+			status = String.Format ("{2} {0} {1}\r\n", statusCode, statusDescription, protocol);
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)

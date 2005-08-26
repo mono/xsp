@@ -1,5 +1,11 @@
 2005-08-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* src/Mono.WebServer/XSPWorkerRequest.cs: if we get a 0, don't pretend
+	we read up to 'size'.
+	* src/Mono.WebServer/XSPApplicationHost.cs: returning 0 in Read is fine.
+
+2005-08-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/Mono.WebServer/XSPWorkerRequest.cs: if we get a -1 when reading
 	the request, the client closed or there was an error. For a 0 we just
 	return what we have so far.

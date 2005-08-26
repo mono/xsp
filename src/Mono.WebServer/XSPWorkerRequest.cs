@@ -594,10 +594,10 @@ namespace Mono.WebServer
 					return length;
 			}
 
-			int localsize = size;
-			while (localsize > 0) {
+			int localsize = 0;
+			while (size > 0) {
 				byte[] readBuffer;
-				int read = requestBroker.Read (requestId, localsize, out readBuffer);
+				int read = requestBroker.Read (requestId, size, out readBuffer);
 				if (read == 0)
 					break;
 
@@ -605,10 +605,11 @@ namespace Mono.WebServer
 					throw new HttpException (500, "Error reading request.");
 				Buffer.BlockCopy (readBuffer, 0, buffer, offset, read);
 				offset += read;
-				localsize -= read;
+				size -= read;
+				localsize += read;
 			}
 
-			return (length + size);
+			return (length + localsize);
 		}
 
 		public override int ReadEntityBody (byte [] buffer, int size)

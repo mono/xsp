@@ -304,7 +304,7 @@ namespace Mono.WebServer
 		public int Read (byte[] buffer, int position, int size)
 		{
 			int n = stream.Read (buffer, position, size);
-			return (n > 0) ? n : -1;
+			return (n >= 0) ? n : -1;
 		}
 		
 		public void Write (byte[] buffer, int position, int size)

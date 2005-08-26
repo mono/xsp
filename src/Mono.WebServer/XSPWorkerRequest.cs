@@ -598,7 +598,12 @@ namespace Mono.WebServer
 			while (localsize > 0) {
 				byte[] readBuffer;
 				int read = requestBroker.Read (requestId, localsize, out readBuffer);
-				Array.Copy (readBuffer, 0, buffer, offset, read);
+				if (read == 0)
+					break;
+
+				if (read < 0)
+					throw new HttpException (500, "Error reading request.");
+				Buffer.BlockCopy (readBuffer, 0, buffer, offset, read);
 				offset += read;
 				localsize -= read;
 			}

@@ -41,6 +41,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using System.Runtime.InteropServices;
 
 namespace Mono.WebServer
 {
@@ -56,9 +57,9 @@ namespace Mono.WebServer
 		bool headersSent;
 		StringBuilder responseHeaders;
 		string status;
-		MemoryStream response;
 		byte [] inputBuffer;
 		int inputLength;
+		bool refilled;
 		int position;
 		EndPoint remoteEP;
 		bool sentConnection;
@@ -70,8 +71,10 @@ namespace Mono.WebServer
 		bool haveContentLength;
 		long contentSent;
 		long contentLength;
+		IntPtr socket;
 
 		static bool running_tests;
+		static bool no_libc;
 		static string server_software;
 		static string serverHeader;
 
@@ -84,6 +87,7 @@ namespace Mono.WebServer
 
 		static XSPWorkerRequest ()
 		{
+			no_libc = CheckOS ();
 			running_tests = (Environment.GetEnvironmentVariable ("XSP_RUNNING_TESTS") != null);
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string title = "Mono-XSP Server";
@@ -104,6 +108,24 @@ namespace Mono.WebServer
 
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 			SetDefaultIndexFiles (indexes);
+		}
+
+		static bool CheckOS ()
+		{
+			if (Environment.GetEnvironmentVariable ("XSP_NO_LIBC") != null)
+				return true;
+
+			bool is_linux = false;
+			try {
+				Stream st = File.OpenRead ("/proc/sys/kernel/ostype");
+				StreamReader sr = new StreamReader (st);
+				string os = sr.ReadToEnd ();
+				sr.Close ();
+				is_linux = os.StartsWith ("Linux");
+			} catch {
+			}
+
+			return !is_linux;
 		}
 
 		static void SetDefaultIndexFiles (string list)
@@ -152,9 +174,11 @@ namespace Mono.WebServer
 								string path, 
 								string queryString, 
 								string protocol, 
-								byte[] inputBuffer)
+								byte[] inputBuffer,
+								IntPtr socket)
 			: base (appHost)
 		{
+			this.socket = socket;
 			this.requestId = requestId;
 			this.requestBroker = requestBroker;
 			this.remoteEP = remoteEP;
@@ -185,7 +209,6 @@ namespace Mono.WebServer
 
 			responseHeaders = new StringBuilder ();
 			responseHeaders.Append (serverHeader);
-			response = AllocateMemoryStream ();
 			status = protocol + " 200 OK\r\n";
 			
 			localPort = ((IPEndPoint) localEP).Port;
@@ -198,55 +221,62 @@ namespace Mono.WebServer
 
 		void FillBuffer ()
 		{
-			inputLength = requestBroker.Read (requestId, 32*1024, out inputBuffer);
+			refilled = true;
 			position = 0;
-		}
-
-		int ReadInputByte ()
-		{
-			if (inputBuffer == null || position >= inputLength)
-				FillBuffer ();
-
-			return (int) inputBuffer [position++];
+			inputLength = requestBroker.Read (requestId, 32*1024, out inputBuffer);
 		}
 
 		string ReadLine ()
 		{
-			bool foundCR = false;
 			StringBuilder text = new StringBuilder ();
+			bool cr = false;
+			do {
+				if (inputBuffer == null || position >= inputLength)
+					FillBuffer ();
 
-			while (true) {
-				int c = ReadInputByte ();
-
-				if (c == -1) {				// end of stream
-					if (text.Length == 0)
-						return null;
-
-					if (foundCR)
-						text.Length--;
-
+				if (position >= inputLength)
 					break;
+				
+				cr = false;
+				int count = 0;
+				byte b = 0;
+				int i;
+				for (i = position; count < 8192 && i < inputLength; i++, count++) {
+					b = inputBuffer [i];
+					if (b == '\r') {
+						cr = true;
+						count--;
+						continue;
+					} else if (b == '\n' || cr) {
+						count--;
+						break;
+					}
 				}
 
-				if (c == '\n') {			// newline
-					if ((text.Length > 0) && (text [text.Length - 1] == '\r'))
-						text.Length--;
+				if (position >= inputLength && b == '\r' || b == '\n')
+					count++;
 
-					foundCR = false;
-					break;
-				} else if (foundCR) {
-					text.Length--;
-					break;
-				}
-
-				if (c == '\r')
-					foundCR = true;
-					
-
-				text.Append ((char) c);
-				if (text.Length > 8192)
+				if (count >= 8192 || count + text.Length >= 8192)
 					throw new InvalidOperationException ("Line too long.");
-			}
+
+				if (count <= 0) {
+					position = i + 1;
+					break;
+				}
+
+				text.Append (Encoding.GetString (inputBuffer, position, count));
+				position = i + 1;
+
+				if (i >= inputLength) {
+					b = inputBuffer [inputLength - 1];
+					if (b != '\r' && b != '\n')
+						continue;
+				}
+				break;
+			} while (true);
+
+			if (text.Length == 0)
+				return null;
 
 			return text.ToString ();
 		}
@@ -279,8 +309,6 @@ namespace Mono.WebServer
 				// CloseConnection at an early stage.
 				requestBroker.Close (requestId, (headersSent ? keepAlive : false));
 				requestBroker = null;
-				FreeMemoryStream (response);
-				response = null;
 			}
 		}
 
@@ -316,53 +344,28 @@ namespace Mono.WebServer
 			return result;
 		}
 
+		byte [] GetHeaders ()
+		{
+			responseHeaders.Insert (0, status);
+			if (!sentConnection) {
+				if (!haveContentLength)
+					keepAlive = false;
+
+				AddConnectionHeader ();
+			}
+
+			responseHeaders.Append ("\r\n");
+			return Encoding.GetBytes (responseHeaders.ToString ());
+		}
+
 		public override void FlushResponse (bool finalFlush)
 		{
-			if (requestBroker == null)
-				return;
-
 			try {
-				if (!headersSent) {
-					responseHeaders.Insert (0, status);
-					if (!sentConnection) {
-						if (!haveContentLength)
-							keepAlive = false;
+				if (!headersSent)
+					SendHeaders ();
 
-						AddConnectionHeader ();
-					}
-
-					responseHeaders.Append ("\r\n");
-					byte [] headerBytes = Encoding.GetBytes (responseHeaders.ToString ());
-					int oldLength = (int) response.Length;
-					if (oldLength == 0 || oldLength >= 32768) {
-						requestBroker.Write (requestId, headerBytes, 0, headerBytes.Length);
-					} else {
-						oldLength = UpdateBodyLength (oldLength);
-						// Attempt not to send a minimum of 2 packets
-						int newLength = oldLength + headerBytes.Length;
-						response.SetLength (newLength);
-						byte [] buf = response.GetBuffer ();
-						Buffer.BlockCopy (buf, 0, buf, headerBytes.Length, oldLength);
-						Buffer.BlockCopy (headerBytes, 0, buf, 0, headerBytes.Length);
-						requestBroker.Write (requestId, buf, 0, newLength);
-						response.SetLength (0);
-					}
-
-					headersSent = true;
-				}
-
-				if (response.Length != 0) {
-					byte [] bytes = response.GetBuffer ();
-					int len = UpdateBodyLength ((int) response.Length);
-					requestBroker.Write (requestId, bytes, 0, len);
-				}
-				
 				if (finalFlush)
 					CloseConnection ();
-				else {
-					requestBroker.Flush (requestId);
-					response.SetLength (0);
-				}
 			} catch (Exception e) {
 				CloseConnection ();
 			}
@@ -450,7 +453,18 @@ namespace Mono.WebServer
 
 		public override byte [] GetPreloadedEntityBody ()
 		{
-			return null;
+			if (verb != "POST" || refilled || position >= inputLength)
+				return null;
+
+			if (inputLength == 0)
+				return null;
+
+			byte [] result = new byte [inputLength - position];
+			Buffer.BlockCopy (inputBuffer, position, result, 0, inputLength - position);
+			position = 0;
+			inputLength = 0;
+			inputBuffer = null;
+			return result;
 		}
 
 		public override string GetQueryString ()
@@ -544,7 +558,18 @@ namespace Mono.WebServer
 
 		public override bool IsEntireEntityBodyIsPreloaded ()
 		{
-			return false; //TODO: handle preloading data
+			if (verb != "POST" || refilled || position >= inputLength)
+				return false;
+
+			string content_length = (string) headers ["Content-Length"];
+			long length = -1;
+			try {
+				length = Int64.Parse (content_length);
+			} catch {
+				return false;
+			}
+
+			return (length <= inputLength);
 		}
 
 		bool TryDirectory ()
@@ -614,7 +639,7 @@ namespace Mono.WebServer
 
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
-			if (size == 0)
+			if (size == 0 || buffer == null)
 				return 0;
 
 			return ReadInput (buffer, 0, size);
@@ -628,12 +653,27 @@ namespace Mono.WebServer
 			if (data.Length < length)
 				length = data.Length;
 
-			response.Write (data, 0, length);
+			bool uncork = false;
+			if (!headersSent) {
+				Cork (true);
+				uncork = true;
+				SendHeaders ();
+			}
+
+			Send (data, 0, length);
+			if (uncork)
+				Cork (false);
 		}
 		
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
 			status = String.Format ("{2} {0} {1}\r\n", statusCode, statusDescription, protocol);
+			if (statusCode == 400 || statusCode >= 500) {
+				sentConnection = false;
+				keepAlive = false;
+				SendUnknownResponseHeader ("Connection", "close");
+			}
+				
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
@@ -658,6 +698,85 @@ namespace Mono.WebServer
 				responseHeaders.Append ("\r\n");
 			}
 		}
+
+		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
+		{
+			if (no_libc || (tried_sendfile && !use_sendfile)) {
+				base.SendResponseFromFile (handle, offset, length);
+				return;
+			}
+
+			int result;
+			// TODO -> int/long handling. Error handling.
+			try {
+				tried_sendfile = true;
+				Cork (true);
+				SendHeaders ();
+				result = sendfile (socket, handle, ref offset, (IntPtr) length);
+				if (result != length)
+					throw new System.ComponentModel.Win32Exception ();
+			} catch (Exception e) {
+				return;
+			} finally {
+				Cork (false);
+			}
+
+			use_sendfile = true;
+		}
+
+		int SendHeaders ()
+		{
+			if (headersSent)
+				return 0;
+
+			byte [] headers = GetHeaders ();
+			headersSent = true;
+			return Send (headers, 0, headers.Length);
+		}
+
+		int Cork (bool val)
+		{
+			if (no_libc)
+				return 0;
+			// 6 -> SOL_TCP, 3 -> TCP_CORK
+			bool t = val;
+			return setsockopt (socket, (IntPtr) 6, (IntPtr) 3, ref t, (IntPtr) IntPtr.Size);
+		}
+
+		unsafe int Send (byte [] buffer, int offset, int len)
+		{
+			if (no_libc) {
+				requestBroker.Write (requestId, buffer, offset, len);
+				return len;
+			}
+
+			int total = 0;
+			while (total < len) {
+				fixed (byte *ptr = buffer) {
+					// 0x4000 no sigpipe
+					int n = send (socket, ptr + total, (IntPtr) (len - total), (IntPtr) 0x4000);
+					if (n >= 0) {
+						total += n;
+					} else {
+						throw new IOException ();
+					}
+				}
+			}
+
+			return total;
+		}
+
+		static bool tried_sendfile;
+		static bool use_sendfile;
+
+		[DllImport ("libc", SetLastError=true)]
+		extern static int setsockopt (IntPtr handle, IntPtr level, IntPtr opt, ref bool val, IntPtr len);
+
+		[DllImport ("libc", SetLastError=true)]
+		extern static int sendfile (IntPtr out_fd, IntPtr in_fd, ref long offset, IntPtr count);
+
+		[DllImport ("libc", SetLastError=true, EntryPoint="send")]
+		unsafe extern static int send (IntPtr s, byte *buffer, IntPtr len, IntPtr flags);
 	}
 }
 

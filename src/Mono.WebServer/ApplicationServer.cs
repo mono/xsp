@@ -104,7 +104,7 @@ namespace Mono.WebServer
 			set { verbose = value; }
 		}
 
-		private void AddApplication (string vhost, int vport, string vpath, string fullPath)
+		public void AddApplication (string vhost, int vport, string vpath, string fullPath)
 		{
 			// TODO - check for duplicates, sort, optimize, etc.
 			if (started)
@@ -339,7 +339,14 @@ namespace Mono.WebServer
 					}
 
 					spool.RemoveReadSocket (s);
-					IWorker worker = webSource.CreateWorker (s, this);
+					IWorker worker = null;
+					try {
+						// This might happen when reusing and the client closes.
+						worker = webSource.CreateWorker (s, this);
+					} catch (Exception) {
+						try { s.Close (); } catch {}
+					}
+
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 				}
 			}

@@ -1,5 +1,22 @@
 2005-08-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* src/Mono.WebServer/MonoWorkerRequest.cs: default encoding will be
+	latin1.
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: if we're running on linux, use
+	send, setsockopt and sendfile from libc. No more buffering done but
+	for the headers. Use TCP_CORK. Use sendfile() for SendResponseFromFile
+	when possible.
+
+	* src/Mono.WebServer/ApplicationServer.cs: catch a possible error.
+	* src/Mono.WebServer/XSPApplicationHost.cs: pass the socket handle to
+	the worker request.
+	* src/Mono.WebServer/InitialWorkerRequest.cs: work directly on the
+	input buffer instead of calling ReadByte().
+	* src/Mono.WebServer/Makefile.am: add -unsafe flag.
+
+2005-08-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/Mono.WebServer/XSPWorkerRequest.cs: if we get a 0, don't pretend
 	we read up to 'size'.
 	* src/Mono.WebServer/XSPApplicationHost.cs: returning 0 in Read is fine.

@@ -120,7 +120,7 @@ namespace Mono.WebServer
 		protected virtual Encoding Encoding {
 			get {
 				if (encoding == null)
-					encoding = new UTF8Encoding (false);
+					encoding = Encoding.GetEncoding (28591);
 
 				return encoding;
 			}

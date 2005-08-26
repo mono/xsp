@@ -86,6 +86,7 @@ namespace Mono.WebServer
 		const int BSize = 1024 * 32;
 		
 		static Stack bufferStack = new Stack ();
+		static Encoding encoding = Encoding.GetEncoding (28591);
 		
 		static byte [] AllocateBuffer ()
 		{
@@ -111,64 +112,74 @@ namespace Mono.WebServer
 			stream = ns;
 		}
 
+		public void FreeBuffer ()
+		{
+			if (inputBuffer != null)
+				FreeBuffer (inputBuffer);
+		}
+
 		void FillBuffer ()
 		{
+			position = 0;
 			inputBuffer = AllocateBuffer ();
 			inputLength = stream.Read (inputBuffer, 0, BSize);
 			if (inputLength == 0) // Socket closed
 				throw new IOException ("socket closed");
 
 			gotSomeInput = true;
-			position = 0;
 		}
 
-		int ReadInputByte ()
+		string ReadRequestLine ()
 		{
-			if (inputBuffer == null)
-				FillBuffer ();
-
-			if (position >= inputLength)
-				return stream.ReadByte ();
-
-			return (int) inputBuffer [position++];
-		}
-
-		string ReadLine ()
-		{
-			bool foundCR = false;
 			StringBuilder text = new StringBuilder ();
+			bool cr = false;
+			do {
+				if (inputBuffer == null || position >= inputLength)
+					FillBuffer ();
 
-			while (true) {
-				int c = ReadInputByte ();
+				if (position >= inputLength)
+					break;
+				
+				cr = false;
+				int count = 0;
+				byte b = 0;
+				int i;
+				for (i = position; count < 8192 && i < inputLength; i++, count++) {
+					b = inputBuffer [i];
+					if (b == '\r') {
+						cr = true;
+						count--;
+						continue;
+					} else if (b == '\n' || cr) {
+						count--;
+						break;
+					}
+				}
 
-				if (c == -1) {				// end of stream
-					if (text.Length == 0)
-						return null;
+				if (position >= inputLength && b == '\r' || b == '\n')
+					count++;
 
-					if (foundCR)
-						text.Length--;
+				if (count >= 8192 || count + text.Length >= 8192)
+					throw new InvalidOperationException ("Line too long.");
 
+				if (count <= 0) {
+					position = i + 1;
 					break;
 				}
 
-				if (c == '\n') {			// newline
-					if ((text.Length > 0) && (text [text.Length - 1] == '\r'))
-						text.Length--;
+				text.Append (encoding.GetString (inputBuffer, position, count));
+				position = i + 1;
 
-					foundCR = false;
-					break;
-				} else if (foundCR) {
-					text.Length--;
-					break;
+				if (i >= inputLength) {
+					b = inputBuffer [inputLength - 1];
+					if (b != '\r' && b != '\n')
+						continue;
 				}
+				break;
+			} while (true);
 
-				if (c == '\r')
-					foundCR = true;
-					
-
-				text.Append ((char) c);
-				if (text.Length > 8192)
-					throw new InvalidOperationException ("Input line too long.");
+			if (text.Length == 0) {
+				return null;
 			}
 
 			return text.ToString ();
@@ -179,7 +190,7 @@ namespace Mono.WebServer
 			string req = null;
 			try {
 				while (true) {
-					req = ReadLine ();
+					req = ReadRequestLine ();
 					if (req == null) {
 						gotSomeInput = false;
 						return false;

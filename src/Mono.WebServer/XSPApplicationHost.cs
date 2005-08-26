@@ -147,13 +147,13 @@ namespace Mono.WebServer
 	{
 		public void ProcessRequest (int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
 					int remoteEPPort, string verb, string path,
-					string queryString, string protocol, byte [] inputBuffer, string redirect)
+					string queryString, string protocol, byte [] inputBuffer, string redirect, IntPtr socket)
 		{
 			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
 			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
 			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
-								queryString, protocol, inputBuffer);
+								queryString, protocol, inputBuffer, socket);
 
 			string translated = mwr.GetFilePathTranslated ();
 			if (path [path.Length - 1] != '/' && Directory.Exists (translated))
@@ -224,9 +224,7 @@ namespace Mono.WebServer
 
 			sock = client;
 			this.server = server;
-			try {
-				remoteEP = (IPEndPoint) client.RemoteEndPoint;
-			} catch { }
+			this.remoteEP = (IPEndPoint) client.RemoteEndPoint;
 			this.localEP = (IPEndPoint) localEP;
 		}
 
@@ -252,6 +250,8 @@ namespace Mono.WebServer
 						byte [] badReq = HttpErrors.BadRequest ();
 						Write (badReq, 0, badReq.Length);
 					}
+
+					ir.FreeBuffer ();
 
 					throw ex;
 				}
@@ -280,7 +280,7 @@ namespace Mono.WebServer
 				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
 						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
 						rdata.Path, rdata.QueryString,
-						rdata.Protocol, rdata.InputBuffer, redirect);
+						rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle);
 			} catch (Exception e) {
 				bool ignore = ((e is RequestLineException) || (e is IOException));
 				if (!ignore)

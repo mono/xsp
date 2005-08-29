@@ -56,6 +56,7 @@ namespace Mono.WebServer
 		DECLINE_REQUEST,
 		NOT_FOUND,
 		IS_CONNECTED,
+		SEND_FILE,
 		LAST_COMMAND
 	}
 
@@ -99,7 +100,7 @@ namespace Mono.WebServer
 			if (shutdown)
 				return;
 
-			if (cmd != 2) {
+			if (cmd != 3) {
 				string msg = "mod_mono and xsp have different versions.";
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
@@ -180,6 +181,12 @@ namespace Mono.WebServer
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
 			writer.Write (data, position, length);
+		}
+
+		public void SendFile (string filename)
+		{
+			SendSimpleCommand (Cmd.SEND_FILE);
+			WriteString (filename);
 		}
 
 		public void SetResponseHeader (string name, string value)

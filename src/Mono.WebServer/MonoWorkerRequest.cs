@@ -265,7 +265,7 @@ namespace Mono.WebServer
 			SendUnknownResponseHeader (headerName, value);
 		}
 
-		private void SendStream (Stream stream, long offset, long length)
+		protected void SendFromStream (Stream stream, long offset, long length)
 		{
 			if (offset < 0 || length <= 0)
 				return;
@@ -288,10 +288,10 @@ namespace Mono.WebServer
 
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
-			Stream file = null;
+			FileStream file = null;
 			try {
 				file = File.OpenRead (filename);
-				SendStream (file, offset, length);
+				SendResponseFromFile (file.Handle, offset, length);
 			} finally {
 				if (file != null)
 					file.Close ();
@@ -303,7 +303,7 @@ namespace Mono.WebServer
 			Stream file = null;
 			try {
 				file = new FileStream (handle, FileAccess.Read);
-				SendStream (file, offset, length);
+				SendFromStream (file, offset, length);
 			} finally {
 				if (file != null)
 					file.Close ();

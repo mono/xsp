@@ -707,7 +707,6 @@ namespace Mono.WebServer
 			}
 
 			int result;
-			// TODO -> int/long handling. Error handling.
 			try {
 				tried_sendfile = true;
 				Cork (true);

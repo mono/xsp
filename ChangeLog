@@ -1,3 +1,19 @@
+2005-08-28 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoWorkerRequest.cs: pretend the client is HTTP/1.0 so that
+	System.Web does not tries to send chunked content. Apache will take care
+	of that. If the Flush is final, call CloseConnection. Implemented
+	sendfile support 
+
+	* src/ModMonoRequest.cs: added SEND_FILE command an increased version
+	number.
+
+	* src/Mono.WebServer/MonoWorkerRequest.cs: use the IntPtr version of
+	SendResponseFromFile if no override is available.
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: removed TODO.
+	* src/ModMonoApplicationHost.cs: SendFile support.
+
 2005-08-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/MonoWorkerRequest.cs: default encoding will be

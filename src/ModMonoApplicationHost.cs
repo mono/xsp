@@ -180,6 +180,11 @@ namespace Mono.WebServer
 		{
 			((ModMonoWorker)GetWorker (requestId)).SetResponseHeader (name, value);
 		}
+
+		public void SendFile (int requestId, string filename)
+		{
+			((ModMonoWorker)GetWorker (requestId)).SendFile (filename);
+		}
 	}
 
 	//
@@ -324,6 +329,11 @@ namespace Mono.WebServer
 		public bool IsConnected ()
 		{
 			return modRequest.IsConnected ();
+		}
+
+		public void SendFile (string filename)
+		{
+			modRequest.SendFile (filename);
 		}
 
 		public string GetServerVariable (string name)

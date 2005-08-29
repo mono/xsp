@@ -143,7 +143,10 @@ namespace Mono.WebServer
 			this.requestId = requestId;
 			this.requestBroker = requestBroker;
 			this.verb = verb;
-			this.protocol = protocol;
+			//this.protocol = protocol;
+			// Don't let System.Web know if it's 1.1. This way apache handles the chunked
+			// encoding for us, without sys.web interfering.
+			this.protocol = "HTTP/1.0";
 			this.queryString = queryString;
 			this.path = path;
 			this.localAddress = localAddress;
@@ -227,6 +230,8 @@ namespace Mono.WebServer
 		{
 			// FLUSH is a no-op in mod_mono. Apache takes care of it.
 			// requestBroker.Flush (requestId);
+			if (finalFlush)
+				CloseConnection ();
 		}
 
 		public override bool IsSecure ()
@@ -406,6 +411,38 @@ namespace Mono.WebServer
 			int nr = requestBroker.Read (requestId, size, out readBuffer);
 			Buffer.BlockCopy (readBuffer, 0, buffer, 0, nr);
 			return nr;
+		}
+
+		public override void SendResponseFromFile (string filename, long offset, long length)
+		{
+			if (offset == 0) {
+				FileInfo info = new FileInfo (filename);
+				if (info.Length == length) {
+					requestBroker.SendFile (requestId, filename);
+					return;
+				}
+			}
+
+			FileStream file = null;
+			try {
+				file = File.OpenRead (filename);
+				base.SendResponseFromFile (file.Handle, offset, length);
+			} finally {
+				if (file != null)
+					file.Close ();
+			}
+		}
+
+		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
+		{
+			Stream file = null;
+			try {
+				file = new FileStream (handle, FileAccess.Read);
+				SendFromStream (file, offset, length);
+			} finally {
+				if (file != null)
+					file.Close ();
+			}
 		}
 	}
 }

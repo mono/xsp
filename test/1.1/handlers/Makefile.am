@@ -3,6 +3,7 @@ authsample_DATA = \
 		chunked.ashx \
 		empty.ashx \
 		monodoc.ashx \
-		webhandler.ashx
+		webhandler.ashx \
+		async.ashx
 
 EXTRA_DIST = $(authsample_DATA)

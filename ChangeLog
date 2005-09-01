@@ -1,3 +1,7 @@
+2005-09-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoRequest.cs: write all the headers at once.
+
 2005-08-28 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoWorkerRequest.cs: pretend the client is HTTP/1.0 so that

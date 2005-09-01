@@ -45,7 +45,7 @@ namespace Mono.WebServer
 		FIRST_COMMAND,
 		SEND_FROM_MEMORY = 0,
 		GET_SERVER_VARIABLE,
-		SET_RESPONSE_HEADER,
+		SET_RESPONSE_HEADERS,
 		GET_LOCAL_PORT,
 		FLUSH,
 		CLOSE,
@@ -60,7 +60,7 @@ namespace Mono.WebServer
 		LAST_COMMAND
 	}
 
-	public class ModMonoRequest : MarshalByRefObject
+	public class ModMonoRequest
 	{
 		const int MAX_STRING_SIZE = 1024 * 10;
 		BinaryReader reader;
@@ -81,6 +81,8 @@ namespace Mono.WebServer
 		Hashtable headers;
 		int clientBlock;
 		bool shutdown;
+		StringBuilder out_headers = new StringBuilder ();
+		bool headers_sent;
 
 		public ModMonoRequest (NetworkStream ns)
 		{
@@ -100,7 +102,7 @@ namespace Mono.WebServer
 			if (shutdown)
 				return;
 
-			if (cmd != 3) {
+			if (cmd != 4) {
 				string msg = "mod_mono and xsp have different versions.";
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
@@ -178,6 +180,8 @@ namespace Mono.WebServer
 
 		public void SendResponseFromMemory (byte [] data, int position, int length)
 		{
+			if (!headers_sent)
+				SendHeaders ();
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
 			writer.Write (data, position, length);
@@ -185,15 +189,23 @@ namespace Mono.WebServer
 
 		public void SendFile (string filename)
 		{
+			if (!headers_sent)
+				SendHeaders ();
 			SendSimpleCommand (Cmd.SEND_FILE);
 			WriteString (filename);
 		}
 
+		void SendHeaders ()
+		{
+			SendSimpleCommand (Cmd.SET_RESPONSE_HEADERS);
+			WriteString (out_headers.ToString ());
+			out_headers = null;
+			headers_sent = true;
+		}
+
 		public void SetResponseHeader (string name, string value)
 		{
-			SendSimpleCommand (Cmd.SET_RESPONSE_HEADER);
-			WriteString (name);
-			WriteString (value);
+			out_headers.AppendFormat ("{0}\0{1}\0", name, value);
 		}
 
 		public string [] GetAllHeaders ()
@@ -286,6 +298,8 @@ namespace Mono.WebServer
 
 		public void Close ()
 		{
+			if (!headers_sent)
+				SendHeaders ();
 			SendSimpleCommand (Cmd.CLOSE);
 		}
 

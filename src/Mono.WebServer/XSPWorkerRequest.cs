@@ -711,11 +711,14 @@ namespace Mono.WebServer
 				tried_sendfile = true;
 				Cork (true);
 				SendHeaders ();
-				result = sendfile (socket, handle, ref offset, (IntPtr) length);
-				if (result != length)
-					throw new System.ComponentModel.Win32Exception ();
-			} catch (Exception e) {
-				return;
+				while (length > 0) {
+					result = sendfile (socket, handle, ref offset, (IntPtr) length);
+					if (result == -1)
+						throw new System.ComponentModel.Win32Exception ();
+
+					// sendfile() will set 'offset' for us
+					length -= result;
+				}
 			} finally {
 				Cork (false);
 			}

@@ -1,3 +1,9 @@
+2005-09-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: sendfile() might need to be
+	called more than once for big files (tried with a 1GiB one). Fixes bug
+	#75926.
+
 2005-09-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoRequest.cs: write all the headers at once.

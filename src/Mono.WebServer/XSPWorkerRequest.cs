@@ -6,7 +6,7 @@
 //	Simon Waite (simon@psionics.demon.co.uk)
 //
 // (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2005 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -37,6 +37,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Web;
@@ -69,9 +70,8 @@ namespace Mono.WebServer
 		XSPRequestBroker requestBroker;
 		bool keepAlive;
 		bool haveContentLength;
-		long contentSent;
-		long contentLength;
 		IntPtr socket;
+		bool secure;
 
 		static bool running_tests;
 		static bool no_libc;
@@ -146,25 +146,6 @@ namespace Mono.WebServer
 			indexFiles = (string []) files.ToArray (typeof (string));
 		}
 		
-		static Stack bufferStack = new Stack ();
-		
-		static MemoryStream AllocateMemoryStream ()
-		{
-			lock (bufferStack) {
-				if (bufferStack.Count != 0)
-					return (MemoryStream) bufferStack.Pop ();
-			}
-			return new MemoryStream ();
-		}
-		
-		static void FreeMemoryStream (MemoryStream buf)
-		{
-			buf.SetLength (0);
-			lock (bufferStack) {
-				bufferStack.Push (buf);
-			}
-		}
-		
 		public XSPWorkerRequest (int requestId, 
 								XSPRequestBroker requestBroker, 
 								IApplicationHost appHost, 
@@ -175,7 +156,8 @@ namespace Mono.WebServer
 								string queryString, 
 								string protocol, 
 								byte[] inputBuffer,
-								IntPtr socket)
+								IntPtr socket,
+								bool secure)
 			: base (appHost)
 		{
 			this.socket = socket;
@@ -195,6 +177,7 @@ namespace Mono.WebServer
 			this.inputBuffer = inputBuffer;
 			inputLength = inputBuffer.Length;
 			position = 0;
+			this.secure = secure;
 
 			GetRequestHeaders ();
 			string cncHeader = (string) headers ["Connection"];
@@ -330,18 +313,6 @@ namespace Mono.WebServer
 			responseHeaders.Append (allowed.ToString ());
 			responseHeaders.Append ("\r\n");
 			responseHeaders.Append ("Connection: Keep-Alive\r\n");
-		}
-
-		int UpdateBodyLength (int currentBlockLength)
-		{
-			if (!haveContentLength || contentSent < contentLength - currentBlockLength) {
-				contentSent += currentBlockLength;
-				return currentBlockLength;
-			}
-
-			int result = (int) (contentLength - contentSent);
-			contentSent = contentLength;
-			return result;
 		}
 
 		byte [] GetHeaders ()
@@ -530,7 +501,11 @@ namespace Mono.WebServer
 				result = server_software;
 				break;
 			default:
-				result = base.GetServerVariable (name);
+				if (IsSecure ()) {
+					result = GetSslVariable (name);
+				} else {
+					result = base.GetServerVariable (name);
+				}
 				break;
 			}
 
@@ -688,7 +663,6 @@ namespace Mono.WebServer
 			if (!sentConnection && !haveContentLength &&
 			     String.Compare (name, "Content-Length", true, CultureInfo.InvariantCulture) == 0) {
 				haveContentLength = true;
-				contentLength = Int64.Parse (value); // This should work, otherwise HttpResponse throws.
 			}
 
 			if (!headersSent) {
@@ -698,6 +672,68 @@ namespace Mono.WebServer
 				responseHeaders.Append ("\r\n");
 			}
 		}
+
+ 		public override bool IsSecure ()
+ 		{
+ 			return secure;
+ 		}
+ 
+ 		// as we must have the client certificate (if provided) then we're able to avoid
+ 		// pre-calculating some items (and cache them if we have to calculate)
+ 		private string cert_cookie;
+ 		private string cert_issuer;
+ 		private string cert_serial;
+ 		private string cert_subject;
+ 
+ 		private string GetSslVariable (string name)
+ 		{
+ 			X509Certificate client = ClientCertificate;
+ 			string result = null;
+ 
+ 			switch (name) {
+ 			case "CERT_COOKIE":
+ 				if (cert_cookie == null) {
+ 					if (client == null)
+ 						cert_cookie = String.Empty;
+ 					else
+ 						cert_cookie = client.GetCertHashString ();
+ 				}
+ 				result = cert_cookie;
+ 				break;
+ 			case "CERT_ISSUER":
+ 				if (cert_issuer == null) {
+ 					if (client == null)
+ 						cert_issuer = String.Empty;
+ 					else
+ 						cert_issuer = client.GetIssuerName ();
+ 				}
+ 				result = cert_issuer;
+ 				break;
+ 			case "CERT_SERIALNUMBER":
+ 				if (cert_serial == null) {
+ 					if (client == null)
+ 						cert_serial = String.Empty;
+ 					else
+ 						cert_serial = client.GetSerialNumberString ();
+ 				}
+ 				result = cert_serial;
+ 				break;
+ 			case "CERT_SUBJECT":
+ 				if (cert_subject == null) {
+ 					if (client == null)
+ 						cert_subject = String.Empty;
+ 					else
+ 						cert_subject = client.GetName ();
+ 				}
+ 				result = cert_subject;
+ 				break;
+ 			default:
+ 				result = base.GetServerVariable (name);
+ 				break;
+ 			}
+ 
+ 			return result;
+ 		}
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{

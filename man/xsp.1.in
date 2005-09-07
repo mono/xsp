@@ -122,6 +122,12 @@ configuration file like this:
 By default, it has index.aspx, Default.aspx, default.aspx, index.html
 and index.htm. The order matters.
 
+.SH ENVIRONMENT VARIABLES
+.TP
+.I XSP_NO_LIBC
+When set, tells xsp 
+.B not
+to use sendfile()/send() from libc and default to the regular Socket.Send.
 .SH WEBAPP FILE FORMAT
 The format of the .webapp files used for --appconfigfile and
 --appconfigdir is:

@@ -33,11 +33,13 @@
 
 using System;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Web;
@@ -86,6 +88,11 @@ namespace Mono.WebServer
 		string hostPath;
 		EndOfSendNotification end_send;
 		object end_send_data;
+
+		protected byte[] server_raw;
+		protected byte[] client_raw;
+		X509Certificate client_cert;
+		NameValueCollection server_variables;
 
 		public MonoWorkerRequest (IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
@@ -308,6 +315,80 @@ namespace Mono.WebServer
 				if (file != null)
 					file.Close ();
 			}
+		}
+
+
+		public override string GetServerVariable (string name)
+		{
+			if (server_variables == null)
+				return String.Empty;
+
+			string s = server_variables [name];
+			return (s == null) ? String.Empty : s;
+		}
+
+		public void AddServerVariable (string name, string value)
+		{
+			if (server_variables == null)
+				server_variables = new NameValueCollection ();
+
+			server_variables.Add (name, value);
+		}
+
+		// Client Certificate Support
+
+		public X509Certificate ClientCertificate {
+			get {
+				if ((client_cert == null) && (client_raw != null))
+					client_cert = new X509Certificate (client_raw);
+				return client_cert;
+			}
+		}
+
+		public void SetClientCertificate (byte[] rawcert)
+		{
+			client_raw = rawcert;
+		}
+
+		public override byte[] GetClientCertificate ()
+		{
+			return client_raw;
+		}
+		
+		public override byte[] GetClientCertificateBinaryIssuer ()
+		{
+			if (ClientCertificate == null)
+				return base.GetClientCertificateBinaryIssuer ();
+			// TODO: not 100% sure of the content
+			return new byte [0];
+		}
+		
+		public override int GetClientCertificateEncoding ()
+		{
+			if (ClientCertificate == null)
+				return base.GetClientCertificateEncoding ();
+			return 0;
+		}
+		
+		public override byte[] GetClientCertificatePublicKey ()
+		{
+			if (ClientCertificate == null)
+				return base.GetClientCertificatePublicKey ();
+			return ClientCertificate.GetPublicKey ();
+		}
+
+		public override DateTime GetClientCertificateValidFrom ()
+		{
+			if (ClientCertificate == null)
+				return base.GetClientCertificateValidFrom ();
+			return DateTime.Parse (ClientCertificate.GetEffectiveDateString ());
+		}
+
+		public override DateTime GetClientCertificateValidUntil ()
+		{
+			if (ClientCertificate == null)
+				return base.GetClientCertificateValidUntil ();
+			return DateTime.Parse (ClientCertificate.GetExpirationDateString ());
 		}
 	}
 }

@@ -1,3 +1,10 @@
+2005-09-07 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/MonoWorkerRequest.cs:
+	* src/Mono.WebServer/XSPWorkerRequest.cs:
+	* src/Mono.WebServer/XSPApplicationHost.cs: added support for client
+	certificates. Patch by Sebastien Pouliot.
+
 2005-09-05 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: sendfile() might need to be

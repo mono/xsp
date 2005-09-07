@@ -28,6 +28,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -95,7 +96,7 @@ namespace Mono.WebServer
 			listen_socket.Bind (bindAddress);
 			return listen_socket;
 		} 
- 
+
 		public IWorker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new XSPWorker (client, client.LocalEndPoint, server,
@@ -147,13 +148,47 @@ namespace Mono.WebServer
 	{
 		public void ProcessRequest (int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
 					int remoteEPPort, string verb, string path,
-					string queryString, string protocol, byte [] inputBuffer, string redirect, IntPtr socket)
+					string queryString, string protocol, byte [] inputBuffer, string redirect,
+					IntPtr socket, SslInformations ssl)
 		{
 			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
 			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
 			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
+			bool secure = (ssl != null);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
-								queryString, protocol, inputBuffer, socket);
+								queryString, protocol, inputBuffer, socket, secure);
+
+			if (secure) {
+				// note: we're only setting what we use (and not the whole lot)
+				mwr.AddServerVariable ("CERT_KEYSIZE", ssl.KeySize.ToString (CultureInfo.InvariantCulture));
+				mwr.AddServerVariable ("CERT_SECRETKEYSIZE", ssl.SecretKeySize.ToString (CultureInfo.InvariantCulture));
+ 
+				if (ssl.RawClientCertificate != null) {
+					// the worker need to be able to return it (if asked politely)
+					mwr.SetClientCertificate (ssl.RawClientCertificate);
+
+					// XSPWorkerRequest will answer, as required, for CERT_COOKIE, CERT_ISSUER, 
+					// CERT_SERIALNUMBER and CERT_SUBJECT (as anyway it requires the client 
+					// certificate - if it was provided)
+
+					if (ssl.ClientCertificateValid) {
+						// client cert present (bit0 = 1) and valid (bit1 = 0)
+						mwr.AddServerVariable ("CERT_FLAGS", "1");
+					} else {
+						// client cert present (bit0 = 1) and valid (bit1 = 0)
+						mwr.AddServerVariable ("CERT_FLAGS", "3");
+					}
+				} else {
+					// no client certificate (bit0 = 0) ? does bit1 matter ?
+					mwr.AddServerVariable ("CERT_FLAGS", "0");
+				}
+
+				if (ssl.RawServerCertificate != null) {
+					X509Certificate server = ssl.GetServerCertificate ();
+					mwr.AddServerVariable ("CERT_SERVER_ISSUER", server.GetIssuerName ());
+					mwr.AddServerVariable ("CERT_SERVER_SUBJECT", server.GetName ());
+				}
+			}
 
 			string translated = mwr.GetFilePathTranslated ();
 			if (path [path.Length - 1] != '/' && Directory.Exists (translated))
@@ -191,6 +226,54 @@ namespace Mono.WebServer
 			wr.CloseConnection ();
 		}
 	}
+
+	[Serializable]
+	public class SslInformations {
+		bool client_cert_required;
+		bool client_cert_valid;
+		byte[] raw_client_cert;
+		byte[] raw_server_cert;
+		int key_size;
+		int secret_key_size;
+
+		public bool RequiresClientCertificate {
+			get { return client_cert_required; }
+			set { client_cert_required = value; }
+		}
+
+		public bool ClientCertificateValid {
+			get { return client_cert_valid; }
+			set { client_cert_valid = value; }
+		}
+
+		public int KeySize {
+			get { return key_size; }
+			set { key_size = value; }
+		}			
+
+		public byte[] RawClientCertificate {
+			get { return raw_client_cert; }
+			set { raw_client_cert = value; }
+		}
+
+		public byte[] RawServerCertificate {
+			get { return raw_server_cert; }
+			set { raw_server_cert = value; }
+		}
+
+		public int SecretKeySize {
+			get { return secret_key_size; }
+			set { secret_key_size = value; }
+		}
+
+		public X509Certificate GetServerCertificate ()
+		{
+			if (raw_server_cert == null)
+				return null;
+
+			return new X509Certificate (raw_server_cert);
+		}
+	}
 	
 	//
 	// XSPWorker: The worker that do the initial processing of XSP
@@ -204,6 +287,7 @@ namespace Mono.WebServer
 		IPEndPoint remoteEP;
 		IPEndPoint localEP;
 		Socket sock;
+		SslInformations ssl;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
 			bool secureConnection,
@@ -213,9 +297,14 @@ namespace Mono.WebServer
 			bool requireClientCert) 
 		{
 			if (secureConnection) {
+				ssl = new SslInformations ();
+				ssl.RequiresClientCertificate = requireClientCert;
+				ssl.RawServerCertificate = cert.GetRawCertData ();
+
 				netStream = new LingeringNetworkStream (client, true);
 				SslServerStream s = new SslServerStream (netStream, cert, requireClientCert, false);
 				s.PrivateKeyCertSelectionDelegate += keyCB;
+				s.ClientCertValidationDelegate += new CertificateValidationCallback (ClientCertificateValidation);
 				stream = s;
 			} else {
 				netStream = new LingeringNetworkStream (client, false);
@@ -274,13 +363,19 @@ namespace Mono.WebServer
 				
 				broker = (XSPRequestBroker) vapp.RequestBroker;
 				requestId = broker.RegisterRequest (this);
-				
+
+				if (ssl != null) {
+					SslServerStream s = (stream as SslServerStream);
+					ssl.KeySize = s.CipherStrength;
+					ssl.SecretKeySize = s.KeyExchangeStrength;
+				}
+
 				string redirect;
 				vapp.Redirect (rdata.Path, out redirect);
 				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
 						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
 						rdata.Path, rdata.QueryString,
-						rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle);
+						rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
 			} catch (Exception e) {
 				bool ignore = ((e is RequestLineException) || (e is IOException));
 				if (!ignore)
@@ -350,6 +445,20 @@ namespace Mono.WebServer
 		{
 			if (stream != netStream)
 				stream.Flush ();
+		}
+
+		private bool ClientCertificateValidation (X509Certificate certificate, int[] certificateErrors)
+		{
+			if (certificate != null)
+				ssl.RawClientCertificate = certificate.GetRawCertData (); // to avoid serialization
+
+			ssl.ClientCertificateValid = (certificateErrors.Length == 0);
+			if (!ssl.RequiresClientCertificate) {
+				// don't freak out (i.e. validate) on "invalid/unknown" 
+				// client certificates if they aren't required
+				return true;
+			}
+			return ssl.ClientCertificateValid;
 		}
 	}
 }

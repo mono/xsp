@@ -94,6 +94,41 @@ This applies only to xsp.exe: by default xsp will stop processing
 requests when the return key is pressed.  Use this to avoid this
 behavior. 
 .TP
+.I \-\-https
+Enables HTTPS support on the server, you must specify an X.509
+certificate with the --cert option.
+.TP
+To use you must first create an X.509 certificate, for example:
+.nf
+	$ makecert -r -eku 1.3.6.1.5.5.7.3.1 -n "CN=server" -sv server.pvk server.cer
+	Mono MakeCert - version 1.1.9.0
+	X.509 Certificate Builder
+	Copyright 2002, 2003 Motus Technologies. Copyright 2004-2005 Novell. BSD licensed.
+	
+	Success
+.fi
+.TP
+Then you must pass the following flags to xsp:
+.nf
+	$ xsp --https --cert server.cer --pkfile server.pvk
+.fi
+.TP
+.I \-\-cert FILENAME
+Used to specify the server X.509 certificate.
+.TP
+.I \-\-pkfile FILENAME
+Used to specify the path to the private keyfile.
+.TP
+.I \-\-pkpwd PASSWORD
+If your private key is password protected, PASSWORD is the password
+used to decote the private key.   
+.TP
+.I \-\-protocol PROTOCOL
+Specifies which protocols are available for SSL.
+.TP
+The possible values: Default, Tls, Ssl2, Ssl3;  The default is
+"Default" which includes all of the protocols. 
+.TP
 .I \-\-terminate (mod-mono-server only)
 Gracefully terminates a running mod-mono-server instance.  All other
 options but --filename or --address and --port" are ignored if this
@@ -122,12 +157,6 @@ configuration file like this:
 By default, it has index.aspx, Default.aspx, default.aspx, index.html
 and index.htm. The order matters.
 
-.SH ENVIRONMENT VARIABLES
-.TP
-.I XSP_NO_LIBC
-When set, tells xsp 
-.B not
-to use sendfile()/send() from libc and default to the regular Socket.Send.
 .SH WEBAPP FILE FORMAT
 The format of the .webapp files used for --appconfigfile and
 --appconfigdir is:
@@ -157,7 +186,10 @@ file in the XSP samples directory.
 The Mono XSP server was written by Gonzalo Paniagua Javier
 (gonzalo@ximian.com).
 .SH SEE ALSO
-.BR mono (1), dbsessmgr (1), asp-state (1), mod_mono (8)
+.BR mono (1), dbsessmgr (1), asp-state (1), mod_mono (8), makecert(1)
+.PP
+For more information on creating certificates, see:
+http://pages.infinit.net/ctech/20050701-1048.html
 .PP
 System.Web, System.Web.Hosting namespaces.
 .PP

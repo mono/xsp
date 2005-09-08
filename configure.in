@@ -28,12 +28,9 @@ fi
 if test "x$GMCS" != "xno" ; then
 	AC_MSG_CHECKING([whether gmcs is actually able to compile...])
 
-	tmpin=`mktemp -t in.XXXXXX`
-	tmpout=`mktemp -t out.XXXXXX`
+	echo "class Foo { public static void Main() {} }" > test.cs
 
-	echo "class Foo { public static void Main() {} }" > $tmpin
-
-	if [ gmcs -r:System.Web.dll -out:$tmpout $tmpin > /dev/null 2>&1 ]
+	if [ gmcs -r:System.Web.dll -out:test.exe test.cs > /dev/null 2>&1 ]
 	then
 		AC_MSG_RESULT(yes)
 	else
@@ -41,7 +38,7 @@ if test "x$GMCS" != "xno" ; then
 		AC_MSG_RESULT(no)
 	fi
 
-	rm -f $tmpin $tmpout
+	rm -f test.cs test.exe
 fi
 
 case "$host" in

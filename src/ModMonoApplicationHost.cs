@@ -223,64 +223,13 @@ namespace Mono.WebServer
 			this.server = server;
 		}
 
+		int requestId = -1;
+		ModMonoRequestBroker broker = null;
+			
 		public void Run (object state)
 		{
-			int requestId = -1;
-			ModMonoRequestBroker broker = null;
-			
 			try {
-				RequestReader rr = new RequestReader (Stream);
-				if (rr.ShuttingDown) {
-					Close ();
-					server.Stop ();
-					return;
-				}
-
-				string vhost = rr.Request.GetRequestHeader ("Host");
-				int port = -1;
-				if (vhost != null) {
-					int colon = vhost.IndexOf (':');
-					if (colon != -1) {
-						port = Int32.Parse (vhost.Substring (colon + 1));
-						vhost = vhost.Substring (0, colon);
-					} else {
-						port = 80;
-					}
-				}
-				
-				VPathToHost vapp = server.GetApplicationForPath (vhost, port, rr.GetUriPath (), false);
-				if (vapp == null) {
-					rr.NotFound (); // No app to handle the request
-					Stream.Close ();
-					Stream = null;
-					return;
-				}
-
-				ModMonoApplicationHost host = (ModMonoApplicationHost) vapp.AppHost;
-				if (host == null) {
-					rr.Decline ();
-					Stream.Close ();
-					Stream = null;
-					return;
-				}
-				modRequest = rr.Request;
-				
-				broker = (ModMonoRequestBroker) vapp.RequestBroker; 
-				requestId = broker.RegisterRequest (this);
-				
-				host.ProcessRequest (requestId, 
-									modRequest.GetHttpVerbName(), 
-									modRequest.GetQueryString(), 
-									modRequest.GetUri(), 
-									modRequest.GetProtocol(), 
-									modRequest.GetLocalAddress(), 
-									modRequest.GetServerPort(), 
-									modRequest.GetRemoteAddress(), 
-									modRequest.GetRemotePort(), 
-									modRequest.GetRemoteName(), 
-									modRequest.GetAllHeaders(),
-									modRequest.GetAllHeaderValues());
-				
+				InnerRun (state);
 			} catch (Exception e) {
 				//Console.WriteLine ("In ModMonoWorker.Run: {0}", e.Message);
 				try {
@@ -292,6 +241,64 @@ namespace Mono.WebServer
 				if (broker != null && requestId != -1)
 					broker.UnregisterRequest (requestId);
 			}
+		}
+
+		void InnerRun (object state)
+		{
+			requestId = -1;
+			broker = null;
+			
+			RequestReader rr = new RequestReader (Stream);
+			if (rr.ShuttingDown) {
+				Close ();
+				server.Stop ();
+				return;
+			}
+
+			string vhost = rr.Request.GetRequestHeader ("Host");
+			int port = -1;
+			if (vhost != null) {
+				int colon = vhost.IndexOf (':');
+				if (colon != -1) {
+					port = Int32.Parse (vhost.Substring (colon + 1));
+					vhost = vhost.Substring (0, colon);
+				} else {
+					port = 80;
+				}
+			}
+			
+			VPathToHost vapp = server.GetApplicationForPath (vhost, port, rr.GetUriPath (), false);
+			if (vapp == null) {
+				rr.NotFound (); // No app to handle the request
+				Stream.Close ();
+				Stream = null;
+				return;
+			}
+
+			ModMonoApplicationHost host = (ModMonoApplicationHost) vapp.AppHost;
+			if (host == null) {
+				rr.Decline ();
+				Stream.Close ();
+				Stream = null;
+				return;
+			}
+			modRequest = rr.Request;
+			
+			broker = (ModMonoRequestBroker) vapp.RequestBroker; 
+			requestId = broker.RegisterRequest (this);
+			
+			host.ProcessRequest (requestId, 
+								modRequest.GetHttpVerbName(), 
+								modRequest.GetQueryString(), 
+								modRequest.GetUri(), 
+								modRequest.GetProtocol(), 
+								modRequest.GetLocalAddress(), 
+								modRequest.GetServerPort(), 
+								modRequest.GetRemoteAddress(), 
+								modRequest.GetRemotePort(), 
+								modRequest.GetRemoteName(), 
+								modRequest.GetAllHeaders(),
+								modRequest.GetAllHeaderValues());
 		}
 
 		public int Read (byte[] buffer, int position, int size)

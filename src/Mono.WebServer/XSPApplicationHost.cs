@@ -322,60 +322,12 @@ namespace Mono.WebServer
 			return server.GetAvailableReuses (sock);
 		}
 
+		int requestId = -1;
+		XSPRequestBroker broker = null;
 		public void Run (object state)
 		{
-			int requestId = -1;
-			XSPRequestBroker broker = null;
-			
 			try {
-				if (remoteEP == null)
-					return;
-
-				InitialWorkerRequest ir = new InitialWorkerRequest (stream);
-				try {
-					ir.ReadRequestData ();
-				} catch (Exception ex) {
-					if (ir.GotSomeInput) {
-						byte [] badReq = HttpErrors.BadRequest ();
-						Write (badReq, 0, badReq.Length);
-					}
-
-					ir.FreeBuffer ();
-
-					throw ex;
-				}
-
-				RequestData rdata = ir.RequestData;
-				string vhost = null; // TODO: read the headers in InitialWorkerRequest
-				int port = ((IPEndPoint) localEP).Port;
-				
-				VPathToHost vapp = server.GetApplicationForPath (vhost, port, rdata.Path, true);
-				XSPApplicationHost host = null;
-				if (vapp != null)
-					host = (XSPApplicationHost) vapp.AppHost;
-
-				if (host == null) {
-					byte [] nf = HttpErrors.NotFound (rdata.Path);
-					Write (nf, 0, nf.Length);
-					Close ();
-					return;
-				}
-				
-				broker = (XSPRequestBroker) vapp.RequestBroker;
-				requestId = broker.RegisterRequest (this);
-
-				if (ssl != null) {
-					SslServerStream s = (stream as SslServerStream);
-					ssl.KeySize = s.CipherStrength;
-					ssl.SecretKeySize = s.KeyExchangeStrength;
-				}
-
-				string redirect;
-				vapp.Redirect (rdata.Path, out redirect);
-				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
-						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
-						rdata.Path, rdata.QueryString,
-						rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
+				InnerRun (state);
 			} catch (Exception e) {
 				bool ignore = ((e is RequestLineException) || (e is IOException));
 				if (!ignore)
@@ -394,6 +346,61 @@ namespace Mono.WebServer
 				if (broker != null && requestId != -1)
 					broker.UnregisterRequest (requestId);
 			}
+		}
+
+		void InnerRun (object state)
+		{
+			requestId = -1;
+			broker = null;
+			
+			if (remoteEP == null)
+				return;
+
+			InitialWorkerRequest ir = new InitialWorkerRequest (stream);
+			try {
+				ir.ReadRequestData ();
+			} catch (Exception ex) {
+				if (ir.GotSomeInput) {
+					byte [] badReq = HttpErrors.BadRequest ();
+					Write (badReq, 0, badReq.Length);
+				}
+
+				ir.FreeBuffer ();
+
+				throw ex;
+			}
+
+			RequestData rdata = ir.RequestData;
+			string vhost = null; // TODO: read the headers in InitialWorkerRequest
+			int port = ((IPEndPoint) localEP).Port;
+			
+			VPathToHost vapp = server.GetApplicationForPath (vhost, port, rdata.Path, true);
+			XSPApplicationHost host = null;
+			if (vapp != null)
+				host = (XSPApplicationHost) vapp.AppHost;
+
+			if (host == null) {
+				byte [] nf = HttpErrors.NotFound (rdata.Path);
+				Write (nf, 0, nf.Length);
+				Close ();
+				return;
+			}
+			
+			broker = (XSPRequestBroker) vapp.RequestBroker;
+			requestId = broker.RegisterRequest (this);
+
+			if (ssl != null) {
+				SslServerStream s = (stream as SslServerStream);
+				ssl.KeySize = s.CipherStrength;
+				ssl.SecretKeySize = s.KeyExchangeStrength;
+			}
+
+			string redirect;
+			vapp.Redirect (rdata.Path, out redirect);
+			host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
+					remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
+					rdata.Path, rdata.QueryString,
+					rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
 		}
 
 		public int Read (byte[] buffer, int position, int size)

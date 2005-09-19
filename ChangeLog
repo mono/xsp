@@ -1,5 +1,16 @@
 2005-09-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* src/Mono.WebServer/XSPWorkerRequest.cs: return 0 when trying to read
+	the entity body from a GET/HEAD request.
+
+	* src/Mono.WebServer/XSPApplicationHost.cs:
+	* src/ModMonoApplicationHost.cs: moved Run into InnerRun. MS was
+	throwing a TypeLoadException before running the method and we didn't
+	catch that one, so the connection wasn't being closed.
+	
+
+2005-09-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/ModMonoRequest.cs: when reading a string from mod_mono, handle
 	short reads. From a patch by Mathias Herberts.
 

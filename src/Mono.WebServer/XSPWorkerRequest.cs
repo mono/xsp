@@ -614,7 +614,7 @@ namespace Mono.WebServer
 
 		public override int ReadEntityBody (byte [] buffer, int size)
 		{
-			if (size == 0 || buffer == null)
+			if (verb == "GET" || verb == "HEAD" || size == 0 || buffer == null)
 				return 0;
 
 			return ReadInput (buffer, 0, size);

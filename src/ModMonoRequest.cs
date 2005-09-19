@@ -8,7 +8,7 @@
 // Copyright (c) 2002 Daniel Lopez Ridruejo.
 //           (c) 2002,2003 Ximian, Inc.
 //           All rights reserved.
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004,2005 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -143,7 +143,16 @@ namespace Mono.WebServer
 			byte [] buf = new byte [size];
 			string s;
 			if (size != 0) {
-				reader.Read (buf, 0, size);
+				int chunk;
+				int total = 0;
+				do {
+					chunk = reader.Read (buf, total, size - total);
+					if (chunk == 0)
+						throw new IOException ("Lost connection with mod_mono");
+					if (chunk > 0)
+						total += chunk;
+				} while ((chunk > 0 && total < size));
+
 				//FIXME: encoding!
 				s = Encoding.Default.GetString (buf);
 			} else {

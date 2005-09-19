@@ -1,3 +1,13 @@
+2005-09-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoRequest.cs: when reading a string from mod_mono, handle
+	short reads. From a patch by Mathias Herberts.
+
+2005-09-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoRequest.cs: avoid 500 response when the body was actually
+	sent. Patch by dean@brettle.com that fixes bug #76124.
+
 2005-09-07 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/MonoWorkerRequest.cs:

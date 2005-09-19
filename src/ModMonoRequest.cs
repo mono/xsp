@@ -205,7 +205,8 @@ namespace Mono.WebServer
 
 		public void SetResponseHeader (string name, string value)
 		{
-			out_headers.AppendFormat ("{0}\0{1}\0", name, value);
+			if (!headers_sent)
+				out_headers.AppendFormat ("{0}\0{1}\0", name, value);
 		}
 
 		public string [] GetAllHeaders ()

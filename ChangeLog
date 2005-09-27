@@ -1,3 +1,8 @@
+2005-09-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: when the connection is secure,
+	use the regular stream.
+
 2005-09-19 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: return 0 when trying to read

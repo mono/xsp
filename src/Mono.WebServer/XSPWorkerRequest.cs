@@ -737,7 +737,7 @@ namespace Mono.WebServer
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{
-			if (no_libc || (tried_sendfile && !use_sendfile)) {
+			if (secure || no_libc || (tried_sendfile && !use_sendfile)) {
 				base.SendResponseFromFile (handle, offset, length);
 				return;
 			}
@@ -774,7 +774,7 @@ namespace Mono.WebServer
 
 		int Cork (bool val)
 		{
-			if (no_libc)
+			if (secure || no_libc)
 				return 0;
 			// 6 -> SOL_TCP, 3 -> TCP_CORK
 			bool t = val;
@@ -783,7 +783,7 @@ namespace Mono.WebServer
 
 		unsafe int Send (byte [] buffer, int offset, int len)
 		{
-			if (no_libc) {
+			if (secure || no_libc) {
 				requestBroker.Write (requestId, buffer, offset, len);
 				return len;
 			}

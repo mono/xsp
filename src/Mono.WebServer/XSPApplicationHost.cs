@@ -54,16 +54,19 @@ namespace Mono.WebServer
 		SecurityProtocolType SecurityProtocol;
 		X509Certificate cert;
 		PrivateKeySelectionCallback keyCB;
+		bool allowClientCert;
 		bool requireClientCert;
 
 		public XSPWebSource(IPAddress address, int port, SecurityProtocolType securityProtocol,
-					X509Certificate cert, PrivateKeySelectionCallback keyCB, bool requireClientCert)
+					X509Certificate cert, PrivateKeySelectionCallback keyCB, 
+					bool allowClientCert, bool requireClientCert)
 		{			
 			secureConnection = (cert != null && keyCB != null);
 			this.bindAddress = new IPEndPoint (address, port);
 			this.SecurityProtocol = securityProtocol;
 			this.cert = cert;
 			this.keyCB = keyCB;
+			this.allowClientCert = allowClientCert;
 			this.requireClientCert = requireClientCert;
 		}
 
@@ -100,7 +103,7 @@ namespace Mono.WebServer
 		public IWorker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new XSPWorker (client, client.LocalEndPoint, server,
-				secureConnection, SecurityProtocol, cert, keyCB, requireClientCert);
+				secureConnection, SecurityProtocol, cert, keyCB, allowClientCert, requireClientCert);
 		}
 		
 		public Type GetApplicationHostType ()
@@ -175,7 +178,7 @@ namespace Mono.WebServer
 						// client cert present (bit0 = 1) and valid (bit1 = 0)
 						mwr.AddServerVariable ("CERT_FLAGS", "1");
 					} else {
-						// client cert present (bit0 = 1) and valid (bit1 = 0)
+						// client cert present (bit0 = 1) but invalid (bit1 = 1)
 						mwr.AddServerVariable ("CERT_FLAGS", "3");
 					}
 				} else {
@@ -229,6 +232,7 @@ namespace Mono.WebServer
 
 	[Serializable]
 	public class SslInformations {
+		bool client_cert_allowed;
 		bool client_cert_required;
 		bool client_cert_valid;
 		byte[] raw_client_cert;
@@ -236,7 +240,12 @@ namespace Mono.WebServer
 		int key_size;
 		int secret_key_size;
 
-		public bool RequiresClientCertificate {
+		public bool AllowClientCertificate {
+			get { return client_cert_allowed; }
+			set { client_cert_allowed = value; }
+		}
+
+		public bool RequireClientCertificate {
 			get { return client_cert_required; }
 			set { client_cert_required = value; }
 		}
@@ -294,11 +303,13 @@ namespace Mono.WebServer
 			Mono.Security.Protocol.Tls.SecurityProtocolType SecurityProtocol,
 			X509Certificate cert,
 			PrivateKeySelectionCallback keyCB,
+			bool allowClientCert,
 			bool requireClientCert) 
 		{
 			if (secureConnection) {
 				ssl = new SslInformations ();
-				ssl.RequiresClientCertificate = requireClientCert;
+				ssl.AllowClientCertificate = allowClientCert;
+				ssl.RequireClientCertificate = requireClientCert;
 				ssl.RawServerCertificate = cert.GetRawCertData ();
 
 				netStream = new LingeringNetworkStream (client, true);
@@ -459,13 +470,11 @@ namespace Mono.WebServer
 			if (certificate != null)
 				ssl.RawClientCertificate = certificate.GetRawCertData (); // to avoid serialization
 
+			// right now we're accepting any client certificate - i.e. it's up to the 
+			// web application to check if the certificate is valid (HttpClientCertificate.IsValid)
 			ssl.ClientCertificateValid = (certificateErrors.Length == 0);
-			if (!ssl.RequiresClientCertificate) {
-				// don't freak out (i.e. validate) on "invalid/unknown" 
-				// client certificates if they aren't required
-				return true;
-			}
-			return ssl.ClientCertificateValid;
+
+			return ssl.RequireClientCertificate ? (certificate != null) : true;
 		}
 	}
 }

@@ -95,12 +95,15 @@ requests when the return key is pressed.  Use this to avoid this
 behavior. 
 .TP
 .I \-\-https
-Enables HTTPS support on the server, you must specify an X.509
-certificate with the --cert option.
+Enables HTTPS support on the server, you must supply an X.509 certificate
+and a private key with either the --cert/--pkfile options or with the 
+--p12file (which combines both the certificate and the private key into a
+single file).
 .TP
-To use you must first create an X.509 certificate, for example:
+To use you must first create an X.509 certificate for your server, for 
+example:
 .nf
-	$ makecert -r -eku 1.3.6.1.5.5.7.3.1 -n "CN=server" -sv server.pvk server.cer
+	$ makecert -r -eku 1.3.6.1.5.5.7.3.1 -n "CN=server" -p12 server.p12 s3kr3t
 	Mono MakeCert - version 1.1.9.0
 	X.509 Certificate Builder
 	Copyright 2002, 2003 Motus Technologies. Copyright 2004-2005 Novell. BSD licensed.
@@ -110,24 +113,74 @@ To use you must first create an X.509 certificate, for example:
 .TP
 Then you must pass the following flags to xsp:
 .nf
-	$ xsp --https --cert server.cer --pkfile server.pvk
+	$ xsp --https --p12file server.p12 --pkpwd s3kr3t
 .fi
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
+.TP
+.I \-\-https-client-accept
+Like --https this enables HTTPS support on the server. However this option
+also send an "invitation" to clients to provide client-certificates to 
+authenticate themselves. Client are free to provide, or not, a client 
+certificate. Web application can detect if a client certificate is used 
+and react accordingly. Most web browser will not send a client certificate
+unless they have been explicitly requested to do so.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
+.TP
+.I \-\-https-client-requires
+Like --https this enables HTTPS support on the server. However this option
+also 
+.B requires 
+clients to use client-certificates to authenticate themselves. Client who
+do not provide client certificates will receive an error. Note that client
+may send an empty certificate structure so web application should check
+the certificate content.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
+.TP
+.I \-\-p12file FILENAME
+Used to specify the PKCS#12 file to use. This file includes both the X.509
+certificate and the private key required to encrypt the HTTP traffic.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
 .TP
 .I \-\-cert FILENAME
-Used to specify the server X.509 certificate.
+Used to specify the server X.509 certificate file. This is normally used 
+with the --pkfile.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
 .TP
 .I \-\-pkfile FILENAME
-Used to specify the path to the private keyfile.
+Used to specify the path to the private keyfile. The PVK format isn't 
+very secure and you should use the PKCS#12 format (--p12file option) to 
+store new private keys.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
 .TP
 .I \-\-pkpwd PASSWORD
 If your private key is password protected, PASSWORD is the password
-used to decote the private key.   
+used to decote the private key. This option works for both PVK and 
+PKCS#12 formats.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
 .TP
 .I \-\-protocol PROTOCOL
-Specifies which protocols are available for SSL.
-.TP
-The possible values: Default, Tls, Ssl2, Ssl3;  The default is
-"Default" which includes all of the protocols. 
+Specifies which protocols are available for encrypting the communications.
+The possible values are Default, Tls and Ssl3.
+.B Ssl2 isn't supported.
+The default value is "Default" which auto-detect the client protocol and
+adjust the server protocol accordingly.
+.HP
+This option is only valid for XSP. For mod_mono you should configure 
+Apache for SSL/TLS.
 .TP
 .I \-\-terminate (mod-mono-server only)
 Gracefully terminates a running mod-mono-server instance.  All other

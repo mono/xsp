@@ -1,3 +1,16 @@
+2005-09-29  Sebastien Pouliot  <sebastien@ximian.com>
+
+	* src/Makefile.am: Added security.cs to the build.
+	* src/server.cs: Removed security configuration from the source. Added
+	new options for client certificates and pkcs#12 support.
+	* src/security.cs: New. Keep all security configuration in a single 
+	place. Added support (and logic) to support certificates and keys 
+	inside PKCS#12 files.
+	* src/Mono.WebServer/XSPApplicationHost.cs: Add support for mandatory
+	client certificates.
+	* man/xsp.1.in: Updated man page with the new options for client side
+	certificates and pkcs#12 files support.
+
 2005-09-26 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: when the connection is secure,

@@ -37,9 +37,7 @@ using System.Web.Hosting;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 #if !MODMONO_SERVER
-using Mono.Security.Authenticode;
 using Mono.Security.Protocol.Tls;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 #endif
 using Mono.WebServer;
 
@@ -48,7 +46,7 @@ namespace Mono.XSP
 	public class Server
 	{
 #if !MODMONO_SERVER
-		static PrivateKey key;
+		static RSA key;
 #endif
 		
 		static void ShowVersion ()
@@ -100,17 +98,25 @@ namespace Mono.XSP
 #endif
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
+#if !MODMONO_SERVER
 			Console.WriteLine ("    --https:        enable SSL for the server");
 			Console.WriteLine ("                    Default value: false.");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
-			Console.WriteLine ("    --cert FILENAME: path to X.509 certificate file");
+			Console.WriteLine ("    --https-client: enable SSL for the server with mandatory client certificates");
+			Console.WriteLine ("                    Default value: false.");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
-			Console.WriteLine ("    --pkfile FILENAME: path to private key file");
+			Console.WriteLine ("    --cert FILENAME: path to X.509 certificate file (cer)");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
-			Console.WriteLine ("    --pkpwd PASSWORD: password for private key file");
+			Console.WriteLine ("    --pkfile FILENAME: path to private key file (pvk)");
+			Console.WriteLine ("                    AppSettings key name: ");
+			Console.WriteLine ();
+			Console.WriteLine ("    --p12file FILENAME: path to a PKCS#12 file containing the certificate and the private");
+			Console.WriteLine ("                    AppSettings key name: ");
+			Console.WriteLine ();
+			Console.WriteLine ("    --pkpwd PASSWORD: password to decrypt the private key");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
 			Console.WriteLine ("    --protocol:     specify which protocols are available for SSL");
@@ -118,6 +124,7 @@ namespace Mono.XSP
 			Console.WriteLine ("                    Default value: Default (all)");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
+#endif
 			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
 			Console.WriteLine ("                    anything else.");
 			Console.WriteLine ("                    Default value: current directory.");
@@ -182,7 +189,7 @@ namespace Mono.XSP
 			Address = 1 << 7,
 			Port = 1 << 8,
 			Terminate = 1 << 9,
-			Https = 1 << 10,
+			Https = 1 << 10
 		}
 
 		static void CheckAndSetOptions (string name, Options value, ref Options options)
@@ -207,18 +214,13 @@ namespace Mono.XSP
 #if !MODMONO_SERVER
 		static AsymmetricAlgorithm GetPrivateKey (X509Certificate certificate, string targetHost) 
 		{ 
-			return key.RSA; 
+			return key; 
 		}
 #endif
 
 		public static int Main (string [] args)
 		{
-			bool secure = false;
-#if !MODMONO_SERVER
-			string certFilename = null, keyFilename = null, keyPassword = null, securityProtocolTypeParam = null;
-			SecurityProtocolType securityProtocolType = SecurityProtocolType.Default;
-			X509Certificate cert = null;
-#endif
+			SecurityConfiguration security = new SecurityConfiguration ();
 			bool nonstop = false;
 			bool verbose = false;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
@@ -256,19 +258,34 @@ namespace Mono.XSP
 #else
 				case "--https":
 					CheckAndSetOptions (a, Options.Https, ref options);
-					secure=true;
+					security.Enabled = true;
+					break;
+				case "--https-client-accept":
+					CheckAndSetOptions (a, Options.Https, ref options);
+					security.Enabled = true;
+					security.AcceptClientCertificates = true;
+					security.RequireClientCertificates = false;
+					break;
+				case "--https-client-require":
+					CheckAndSetOptions (a, Options.Https, ref options);
+					security.Enabled = true;
+					security.AcceptClientCertificates = true;
+					security.RequireClientCertificates = true;
+					break;
+				case "--p12file":
+					security.Pkcs12File = args [++i];
 					break;
 				case "--cert":
-					certFilename = args [++i];
+					security.CertificateFile = args [++i];
 					break;
 				case "--pkfile":
-					keyFilename = args [++i];
+					security.PvkFile = args [++i];
 					break;
 				case "--pkpwd":
-					keyPassword = args [++i];
+					security.Password = args [++i];
 					break;
 				case "--protocols":
-					securityProtocolTypeParam = args [++i];
+					security.SetProtocol (args [++i]);
 					break;
 #endif
 				case "--port":
@@ -352,51 +369,6 @@ namespace Mono.XSP
 				return 1;
 			}
 
-#if !MODMONO_SERVER
-			if (secure)
-			{
-				if (certFilename==null) {
-					Console.WriteLine ("A server X.509 certificate must be specified for a https server");
-					return 1;
-				}
-
-				try {
-					cert = X509Certificate.CreateFromCertFile (certFilename);
-				} catch (Exception) {
-					Console.WriteLine ("Unable to load X.509 certicate: " + certFilename);
-					return 1;
-				}
-
-				if (keyFilename == null) {
-					Console.WriteLine ("A private key file must be specified for a https server");
-					return 1;
-				}
-
-				try {
-					if (keyPassword == null)
-						key = PrivateKey.CreateFromFile (keyFilename);
-					else
-						key = PrivateKey.CreateFromFile (keyFilename, keyPassword);
-				} catch (CryptographicException) {
-					Console.WriteLine ("Invalid private key password or private key file is corrupt");
-					return 1;
-				} catch (Exception ex) {
-					Console.WriteLine ("Unable to load private key: " + keyFilename);
-					return 1;
-				}
-
-				if (securityProtocolTypeParam != null) {
-					try {
-						securityProtocolType = (SecurityProtocolType) 
-							Enum.Parse (typeof (SecurityProtocolType), securityProtocolTypeParam);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for security protcol is invalid: " + securityProtocolTypeParam);
-						return 1;
-					}
-				}
-			}
-#endif
-
 			if (rootDir != null && rootDir != "") {
 				try {
 					Environment.CurrentDirectory = rootDir;
@@ -429,11 +401,20 @@ namespace Mono.XSP
 
 			ApplicationServer server = new ApplicationServer (webSource);
 #else
-			if (!secure)
+			if (security.Enabled) {
+				try {
+					key = security.KeyPair;
+					webSource = new XSPWebSource (ipaddr, port, security.Protocol, security.ServerCertificate, 
+						new PrivateKeySelectionCallback (GetPrivateKey), 
+						security.AcceptClientCertificates, security.RequireClientCertificates);
+				}
+				catch (CryptographicException ce) {
+					Console.WriteLine (ce.Message);
+					return 1;
+				}
+			} else {
 				webSource = new XSPWebSource (ipaddr, port);
-			else
-				webSource = new XSPWebSource (ipaddr, port, securityProtocolType, cert, 
-					new PrivateKeySelectionCallback (GetPrivateKey), false);
+			}
 
 			ApplicationServer server = new ApplicationServer (webSource);
 #endif
@@ -457,10 +438,7 @@ namespace Mono.XSP
 			} else
 #endif
 			{
-				if (secure)
-					Console.WriteLine ("Listening on port: {0} (SSL)", port);
-				else
-					Console.WriteLine ("Listening on port: {0}", port);
+				Console.WriteLine ("Listening on port: {0} {1}", port, security);
 				Console.WriteLine ("Listening on address: {0}", ip);
 			}
 			

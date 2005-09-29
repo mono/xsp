@@ -37,7 +37,7 @@ modmono_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mo
 modmono2_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Posix.dll
 endif
 
-xsp_sources = server.cs
+xsp_sources = server.cs security.cs
 
 xsp_build_sources = $(addprefix $(srcdir)/, $(xsp_sources)) AssemblyInfo.cs
 
@@ -46,7 +46,7 @@ modmono_only = ModMonoRequest.cs \
 	      ModMonoApplicationHost.cs \
 	      ModMonoTCPWebSource.cs
 
-modmono_sources =  $(modmono_only) server.cs
+modmono_sources =  $(modmono_only) $(xsp_sources)
 modmono_build_sources = $(addprefix $(srcdir)/, $(modmono_sources)) AssemblyInfoModMono.cs
 
 xsp.exe: $(xsp_build_sources)

@@ -1,3 +1,8 @@
+2005-09-29  Sebastien Pouliot  <sebastien@ximian.com> 
+ 
+	* src/server.cs: Added *all* new options in --help.
+	* man/xsp.1.in: Fixed typo.
+
 2005-09-29  Sebastien Pouliot  <sebastien@ximian.com>
 
 	* src/Makefile.am: Added security.cs to the build.

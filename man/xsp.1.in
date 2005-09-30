@@ -130,7 +130,7 @@ unless they have been explicitly requested to do so.
 This option is only valid for XSP. For mod_mono you should configure 
 Apache for SSL/TLS.
 .TP
-.I \-\-https-client-requires
+.I \-\-https-client-require
 Like --https this enables HTTPS support on the server. However this option
 also 
 .B requires 

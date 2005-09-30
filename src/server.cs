@@ -103,8 +103,12 @@ namespace Mono.XSP
 			Console.WriteLine ("                    Default value: false.");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
-			Console.WriteLine ("    --https-client: enable SSL for the server with mandatory client certificates");
-			Console.WriteLine ("                    Default value: false.");
+			Console.WriteLine ("    --https-client-accept: enable SSL for the server with optional client certificates");
+			Console.WriteLine ("                    Default value: false (non-ssl).");
+			Console.WriteLine ("                    AppSettings key name: ");
+			Console.WriteLine ();
+			Console.WriteLine ("    --https-client-require: enable SSL for the server with mandatory client certificates");
+			Console.WriteLine ("                    Default value: false (non-ssl).");
 			Console.WriteLine ("                    AppSettings key name: ");
 			Console.WriteLine ();
 			Console.WriteLine ("    --cert FILENAME: path to X.509 certificate file (cer)");

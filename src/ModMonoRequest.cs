@@ -44,7 +44,7 @@ namespace Mono.WebServer
 	{
 		FIRST_COMMAND,
 		SEND_FROM_MEMORY = 0,
-		GET_SERVER_VARIABLE,
+		GET_SERVER_VARIABLES,
 		SET_RESPONSE_HEADERS,
 		GET_LOCAL_PORT,
 		FLUSH,
@@ -65,6 +65,7 @@ namespace Mono.WebServer
 		const int MAX_STRING_SIZE = 1024 * 10;
 		BinaryReader reader;
 		BinaryWriter writer;
+		bool got_server_vars;
 		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
 							   CaseInsensitiveComparer.DefaultInvariant);
 		string verb;
@@ -102,7 +103,7 @@ namespace Mono.WebServer
 			if (shutdown)
 				return;
 
-			if (cmd != 4) {
+			if (cmd != 5) {
 				string msg = "mod_mono and xsp have different versions.";
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
@@ -239,18 +240,25 @@ namespace Mono.WebServer
 			return headers [name] as string;
 		}
 
+		void GetServerVariables ()
+		{
+			SendSimpleCommand (Cmd.GET_SERVER_VARIABLES);
+			int nvars = reader.ReadInt32 ();
+			while (nvars > 0) {
+				string key = ReadString ();
+				serverVariables [key] = ReadString ();
+				nvars--;
+			}
+
+			got_server_vars = true;
+		}
+
 		public string GetServerVariable (string name)
 		{
-			object o = serverVariables [name];
-			if (o != null)
-				return (string) o;
+			if (!got_server_vars)
+				GetServerVariables ();
 
-			SendSimpleCommand (Cmd.GET_SERVER_VARIABLE);
-			WriteString (name);
-			o = ReadString ();
-			serverVariables [name] = o;
-
-			return (string) o;
+			return (string) serverVariables [name];
 		}
 
 		public string GetUri ()

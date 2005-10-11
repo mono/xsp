@@ -1,5 +1,10 @@
+2005-10-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoRequest.cs: all the server variables are now written
+	at once from mod_mono.
+
 2005-09-29  Sebastien Pouliot  <sebastien@ximian.com> 
- 
+
 	* src/server.cs: Added *all* new options in --help.
 	* man/xsp.1.in: Fixed typo.
 

@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 // 	Lluis Sanchez Gual (lluis@ximian.com)
 //
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004,2005 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -31,7 +31,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Mono.Posix;
+using Mono.Unix;
 
 namespace Mono.WebServer
 {

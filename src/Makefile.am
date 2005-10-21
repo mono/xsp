@@ -1,6 +1,6 @@
 SUBDIRS=Mono.WebServer
 
-MCSFLAGS= -debug+ -debug:full -nologo
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618
 
 xspdir = $(prefix)/lib/xsp/1.0
 modmonoserverdir = $(prefix)/lib/xsp/1.0

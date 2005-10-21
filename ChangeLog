@@ -1,3 +1,13 @@
+2005-10-21 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoWorkerRequest.cs:
+	* src/ModMonoRequest.cs: server variables are now read when getting the
+	initial data.
+
+	* src/Makefile.am: don't show warning 618.
+	* src/Mono.WebServer/Makefile.am: Modified file.
+	* src/ModMonoApplicationHost.cs: s/Mono.Posix/Mono.Unix/
+
 2005-10-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoRequest.cs: all the server variables are now written

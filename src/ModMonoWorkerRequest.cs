@@ -8,7 +8,7 @@
 // Copyright (c) 2002 Daniel Lopez Ridruejo.
 //           (c) 2002,2003 Ximian, Inc.
 //           All rights reserved.
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004,2005 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -288,18 +288,34 @@ namespace Mono.WebServer
 			return remotePort;
 		}
 
+		Hashtable server_vars = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
+							CaseInsensitiveComparer.DefaultInvariant);
 		public override string GetServerVariable (string name)
 		{
+			object o = server_vars [name];
+			if (o is bool)
+				return null;
+
+			if (o != null)
+				return (string) o;
+
 			string result = requestBroker.GetServerVariable (requestId, name);
-			if (result != null && result.Length > 0)
+			if (result != null && result.Length > 0) {
+				server_vars [name] = result;
 				return result;
+			}
 
 			switch (name) {
 			case "HTTPS":
 				result = (IsSecure ()) ? "on" : "off";
+				server_vars ["HTTPS"] = result;
 				break;
 			default:
 				result = base.GetServerVariable (name);
+				if (result == null || result.Length == 0)
+					server_vars [name] = false;
+				else
+					server_vars [name] = result;
 				break;
 			}
 

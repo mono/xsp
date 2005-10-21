@@ -47,7 +47,6 @@ namespace Mono.WebServer
 		GET_SERVER_VARIABLES,
 		SET_RESPONSE_HEADERS,
 		GET_LOCAL_PORT,
-		FLUSH,
 		CLOSE,
 		SHOULD_CLIENT_BLOCK,
 		SETUP_CLIENT_BLOCK,
@@ -103,7 +102,7 @@ namespace Mono.WebServer
 			if (shutdown)
 				return;
 
-			if (cmd != 5) {
+			if (cmd != 6) {
 				string msg = "mod_mono and xsp have different versions.";
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
@@ -114,6 +113,11 @@ namespace Mono.WebServer
 			uri = ReadString ();
 			queryString = ReadString ();
 			protocol = ReadString ();
+			localAddress = ReadString ();
+			serverPort = reader.ReadInt32 ();
+			remoteAddress = ReadString ();
+			remotePort = reader.ReadInt32 ();
+			remoteName = ReadString ();
 			int nheaders = reader.ReadInt32 ();
 			headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
 						 CaseInsensitiveComparer.DefaultInvariant);
@@ -121,12 +125,6 @@ namespace Mono.WebServer
 				string key = ReadString ();
 				headers [key] = ReadString ();
 			}
-
-			localAddress = ReadString ();
-			serverPort = reader.ReadInt32 ();
-			remoteAddress = ReadString ();
-			remotePort = reader.ReadInt32 ();
-			remoteName = ReadString ();
 		}
 
 		void SendSimpleCommand (Cmd cmd)
@@ -139,7 +137,7 @@ namespace Mono.WebServer
 		{
 			int size = reader.ReadInt32 ();
 			if (size < 0 || size > MAX_STRING_SIZE)
-				throw new ArgumentOutOfRangeException ("size", "Abnormal string size.");
+				throw new ArgumentOutOfRangeException ("size", "Abnormal string size " + size);
 
 			byte [] buf = new byte [size];
 			string s;
@@ -306,12 +304,6 @@ namespace Mono.WebServer
 		public int GetRemotePort ()
 		{
 			return remotePort;
-		}
-
-		public void Flush ()
-		{
-			// No-op in mod_mono. Not needed.
-			// SendSimpleCommand (Cmd.FLUSH);
 		}
 
 		public void Close ()

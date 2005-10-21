@@ -1,5 +1,5 @@
 pkgconfigdir=$(libdir)/pkgconfig
-MCSFLAGS= -debug+ -debug:full -nologo -unsafe
+MCSFLAGS= -debug+ -debug:full -nologo -unsafe -nowarn:618
 
 monowebserverdir = $(prefix)/lib/xsp/1.0
 monowebserver2dir = $(prefix)/lib/xsp/2.0

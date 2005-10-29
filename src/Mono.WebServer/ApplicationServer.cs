@@ -345,6 +345,7 @@ namespace Mono.WebServer
 						worker = webSource.CreateWorker (s, this);
 					} catch (Exception) {
 						try { s.Close (); } catch {}
+						continue;
 					}
 
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));

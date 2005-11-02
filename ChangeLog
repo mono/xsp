@@ -1,5 +1,10 @@
 2005-11-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* src/ModMonoWorkerRequest.cs: don't append the index file name
+	after the path in presence of path_info. Fixes bug #76604.
+
+2005-11-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/ModMonoWorkerRequest.cs:
 	* src/ModMonoRequest.cs:
 	* src/server.cs:

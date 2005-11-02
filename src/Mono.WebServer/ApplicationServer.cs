@@ -107,9 +107,6 @@ namespace Mono.WebServer
 		public void AddApplication (string vhost, int vport, string vpath, string fullPath)
 		{
 			// TODO - check for duplicates, sort, optimize, etc.
-			if (started)
-				throw new InvalidOperationException ("The server is already started.");
-
 			if (verbose) {
 				Console.WriteLine("Registering application:");
 				Console.WriteLine("    Host:          {0}", (vhost != null) ? vhost : "any");
@@ -255,9 +252,6 @@ namespace Mono.WebServer
  			if (vpathToHost == null)
  				throw new InvalidOperationException ("SetApplications must be called first.");
 
- 			if (vpathToHost.Count == 0)
- 				throw new InvalidOperationException ("No applications defined or all of them are disabled");
- 				
 			listen_socket = webSource.CreateSocket ();
 			listen_socket.Listen (500);
 			listen_socket.Blocking = false;
@@ -537,7 +531,7 @@ namespace Mono.WebServer
 		public readonly string vhost;
 		public readonly int vport;
 		public readonly string vpath;
-		public readonly string realPath;
+		public string realPath;
 		public readonly bool haveWildcard;
 
 		public IApplicationHost AppHost;
@@ -554,7 +548,6 @@ namespace Mono.WebServer
 
 			this.realPath = realPath;
 			this.AppHost = null;
-
 			if (vhost != null && this.vhost.Length != 0 && this.vhost [0] == '*') {
 				haveWildcard = true;
 				if (this.vhost.Length > 2 && this.vhost [1] == '.')
@@ -641,7 +634,7 @@ namespace Mono.WebServer
 			if (v != "/" && v.EndsWith ("/")) {
 				v = v.Substring (0, v.Length - 1);
 			}
-			
+
 			AppHost = ApplicationHost.CreateApplicationHost (webSource.GetApplicationHostType(), v, realPath) as IApplicationHost;
 			AppHost.Server = server;
 			

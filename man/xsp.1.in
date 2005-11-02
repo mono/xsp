@@ -89,6 +89,12 @@ Two applications like the above ones are handled.
 .B myhost.someprovider.net:/blog:../myblog
 The virtual /blog at myhost.someprovider.net is mapped to ../myblog.
 .TP
+.I \-\-master
+.TP
+This instance will be used to by mod_mono to create ASP.NET
+applications on demand. If this option is provided, there is no
+need to provide a list of applications to start.
+This applies only to mod-mono-server.exe.
 .I \-\-nonstop
 This applies only to xsp.exe: by default xsp will stop processing
 requests when the return key is pressed.  Use this to avoid this

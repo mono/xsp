@@ -171,6 +171,9 @@ namespace Mono.XSP
 			Console.WriteLine ("    --terminate: gracefully terminates a running mod-mono-server instance.");
 			Console.WriteLine ("                 All other options but --filename or --address and --port");
 			Console.WriteLine ("                 are ignored if this option is provided.");
+			Console.WriteLine ("    --master: this instance will be used to by mod_mono to create ASP.NET");
+			Console.WriteLine ("              applications on demand. If this option is provided, there is no");
+			Console.WriteLine ("              need to provide a list of applications to start.");
 #endif
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
@@ -193,7 +196,8 @@ namespace Mono.XSP
 			Address = 1 << 7,
 			Port = 1 << 8,
 			Terminate = 1 << 9,
-			Https = 1 << 10
+			Https = 1 << 10,
+			Master = 1 << 11
 		}
 
 		static void CheckAndSetOptions (string name, Options value, ref Options options)
@@ -234,6 +238,7 @@ namespace Mono.XSP
 			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
 			object oport;
 			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];
+			bool master = false;
 #if MODMONO_SERVER
 			string filename = ConfigurationSettings.AppSettings ["MonoUnixSocket"];
 #endif
@@ -258,6 +263,10 @@ namespace Mono.XSP
 					break;
 				case "--terminate":
 					CheckAndSetOptions (a, Options.Terminate, ref options);
+					break;
+				case "--master":
+					CheckAndSetOptions (a, Options.Master, ref options);
+					master = true;
 					break;
 #else
 				case "--https":
@@ -434,7 +443,7 @@ namespace Mono.XSP
 			if (appConfigDir != null)
 				server.AddApplicationsFromConfigDirectory (appConfigDir);
 
-			if (apps == null && appConfigDir == null && appConfigFile == null)
+			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 #if MODMONO_SERVER
 			if (!useTCP) {

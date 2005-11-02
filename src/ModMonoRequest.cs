@@ -83,6 +83,7 @@ namespace Mono.WebServer
 		bool shutdown;
 		StringBuilder out_headers = new StringBuilder ();
 		bool headers_sent;
+		string physical_path;
 
 		public ModMonoRequest (NetworkStream ns)
 		{
@@ -125,6 +126,9 @@ namespace Mono.WebServer
 				string key = ReadString ();
 				headers [key] = ReadString ();
 			}
+
+			if (reader.ReadByte () != 0)
+				physical_path = ReadString ();
 		}
 
 		void SendSimpleCommand (Cmd cmd)
@@ -257,6 +261,11 @@ namespace Mono.WebServer
 				GetServerVariables ();
 
 			return (string) serverVariables [name];
+		}
+
+		public string GetPhysicalPath ()
+		{
+			return physical_path;
 		}
 
 		public string GetUri ()

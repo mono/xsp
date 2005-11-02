@@ -66,6 +66,11 @@ namespace Mono.WebServer
 			return path;
 		}
 
+		public string GetPhysicalPath ()
+		{
+			return request.GetPhysicalPath ();
+		}
+
 		public void Decline ()
 		{
 			request.Decline ();

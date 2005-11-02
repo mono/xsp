@@ -243,6 +243,69 @@ namespace Mono.WebServer
 			}
 		}
 
+		VPathToHost GetOrCreateApplication (string vhost, int port, string filepath, string virt)
+		{
+			VPathToHost vapp = null;
+			string vdir = Path.GetDirectoryName (virt);
+			string pdir = Path.GetDirectoryName (filepath);
+			DirectoryInfo vinfo = new DirectoryInfo (vdir);
+			DirectoryInfo pinfo = new DirectoryInfo (pdir);
+			string final_pdir = null;
+			string final_vdir = null;
+			while (vinfo != null && pinfo != null) {
+				if (final_pdir == null && CheckDirectory (pinfo)) {
+					final_pdir = pinfo.ToString ();
+					final_vdir = vinfo.ToString ();
+					break;
+				}
+
+				if (pinfo.Name != vinfo.Name) {
+					final_vdir = vinfo.ToString ();
+					break;
+				}
+
+				pinfo = pinfo.Parent;
+				vinfo = vinfo.Parent;
+			}
+
+			if (final_pdir == null) {
+				final_pdir = pinfo.ToString ();
+			}
+
+			if (final_vdir == null) {
+				final_vdir = vinfo.ToString ();
+			}
+
+
+			Console.Error.WriteLine ("final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
+			vapp = server.GetApplicationForPath (vhost, port, virt, false);
+			if (vapp == null) {
+				final_pdir = "file://" + final_pdir;
+				if (final_vdir [0] != '/')
+					final_vdir = "/" + final_vdir;
+				server.AddApplication (vhost, port, final_vdir, final_pdir);
+				vapp = server.GetApplicationForPath (vhost, port, virt, false);
+			}
+
+			return vapp;
+		}
+
+		static bool CheckDirectory (DirectoryInfo info)
+		{
+			if (!info.Exists)
+				return false;
+
+			FileInfo [] g1 = info.GetFiles ("Global.asax");
+			if (g1.Length != 0)
+				return true;
+
+			g1 = info.GetFiles ("global.asax");
+			if (g1.Length != 0)
+				return true;
+
+			return (info.GetDirectories ("bin").Length != 0);
+		}
+
 		void InnerRun (object state)
 		{
 			requestId = -1;
@@ -266,10 +329,18 @@ namespace Mono.WebServer
 					port = 80;
 				}
 			}
-			
-			VPathToHost vapp = server.GetApplicationForPath (vhost, port, rr.GetUriPath (), false);
+
+			VPathToHost vapp = null;
+			string vpath = rr.GetUriPath ();
+			string path = rr.GetPhysicalPath ();
+			if (path == null) {
+				vapp = server.GetApplicationForPath (vhost, port, vpath, false);
+			} else {
+				vapp = GetOrCreateApplication (vhost, port, path, vpath);
+			}
+
 			if (vapp == null) {
-				rr.NotFound (); // No app to handle the request
+				rr.Decline ();
 				Stream.Close ();
 				Stream = null;
 				return;

@@ -1,3 +1,8 @@
+2005-12-27 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoRequest.cs: use UTF8 instead of the default encoding. Fixes
+	bug #77074.
+
 2005-11-02 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoWorkerRequest.cs: don't append the index file name

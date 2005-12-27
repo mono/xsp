@@ -156,8 +156,7 @@ namespace Mono.WebServer
 						total += chunk;
 				} while ((chunk > 0 && total < size));
 
-				//FIXME: encoding!
-				s = Encoding.Default.GetString (buf);
+				s = Encoding.UTF8.GetString (buf);
 			} else {
 				s = "";
 			}

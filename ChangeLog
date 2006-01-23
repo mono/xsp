@@ -1,3 +1,8 @@
+2006-01-23 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/ApplicationServer.cs: temporary workaround to
+	prevent threadpool exhaustion.
+
 2005-12-27 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoRequest.cs: use UTF8 instead of the default encoding. Fixes

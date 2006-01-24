@@ -342,13 +342,6 @@ namespace Mono.WebServer
 						continue;
 					}
 
-					int threads, cports;
-					ThreadPool.GetAvailableThreads (out threads, out cports);
-					while (threads < 8) {
-						System.Threading.Thread.Sleep (100);
-						ThreadPool.GetAvailableThreads (out threads, out cports);
-					}
-
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 				}
 			}

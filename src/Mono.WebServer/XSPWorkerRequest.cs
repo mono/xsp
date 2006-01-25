@@ -106,7 +106,11 @@ namespace Mono.WebServer
 			server_software = String.Format ("{0}/{1}", title, version); 
 			serverHeader = String.Format ("Server: {0} {1}\r\n", server_software, plat);
 
+#if NET_2_0
+			string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
+#else
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+#endif
 			SetDefaultIndexFiles (indexes);
 		}
 

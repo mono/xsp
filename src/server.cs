@@ -29,6 +29,7 @@
 
 using System;
 using System.Configuration;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -226,26 +227,36 @@ namespace Mono.XSP
 		}
 #endif
 
+		static NameValueCollection AppSettings {
+			get {
+#if NET_2_0
+				return ConfigurationManager.AppSettings;
+#else
+				return ConfigurationSettings.AppSettings;
+#endif
+			}
+		}
+
 		public static int Main (string [] args)
 		{
 			SecurityConfiguration security = new SecurityConfiguration ();
 			bool nonstop = false;
 			bool verbose = false;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
-			string apps = ConfigurationSettings.AppSettings ["MonoApplications"];
-			string appConfigDir = ConfigurationSettings.AppSettings ["MonoApplicationsConfigDir"];
-			string appConfigFile = ConfigurationSettings.AppSettings ["MonoApplicationsConfigFile"];
-			string rootDir = ConfigurationSettings.AppSettings ["MonoServerRootDir"];
+			string apps = AppSettings ["MonoApplications"];
+			string appConfigDir = AppSettings ["MonoApplicationsConfigDir"];
+			string appConfigFile = AppSettings ["MonoApplicationsConfigFile"];
+			string rootDir = AppSettings ["MonoServerRootDir"];
 			object oport;
-			string ip = ConfigurationSettings.AppSettings ["MonoServerAddress"];
+			string ip = AppSettings ["MonoServerAddress"];
 			bool master = false;
 #if MODMONO_SERVER
-			string filename = ConfigurationSettings.AppSettings ["MonoUnixSocket"];
+			string filename = AppSettings ["MonoUnixSocket"];
 #endif
 			if (ip == "" || ip == null)
 				ip = "0.0.0.0";
 
-			oport = ConfigurationSettings.AppSettings ["MonoServerPort"];
+			oport = AppSettings ["MonoServerPort"];
 			if (oport == null)
 				oport = 8080;
 

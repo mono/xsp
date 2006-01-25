@@ -26,7 +26,7 @@ EXTRA_DIST = $(xsp_sources) $(modmono_only) AssemblyInfo.cs.in AssemblyInfoModMo
 
 # 
 xsp_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Security.dll 
-xsp2_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Security.dll 
+xsp2_references= -r:System.Web.dll -r:System.Configuration.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Security.dll 
 if PLATFORM_WIN32
 modmono_references= -lib:"$(prefix)/lib" -r:Mono.WebServer/Mono.WebServer.dll \
 			-r:System.Web.dll -r:Mono.Posix.dll
@@ -34,7 +34,7 @@ modmono2_references= -lib:"$(prefix)/lib" -r:Mono.WebServer/Mono.WebServer2.dll 
 			-r:System.Web.dll -r:Mono.Posix.dll
 else
 modmono_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Posix.dll
-modmono2_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Posix.dll
+modmono2_references= -r:System.Web.dll -r:System.Configuration.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Posix.dll
 endif
 
 xsp_sources = server.cs security.cs
@@ -56,8 +56,8 @@ mod-mono-server.exe: $(modmono_build_sources)
 	$(MCS) $(MCSFLAGS) $(modmono_references) /d:MODMONO_SERVER /out:$@ $(modmono_build_sources)
 
 xsp2.exe: $(xsp_build_sources)
-	$(GMCS) $(MCSFLAGS) $(xsp2_references) /out:$@ $(xsp_build_sources)
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(xsp2_references) /out:$@ $(xsp_build_sources)
 
 mod-mono-server2.exe: $(modmono_build_sources)
-	$(GMCS) $(MCSFLAGS) $(modmono2_references) /d:MODMONO_SERVER /out:$@ $(modmono_build_sources)
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(modmono2_references) /d:MODMONO_SERVER /out:$@ $(modmono_build_sources)
 

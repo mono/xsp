@@ -10,6 +10,7 @@ monowebserver2_SCRIPTS = $(monowebserver2_install)
 
 if NET_2_0
 monowebserver2_install = Mono.WebServer2.dll
+monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Security.dll
 endif
 
 CLEANFILES = Mono.WebServer.dll* Mono.WebServer2.dll*
@@ -37,5 +38,5 @@ Mono.WebServer.dll: $(monowebserver_build_sources)
 	$(MCS) $(MCSFLAGS) $(monowebserver_references) /target:library /out:$@ $(monowebserver_build_sources)
 
 Mono.WebServer2.dll: $(monowebserver2_build_sources)
-	$(GMCS) $(MCSFLAGS) $(monowebserver_references) /target:library /out:$@ $(monowebserver2_build_sources)
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
 

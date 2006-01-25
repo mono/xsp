@@ -116,7 +116,11 @@ namespace Mono.WebServer
 
 		static ModMonoWorkerRequest ()
 		{
+#if NET_2_0
+			string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
+#else
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+#endif
 			SetDefaultIndexFiles (indexes);
 		}
 

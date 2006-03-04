@@ -24,8 +24,8 @@ Delete all sessions.
 Display session data.
 .SH CONFIGURATION
 You can choose the assembly and type used to connect to your database
-backend and also set the connection string through the configuration
-file, named dbsessmgr.exe.config.
+backend and also set the connection string and the SQL parameter prefix
+through the configuration file, named dbsessmgr.exe.config.
 The configuration shipped by default is:
 
 .nf
@@ -36,6 +36,8 @@ The configuration shipped by default is:
 	     value="Npgsql.NpgsqlConnection"/>
 	<add key="DBConnectionString"
 	     value="SERVER=127.0.0.1;USER ID=monostate;PASSWORD=monostate;dbname=monostate"/>
+	<add key="DBParamPrefix"
+	     value=":" />
     </appSettings>
 .fi
 .SH AUTHORS

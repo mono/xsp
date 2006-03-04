@@ -1,3 +1,10 @@
+2006-03-05  Robert Jordan  <robertj@gmx.net>
+
+	* tools/dbsessmgr/dbsessmgr.cs: 
+	* tools/dbsessmgr/dbsessmgr.exe.config:
+	* man/dbsessmgr.1.in: make SQL statements and parameters
+	provider independent/configurable. Fixes bug #77698.
+
 2006-01-25  Chris Toshok  <toshok@ximian.com>
 
 	* src/Mono.WebServer/Makefile.am: define NET_2_0 in the

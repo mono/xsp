@@ -17,6 +17,8 @@ namespace Mono.ASPNET.Tools {
 
 	internal sealed class DbSession {
 
+		static string paramPrefix;
+
 		private delegate void DbSessionCommand (IDbConnection conn);
 		
 		private static int Main (string [] args)
@@ -42,10 +44,10 @@ namespace Mono.ASPNET.Tools {
                         using (IDbCommand command = conn.CreateCommand ()) {
                                 IDataParameterCollection param;
                                 
-                                command.CommandText = "DELETE FROM ASPStateTempSessions WHERE Expires < :Now";
+                                command.CommandText = "DELETE FROM ASPStateTempSessions WHERE Expires < " + paramPrefix + "Now";
                                 
                                 param = command.Parameters;
-                                param.Add (CreateParam (command, DbType.DateTime, ":Now", DateTime.Now));
+                                param.Add (CreateParam (command, DbType.DateTime, "Now", DateTime.Now));
                                 
                                 command.ExecuteNonQuery ();
                         }
@@ -70,7 +72,7 @@ namespace Mono.ASPNET.Tools {
                         Console.WriteLine ();
                         
                         using (IDbCommand command = conn.CreateCommand ()) {
-                                command.CommandText = "SELECT * from aspstatetempsessions";
+                                command.CommandText = "SELECT * FROM ASPStateTempSessions";
 
                                 using (IDataReader reader = command.ExecuteReader ()) {
                                         while (reader.Read ()) {
@@ -102,7 +104,7 @@ namespace Mono.ASPNET.Tools {
 			string asm, type, conn_str;
 			IDbConnection conn;
 			
-			GetConnectionData (out asm, out type, out conn_str);
+			GetConnectionData (out asm, out type, out conn_str, out paramPrefix);
 			
 			Assembly dbAssembly = Assembly.LoadWithPartialName (asm);
 			Type cnc_type = dbAssembly.GetType (type, true);
@@ -118,23 +120,20 @@ namespace Mono.ASPNET.Tools {
 		}
 		
 		private static void GetConnectionData (out string asm,
-				out string type, out string conn_str)
+				out string type, out string conn_str,
+				out string param_prefix)
 		{
 			asm = null;
 			type = null;
 			conn_str = null;
+			param_prefix = null;
 
-			NameValueCollection config = ConfigurationSettings.AppSettings as NameValueCollection;
+			NameValueCollection config = ConfigurationSettings.AppSettings;
 			if (config != null) {
-				foreach (string s in config.Keys) {
-					if (0 == String.Compare ("DBProviderAssembly", s, true)) {
-						asm = config [s];
-					} else if (0 == String.Compare ("DBConnectionType", s, true)) {
-						type = config [s];
-					} else if (0 == String.Compare ("DBConnectionString", s, true)) {
-                                                conn_str = config [s];
-                                        }
-				}
+				asm = config ["DBProviderAssembly"];
+				type = config ["DBConnectionType"];
+				conn_str = config ["DBConnectionString"];
+				param_prefix = config ["DBParamPrefix"];
 			}
 
 			if (asm == null || asm == String.Empty)
@@ -145,6 +144,9 @@ namespace Mono.ASPNET.Tools {
 
 			if (conn_str == null || conn_str == String.Empty)
 				conn_str = "SERVER=127.0.0.1;USER ID=monostate;PASSWORD=monostate;dbname=monostate";
+
+			if (param_prefix == null || param_prefix == String.Empty)
+				param_prefix = ":";
 		}
 
 		private static DbSessionCommand GetCommand (string [] args)
@@ -178,7 +180,7 @@ namespace Mono.ASPNET.Tools {
 		{
 			IDataParameter result = command.CreateParameter ();
 			result.DbType = type;
-			result.ParameterName = name;
+			result.ParameterName = paramPrefix + name;
 			result.Value = value;
 			return result;
 		}

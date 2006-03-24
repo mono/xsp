@@ -11,17 +11,8 @@
 
     If you don't specify --prefix, it will default to /usr/local.
 
-    If ./configure finds 'gmcs' it will assume that you have an
-    installation able to compile .NET 2.0 executables.  This means that
-    you need to make sure you have the required assemblies installed.
-    This is done from svn by:
-
-    	./configure --profile=net_2_0
-	make
-	make install
-
-    in the mcs/ svn module or configuring the mono tarball/module
-    using the '--with-preview=yes' option.
+    If ./configure finds a working 'gmcs' it will automatically build a
+    2.0 profile version of xsp, named xsp2.
 
 * Running XSP with the bundled tests
 ------------------------------------

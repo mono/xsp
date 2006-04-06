@@ -253,7 +253,8 @@ namespace Mono.XSP
 			int hash = 0;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
-				hash ^= args [i].GetHashCode () + i;
+				int idx = (i + 1 < args.Length) ? i + 1 : i;
+				hash ^= args [idx].GetHashCode () + i;
 				
 				switch (a){
 #if MODMONO_SERVER

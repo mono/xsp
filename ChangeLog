@@ -1,3 +1,9 @@
+2006-04-06 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/server.cs: make the hash different when the last argument is an
+	option (like a port number). Fixes bug #78034. Thanks to Hubert
+	Fongarnand.
+
 2006-03-05  Robert Jordan  <robertj@gmx.net>
 
 	* tools/dbsessmgr/dbsessmgr.cs: 
@@ -23,6 +29,7 @@
 
 	* src/ModMonoWorkerRequest.cs: use ConfigurationManager in 2.0
 
+>>>>>>> .r59119
 2005-12-27 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoRequest.cs: use UTF8 instead of the default encoding. Fixes

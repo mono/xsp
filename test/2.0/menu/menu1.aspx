@@ -4,7 +4,6 @@
     void Menu1_MenuItemClick(Object s, System.Web.UI.WebControls.MenuEventArgs e)
     {
         Label1.Text = "You selected " + e.Item.Text;
-		Page.Header.Metadata ["un"] = "dos";
 		Page.Header.Title = "You selected " + e.Item.Text;
     }
     

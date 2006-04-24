@@ -47,7 +47,7 @@ namespace Mono.WebServer
 	// XSPWebSource: Provides methods to get objects and types specific
 	// to XSP.
 	//
-	public class XSPWebSource: IWebSource
+	public class XSPWebSource: WebSource
 	{
 		IPEndPoint bindAddress;
 		bool secureConnection;
@@ -93,31 +93,27 @@ namespace Mono.WebServer
 			this.bindAddress = bindAddress;
 		}
 		
-		public Socket CreateSocket ()
+		public override Socket CreateSocket ()
 		{
 			Socket listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (bindAddress);
 			return listen_socket;
 		} 
 
-		public IWorker CreateWorker (Socket client, ApplicationServer server)
+		public override Worker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new XSPWorker (client, client.LocalEndPoint, server,
 				secureConnection, SecurityProtocol, cert, keyCB, allowClientCert, requireClientCert);
 		}
 		
-		public Type GetApplicationHostType ()
+		public override Type GetApplicationHostType ()
 		{
 			return typeof (XSPApplicationHost);
 		}
 		
-		public IRequestBroker CreateRequestBroker ()
+		public override IRequestBroker CreateRequestBroker ()
 		{
 			return new XSPRequestBroker ();
-		}
-
-		public void Dispose ()
-		{
 		}
 	}
 	
@@ -288,7 +284,7 @@ namespace Mono.WebServer
 	// XSPWorker: The worker that do the initial processing of XSP
 	// requests.
 	//
-	internal class XSPWorker: IWorker
+	internal class XSPWorker: Worker
 	{
 		ApplicationServer server;
 		LingeringNetworkStream netStream;
@@ -328,14 +324,19 @@ namespace Mono.WebServer
 			this.localEP = (IPEndPoint) localEP;
 		}
 
+		public override bool IsAsync {
+			get { return true; }
+		}
+
 		public int GetReuseCount ()
 		{
-			return server.GetAvailableReuses (sock);
+			//FIXME
+			return 0;
 		}
 
 		int requestId = -1;
 		XSPRequestBroker broker = null;
-		public void Run (object state)
+		public override void Run (object state)
 		{
 			try {
 				InnerRun (state);
@@ -414,23 +415,23 @@ namespace Mono.WebServer
 					rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
 		}
 
-		public int Read (byte[] buffer, int position, int size)
+		public override int Read (byte[] buffer, int position, int size)
 		{
 			int n = stream.Read (buffer, position, size);
 			return (n >= 0) ? n : -1;
 		}
 		
-		public void Write (byte[] buffer, int position, int size)
+		public override void Write (byte[] buffer, int position, int size)
 		{
 			try {
 				stream.Write (buffer, position, size);
-			} catch (Exception e) {
+			} catch (Exception) {
 				Close ();
 				throw;
 			}
 		}
 		
-		public void Close ()
+		public override void Close ()
 		{
 			Close (false);
 		}
@@ -454,18 +455,18 @@ namespace Mono.WebServer
 			server.ReuseSocket (sock);
 		}
 
-		public bool IsConnected ()
+		public override bool IsConnected ()
 		{
 			return netStream.Connected;
 		}
 
-		public void Flush ()
+		public override void Flush ()
 		{
 			if (stream != netStream)
 				stream.Flush ();
 		}
 
-		private bool ClientCertificateValidation (X509Certificate certificate, int[] certificateErrors)
+		bool ClientCertificateValidation (X509Certificate certificate, int [] certificateErrors)
 		{
 			if (certificate != null)
 				ssl.RawClientCertificate = certificate.GetRawCertData (); // to avoid serialization
@@ -473,8 +474,8 @@ namespace Mono.WebServer
 			// right now we're accepting any client certificate - i.e. it's up to the 
 			// web application to check if the certificate is valid (HttpClientCertificate.IsValid)
 			ssl.ClientCertificateValid = (certificateErrors.Length == 0);
-
 			return ssl.RequireClientCertificate ? (certificate != null) : true;
 		}
 	}
 }
+

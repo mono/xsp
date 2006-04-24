@@ -121,10 +121,11 @@ namespace Mono.WebServer
 
 			bool is_linux = false;
 			try {
-				Stream st = File.OpenRead ("/proc/sys/kernel/ostype");
-				StreamReader sr = new StreamReader (st);
-				string os = sr.ReadToEnd ();
-				sr.Close ();
+				string os = "";
+				using (Stream st = File.OpenRead ("/proc/sys/kernel/ostype")) {
+					StreamReader sr = new StreamReader (st);
+					os = sr.ReadToEnd ();
+				}
 				is_linux = os.StartsWith ("Linux");
 			} catch {
 			}
@@ -282,7 +283,7 @@ namespace Mono.WebServer
 					string value = line.Substring (colon + 1).Trim ();
 					headers [key] = value;
 				}
-			} catch (IOException ioe) {
+			} catch (IOException) {
 				throw;
 			} catch (Exception e) {
 				throw new Exception ("Error reading headers.", e);
@@ -341,7 +342,7 @@ namespace Mono.WebServer
 
 				if (finalFlush)
 					CloseConnection ();
-			} catch (Exception e) {
+			} catch (Exception) {
 				CloseConnection ();
 			}
 		}

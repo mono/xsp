@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Lluis Sanchez Gual (lluis@ximian.com)
 //
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004,2005,2006 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -33,6 +33,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Web;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -284,7 +285,7 @@ namespace Mono.WebServer
 	// XSPWorker: The worker that do the initial processing of XSP
 	// requests.
 	//
-	internal class XSPWorker: Worker
+	class XSPWorker: Worker
 	{
 		ApplicationServer server;
 		LingeringNetworkStream netStream;
@@ -293,6 +294,9 @@ namespace Mono.WebServer
 		IPEndPoint localEP;
 		Socket sock;
 		SslInformations ssl;
+		InitialWorkerRequest initial;
+		int requestId = -1;
+		XSPRequestBroker broker = null;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
 			bool secureConnection,
@@ -334,55 +338,51 @@ namespace Mono.WebServer
 			return 0;
 		}
 
-		int requestId = -1;
-		XSPRequestBroker broker = null;
 		public override void Run (object state)
 		{
+			initial = new InitialWorkerRequest (stream);
+			byte [] buffer = InitialWorkerRequest.AllocateBuffer ();
+			sock.BeginReceive (buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback (ReadCB), buffer);
+		}
+
+		void ReadCB (IAsyncResult ares)
+		{
+			byte [] buffer = (byte []) ares.AsyncState;
 			try {
-				InnerRun (state);
+				int nread = sock.EndReceive (ares);
+				initial.SetBuffer (buffer, nread);
+				initial.ReadRequestData ();
+				ThreadPool.QueueUserWorkItem (new WaitCallback (RunInternal));
 			} catch (Exception e) {
-				bool ignore = ((e is RequestLineException) || (e is IOException));
-				if (!ignore)
-					Console.WriteLine (e);
-
-				try {
-					if (!ignore) {
-						byte [] error = HttpErrors.ServerError ();
-						Write (error, 0, error.Length);
-					}
-				} catch {}
-				try {
-					Close ();
-				} catch {}
-
-				if (broker != null && requestId != -1)
-					broker.UnregisterRequest (requestId);
+				InitialWorkerRequest.FreeBuffer (buffer);
+				HandleInitialException (e);
 			}
 		}
 
-		void InnerRun (object state)
+		void HandleInitialException (Exception e)
 		{
-			requestId = -1;
-			broker = null;
-			
-			if (remoteEP == null)
-				return;
+			bool ignore = ((e is RequestLineException) || (e is IOException));
+			if (!ignore)
+				Console.WriteLine (e);
 
-			InitialWorkerRequest ir = new InitialWorkerRequest (stream);
 			try {
-				ir.ReadRequestData ();
-			} catch (Exception ex) {
-				if (ir.GotSomeInput) {
-					byte [] badReq = HttpErrors.BadRequest ();
-					Write (badReq, 0, badReq.Length);
+				if (initial != null && initial.GotSomeInput) {
+					byte [] error = HttpErrors.ServerError ();
+					Write (error, 0, error.Length);
 				}
+			} catch {}
 
-				ir.FreeBuffer ();
+			try {
+				Close ();
+			} catch {}
 
-				throw ex;
-			}
+			if (broker != null && requestId != -1)
+				broker.UnregisterRequest (requestId);
+		}
 
-			RequestData rdata = ir.RequestData;
+		void RunInternal (object state)
+		{
+			RequestData rdata = initial.RequestData;
 			string vhost = null; // TODO: read the headers in InitialWorkerRequest
 			int port = ((IPEndPoint) localEP).Port;
 			

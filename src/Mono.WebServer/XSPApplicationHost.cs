@@ -447,8 +447,11 @@ namespace Mono.WebServer
 		{
 			if (!keepAlive || !IsConnected ()) {
 				stream.Close ();
-				if (stream != netStream)
+				if (stream != netStream) {
 					netStream.Close ();
+				} else if (false == netStream.OwnsSocket) {
+					try { sock.Close (); } catch {}
+				}
 
 				return;
 			}

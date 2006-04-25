@@ -195,6 +195,9 @@ namespace Mono.WebServer
 					keepAlive = false;
 			}
 
+			if (secure)
+				keepAlive = false; //FIXME: until the NetworkStream don't own the socket for ssl streams. 
+
 			responseHeaders = new StringBuilder ();
 			responseHeaders.Append (serverHeader);
 			status = protocol + " 200 OK\r\n";

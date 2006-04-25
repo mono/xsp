@@ -38,9 +38,15 @@ namespace Mono.WebServer
 		bool enableLingering = true;
 		// We dont actually use the data from this buffer. So we cache it...
 		static byte [] buffer;
+		bool owns;
 
 		public LingeringNetworkStream (Socket sock, bool owns) : base (sock, owns)
 		{
+			this.owns = owns;
+		}
+
+		public bool OwnsSocket {
+			get { return owns; }
 		}
 		
 		public bool EnableLingering

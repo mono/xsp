@@ -223,10 +223,14 @@ namespace Mono.WebServer
 			if (path.StartsWith (HostVPath) && (path.Length == len || path [len] == '/'))
 				path = path.Substring (len + 1);
 
-			if (path.Length > 0 && path [0] == '/')
+			while (path.Length > 0 && path [0] == '/') {
 				path = path.Substring (1);
+			}
 
-			return Path.Combine (HostPath, path.Replace ('/', Path.DirectorySeparatorChar));
+			if (Path.DirectorySeparatorChar != '/')
+				path = path.Replace ('/', Path.DirectorySeparatorChar);
+
+			return Path.Combine (HostPath, path);
 		}
 
 		protected abstract bool GetRequestData ();

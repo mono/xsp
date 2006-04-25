@@ -127,7 +127,7 @@ namespace Mono.WebServer
 		public int GetReuseCount (int requestId)
 		{
 			XSPWorker worker = (XSPWorker) GetWorker (requestId);
-			return worker.GetReuseCount ();
+			return worker.GetRemainingReuses ();
 		}
 
 		public void Close (int requestId, bool keepAlive)
@@ -297,6 +297,7 @@ namespace Mono.WebServer
 		InitialWorkerRequest initial;
 		int requestId = -1;
 		XSPRequestBroker broker = null;
+		int reuses;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
 			bool secureConnection,
@@ -332,10 +333,14 @@ namespace Mono.WebServer
 			get { return true; }
 		}
 
-		public int GetReuseCount ()
+		public override void SetReuseCount (int nreuses)
 		{
-			//FIXME
-			return 0;
+			reuses = nreuses;
+		}
+
+		public override int GetRemainingReuses ()
+		{
+			return 100 - reuses;
 		}
 
 		public override void Run (object state)
@@ -350,6 +355,7 @@ namespace Mono.WebServer
 			byte [] buffer = (byte []) ares.AsyncState;
 			try {
 				int nread = sock.EndReceive (ares);
+				// See if we got at least 1 line
 				initial.SetBuffer (buffer, nread);
 				initial.ReadRequestData ();
 				ThreadPool.QueueUserWorkItem (new WaitCallback (RunInternal));
@@ -361,12 +367,12 @@ namespace Mono.WebServer
 
 		void HandleInitialException (Exception e)
 		{
-			bool ignore = ((e is RequestLineException) || (e is IOException));
-			if (!ignore)
-				Console.WriteLine (e);
+			//bool ignore = ((e is RequestLineException) || (e is IOException));
+			//if (!ignore)
+			//	Console.WriteLine (e);
 
 			try {
-				if (initial != null && initial.GotSomeInput) {
+				if (initial != null && initial.GotSomeInput && sock.Connected) {
 					byte [] error = HttpErrors.ServerError ();
 					Write (error, 0, error.Length);
 				}
@@ -383,6 +389,7 @@ namespace Mono.WebServer
 		void RunInternal (object state)
 		{
 			RequestData rdata = initial.RequestData;
+			initial.FreeBuffer ();
 			string vhost = null; // TODO: read the headers in InitialWorkerRequest
 			int port = ((IPEndPoint) localEP).Port;
 			
@@ -443,7 +450,6 @@ namespace Mono.WebServer
 				if (stream != netStream)
 					netStream.Close ();
 
-				server.CloseSocket (sock);
 				return;
 			}
 
@@ -452,7 +458,7 @@ namespace Mono.WebServer
 			if (stream != netStream)
 				netStream.Close ();
 
-			server.ReuseSocket (sock);
+			server.ReuseSocket (sock, reuses + 1);
 		}
 
 		public override bool IsConnected ()

@@ -57,6 +57,15 @@ namespace Mono.WebServer {
 			get { return false; }
 		}
 
+		public virtual void SetReuseCount (int reuses)
+		{
+		}
+
+		public virtual int GetRemainingReuses ()
+		{
+			return 0;
+		}
+
 		public abstract void Run (object state);
 		public abstract int Read (byte [] buffer, int position, int size);
 		public abstract void Write (byte [] buffer, int position, int size);

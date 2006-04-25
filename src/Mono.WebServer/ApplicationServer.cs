@@ -331,16 +331,28 @@ namespace Mono.WebServer
 				return;
 			accepted.Blocking = true;
 			SetSocketOptions (accepted);
+			StartRequest (accepted, 0);
+		}
+
+		void StartRequest (Socket accepted, int reuses)
+		{
 			Worker worker = null;
 			try {
+				// The next line can throw (reusing and the client closed)
 				worker = webSource.CreateWorker (accepted, this);
+				worker.SetReuseCount (reuses);
 				if (false == worker.IsAsync)
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 				else
 					worker.Run (null);
-			} catch {
+			} catch (Exception) {
 				try { accepted.Close (); } catch {}
 			}
+		}
+
+		public void ReuseSocket (Socket sock, int reuses)
+		{
+			StartRequest (sock, reuses);
 		}
 
 		public VPathToHost GetApplicationForPath (string vhost, int port, string path,
@@ -391,32 +403,6 @@ namespace Mono.WebServer
 		public override object InitializeLifetimeService ()
 		{
 			return null;
-		}
-
-		public int GetAvailableReuses (Socket sock)
-		{
-			/*
-			int res = spool.GetReuseCount (sock);
-			if (res == -1 || res >= 100)
-				return -1;
-
-			return 100 - res;
-			*/
-			return 0;
-		}
-
-		public void ReuseSocket (Socket sock)
-		{
-			/*
-			Worker worker = webSource.CreateWorker (sock, this);
-			spool.IncrementReuseCount (sock);
-			ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
-			*/
-		}
-
-		public void CloseSocket (Socket sock)
-		{
-			//spool.RemoveReadSocket (sock);
 		}
 	}
 

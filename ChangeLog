@@ -1,3 +1,7 @@
+2006-04-28 Wade Berrier <wberrier@novell.com>
+
+	* test/2.0/treeview/Makefile.am: Appease newer versions of automake
+
 2006-04-25 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/MonoWorkerRequest.cs: remove all the duplicated

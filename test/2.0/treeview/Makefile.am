@@ -30,5 +30,5 @@ install-data-hook:
 	mkdir $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
 	cp $(srcdir)/TreeLineImages/*gif $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages
 
-uninstall-data-hook:
+uninstall-hook:
 	rm $(datadir)/doc/xsp/test/2.0/treeview/TreeLineImages/*gif

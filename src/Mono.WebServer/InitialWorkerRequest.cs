@@ -88,7 +88,7 @@ namespace Mono.WebServer
 		static Stack bufferStack = new Stack ();
 		static Encoding encoding = Encoding.GetEncoding (28591);
 		
-		static byte [] AllocateBuffer ()
+		public static byte [] AllocateBuffer ()
 		{
 			lock (bufferStack) {
 				if (bufferStack.Count != 0)
@@ -97,8 +97,11 @@ namespace Mono.WebServer
 			return new byte [BSize];
 		}
 		
-		static void FreeBuffer (byte [] buf)
+		public static void FreeBuffer (byte [] buf)
 		{
+			if (buf == null)
+				return;
+
 			lock (bufferStack) {
 				bufferStack.Push (buf);
 			}
@@ -116,6 +119,14 @@ namespace Mono.WebServer
 		{
 			if (inputBuffer != null)
 				FreeBuffer (inputBuffer);
+		}
+
+		public void SetBuffer (byte [] buffer, int length)
+		{
+			inputBuffer = buffer;
+			inputLength = length;
+			gotSomeInput = (length > 0);
+			position = 0;
 		}
 
 		void FillBuffer ()
@@ -288,13 +299,16 @@ namespace Mono.WebServer
 			get { return gotSomeInput; }
 		}
 
+		public byte [] InputBuffer {
+			get { return inputBuffer; }
+		}
+
 		public RequestData RequestData {
 			get {
 				RequestData rd = new RequestData (verb, path, queryString, protocol);
 				byte [] buffer = new byte [inputLength - position];
 				Buffer.BlockCopy (inputBuffer, position, buffer, 0, inputLength - position);
 				rd.InputBuffer = buffer;
-				FreeBuffer (inputBuffer);
 				return rd;
 			}
 		}

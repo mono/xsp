@@ -39,7 +39,7 @@ namespace Mono.WebServer
 	// ModMonoWebSource: Provides methods to get objects and types specific
 	// to mod_mono.
 	//
-	public class ModMonoWebSource: IWebSource, IDisposable
+	public class ModMonoWebSource: WebSource
 	{
 		string filename;
 		bool file_bound;
@@ -94,7 +94,7 @@ namespace Mono.WebServer
 			return result;
 		}
 
-		public virtual Socket CreateSocket ()
+		public override Socket CreateSocket ()
 		{
 			if (filename == null)
 				throw new InvalidOperationException ("filename not set");
@@ -106,7 +106,7 @@ namespace Mono.WebServer
 					conn.Connect (ep);
 					conn.Close ();
 					throw new InvalidOperationException ("There's already a server listening on " + filename);
-				} catch (SocketException se) {
+				} catch (SocketException) {
 				}
 				File.Delete (filename);
 			}
@@ -117,27 +117,22 @@ namespace Mono.WebServer
 			return listen_socket;
 		}
  
-		public IWorker CreateWorker (Socket client, ApplicationServer server)
+		public override Worker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new ModMonoWorker (client, server);
 		}
 		
-		public Type GetApplicationHostType ()
+		public override Type GetApplicationHostType ()
 		{
 			return typeof (ModMonoApplicationHost);
 		}
 		
-		public IRequestBroker CreateRequestBroker ()
+		public override IRequestBroker CreateRequestBroker ()
 		{
 			return new ModMonoRequestBroker ();
 		}
 
-		public void Dispose ()
-		{
-			Dispose (true);
-		}
-
-		protected virtual void Dispose (bool expl)
+		protected override void Dispose (bool expl)
 		{
 			if (filename != null) {
 				string f = filename;
@@ -209,7 +204,7 @@ namespace Mono.WebServer
 	// ModMonoWorker: The worker that do the initial processing of mod_mono
 	// requests.
 	//
-	internal class ModMonoWorker: IWorker
+	internal class ModMonoWorker: Worker
 	{
 		ApplicationServer server;
 		public LingeringNetworkStream Stream;
@@ -226,12 +221,11 @@ namespace Mono.WebServer
 		int requestId = -1;
 		ModMonoRequestBroker broker = null;
 			
-		public void Run (object state)
+		public override void Run (object state)
 		{
 			try {
 				InnerRun (state);
-			} catch (Exception e) {
-				//Console.WriteLine ("In ModMonoWorker.Run: {0}", e.Message);
+			} catch (Exception) {
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();
@@ -372,17 +366,17 @@ namespace Mono.WebServer
 								modRequest.GetAllHeaderValues());
 		}
 
-		public int Read (byte[] buffer, int position, int size)
+		public override int Read (byte[] buffer, int position, int size)
 		{
 			return modRequest.GetClientBlock (buffer, position, size);
 		}
 		
-		public void Write (byte[] buffer, int position, int size)
+		public override void Write (byte[] buffer, int position, int size)
 		{
 			modRequest.SendResponseFromMemory (buffer, position, size);
 		}
 		
-		public void Close ()
+		public override void Close ()
 		{
 			if (closed)
 				return;
@@ -399,12 +393,12 @@ namespace Mono.WebServer
 			} catch {}
 		}
 		
-		public void Flush ()
+		public override void Flush ()
 		{
 			//modRequest.Flush (); No-op
 		}
 
-		public bool IsConnected ()
+		public override bool IsConnected ()
 		{
 			return modRequest.IsConnected ();
 		}
@@ -430,3 +424,4 @@ namespace Mono.WebServer
 		}
 	}	
 }
+

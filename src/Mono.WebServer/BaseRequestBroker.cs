@@ -52,7 +52,7 @@ namespace Mono.WebServer
 			stk.Push (buffer);
 		}
 
-		public int RegisterRequest (IWorker worker)
+		public int RegisterRequest (Worker worker)
 		{
 			int result = worker.GetHashCode ();
 			lock (requests) {
@@ -79,9 +79,9 @@ namespace Mono.WebServer
 			} else {
 				buffer = new byte[size];
 			}
-			IWorker w;
+			Worker w;
 			lock (requests) {
-				w = (IWorker) requests [requestId];
+				w = (Worker) requests [requestId];
 			}
 
 			int nread = 0;
@@ -91,30 +91,30 @@ namespace Mono.WebServer
 			return nread;
 		}
 		
-		public IWorker GetWorker (int requestId)
+		public Worker GetWorker (int requestId)
 		{
 			lock (requests) {
-				return (IWorker) requests [requestId];
+				return (Worker) requests [requestId];
 			}
 		}
 		
 		public void Write (int requestId, byte[] buffer, int position, int size)
 		{
-			IWorker worker = GetWorker (requestId);
+			Worker worker = GetWorker (requestId);
 			if (worker != null)
 				worker.Write (buffer, position, size);
 		}
 		
 		public void Close (int requestId)
 		{
-			IWorker worker = GetWorker (requestId);
+			Worker worker = GetWorker (requestId);
 			if (worker != null)
 				worker.Close ();
 		}
 		
 		public void Flush (int requestId)
 		{
-			IWorker worker = GetWorker (requestId);
+			Worker worker = GetWorker (requestId);
 			if (worker != null)
 				worker.Flush ();
 		}

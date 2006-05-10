@@ -45,8 +45,8 @@ namespace Mono.WebServer
 {
 	// ApplicationServer runs the main server thread, which accepts client 
 	// connections and forwards the requests to the correct web application.
-	// ApplicationServer takes an IWebSource object as parameter in the 
-	// constructor. IWebSource provides methods for getting some objects
+	// ApplicationServer takes an WebSource object as parameter in the 
+	// constructor. WebSource provides methods for getting some objects
 	// whose behavior is specific to XSP or mod_mono.
 	
 	// Each web application lives in its own application domain, and incoming
@@ -66,24 +66,24 @@ namespace Mono.WebServer
 	// The complete sequence of servicing a request is the following:
 	//
 	// 1) The listener accepts an incoming connection.
-	// 2) An IWorker object is created (through the IWebSource), and it is
+	// 2) An Worker object is created (through the WebSource), and it is
 	//    queued in the thread pool.
-	// 3) When the IWorker's run method is called, it registers itself in
+	// 3) When the Worker's run method is called, it registers itself in
 	//    the application's request broker, and gets a request id. All this is
 	//    done in the main domain.
-	// 4) The IWorker starts the request processing by making a cross-app domain
+	// 4) The Worker starts the request processing by making a cross-app domain
 	//    call to the application host. It passes as parameters the request id
 	//    and other information already read from the request.
 	// 5) The application host executes the request. When it needs to read or
 	//    write request data, it performs remote calls to the request broker,
-	//    passing the request id provided by the IWorker.
+	//    passing the request id provided by the Worker.
 	// 6) When the request broker receives a call from the application host,
-	//    it locates the IWorker registered with the provided request id and
+	//    it locates the Worker registered with the provided request id and
 	//    forwards the call to it.
 	
 	public class ApplicationServer : MarshalByRefObject
 	{
-		IWebSource webSource;
+		WebSource webSource;
 		bool started;
 		bool stop;
 		bool verbose;
@@ -94,7 +94,7 @@ namespace Mono.WebServer
 		// This is much faster than hashtable for typical cases.
 		ArrayList vpathToHost = new ArrayList ();
 		
-		public ApplicationServer (IWebSource source)
+		public ApplicationServer (WebSource source)
 		{
 			webSource = source;
 		} 
@@ -307,46 +307,56 @@ namespace Mono.WebServer
 #endif
 		}
 
-		SocketPool spool = new SocketPool ();
 
+		AsyncCallback accept_cb;
 		void RunServer ()
 		{
-			spool.AddReadSocket (listen_socket);
 			started = true;
-			Socket client;
-			int w;
-			while (!stop){
-				ArrayList wSockets = spool.SelectRead ();
-				w = wSockets.Count;
-				for (int i = 0; i < w; i++) {
-					Socket s = (Socket) wSockets [i];
-					if (s == listen_socket) {
-						try {
-							client = s.Accept ();
-							client.Blocking = true;
-						} catch (Exception e) {
-							continue;
-						}
-						SetSocketOptions (client);
-						spool.AddReadSocket (client, DateTime.UtcNow);
-						continue;
-					}
+			accept_cb = new AsyncCallback (OnAccept);
+			listen_socket.BeginAccept (accept_cb, null);
+			if (runner.IsBackground)
+				return;
 
-					spool.RemoveReadSocket (s);
-					IWorker worker = null;
-					try {
-						// This might happen when reusing and the client closes.
-						worker = webSource.CreateWorker (s, this);
-					} catch (Exception) {
-						try { s.Close (); } catch {}
-						continue;
-					}
+			while (true) // Just sleep until we're aborted.
+				Thread.Sleep (1000000);
+		}
 
-					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
-				}
+		void OnAccept (IAsyncResult ares)
+		{
+			Socket accepted = null;
+			try {
+				accepted = listen_socket.EndAccept (ares);
+			} catch {
+			} finally {
+				listen_socket.BeginAccept (accept_cb, null);
 			}
 
-			started = false;
+			if (accepted == null)
+				return;
+			accepted.Blocking = true;
+			SetSocketOptions (accepted);
+			StartRequest (accepted, 0);
+		}
+
+		void StartRequest (Socket accepted, int reuses)
+		{
+			Worker worker = null;
+			try {
+				// The next line can throw (reusing and the client closed)
+				worker = webSource.CreateWorker (accepted, this);
+				worker.SetReuseCount (reuses);
+				if (false == worker.IsAsync)
+					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
+				else
+					worker.Run (null);
+			} catch (Exception) {
+				try { accepted.Close (); } catch {}
+			}
+		}
+
+		public void ReuseSocket (Socket sock, int reuses)
+		{
+			StartRequest (sock, reuses);
 		}
 
 		public VPathToHost GetApplicationForPath (string vhost, int port, string path,
@@ -398,134 +408,8 @@ namespace Mono.WebServer
 		{
 			return null;
 		}
-
-		public int GetAvailableReuses (Socket sock)
-		{
-			int res = spool.GetReuseCount (sock);
-			if (res == -1 || res >= 100)
-				return -1;
-
-			return 100 - res;
-		}
-
-		public void ReuseSocket (Socket sock)
-		{
-			IWorker worker = webSource.CreateWorker (sock, this);
-			spool.IncrementReuseCount (sock);
-			ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
-		}
-
-		public void CloseSocket (Socket sock)
-		{
-			spool.RemoveReadSocket (sock);
-		}
 	}
 
-	class SocketPool {
-		ArrayList readSockets = new ArrayList ();
-		Hashtable timeouts = new Hashtable ();
-		Hashtable uses = new Hashtable ();
-		object locker = new object ();
-
-		public ArrayList SelectRead ()
-		{
-			if (readSockets.Count == 0)
-				throw new InvalidOperationException ("There are no sockets.");
-
-			ArrayList wSockets = new ArrayList (readSockets);
-			// A bug on MS (or is it just me?) makes the following select return immediately
-			// when there's only one socket (the listen socket) in the array:
-			//   Socket.Select (wSockets, null, null, (w == 1) ? -1 : 1000 * 1000); // 1s
-			// so i have to do this for the MS runtime not to hung all the CPU.
-			if  (wSockets.Count > 1) {
-				Socket.Select (wSockets, null, null, 1000 * 1000); // 1s
-			} else {
-				Socket sock = (Socket) wSockets [0];
-				sock.Poll (-1, SelectMode.SelectRead);
-				// wSockets already contains listen_socket.
-			}
-
-			lock (locker)
-				CheckTimeouts (wSockets);
-
-			return wSockets;
-		}
-
-		void CheckTimeouts (ArrayList wSockets)
-		{
-			int w = timeouts.Count;
-			if (w > 0) {
-				Socket [] socks_timeout = new Socket [w];
-				timeouts.Keys.CopyTo (socks_timeout, 0);
-				DateTime now = DateTime.UtcNow;
-				foreach (Socket k in socks_timeout) {
-					if (wSockets.Contains (k))
-						continue;
-
-					DateTime atime = (DateTime) timeouts [k];
-					TimeSpan diff = now - atime;
-					if (diff.TotalMilliseconds > 15 * 1000) {
-						RemoveReadSocket (k);
-						wSockets.Remove (k);
-						k.Close ();
-						continue;
-					}
-				}
-			}
-		}
-
-		public void IncrementReuseCount (Socket sock)
-		{
-			lock (locker) {
-				if (uses.ContainsKey (sock)) {
-					int n = (int) uses [sock];
-					uses [sock] = n + 1;
-				} else {
-					uses [sock] = 1;
-				}
-			}
-		}
-
-		public int GetReuseCount (Socket sock)
-		{
-			lock (locker) {
-				if (uses.ContainsKey (sock))
-					return (int) uses [sock];
-
-				uses [sock] = 1;
-				return 1;
-			}
-		}
-
-		public void AddReadSocket (Socket sock)
-		{
-			lock (locker)
-				readSockets.Add (sock);
-		}
-
-		public void AddReadSocket (Socket sock, DateTime time)
-		{
-			lock (locker) {
-				if (readSockets.Contains (sock)) {
-					timeouts [sock] = time;
-					return;
-				}
-
-				readSockets.Add (sock);
-				timeouts [sock] = time;
-			}
-		}
-
-		public void RemoveReadSocket (Socket sock)
-		{
-			lock (locker) {
-				readSockets.Remove (sock);
-				timeouts.Remove (sock);
-				uses.Remove (sock);
-			}
-		}
-	}
-	
 	public class VPathToHost
 	{
 		public readonly string vhost;
@@ -628,7 +512,7 @@ namespace Mono.WebServer
 			return (vpath.StartsWith (this.vpath));
 		}
 
-		public void CreateHost (ApplicationServer server, IWebSource webSource)
+		public void CreateHost (ApplicationServer server, WebSource webSource)
 		{
 			string v = vpath;
 			if (v != "/" && v.EndsWith ("/")) {

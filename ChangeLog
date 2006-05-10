@@ -1,3 +1,18 @@
+2006-05-10 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/server.cs:
+	* src/Mono.WebServer/XSPWorkerRequest.cs:
+	* src/Mono.WebServer/BaseRequestBroker.cs:
+	* src/Mono.WebServer/ApplicationServer.cs:
+	* src/Mono.WebServer/XSPApplicationHost.cs:
+	* src/Mono.WebServer/InitialWorkerRequest.cs:
+	* src/Mono.WebServer/LingeringNetworkStream.cs:
+	* src/Mono.WebServer/IWebSource.cs:
+	* src/ModMonoApplicationHost.cs: accepting a connection and the initial
+	read are now done asynchronously. SocketPool class and that Select are
+	over now and xsp/mod-mono-server behave much better when getting many
+	simultaneous connections.
+
 2006-04-25 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/MonoWorkerRequest.cs: remove all the duplicated

@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Lluis Sanchez Gual (lluis@ximian.com)
 //
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004,2005,2006 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -33,6 +33,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Web;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -47,7 +48,7 @@ namespace Mono.WebServer
 	// XSPWebSource: Provides methods to get objects and types specific
 	// to XSP.
 	//
-	public class XSPWebSource: IWebSource
+	public class XSPWebSource: WebSource
 	{
 		IPEndPoint bindAddress;
 		bool secureConnection;
@@ -93,31 +94,27 @@ namespace Mono.WebServer
 			this.bindAddress = bindAddress;
 		}
 		
-		public Socket CreateSocket ()
+		public override Socket CreateSocket ()
 		{
 			Socket listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (bindAddress);
 			return listen_socket;
 		} 
 
-		public IWorker CreateWorker (Socket client, ApplicationServer server)
+		public override Worker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new XSPWorker (client, client.LocalEndPoint, server,
 				secureConnection, SecurityProtocol, cert, keyCB, allowClientCert, requireClientCert);
 		}
 		
-		public Type GetApplicationHostType ()
+		public override Type GetApplicationHostType ()
 		{
 			return typeof (XSPApplicationHost);
 		}
 		
-		public IRequestBroker CreateRequestBroker ()
+		public override IRequestBroker CreateRequestBroker ()
 		{
 			return new XSPRequestBroker ();
-		}
-
-		public void Dispose ()
-		{
 		}
 	}
 	
@@ -130,7 +127,7 @@ namespace Mono.WebServer
 		public int GetReuseCount (int requestId)
 		{
 			XSPWorker worker = (XSPWorker) GetWorker (requestId);
-			return worker.GetReuseCount ();
+			return worker.GetRemainingReuses ();
 		}
 
 		public void Close (int requestId, bool keepAlive)
@@ -288,7 +285,7 @@ namespace Mono.WebServer
 	// XSPWorker: The worker that do the initial processing of XSP
 	// requests.
 	//
-	internal class XSPWorker: IWorker
+	class XSPWorker: Worker
 	{
 		ApplicationServer server;
 		LingeringNetworkStream netStream;
@@ -297,6 +294,10 @@ namespace Mono.WebServer
 		IPEndPoint localEP;
 		Socket sock;
 		SslInformations ssl;
+		InitialWorkerRequest initial;
+		int requestId = -1;
+		XSPRequestBroker broker = null;
+		int reuses;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
 			bool secureConnection,
@@ -328,60 +329,67 @@ namespace Mono.WebServer
 			this.localEP = (IPEndPoint) localEP;
 		}
 
-		public int GetReuseCount ()
-		{
-			return server.GetAvailableReuses (sock);
+		public override bool IsAsync {
+			get { return true; }
 		}
 
-		int requestId = -1;
-		XSPRequestBroker broker = null;
-		public void Run (object state)
+		public override void SetReuseCount (int nreuses)
 		{
+			reuses = nreuses;
+		}
+
+		public override int GetRemainingReuses ()
+		{
+			return 100 - reuses;
+		}
+
+		public override void Run (object state)
+		{
+			initial = new InitialWorkerRequest (stream);
+			byte [] buffer = InitialWorkerRequest.AllocateBuffer ();
+			sock.BeginReceive (buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback (ReadCB), buffer);
+		}
+
+		void ReadCB (IAsyncResult ares)
+		{
+			byte [] buffer = (byte []) ares.AsyncState;
 			try {
-				InnerRun (state);
+				int nread = sock.EndReceive (ares);
+				// See if we got at least 1 line
+				initial.SetBuffer (buffer, nread);
+				initial.ReadRequestData ();
+				ThreadPool.QueueUserWorkItem (new WaitCallback (RunInternal));
 			} catch (Exception e) {
-				bool ignore = ((e is RequestLineException) || (e is IOException));
-				if (!ignore)
-					Console.WriteLine (e);
-
-				try {
-					if (!ignore) {
-						byte [] error = HttpErrors.ServerError ();
-						Write (error, 0, error.Length);
-					}
-				} catch {}
-				try {
-					Close ();
-				} catch {}
-
-				if (broker != null && requestId != -1)
-					broker.UnregisterRequest (requestId);
+				InitialWorkerRequest.FreeBuffer (buffer);
+				HandleInitialException (e);
 			}
 		}
 
-		void InnerRun (object state)
+		void HandleInitialException (Exception e)
 		{
-			requestId = -1;
-			broker = null;
-			
-			if (remoteEP == null)
-				return;
+			//bool ignore = ((e is RequestLineException) || (e is IOException));
+			//if (!ignore)
+			//	Console.WriteLine (e);
 
-			InitialWorkerRequest ir = new InitialWorkerRequest (stream);
 			try {
-				ir.ReadRequestData ();
-			} catch (Exception ex) {
-				if (ir.GotSomeInput) {
-					byte [] badReq = HttpErrors.BadRequest ();
-					Write (badReq, 0, badReq.Length);
+				if (initial != null && initial.GotSomeInput && sock.Connected) {
+					byte [] error = HttpErrors.ServerError ();
+					Write (error, 0, error.Length);
 				}
+			} catch {}
 
-				ir.FreeBuffer ();
+			try {
+				Close ();
+			} catch {}
 
-				throw ex;
-			}
+			if (broker != null && requestId != -1)
+				broker.UnregisterRequest (requestId);
+		}
 
-			RequestData rdata = ir.RequestData;
+		void RunInternal (object state)
+		{
+			RequestData rdata = initial.RequestData;
+			initial.FreeBuffer ();
 			string vhost = null; // TODO: read the headers in InitialWorkerRequest
 			int port = ((IPEndPoint) localEP).Port;
 			
@@ -414,23 +422,23 @@ namespace Mono.WebServer
 					rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
 		}
 
-		public int Read (byte[] buffer, int position, int size)
+		public override int Read (byte[] buffer, int position, int size)
 		{
 			int n = stream.Read (buffer, position, size);
 			return (n >= 0) ? n : -1;
 		}
 		
-		public void Write (byte[] buffer, int position, int size)
+		public override void Write (byte[] buffer, int position, int size)
 		{
 			try {
 				stream.Write (buffer, position, size);
-			} catch (Exception e) {
+			} catch (Exception) {
 				Close ();
 				throw;
 			}
 		}
 		
-		public void Close ()
+		public override void Close ()
 		{
 			Close (false);
 		}
@@ -439,10 +447,12 @@ namespace Mono.WebServer
 		{
 			if (!keepAlive || !IsConnected ()) {
 				stream.Close ();
-				if (stream != netStream)
+				if (stream != netStream) {
 					netStream.Close ();
+				} else if (false == netStream.OwnsSocket) {
+					try { sock.Close (); } catch {}
+				}
 
-				server.CloseSocket (sock);
 				return;
 			}
 
@@ -451,21 +461,21 @@ namespace Mono.WebServer
 			if (stream != netStream)
 				netStream.Close ();
 
-			server.ReuseSocket (sock);
+			server.ReuseSocket (sock, reuses + 1);
 		}
 
-		public bool IsConnected ()
+		public override bool IsConnected ()
 		{
 			return netStream.Connected;
 		}
 
-		public void Flush ()
+		public override void Flush ()
 		{
 			if (stream != netStream)
 				stream.Flush ();
 		}
 
-		private bool ClientCertificateValidation (X509Certificate certificate, int[] certificateErrors)
+		bool ClientCertificateValidation (X509Certificate certificate, int [] certificateErrors)
 		{
 			if (certificate != null)
 				ssl.RawClientCertificate = certificate.GetRawCertData (); // to avoid serialization
@@ -473,8 +483,8 @@ namespace Mono.WebServer
 			// right now we're accepting any client certificate - i.e. it's up to the 
 			// web application to check if the certificate is valid (HttpClientCertificate.IsValid)
 			ssl.ClientCertificateValid = (certificateErrors.Length == 0);
-
 			return ssl.RequireClientCertificate ? (certificate != null) : true;
 		}
 	}
 }
+

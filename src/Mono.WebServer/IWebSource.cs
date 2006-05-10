@@ -27,29 +27,51 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
-
 using System;
+using System.IO;
 using System.Net.Sockets;
 
-namespace Mono.WebServer
-{
-	public interface IWebSource : IDisposable
+namespace Mono.WebServer {
+
+	public abstract class WebSource : IDisposable
 	{
-		Socket CreateSocket ();
-		IWorker CreateWorker (Socket client, ApplicationServer server);
-		Type GetApplicationHostType ();
-		IRequestBroker CreateRequestBroker ();
+		public abstract Socket CreateSocket ();
+		public abstract Worker CreateWorker (Socket client, ApplicationServer server);
+		public abstract Type GetApplicationHostType ();
+		public abstract IRequestBroker CreateRequestBroker ();
+
+		public void Dispose ()
+		{
+			Dispose (true);
+			GC.SuppressFinalize (this);
+		}
+
+		protected virtual void Dispose (bool disposing)
+		{
+		}
 	}
 	
-	public interface IWorker
+	public abstract class Worker
 	{
-		void Run (object state);
-		int Read (byte[] buffer, int position, int size);
-		void Write (byte[] buffer, int position, int size);
-		void Close ();
-		void Flush ();
-		bool IsConnected ();
+		public virtual bool IsAsync {
+			get { return false; }
+		}
+
+		public virtual void SetReuseCount (int reuses)
+		{
+		}
+
+		public virtual int GetRemainingReuses ()
+		{
+			return 0;
+		}
+
+		public abstract void Run (object state);
+		public abstract int Read (byte [] buffer, int position, int size);
+		public abstract void Write (byte [] buffer, int position, int size);
+		public abstract void Close ();
+		public abstract void Flush ();
+		public abstract bool IsConnected ();
 	}
 }
 

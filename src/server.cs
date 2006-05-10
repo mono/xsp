@@ -405,7 +405,7 @@ namespace Mono.XSP
 
 			rootDir = Directory.GetCurrentDirectory ();
 			
-			IWebSource webSource;
+			WebSource webSource;
 #if MODMONO_SERVER
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);

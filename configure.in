@@ -49,7 +49,7 @@ esac
 
 AM_CONDITIONAL(PLATFORM_WIN32, test x$platform_win32 = xyes)
 AM_CONDITIONAL(NET_2_0, test ! x$GMCS = xno)
-AM_CONDITIONAL(XSP_ONLY, test ! x$CSC = xno)
+AM_CONDITIONAL(XSP_ONLY, test x$platform_win32 = xyes)
 
 echo "$CS compiler: $MCS"
 test x$GMCS = xno || echo "$CS 2.0 compiler: $GMCS"

@@ -1,3 +1,8 @@
+2006-06-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/ApplicationServer.cs: when stopping the server,
+	reset the 'started' variable. Fixes bug #78621.
+
 2006-06-01 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* tools/asp_state/asp-state.exe.config: 

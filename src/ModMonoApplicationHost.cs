@@ -271,10 +271,11 @@ namespace Mono.WebServer
 			}
 
 
-			Console.Error.WriteLine ("final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
+			//Console.Error.WriteLine ("final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
 			vapp = server.GetApplicationForPath (vhost, port, virt, false);
 			if (vapp == null) {
-				final_pdir = "file://" + final_pdir;
+				// Don't know why this breaks mod-mono-server2.exe, but not mod-mono-server.exe
+				//final_pdir = "file://" + final_pdir;
 				if (final_vdir [0] != '/')
 					final_vdir = "/" + final_vdir;
 				server.AddApplication (vhost, port, final_vdir, final_pdir);

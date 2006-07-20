@@ -1,3 +1,8 @@
+2006-07-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/ModMonoApplicationHost.cs: don't prepend the file:// scheme, as
+	it's currently breaking mod-mono-server 2.0.
+
 2006-06-14 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/ApplicationServer.cs: when stopping the server,

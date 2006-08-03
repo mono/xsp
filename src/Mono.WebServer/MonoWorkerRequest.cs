@@ -321,11 +321,57 @@ namespace Mono.WebServer
 			}
 		}
 
-
+ 		// as we must have the client certificate (if provided) then we're able to avoid
+ 		// pre-calculating some items (and cache them if we have to calculate)
+ 		private string cert_cookie;
+ 		private string cert_issuer;
+ 		private string cert_serial;
+ 		private string cert_subject;
+ 
 		public override string GetServerVariable (string name)
 		{
 			if (server_variables == null)
 				return String.Empty;
+
+			if (IsSecure ()) {
+	 			X509Certificate client = ClientCertificate;
+ 				string result = null;
+ 
+	 			switch (name) {
+ 				case "CERT_COOKIE":
+ 					if (cert_cookie == null) {
+ 						if (client == null)
+ 							cert_cookie = String.Empty;
+ 						else
+ 							cert_cookie = client.GetCertHashString ();
+ 					}
+ 					return cert_cookie;
+	 			case "CERT_ISSUER":
+	 				if (cert_issuer == null) {
+	 					if (client == null)
+	 						cert_issuer = String.Empty;
+	 					else
+	 						cert_issuer = client.GetIssuerName ();
+	 				}
+	 				return cert_issuer;
+	 			case "CERT_SERIALNUMBER":
+	 				if (cert_serial == null) {
+	 					if (client == null)
+	 						cert_serial = String.Empty;
+	 					else
+	 						cert_serial = client.GetSerialNumberString ();
+	 				}
+	 				return cert_serial;
+	 			case "CERT_SUBJECT":
+	 				if (cert_subject == null) {
+	 					if (client == null)
+	 						cert_subject = String.Empty;
+	 					else
+	 						cert_subject = client.GetName ();
+	 				}
+					return cert_subject;
+	 			}
+			}
 
 			string s = server_variables [name];
 			return (s == null) ? String.Empty : s;

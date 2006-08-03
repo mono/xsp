@@ -29,12 +29,13 @@ xsp_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.S
 xsp2_references= -r:System.Web.dll -r:System.Configuration.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Security.dll 
 if PLATFORM_WIN32
 modmono_references= -lib:"$(prefix)/lib" -r:Mono.WebServer/Mono.WebServer.dll \
-			-r:System.Web.dll -r:Mono.Posix.dll
+			-r:System.Web.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
 modmono2_references= -lib:"$(prefix)/lib" -r:Mono.WebServer/Mono.WebServer2.dll \
-			-r:System.Web.dll -r:Mono.Posix.dll
+			-r:System.Web.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
 else
-modmono_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Posix.dll
-modmono2_references= -r:System.Web.dll -r:System.Configuration.dll -r:Mono.WebServer/Mono.WebServer2.dll -r:Mono.Posix.dll
+modmono_references= -r:System.Web.dll -r:Mono.WebServer/Mono.WebServer.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
+modmono2_references= -r:System.Web.dll -r:System.Configuration.dll -r:Mono.WebServer/Mono.WebServer2.dll \
+			-r:Mono.Posix.dll -r:Mono.Security.dll 
 endif
 
 xsp_sources = server.cs security.cs

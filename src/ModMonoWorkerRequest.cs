@@ -34,10 +34,13 @@ using System;
 using System.Web;
 using System.Collections;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using Mono.Security.X509;
+using Mono.Security.X509.Extensions;
 
 namespace Mono.WebServer
 {
@@ -107,6 +110,12 @@ namespace Mono.WebServer
 		bool gotSecure;
 		bool isSecure;
 
+		// client certificate validity support
+		string cert_hash;
+		bool cert_validity;
+		static bool cert_check_apache;
+		static bool cert_check_mono;
+
 		string [][] unknownHeaders;
 		static string [] indexFiles = { "index.aspx",
 						"Default.aspx",
@@ -122,6 +131,24 @@ namespace Mono.WebServer
 			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 #endif
 			SetDefaultIndexFiles (indexes);
+
+			// by default the client certificate validity (CCV) checks are done by both Apache and Mono
+			// but this can be limited to either Apache or Mono using the MOD_MONO_CCV environment variable
+			string ccv = Environment.GetEnvironmentVariable ("MOD_MONO_CCV");
+			if (ccv != null)
+				ccv = ccv.ToLower (CultureInfo.InvariantCulture);
+			switch (ccv) {
+			case "mono":
+				cert_check_mono = true;
+				break;
+			case "apache":
+				cert_check_apache = true;
+				break;
+			default: // both
+				cert_check_apache = true;
+				cert_check_mono = true;
+				break;
+			}
 		}
 
 		static void SetDefaultIndexFiles (string list)
@@ -252,6 +279,96 @@ namespace Mono.WebServer
 			}
 
 			return isSecure;
+		}
+
+		private bool IsClientCertificateValidForApache ()
+		{
+			string val = requestBroker.GetServerVariable (requestId, "SSL_CLIENT_VERIFY");
+			if ((val == null) || (val.Length == 0))
+				return false;
+			return (val.Trim () == "SUCCESS");
+		}
+
+		private bool CheckClientCertificateExtensions (X509Certificate cert)
+		{
+			KeyUsages ku = KeyUsages.digitalSignature | KeyUsages.keyEncipherment | KeyUsages.keyAgreement;
+			KeyUsageExtension kux = null;
+			ExtendedKeyUsageExtension eku = null;
+
+			X509Extension xtn = cert.Extensions["2.5.29.15"];
+			if (xtn != null)
+				kux = new KeyUsageExtension (xtn);
+
+			xtn = cert.Extensions["2.5.29.37"];
+			if (xtn != null)
+				eku = new ExtendedKeyUsageExtension (xtn);
+
+			if ((kux != null) && (eku != null)) {
+				// RFC3280 states that when both KeyUsageExtension and 
+				// ExtendedKeyUsageExtension are present then BOTH should
+				// be valid
+				return (kux.Support (ku) &&
+					eku.KeyPurpose.Contains ("1.3.6.1.5.5.7.3.2"));
+			} else if (kux != null) {
+				return kux.Support (ku);
+			} else if (eku != null) {
+				// Client Authentication (1.3.6.1.5.5.7.3.2)
+				return eku.KeyPurpose.Contains ("1.3.6.1.5.5.7.3.2");
+			}
+
+			// last chance - try with older (deprecated) Netscape extensions
+			xtn = cert.Extensions["2.16.840.1.113730.1.1"];
+			if (xtn != null) {
+				NetscapeCertTypeExtension ct = new NetscapeCertTypeExtension (xtn);
+				return ct.Support (NetscapeCertTypeExtension.CertTypes.SslClient);
+			}
+
+			// certificate isn't valid for SSL client usage
+			return false;
+		}
+
+		private bool CheckChain (X509Certificate cert)
+		{
+			return new X509Chain ().Build (cert);
+		}
+
+		private bool IsCertificateValidForMono (byte[] der)
+		{
+			X509Certificate cert = new X509Certificate (der);
+			// invalidate cache if the certificate validity period has ended
+			if (cert.ValidUntil > DateTime.UtcNow)
+				cert_hash = null;
+
+			// heavyweight process, cache result
+			string hash = BitConverter.ToString (cert.Hash);
+			if (hash != cert_hash) {
+				try {
+					cert_validity = CheckClientCertificateExtensions (cert) && CheckChain (cert);
+					cert_hash = hash;
+				}
+				catch {
+					cert_validity = false;
+				}
+			}
+			return cert_validity;
+		}
+
+		// apache: Client certificate is valid if Apache is satisfied (SSL_CLIENT_VERIFY).
+		// mono: Client certificate is valid if Mono is satisfied.
+		// both: (Default) Client certificate is valid if BOTH Apache and Mono agree it is.
+		public bool IsClientCertificateValid (byte[] der)
+		{
+			bool apache = true;
+			// both or apache-only
+			if (cert_check_apache) {
+				apache = IsClientCertificateValidForApache ();
+			}
+			bool mono = true;
+			// both or mono-only
+			if (cert_check_mono) {
+				mono = IsCertificateValidForMono (der);
+			}
+			return (apache && mono);
 		}
 
 		public override void CloseConnection ()

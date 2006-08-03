@@ -1,3 +1,17 @@
+2006-08-03  Sebastien Pouliot  <sebastien@ximian.com>
+
+	* src/Makefile.am: Add a reference to Mono.Security.dll for 
+	mod-mono-server.exe
+	* src/ModMonoWorkerRequest.cs: Add support for client certificate 
+	validation using Apache and/or Mono.
+	* src/ModMonoApplicationHost.cs: Add PEM (Privacy Enhanced Mail) 
+	base64 decoding for certificates and set the proper variables so
+	HttpClientCertificate can be used with mod_mono.
+	* src/Mono.WebServer/MonoWorkerRequest.cs: Add support for special SSL
+	variables (moved from XSPWorkerRequest.cs).
+	* src/Mono.WebServer/XSPWorkerRequest.cs: Removed support for special
+	SSL variables (now shared in MonoWorkerRequest.cs).
+
 2006-07-20 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/ModMonoApplicationHost.cs: don't prepend the file:// scheme, as

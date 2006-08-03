@@ -31,6 +31,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using Mono.Unix;
 
 namespace Mono.WebServer
@@ -187,6 +188,21 @@ namespace Mono.WebServer
 	//
 	public class ModMonoApplicationHost : BaseApplicationHost
 	{
+		private byte[] FromPEM (string pem) 
+		{
+			int start = pem.IndexOf ("-----BEGIN CERTIFICATE-----");
+			if (start < 0)
+				return null;
+
+			start += 27; // 27 being the -----BEGIN CERTIFICATE----- length
+			int end = pem.IndexOf ("-----END CERTIFICATE-----", start);
+			if (end < start)
+				return null;
+				
+			string base64 = pem.Substring (start, (end - start));
+			return Convert.FromBase64String (base64);
+		}
+
 		public void ProcessRequest (int reqId, string verb, string queryString, string path,
 					string protocol, string localAddress, int serverPort, string remoteAddress,
 					int remotePort, string remoteName, string [] headers, string [] headerValues)
@@ -195,6 +211,38 @@ namespace Mono.WebServer
 			ModMonoWorkerRequest mwr = new ModMonoWorkerRequest (reqId, broker, this, verb, path, queryString,
 									protocol, localAddress, serverPort, remoteAddress,
 									remotePort, remoteName, headers, headerValues);
+			if (mwr.IsSecure ()) {
+				// note: we're only setting what we use (and not the whole lot)
+				mwr.AddServerVariable ("CERT_KEYSIZE", broker.GetServerVariable (reqId, "SSL_CIPHER_USEKEYSIZE"));
+				mwr.AddServerVariable ("CERT_SECRETKEYSIZE", broker.GetServerVariable (reqId, "SSL_CIPHER_ALGKEYSIZE"));
+
+				string pem_cert = broker.GetServerVariable (reqId, "SSL_CLIENT_CERT");
+				// 52 is the minimal PEM size for certificate header/footer
+				if ((pem_cert != null) && (pem_cert.Length > 52)) {
+					byte[] certBytes = FromPEM (pem_cert);
+					mwr.SetClientCertificate (certBytes);
+
+					// check client certificate validity with Apache and/or Mono
+					if (mwr.IsClientCertificateValid (certBytes)) {
+						// client cert present (bit0 = 1) and valid (bit1 = 0)
+						mwr.AddServerVariable ("CERT_FLAGS", "1");
+					} else {
+						// client cert present (bit0 = 1) but invalid (bit1 = 1)
+						mwr.AddServerVariable ("CERT_FLAGS", "3");
+					}
+				} else {
+					mwr.AddServerVariable ("CERT_FLAGS", "0");
+				}
+
+				pem_cert = broker.GetServerVariable (reqId, "SSL_SERVER_CERT");
+				// 52 is the minimal PEM size for certificate header/footer
+				if ((pem_cert != null) && (pem_cert.Length > 52)) {
+					byte[] certBytes = FromPEM (pem_cert);
+					X509Certificate cert = new X509Certificate (certBytes);
+					mwr.AddServerVariable ("CERT_SERVER_ISSUER", cert.GetIssuerName ());
+					mwr.AddServerVariable ("CERT_SERVER_SUBJECT", cert.GetName ());
+				}
+			}
 
 			ProcessRequest (mwr);
 		}

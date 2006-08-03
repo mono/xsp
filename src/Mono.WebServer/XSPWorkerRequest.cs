@@ -509,11 +509,7 @@ namespace Mono.WebServer
 				result = server_software;
 				break;
 			default:
-				if (IsSecure ()) {
-					result = GetSslVariable (name);
-				} else {
-					result = base.GetServerVariable (name);
-				}
+				result = base.GetServerVariable (name);
 				break;
 			}
 
@@ -684,63 +680,6 @@ namespace Mono.WebServer
  		public override bool IsSecure ()
  		{
  			return secure;
- 		}
- 
- 		// as we must have the client certificate (if provided) then we're able to avoid
- 		// pre-calculating some items (and cache them if we have to calculate)
- 		private string cert_cookie;
- 		private string cert_issuer;
- 		private string cert_serial;
- 		private string cert_subject;
- 
- 		private string GetSslVariable (string name)
- 		{
- 			X509Certificate client = ClientCertificate;
- 			string result = null;
- 
- 			switch (name) {
- 			case "CERT_COOKIE":
- 				if (cert_cookie == null) {
- 					if (client == null)
- 						cert_cookie = String.Empty;
- 					else
- 						cert_cookie = client.GetCertHashString ();
- 				}
- 				result = cert_cookie;
- 				break;
- 			case "CERT_ISSUER":
- 				if (cert_issuer == null) {
- 					if (client == null)
- 						cert_issuer = String.Empty;
- 					else
- 						cert_issuer = client.GetIssuerName ();
- 				}
- 				result = cert_issuer;
- 				break;
- 			case "CERT_SERIALNUMBER":
- 				if (cert_serial == null) {
- 					if (client == null)
- 						cert_serial = String.Empty;
- 					else
- 						cert_serial = client.GetSerialNumberString ();
- 				}
- 				result = cert_serial;
- 				break;
- 			case "CERT_SUBJECT":
- 				if (cert_subject == null) {
- 					if (client == null)
- 						cert_subject = String.Empty;
- 					else
- 						cert_subject = client.GetName ();
- 				}
- 				result = cert_subject;
- 				break;
- 			default:
- 				result = base.GetServerVariable (name);
- 				break;
- 			}
- 
- 			return result;
  		}
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)

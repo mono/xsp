@@ -1,2 +1,2 @@
 #!/bin/sh
-exec @RUNTIME@ "@plat_bindir@/@exe_file@" "$@"
+exec @RUNTIME@ $MONO_OPTIONS "@plat_bindir@/@exe_file@" "$@"

@@ -273,7 +273,15 @@ namespace Mono.WebServer
 		{
 			try {
 				InnerRun (state);
-			} catch (Exception) {
+			} catch (FileNotFoundException fnf) {
+				// We print this one, as it might be a sign of a bad deployment
+				// once we require the .exe and Mono.WebServer in bin or the GAC.
+				Console.Error.WriteLine (fnf);
+			} catch (IOException) {
+				// This is ok (including EndOfStreamException)
+			} catch (Exception e) {
+				Console.Error.WriteLine (e);
+			} finally {
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
 					Stream.Close ();

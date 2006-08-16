@@ -1,3 +1,12 @@
+2006-08-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/MonoWorkerRequest.cs:
+	* src/Mono.WebServer/XSPApplicationHost.cs:
+	* src/ModMonoApplicationHost.cs: display unexpected errors in
+	ProcessRequest from the root domain, as it will help pinpoint deployment
+	errors once the upcoming patch modifies the way assemblies are loaded
+	in newly created domains.
+
 2006-08-03  Sebastien Pouliot  <sebastien@ximian.com>
 
 	* src/Makefile.am: Add a reference to Mono.Security.dll for 

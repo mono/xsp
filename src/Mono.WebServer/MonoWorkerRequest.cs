@@ -335,8 +335,6 @@ namespace Mono.WebServer
 
 			if (IsSecure ()) {
 	 			X509Certificate client = ClientCertificate;
- 				string result = null;
- 
 	 			switch (name) {
  				case "CERT_COOKIE":
  					if (cert_cookie == null) {

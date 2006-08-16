@@ -414,12 +414,22 @@ namespace Mono.WebServer
 				ssl.SecretKeySize = s.KeyExchangeStrength;
 			}
 
-			string redirect;
-			vapp.Redirect (rdata.Path, out redirect);
-			host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
-					remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
-					rdata.Path, rdata.QueryString,
-					rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
+			try {
+				string redirect;
+				vapp.Redirect (rdata.Path, out redirect);
+				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
+						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
+						rdata.Path, rdata.QueryString,
+						rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
+			} catch (FileNotFoundException fnf) {
+				// We print this one, as it might be a sign of a bad deployment
+				// once we require the .exe and Mono.WebServer in bin or the GAC.
+				Console.Error.WriteLine (fnf);
+			} catch (IOException) {
+				// This is ok (including EndOfStreamException)
+			} catch (Exception e) {
+				Console.Error.WriteLine (e);
+			}
 		}
 
 		public override int Read (byte[] buffer, int position, int size)

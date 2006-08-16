@@ -1,5 +1,5 @@
 prefix=@prefix@
-assemblies_dir=${prefix}/lib/xsp/1.0
+assemblies_dir=${prefix}/lib/mono/1.0
 Libraries=${assemblies_dir}/Mono.WebServer.dll
 Executable=${assemblies_dir}/xsp.exe
  

@@ -1,5 +1,22 @@
 2006-08-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
+	* configure.in:
+	* src/mono.snk:
+	* src/AssemblyInfo.cs.in:
+	* src/Makefile.am:
+	* src/Mono.WebServer/xsp-2.pc.in:
+	* src/Mono.WebServer/xsp.pc.in:
+	* src/Mono.WebServer/AssemblyInfo2.cs.in:
+	* src/Mono.WebServer/AssemblyInfo.cs.in:
+	* src/Mono.WebServer/Makefile.am:
+	* src/AssemblyInfoModMono.cs.in:
+	* src/mono.pub:
+	* scripts/Makefile.am: xsp, xsp2, Mono.WebServer and Mono.WebServer2 are
+	installed in the GAC now to avoid problems with the upcoming patch in
+	the runtime.
+
+2006-08-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
 	* src/Mono.WebServer/MonoWorkerRequest.cs:
 	* src/Mono.WebServer/XSPApplicationHost.cs:
 	* src/ModMonoApplicationHost.cs: display unexpected errors in

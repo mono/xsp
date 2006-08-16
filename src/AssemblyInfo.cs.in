@@ -3,7 +3,7 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
-// Copyright (c) 2002,2003,2004,2005 Novell, Inc. (http://www.novell.com)
+// Copyright (c) 2002,2003,2004,2005,2006 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -31,5 +31,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("@VERSION@")]
 [assembly: AssemblyTitle ("Mono-XSP Server")]
 [assembly: AssemblyDescription ("Minimalistic web server for testing System.Web")]
-[assembly: AssemblyCopyright ("(c) 2002-2005 Novell, Inc.")]
+[assembly: AssemblyCopyright ("(c) 2002-2006 Novell, Inc.")]
 [assembly: AssemblyCompany ("Novell, Inc.")]
+[assembly: AssemblyDelaySign(true)]
+[assembly: AssemblyKeyFile("@top_srcdir@/src/mono.pub")]

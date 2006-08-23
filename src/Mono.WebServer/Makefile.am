@@ -44,14 +44,14 @@ Mono.WebServer2.dll: $(monowebserver2_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 install-data-local:
-	$(GACUTIL1) -i $(builddir)/Mono.WebServer.dll
+	$(GACUTIL1) $(GACUTIL_FLAGS) -i $(builddir)/Mono.WebServer.dll
 
 #if NET_2_0
-	$(GACUTIL2) -i $(builddir)/Mono.WebServer2.dll
+	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(builddir)/Mono.WebServer2.dll
 #endif
 	
 uninstall-local:
 	-for i in Mono.WebServer Mono.WebServer2 ; do \
-		$(GACUTIL) -u $$(basename $$i .exe) ; \
+		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done
 

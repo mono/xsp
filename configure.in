@@ -56,10 +56,13 @@ AM_CONDITIONAL(XSP_ONLY, test x$platform_win32 = xyes)
 echo "$CS compiler: $MCS"
 test x$GMCS = xno || echo "$CS 2.0 compiler: $GMCS"
 
+GACUTIL_FLAGS='-root $(DESTDIR)$(prefix)/lib'
+
 AC_SUBST(MCS)
 AC_SUBST(GMCS)
 AC_SUBST(RUNTIME)
 AC_SUBST(GACUTIL)
+AC_SUBST(GACUTIL_FLAGS)
 AC_SUBST(SN)
 AC_OUTPUT([
 	Makefile

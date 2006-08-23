@@ -1,3 +1,10 @@
+2006-08-23 Wade Berrier <wberrier@novell.com>
+
+	* configure.in:
+	* src/Makefile.am:
+	* src/Mono.WebServer/Makefile.am: Add GACUTIL_FLAGS to make gac root dir package
+	friendly (Relative to DESTDIR)
+
 2006-08-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* configure.in:

@@ -70,17 +70,17 @@ mod-mono-server2.exe: $(modmono_build_sources)
 
 install-data-local:
 	for i in xsp.exe mod-mono-server.exe ; do \
-		$(GACUTIL1) -i $(top_builddir)/src/$$i ; \
+		$(GACUTIL1) $(GACUTIL_FLAGS) -i $(top_builddir)/src/$$i ; \
 	done
 
 #if NET_2_0
 	for i in xsp2.exe mod-mono-server2.exe ; do \
-		$(GACUTIL2) -i $(top_builddir)/src/$$i ; \
+		$(GACUTIL2) $(GACUTIL_FLAGS) -i $(top_builddir)/src/$$i ; \
 	done
 #endif
 	
 uninstall-local:
 	-for i in xsp mod-mono-server xsp2 mod-mono-server2 ; do \
-		$(GACUTIL) -u $$(basename $$i .exe) ; \
+		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done
 

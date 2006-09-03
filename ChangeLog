@@ -1,3 +1,9 @@
+2006-09-03  Sebastien Pouliot  <sebastien@ximian.com>
+
+	* src/Mono.WebServer/XSPApplicationHost.cs: Read from the stream, not 
+	the socket as the socket data is encrypted when using SSL. Fix from 
+	Jean-Francois Burdet.
+
 2006-08-23 Wade Berrier <wberrier@novell.com>
 
 	* configure.in:

@@ -347,14 +347,14 @@ namespace Mono.WebServer
 		{
 			initial = new InitialWorkerRequest (stream);
 			byte [] buffer = InitialWorkerRequest.AllocateBuffer ();
-			sock.BeginReceive (buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback (ReadCB), buffer);
+			stream.BeginRead (buffer, 0, buffer.Length, new AsyncCallback (ReadCB), buffer);
 		}
 
 		void ReadCB (IAsyncResult ares)
 		{
 			byte [] buffer = (byte []) ares.AsyncState;
 			try {
-				int nread = sock.EndReceive (ares);
+				int nread = stream.EndRead (ares);
 				// See if we got at least 1 line
 				initial.SetBuffer (buffer, nread);
 				initial.ReadRequestData ();

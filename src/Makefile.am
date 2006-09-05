@@ -69,12 +69,12 @@ mod-mono-server2.exe: $(modmono_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/mono.snk
 
 install-data-local:
-	for i in xsp.exe mod-mono-server.exe ; do \
+	for i in xsp.exe $(mod_mono_server_SCR) ; do \
 		$(GACUTIL1) $(GACUTIL_FLAGS) -i $(top_builddir)/src/$$i ; \
 	done
 
 #if NET_2_0
-	for i in xsp2.exe mod-mono-server2.exe ; do \
+	for i in xsp2.exe $(mod_mono_server2_SCR) ; do \
 		$(GACUTIL2) $(GACUTIL_FLAGS) -i $(top_builddir)/src/$$i ; \
 	done
 #endif

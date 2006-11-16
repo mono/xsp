@@ -53,7 +53,8 @@ namespace Mono.WebServer
 			try {
 				locker = File.OpenWrite (lockfile);
 			} catch {
-				Console.Error.WriteLine ("Another mod-mono-server with the same arguments is already running.");
+				// Silently exit. Many people confused about this harmless message.
+				//Console.Error.WriteLine ("Another mod-mono-server with the same arguments is already running.");
 				Environment.Exit (1);
 			}
 		}

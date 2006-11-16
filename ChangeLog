@@ -1,3 +1,12 @@
+2006-11-16 Gonzalo Paniagua Javier <gonzalo@ximian.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: close the connection if
+	there's an error reading the headers (including assembly loading
+	exceptions due to a bad installation).
+
+	* src/ModMonoApplicationHost.cs: kill the warning that everyone is
+	worried about.
+
 2006-09-11 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/ApplicationServer.cs: don't run BeginAccept when

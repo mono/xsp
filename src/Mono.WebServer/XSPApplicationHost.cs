@@ -37,7 +37,6 @@ using System.Threading;
 using System.Web;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Authenticode;
 using Mono.Security.Protocol.Tls;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;

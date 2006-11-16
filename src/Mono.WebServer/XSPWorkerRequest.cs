@@ -184,7 +184,13 @@ namespace Mono.WebServer
 			position = 0;
 			this.secure = secure;
 
-			GetRequestHeaders ();
+			try {
+				GetRequestHeaders ();
+			} catch {
+				CloseConnection ();
+				throw;
+			}
+
 			string cncHeader = (string) headers ["Connection"];
 			if (cncHeader != null) {
 				cncHeader = cncHeader.ToLower ();

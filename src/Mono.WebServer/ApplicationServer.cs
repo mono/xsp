@@ -280,10 +280,10 @@ namespace Mono.WebServer
 
 		void RealStop ()
 		{
+			started = false;
 			runner.Abort ();
 			listen_socket.Close ();
 			UnloadAll ();
-			started = false;
 			Thread.Sleep (1000);
 		}
 

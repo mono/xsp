@@ -83,6 +83,7 @@ namespace Mono.WebServer
 	{
 		IApplicationHost appHostBase;
 		Encoding encoding;
+		Encoding headerEncoding;
 		byte [] queryStringBytes;
 		string hostVPath;
 		string hostPath;
@@ -133,6 +134,24 @@ namespace Mono.WebServer
 			}
 
 			set { encoding = value; }
+		}
+
+		protected virtual Encoding HeaderEncoding {
+			get {
+#if NET_2_0
+				if (headerEncoding == null) {
+					Encoding enc = HttpContext.Current.Response.HeaderEncoding;
+					if (enc != null)
+						headerEncoding = enc;
+					else
+						headerEncoding = this.Encoding;
+				}
+				return headerEncoding;
+					
+#else
+				return this.Encoding;
+#endif
+			}
 		}
 
 		public override string GetAppPath ()

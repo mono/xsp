@@ -340,7 +340,7 @@ namespace Mono.WebServer
 			}
 
 			responseHeaders.Append ("\r\n");
-			return Encoding.GetBytes (responseHeaders.ToString ());
+			return HeaderEncoding.GetBytes (responseHeaders.ToString ());
 		}
 
 		public override void FlushResponse (bool finalFlush)

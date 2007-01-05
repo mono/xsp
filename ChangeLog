@@ -1,3 +1,11 @@
+2007-01-05  Marek Habersack  <grendello@gmail.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: use the configured
+	header encoding when outputting the headers.
+
+	* src/Mono.WebServer/MonoWorkerRequest.cs: implement support for
+	response header encoding.
+
 2006-12-23 Gonzalo Paniagua Javier <gonzalo@ximian.com>
 
 	* src/Mono.WebServer/ApplicationServer.cs: set the server as stopped

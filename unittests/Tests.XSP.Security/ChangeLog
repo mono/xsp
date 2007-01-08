@@ -1,0 +1,10 @@
+2007-01-08  Sebastien Pouliot  <sebastien@ximian.com>
+
+	* ChangeLog: Track changes in tests.
+	* Makefile: Build/run unit tests.
+	* FileExtensionsTest.cs: Tests that try, by messing with the file 
+	extensions, to retrieve the original source code of the web page.
+	* DirectoryTraversalTest.cs: Tests that try, by messing with the path,
+	to retrieve a file outside the webroot.
+	* WebTestHelper.cs: Base class with helper methods for tests.
+

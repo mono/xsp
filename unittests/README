@@ -1,0 +1,38 @@
+This directory contains a small test suite to check for any regressions
+in XSP that could cause security vulnerability. Contributions are welcome!
+
+
+Directory structure for the tests
+
+/NOACCESS
+/webroot/
+	index.aspx
+
+Some tests tries to access index.aspx to retrieve it's source code. Other 
+tests tries to access the file NOACCESS that resides outside the root of
+the web server.
+
+* Tests execution (using the same computer)
+
+From a terminal window:
+
+	cd xsp/unittests/webroot
+	xsp
+
+From another terminal window:
+
+	cd xsp/unittests/Tests.XSP.Security
+	make run-test-local
+
+
+* Tests execution (using different computers)
+
+From the server computer (e.g. named "server.test.my"):
+
+	cd xsp/unittests/webroot
+	xsp --port 80
+
+From the client computer
+
+	cd xsp/unittests/Tests.XSP.Security
+	XSP_TEST_HOST=server.test.my:80 make run-test

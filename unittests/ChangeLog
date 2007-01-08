@@ -1,0 +1,5 @@
+2007-01-08  Sebastien Pouliot  <sebastien@ximian.com>
+
+	* webroot/*: Web files used for the tests.
+	* NOACCESS: Test file that resides outside the web root directory.
+	* README: Instruction about how to run the tests.

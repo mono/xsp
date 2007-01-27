@@ -7,7 +7,7 @@
 .\"
 .TH xsp "1" "21 Nov 2004" "xsp @VERSION@" "User Commands"
 .SH NAME 
-XSP \- Mono ASP.NET Web Server
+XSP \- Mono ASP.NET Web Server (xsp and xsp2)
 .SH SYNOPSIS
 .B mono xsp.exe
 [options]
@@ -201,6 +201,16 @@ Shows the list of options and exits.
 .TP
 .I \-\-verbose
 Prints extra messages. Useful for debugging.
+.SH MONO RUNTIME OPTIONS
+xsp and xsp2 are scripts that call mono.  If you want to pass options
+to mono (for example, options to get line numbers in stack traces),
+you can use the MONO_OPTIONS environment variable when invoking xsp or
+xsp2.
+.PP
+For example:
+.nf
+	$ MONO_OPTIONS=--debug xsp2
+.fi
 .SH DEFAULT INDEX FILES
 You can choose which files are considered as index using
 .I xsp.exe.config

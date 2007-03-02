@@ -1,3 +1,12 @@
+2007-03-02 Wade Berrier <wberrier@novell.com>
+
+	* configure.in:
+	* src/Mono.WebServer/xsp-2.pc.in:
+	* src/Mono.WebServer/xsp.pc.in:
+	Use VERSION from configure.in in the .pc files (they were always
+	0.1 and 0.2 before, but this isn't useful since the files 
+	are xsp and xsp-2)
+
 2007-01-25 Wade Berrier <wberrier@novell.com>
 
 	* configure.in: version bump -> 1.2.3

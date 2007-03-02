@@ -5,5 +5,5 @@ Executable=${assemblies_dir}/xsp.exe
  
 Name: xsp
 Description: Mono.WebServer.dll - ASP.NET hosting support classes for .NET 1.1
-Version: 0.1
+Version: @VERSION@
 Libs: -r:Mono.WebServer.dll

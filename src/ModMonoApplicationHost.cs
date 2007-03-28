@@ -289,8 +289,10 @@ namespace Mono.WebServer
 					Stream = null;
 				} catch {}
 
-				if (broker != null && requestId != -1)
+				if (broker != null && requestId != -1) {
 					broker.UnregisterRequest (requestId);
+					requestId = -1;
+				}
 			}
 		}
 

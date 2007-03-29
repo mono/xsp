@@ -165,8 +165,10 @@ namespace Mono.WebServer
 
 		void WriteString (string s)
 		{
-			writer.Write (Encoding.Default.GetByteCount (s));
-			writer.Write (Encoding.Default.GetBytes (s));
+			byte [] bytes = Encoding.Default.GetBytes (s);
+			
+			writer.Write (bytes.Length);
+			writer.Write (bytes);
 		}
 		
 		public void Decline ()
@@ -351,10 +353,17 @@ namespace Mono.WebServer
 		{
 			if (!ShouldClientBlock ()) return 0;
 			if (SetupClientBlock () != 0) return 0;
-			
+
+			/*
+			 * turns out that that GET_CLIENT_BLOCK (ap_get_client_block) can
+			 * return -1 if a socket is closed
+			 */
 			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK);
 			writer.Write (size);
 			int i = reader.ReadInt32 ();
+			if (i == -1)
+				return -1;
+			
 			if (i > size)
 				throw new Exception ("Houston...");
 

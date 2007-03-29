@@ -1,3 +1,10 @@
+2007-03-28  Miguel de Icaza  <miguel@novell.com>
+
+	* src/ModMonoRequest.cs: Only compute the data once.
+
+	(GetClientBlock): if we get a -1, return the -1 to the client, do
+	not try to call Read. 
+
 2007-03-29  Marek Habersack  <mhabersack@novell.com>
 
 	* src/ModMonoApplicationHost.cs: make sure request id is reset to

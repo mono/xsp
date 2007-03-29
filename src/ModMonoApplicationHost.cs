@@ -285,10 +285,11 @@ namespace Mono.WebServer
 			} finally {
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
-					Stream.Close ();
-					Stream = null;
+					if (Stream != null){
+						Stream.Close ();
+						Stream = null;
+					}
 				} catch {}
-
 				if (broker != null && requestId != -1) {
 					broker.UnregisterRequest (requestId);
 					requestId = -1;

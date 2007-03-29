@@ -1,3 +1,9 @@
+2007-03-29  Miguel de Icaza  <miguel@novell.com>
+
+	* src/ModMonoApplicationHost.cs: Do not try to call Close on a
+	null stream (Stream can become null inside InnerRun) and this
+	makes debugging with gdb harder. 
+
 2007-03-28  Miguel de Icaza  <miguel@novell.com>
 
 	* src/ModMonoRequest.cs: Only compute the data once.

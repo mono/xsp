@@ -41,36 +41,36 @@ namespace Mono.WebServer
 			MethodBase mi = sf.GetMethod ();
 
 			if (mi != null)
-				return String.Format ("{0}.{1} ", mi.ReflectedType, mi.Name);
+				return String.Format ("{0}.{1}(): ", mi.ReflectedType, mi.Name);
 			return null;
 		}
 
 		static string GetExtraInfo (StackFrame sf)
 		{
 #if NET_2_0
-			string threadid = String.Format (" [thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
+			string threadid = String.Format ("thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
+			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));
 #else
-			string threadid = String.Format (" [thread_hash: {0}", Thread.CurrentThread.GetHashCode ().ToString ("x"));
+			string threadid = String.Format ("thread_hash: {0}", Thread.CurrentThread.GetHashCode ().ToString ("x"));
+			string domainid = String.Format ("appdomain_hash: {0}", AppDomain.CurrentDomain.GetHashCode ().ToString ("x"));
 #endif
-
+			
 			string filepath = sf != null ? sf.GetFileName () : null;
 			if (filepath != null && filepath.Length > 0)
-				return String.Format ("{0}, in {1}:{2}]", threadid, filepath, sf.GetFileLineNumber ());
+				return String.Format (" [{0}, {1}, in {2}:{3}]", domainid, threadid, filepath, sf.GetFileLineNumber ());
 			else
-				return String.Format ("{0}]", threadid);
+				return String.Format (" [{0}, {1}]", domainid, threadid);
 		}
 
 		static string GetExtraInfo ()
 		{
 			return GetExtraInfo (null);
 		}
-		
-		[Conditional ("WEBTRACE")]
-		public static void Enter (string format, params object[] parms)
+
+		static void Enter (string format, StackFrame sf, params object[] parms)
 		{
 			StringBuilder sb = new StringBuilder ("Enter: ");
-			StackFrame sf = new StackFrame (1);
-			
+					
 			string methodName = GetMethodName (sf);
 			if (methodName != null)
 				sb.Append (methodName);
@@ -81,18 +81,22 @@ namespace Mono.WebServer
 			Trace.WriteLine (sb.ToString ());
 			Trace.Indent ();
 		}
+		
+		[Conditional ("WEBTRACE")]
+		public static void Enter (string format, params object[] parms)
+		{
+			Enter (format, new StackFrame (1), parms);
+		}
 
 		[Conditional ("WEBTRACE")]
 		public static void Enter ()
 		{
-			Enter (null, null);
+			Enter (null, new StackFrame (1), null);
 		}
 
-		[Conditional ("WEBTRACE")]
-		public static void Leave (string format, params object[] parms)
+		static void Leave (string format, StackFrame sf, params object[] parms)
 		{
 			StringBuilder sb = new StringBuilder ("Leave: ");
-			StackFrame sf = new StackFrame (1);
 
 			string methodName = GetMethodName (sf);
 			if (methodName != null)
@@ -104,16 +108,37 @@ namespace Mono.WebServer
 			Trace.Unindent ();
 			Trace.WriteLine (sb.ToString ());
 		}
+		
+		[Conditional ("WEBTRACE")]
+		public static void Leave (string format, params object[] parms)
+		{
+			Leave (format, new StackFrame (1), parms);
+		}
 
 		[Conditional ("WEBTRACE")]
 		public static void Leave ()
 		{
-			Leave (null, null);
+			Leave (null, new StackFrame (1), null);
 		}
 
 		[Conditional ("WEBTRACE")]
 		public static void WriteLine (string format, params object[] parms)
 		{
+			if (format == null)
+				return;
+			
+			StringBuilder sb = new StringBuilder ();
+			sb.AppendFormat (format, parms);
+			sb.Append (GetExtraInfo ());
+			Trace.WriteLine (sb.ToString ());
+		}
+
+		[Conditional ("WEBTRACE")]
+		public static void WriteLineIf (bool cond, string format, params object[] parms)
+		{
+			if (!cond)
+				return;
+			
 			if (format == null)
 				return;
 			

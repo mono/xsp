@@ -1,13 +1,18 @@
 2007-03-30  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/Tracing.cs: added a utility class to help in
+	tracing.
+
 	* src/server.cs: move a line of common code out of ifdefs
 
 	* src/Mono.WebServer/Makefile.am (MCSFLAGS): support tracing if
 	enabled.
+	(monowebserver_sources): added Tracing.cs
 
 	* src/Makefile.am (MCSFLAGS): support tracing if enabled
 
 	* configure.in: add a parameter to enable conditional tracing.
+	Define TRACE together with WEBTRACE.
 
 2007-03-29  Miguel de Icaza  <miguel@novell.com>
 

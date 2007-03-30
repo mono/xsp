@@ -22,7 +22,7 @@ AC_ARG_ENABLE([tracing],
 
 if test "x$enable_tracing" != "xno" ; then
    	AC_MSG_RESULT([yes])
-	WEBTRACING="-define:WEBTRACE"
+	WEBTRACING="-define:WEBTRACE -define:TRACE"
 else
 	AC_MSG_RESULT([no])
 	WEBTRACING=""

@@ -35,6 +35,8 @@ namespace Mono.WebServer
 {
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{
+		const int BufferAllocSize = 16384;
+		
 		Hashtable requests = new Hashtable ();
 		Hashtable buffers = new Hashtable ();
 
@@ -43,8 +45,8 @@ namespace Mono.WebServer
 		{
 			if (stk.Count > 0)
 				return (byte []) stk.Pop ();
-
-			return new byte [16384];
+			
+			return new byte [BufferAllocSize];;
 		}
 
 		static void ReleaseBuffer (byte [] buffer)
@@ -55,7 +57,7 @@ namespace Mono.WebServer
 		public int RegisterRequest (Worker worker)
 		{
 			int result = worker.GetHashCode ();
-			lock (requests) {
+			lock (requests) {						    
 				requests [result] = worker;
 				buffers [result] = Allocate16k ();
 			}
@@ -74,18 +76,22 @@ namespace Mono.WebServer
 
 		public int Read (int requestId, int size, out byte[] buffer)
 		{
-			if (size == 16384) {
-				buffer = (byte []) buffers [requestId];
-			} else {
+			buffer = null;
+			if (size != BufferAllocSize)
 				buffer = new byte[size];
-			}
 			Worker w;
 			lock (requests) {
+				if (buffer == null)
+					buffer = (byte []) buffers [requestId];
 				w = (Worker) requests [requestId];
 			}
 
 			int nread = 0;
-			if (w != null)
+			// NOTE: Maybe we should NOT return cached buffers but
+			// always allocate a new one? That would eliminate the
+			// need to lock buffers[] access and a possible race
+			// condition below.
+			if (w != null && buffer != null)
 				nread = w.Read (buffer, 0, size);
 
 			return nread;

@@ -1,5 +1,9 @@
 2007-03-30  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/BaseRequestBroker.cs: protect access to the
+	buffer in Read at least a bit. It can still be released by some
+	other thread after or during Read.
+
 	* src/Mono.WebServer/Tracing.cs: added a utility class to help in
 	tracing.
 

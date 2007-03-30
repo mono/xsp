@@ -35,8 +35,6 @@ namespace Mono.WebServer
 {
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{
-		const int BufferAllocSize = 16384;
-		
 		Hashtable requests = new Hashtable ();
 		Hashtable buffers = new Hashtable ();
 
@@ -45,8 +43,8 @@ namespace Mono.WebServer
 		{
 			if (stk.Count > 0)
 				return (byte []) stk.Pop ();
-			
-			return new byte [BufferAllocSize];;
+
+			return new byte [16384];
 		}
 
 		static void ReleaseBuffer (byte [] buffer)
@@ -57,7 +55,7 @@ namespace Mono.WebServer
 		public int RegisterRequest (Worker worker)
 		{
 			int result = worker.GetHashCode ();
-			lock (requests) {						    
+			lock (requests) {
 				requests [result] = worker;
 				buffers [result] = Allocate16k ();
 			}
@@ -76,18 +74,18 @@ namespace Mono.WebServer
 
 		public int Read (int requestId, int size, out byte[] buffer)
 		{
-			buffer = null;
-			if (size != BufferAllocSize)
+			if (size == 16384) {
+				buffer = (byte []) buffers [requestId];
+			} else {
 				buffer = new byte[size];
+			}
 			Worker w;
 			lock (requests) {
-				if (buffer == null)
-					buffer = (byte []) buffers [requestId];
 				w = (Worker) requests [requestId];
 			}
 
 			int nread = 0;
-			if (w != null && buffer != null)
+			if (w != null)
 				nread = w.Read (buffer, 0, size);
 
 			return nread;

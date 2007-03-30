@@ -1,5 +1,7 @@
 2007-03-30  Marek Habersack  <mhabersack@novell.com>
 
+	* src/server.cs: move a line of common code out of ifdefs
+
 	* src/Mono.WebServer/Makefile.am (MCSFLAGS): support tracing if
 	enabled.
 

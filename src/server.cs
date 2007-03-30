@@ -423,8 +423,6 @@ namespace Mono.XSP
 
 				return (res) ? 0 : 1;
 			}
-
-			ApplicationServer server = new ApplicationServer (webSource);
 #else
 			if (security.Enabled) {
 				try {
@@ -440,9 +438,8 @@ namespace Mono.XSP
 			} else {
 				webSource = new XSPWebSource (ipaddr, port);
 			}
-
-			ApplicationServer server = new ApplicationServer (webSource);
 #endif
+			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = verbose;
 
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);

@@ -87,10 +87,6 @@ namespace Mono.WebServer
 			}
 
 			int nread = 0;
-			// NOTE: Maybe we should NOT return cached buffers but
-			// always allocate a new one? That would eliminate the
-			// need to lock buffers[] access and a possible race
-			// condition below.
 			if (w != null && buffer != null)
 				nread = w.Read (buffer, 0, size);
 

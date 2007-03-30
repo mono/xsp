@@ -1,7 +1,7 @@
 SUBDIRS=Mono.WebServer
 builddir=$(top_builddir)/src
 
-MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
 
 xspdir = $(prefix)/lib/xsp/1.0
 modmonoserverdir = $(prefix)/lib/xsp/1.0

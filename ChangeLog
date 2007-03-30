@@ -1,3 +1,12 @@
+2007-03-30  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/Makefile.am (MCSFLAGS): support tracing if
+	enabled.
+
+	* src/Makefile.am (MCSFLAGS): support tracing if enabled
+
+	* configure.in: add a parameter to enable conditional tracing.
+
 2007-03-29  Miguel de Icaza  <miguel@novell.com>
 
 	* src/ModMonoApplicationHost.cs: Do not try to call Close on a

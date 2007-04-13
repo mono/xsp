@@ -1,3 +1,20 @@
+2007-04-13  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseRequestBroker.cs: replace old code that
+	used hashtables to store request data with arrays. Array is also
+	used to acquire a unique request id. Previously the code used
+	GetHashCode() to do that, incorrectly assuming that the return
+	value from the method is unique. This caused frequent race
+	conditions and crashes. The new code uses arrays sized at 200
+	slots initially - this means it can handle up to 200 _concurrent_
+	requests before it needs to resize the arrays.
+
+	* src/Mono.WebServer/XSPApplicationHost.cs: make sure worker is
+	not null before attempting to use it.
+
+	* src/ModMonoApplicationHost.cs: make sure worker is not null
+	before attempting to use it.
+
 2007-03-30  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/Tracing.cs: added a utility class to help in

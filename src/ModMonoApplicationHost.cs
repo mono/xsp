@@ -165,22 +165,35 @@ namespace Mono.WebServer
 	{
 		public string GetServerVariable (int requestId, string name)
 		{
-			return ((ModMonoWorker)GetWorker (requestId)).GetServerVariable (name);
+			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			if (worker == null)
+				return null;
+			
+			return worker.GetServerVariable (name);
 		}
 
 		public void SetStatusCodeLine (int requestId, int code, string status)
 		{
-			((ModMonoWorker)GetWorker (requestId)).SetStatusCodeLine (code, status);
+			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			if (worker == null)
+				return;
+			worker.SetStatusCodeLine (code, status);
 		}
 		
 		public void SetResponseHeader (int requestId, string name, string value)
 		{
-			((ModMonoWorker)GetWorker (requestId)).SetResponseHeader (name, value);
+			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			if (worker == null)
+				return;
+			worker.SetResponseHeader (name, value);
 		}
 
 		public void SendFile (int requestId, string filename)
 		{
-			((ModMonoWorker)GetWorker (requestId)).SendFile (filename);
+			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			if (worker == null)
+				return;
+			worker.SendFile (filename);
 		}
 	}
 

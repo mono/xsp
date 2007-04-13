@@ -126,6 +126,9 @@ namespace Mono.WebServer
 		public int GetReuseCount (int requestId)
 		{
 			XSPWorker worker = (XSPWorker) GetWorker (requestId);
+			if (worker == null)
+				return 0;
+			
 			return worker.GetRemainingReuses ();
 		}
 

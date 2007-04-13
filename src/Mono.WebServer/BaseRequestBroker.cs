@@ -35,29 +35,72 @@ namespace Mono.WebServer
 {
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{
-		Hashtable requests = new Hashtable ();
-		Hashtable buffers = new Hashtable ();
+		const int INITIAL_REQUESTS = 200;
+		static object reqlock = new object();		
 
-		static Stack stk = new Stack ();
-		static byte [] Allocate16k ()
+		bool[] request_ids = new bool [INITIAL_REQUESTS];
+		Worker[] requests = new Worker [INITIAL_REQUESTS];
+		byte[][] buffers = new byte [INITIAL_REQUESTS][];
+		int requests_count = 0;		
+
+		// this *MUST* be called with the reqlock held!
+		void GrowRequests (ref int curlen, ref int newid)
 		{
-			if (stk.Count > 0)
-				return (byte []) stk.Pop ();
+			int newsize = curlen + curlen/3;
+			bool[] new_request_ids = new bool [newsize];
+			Worker[] new_requests = new Worker [newsize];
+			byte[][] new_buffers = new byte [newsize][];
 
-			return new byte [16384];
+			request_ids.CopyTo (new_request_ids, 0);
+			Array.Clear (request_ids, 0, request_ids.Length);
+			request_ids = new_request_ids;
+			
+			requests.CopyTo (new_requests, 0);
+			Array.Clear (requests, 0, requests.Length);
+			requests = new_requests;
+			
+			buffers.CopyTo (new_buffers, 0);
+			Array.Clear (buffers, 0, buffers.Length);
+			buffers = new_buffers;
+
+			newid = curlen + 1;
+			curlen = newsize;
 		}
-
-		static void ReleaseBuffer (byte [] buffer)
+		
+		// this *MUST* be called with the reqlock held!
+		int GetNextRequestId ()
 		{
-			stk.Push (buffer);
-		}
+			int reqlen = request_ids.Length;
+			int newid = -1;
+			
+			requests_count++;
+			if (requests_count >= reqlen)
+				GrowRequests (ref reqlen, ref newid);
+			if (newid == -1)
+				for (int i = 0; i < reqlen; i++) {
+					if (!request_ids [i]) {
+						newid = i;
+						break;
+					}
+			}
 
+			if (newid != -1) {
+				request_ids [newid] = true;
+				return newid;
+			}
+				
+			// Should never happen...
+			throw new ApplicationException ("could not allocate new request id");
+		}
+		
 		public int RegisterRequest (Worker worker)
 		{
-			int result = worker.GetHashCode ();
-			lock (requests) {
+			int result = -1;
+			
+			lock (reqlock) {
+				result = GetNextRequestId ();
 				requests [result] = worker;
-				buffers [result] = Allocate16k ();
+				buffers [result] = new byte [16384];
 			}
 
 			return result;
@@ -65,22 +108,40 @@ namespace Mono.WebServer
 		
 		public void UnregisterRequest (int id)
 		{
-			lock (requests) {
-				requests.Remove (id);
-				ReleaseBuffer ((byte []) buffers [id]);
-				buffers.Remove (id);
+			lock (reqlock) {
+				if (id < 0 || id > request_ids.Length - 1)
+					return;
+				if (!request_ids [id])
+					return;
+				
+				requests [id] = null;
+				request_ids [id] = false;
+				byte[] a = buffers [id];
+				if (a != null)
+					Array.Clear (a, 0, a.Length);
+				requests_count--;
 			}
 		}
 
+		protected bool ValidRequest (int requestId)
+		{
+			return (requestId >= 0 && requestId < request_ids.Length && request_ids [requestId] &&
+				buffers [requestId] != null);
+		}
+		
 		public int Read (int requestId, int size, out byte[] buffer)
 		{
+			buffer = null;
+			if (!ValidRequest (requestId))
+				return 0;
+			
 			if (size == 16384) {
-				buffer = (byte []) buffers [requestId];
+				buffer = buffers [requestId];
 			} else {
 				buffer = new byte[size];
 			}
 			Worker w;
-			lock (requests) {
+			lock (reqlock) {
 				w = (Worker) requests [requestId];
 			}
 
@@ -93,7 +154,10 @@ namespace Mono.WebServer
 		
 		public Worker GetWorker (int requestId)
 		{
-			lock (requests) {
+			if (!ValidRequest (requestId))
+				return null;
+			
+			lock (reqlock) {
 				return (Worker) requests [requestId];
 			}
 		}
@@ -121,7 +185,9 @@ namespace Mono.WebServer
 
 		public bool IsConnected (int requestId)
 		{
-			return (GetWorker (requestId)).IsConnected ();
+			Worker worker = GetWorker (requestId);
+			
+			return (worker != null && worker.IsConnected ());
 		}
 
 		public override object InitializeLifetimeService ()

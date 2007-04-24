@@ -101,7 +101,15 @@ namespace Mono.WebServer
 			}
 			
 			mwr.EndOfRequestEvent += endOfRequest;
-			mwr.ProcessRequest ();
+			try {
+				mwr.ProcessRequest ();
+			} catch (Exception ex) { // should "never" happen
+				// we don't know what the request state is,
+				// better write the exception to the console
+				// than forget it.
+				Console.WriteLine ("Unhandled exception: {0}", ex);
+				EndOfRequest (mwr);
+			}
 		}
 
 		public void EndOfRequest (MonoWorkerRequest mwr)

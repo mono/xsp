@@ -94,7 +94,8 @@ namespace Mono.WebServer
 		protected byte[] client_raw;
 		X509Certificate client_cert;
 		NameValueCollection server_variables;
-
+		bool inUnhandledException;
+		
 		public MonoWorkerRequest (IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
 		{
@@ -140,7 +141,7 @@ namespace Mono.WebServer
 			get {
 #if NET_2_0
 				if (headerEncoding == null) {
-					Encoding enc = HttpContext.Current.Response.HeaderEncoding;
+					Encoding enc = inUnhandledException ? null : HttpContext.Current.Response.HeaderEncoding;
 					if (enc != null)
 						headerEncoding = enc;
 					else
@@ -260,9 +261,51 @@ namespace Mono.WebServer
 			return GetRequestData ();
 		}
 
+		static readonly string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
+		
 		public void ProcessRequest ()
 		{
-			HttpRuntime.ProcessRequest (this);
+			string error = null;
+			inUnhandledException = false;
+			
+			try {
+				HttpRuntime.ProcessRequest (this);
+			} catch (HttpException ex) {
+				inUnhandledException = true;
+				error = ex.GetHtmlErrorMessage ();
+			} catch (Exception ex) {
+				inUnhandledException = true;
+				HttpException hex = new HttpException (400, "Bad request", ex);
+				if (hex != null) // just a precaution
+					error = hex.GetHtmlErrorMessage ();
+				else
+					error = String.Format (defaultExceptionHtml, ex.Message);
+			}
+
+			if (!inUnhandledException)
+				return;
+			
+			if (error.Length == 0)
+				error = String.Format (defaultExceptionHtml, "Unknown error");
+
+			try {
+				SendStatus (400, "Bad request");
+				SendUnknownResponseHeader ("Connection", "close");
+				SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
+				
+				Encoding enc = Encoding.UTF8;
+				if (enc == null)
+					enc = Encoding.ASCII;
+				
+				byte[] bytes = enc.GetBytes (error);
+				
+				SendUnknownResponseHeader ("Content-Type", "text/html; charset=" + enc.WebName);
+				SendUnknownResponseHeader ("Content-Length", bytes.Length.ToString ());
+				SendResponseFromMemory (bytes, bytes.Length);
+				FlushResponse (true);
+			} catch (Exception ex) { // should "never" happen
+				throw ex;
+			}
 		}
 
 		public override void EndOfRequest ()

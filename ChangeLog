@@ -1,3 +1,14 @@
+2007-04-24  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: put the worker's
+	ProcessRequest in try/catch in order to handle uncaught exceptions
+	more gracefully.
+
+	* src/Mono.WebServer/MonoWorkerRequest.cs: more robust exception
+	handling. We no longer leave the connection open and the browser
+	spinning after an early exception (e.g. configuration exception
+	while reading the top-level web.config file) ocurred.
+
 2007-04-19  Wade Berrier  <wberrier@novell.com>
 
 	* configure.in: version bump -> 1.2.4

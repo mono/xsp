@@ -141,7 +141,10 @@ namespace Mono.WebServer
 			get {
 #if NET_2_0
 				if (headerEncoding == null) {
-					Encoding enc = inUnhandledException ? null : HttpContext.Current.Response.HeaderEncoding;
+					HttpContext ctx = HttpContext.Current;
+					HttpResponse response = ctx != null ? ctx.Response : null;
+					Encoding enc = inUnhandledException ? null :
+						response != null ? response.HeaderEncoding : null;
 					if (enc != null)
 						headerEncoding = enc;
 					else

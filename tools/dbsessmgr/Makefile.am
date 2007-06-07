@@ -1,13 +1,16 @@
 MCSFLAGS= -debug+ -debug:full -nologo
 
 dbsessmgrdir = $(prefix)/lib/xsp/1.0
-dbsessmgr_SCRIPTS = dbsessmgr.exe dbsessmgr.exe.config
+dbsessmgr_SCRIPTS = dbsessmgr.exe
+dbsessmgr_DATA = dbsessmgr.exe.config
 
 if NET_2_0
-scripts2 = dbsessmgr2.exe dbsessmgr2.exe.config
+scripts2 = dbsessmgr2.exe
+data2 = dbsessmgr2.exe.config
 endif
 dbsessmgr2dir = $(prefix)/lib/xsp/2.0
 dbsessmgr2_SCRIPTS = $(scripts2)
+dbsessmgr2_DATA = $(data2)
 
 EXTRA_DIST = $(dbsessmgr_input) dbsessmgr.exe.config dbsessmgr2.exe.config
 CLEANFILES = *.exe *.mdb

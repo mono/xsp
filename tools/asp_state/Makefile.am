@@ -1,13 +1,16 @@
 MCSFLAGS= -debug+ -debug:full -nologo
 
 aspstatedir = $(prefix)/lib/xsp/1.0
-aspstate_SCRIPTS = asp-state.exe asp-state.exe.config
+aspstate_SCRIPTS = asp-state.exe
+aspstate_DATA = asp-state.exe.config
 
 if NET_2_0
-scripts2 = asp-state2.exe asp-state2.exe.config
+scripts2 = asp-state2.exe
+data2 = asp-state2.exe.config
 endif
 aspstate2dir = $(prefix)/lib/xsp/2.0
 aspstate2_SCRIPTS = $(scripts2)
+aspstate2_DATA = $(data2)
 
 EXTRA_DIST = $(aspstate_input) asp-state.exe.config asp-state2.exe.config
 CLEANFILES = *.exe *.mdb

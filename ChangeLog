@@ -1,3 +1,9 @@
+2007-06-15  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/ApplicationServer.cs: do not skip checking
+	the path when vhost is '*'. Patch from Brian Nickel
+	<brian.nickel@gmail.com>, thanks!
+
 2007-05-06  Wade Berrier  <wberrier@novell.com>
 
 	* tools/asp_state/Makefile.am:

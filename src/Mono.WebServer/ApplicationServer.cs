@@ -477,13 +477,10 @@ namespace Mono.WebServer
 			if (vport != -1 && this.vport != -1 && vport != this.vport)
 				return false;
 
-			if (vhost != null && this.vhost != null) {
+			if (vhost != null && this.vhost != null && this.vhost != "*") {
 				int length = this.vhost.Length;
 				string lwrvhost = vhost.ToLower (CultureInfo.InvariantCulture);
 				if (haveWildcard) {
-					if (this.vhost == "*")
-						return true;
-
 					if (length > vhost.Length)
 						return false;
 

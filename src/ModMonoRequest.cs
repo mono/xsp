@@ -71,6 +71,7 @@ namespace Mono.WebServer
 		string queryString;
 		string protocol;
 		string uri;
+		string vServerName;
 		string localAddress;
 		string remoteAddress;
 		string remoteName;
@@ -103,7 +104,7 @@ namespace Mono.WebServer
 			if (shutdown)
 				return;
 
-			if (cmd != 6) {
+			if (cmd != 7) {
 				string msg = "mod_mono and xsp have different versions.";
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
@@ -111,6 +112,7 @@ namespace Mono.WebServer
 			}
 
 			verb = ReadString ();
+			vServerName = ReadString ();
 			uri = ReadString ();
 			queryString = ReadString ();
 			protocol = ReadString ();
@@ -272,6 +274,11 @@ namespace Mono.WebServer
 		public string GetUri ()
 		{
 			return uri;
+		}
+
+		public string GetVirtualServerName ()
+		{
+			return vServerName;
 		}
 
 		public string GetQueryString ()

@@ -1,3 +1,10 @@
+2007-06-20  Marek Habersack  <mhabersack@novell.com>
+
+	* src/ModMonoRequest.cs: added support for virtual hosts
+	(ServerAlias) Patch from Juraj Skripsky
+	<juraj@hotfeet.ch>, thanks! Closes bug #81878.
+	* src/ModMonoApplicationHost.cs: as above
+
 2007-06-15  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/ApplicationServer.cs: do not skip checking

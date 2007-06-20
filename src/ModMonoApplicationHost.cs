@@ -398,13 +398,17 @@ namespace Mono.WebServer
 				}
 			}
 
+			string vServerName = rr.Request.GetVirtualServerName ();
+			if (vServerName == null)
+				vServerName = vhost;
+
 			VPathToHost vapp = null;
 			string vpath = rr.GetUriPath ();
 			string path = rr.GetPhysicalPath ();
 			if (path == null) {
-				vapp = server.GetApplicationForPath (vhost, port, vpath, false);
+				vapp = server.GetApplicationForPath (vServerName, port, vpath, false);
 			} else {
-				vapp = GetOrCreateApplication (vhost, port, path, vpath);
+				vapp = GetOrCreateApplication (vServerName, port, path, vpath);
 			}
 
 			if (vapp == null) {

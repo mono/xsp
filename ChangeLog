@@ -1,5 +1,9 @@
 2007-06-22  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/BaseRequestBroker.cs: add some
+	documentation and avoid reallocating request buffers. Patch from
+	Brian Nickel <brian.nickel@gmail.com>, thanks!
+
 	* src/Mono.WebServer/BaseApplicationHost.cs: do not assume that
 	requestBroker is not null and that it is
 	BaseRequestBroker. Modified patch from Brian Nickel

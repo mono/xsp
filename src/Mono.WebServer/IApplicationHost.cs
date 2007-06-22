@@ -4,6 +4,9 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
+// Documentation:
+//	Brian Nickel
+//
 // (C) 2003 Ximian, Inc (http://www.ximian.com)
 // (C) Copyright 2004 Novell, Inc
 //
@@ -33,16 +36,79 @@ using System.Web;
 
 namespace Mono.WebServer
 {
+	/// <summary>
+	///    This interface is used for classes that serve as application
+	///    hosts.
+	/// </summary>
+	/// <remarks>
+	///    An application, as created through a <see
+	///    cref="ApplicationServer" />, exists in its own <see
+	///    cref="AppDomain" />.
+	/// </remarks>
 	public interface IApplicationHost
 	{
-		string Path { get; }	
+		/// <summary>
+		///    Gets the physical path of the hosted application.
+		/// </summary>
+		/// <value>
+		///    A <see cref="string" /> containing the physical path of
+		///    the hosted application.
+		/// </value>
+		string Path { get; }
+		
+		/// <summary>
+		///    Gets the virtual path of the hosted application.
+		/// </summary>
+		/// <value>
+		///    A <see cref="string" /> containing the virtual path of
+		///    the hosted application.
+		/// </value>
 		string VPath { get; }	
+		
+		/// <summary>
+		///    Gets the app-domain the application host exists in.
+		/// </summary>
+		/// <value>
+		///    A <see cref="AppDomain" /> object containing the
+		///    app-domain the application host exists in.
+		/// </value>
 		AppDomain Domain { get; }	
+		
+		/// <summary>
+		///    Gets and sets the request broker that manages the hosted
+		///    requests.
+		/// </summary>
+		/// <value>
+		///    A <see cref="IRequestBroker" /> object containing the
+		///    request broker that manages the hosted requests.
+		/// </value>
 		IRequestBroker RequestBroker { get; set; }
+		
+		/// <summary>
+		///    Gets the application server that created the application
+		///    host.
+		/// </summary>
+		/// <value>
+		///    A <see cref="ApplicationServer" /> object containing the
+		///    application server that created the application host.
+		/// </value>
 		ApplicationServer Server { get; set; }
+		
+		/// <summary>
+		///    Unloads the application host.
+		/// </summary>
 		void Unload ();
 	}
 	
+	/// <summary>
+	///    This interface is used for classes that manage requests.
+	/// </summary>
+	/// <remarks>
+	///    A request broker serves as an intermediary between <see
+	///    cref="Worker" /> and <see cref="MonoWorkerRequest" /> to handle
+	///    the interaction between app-domains. In addition it should
+	///    inherit <see cref="MarshalByRefObject" />.
+	/// </remarks>
 	public interface IRequestBroker
 	{
 	}

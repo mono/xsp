@@ -118,7 +118,9 @@ namespace Mono.WebServer
 				mwr.CloseConnection ();
 			} catch {
 			} finally {
-				((BaseRequestBroker) requestBroker).UnregisterRequest (mwr.RequestId);
+				BaseRequestBroker brb = requestBroker as BaseRequestBroker;
+				if (brb != null)
+					brb.UnregisterRequest (mwr.RequestId);
 			}
 		}
 	}

@@ -1,3 +1,10 @@
+2007-06-22  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: do not assume that
+	requestBroker is not null and that it is
+	BaseRequestBroker. Modified patch from Brian Nickel
+	<brian.nickel@gmail.com>, thanks!
+
 2007-06-20  Marek Habersack  <mhabersack@novell.com>
 
 	* src/ModMonoRequest.cs: added support for virtual hosts

@@ -1,5 +1,7 @@
 2007-06-22  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/IWebSource.cs: more docs from Brian Nickel.
+
 	* src/Mono.WebServer/IApplicationHost.cs: more docs from Brian
 	Nickel.
 

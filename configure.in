@@ -117,5 +117,6 @@ AC_OUTPUT([
 	tools/asp_state/AssemblyInfo.cs
 	tools/dbsessmgr/Makefile
 	tools/dbsessmgr/AssemblyInfo.cs
+	docs/Makefile
 ])
 

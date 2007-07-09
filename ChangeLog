@@ -1,3 +1,9 @@
+2007-07-09  Wade Berrier  <wberrier@novell.com>
+
+	* configure.in:
+	* docs/Makefile.am: empty file so that this dir gets included
+	so we can build from a tarball
+
 2007-06-22  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/MonoWorkerRequest.cs: docs from Brian

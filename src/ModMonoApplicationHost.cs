@@ -263,7 +263,7 @@ namespace Mono.WebServer
 	}
 	
 	//
-	// ModMonoWorker: The worker that do the initial processing of mod_mono
+	// ModMonoWorker: The worker that does the initial processing of mod_mono
 	// requests.
 	//
 	internal class ModMonoWorker: Worker
@@ -272,7 +272,8 @@ namespace Mono.WebServer
 		public LingeringNetworkStream Stream;
 		ModMonoRequest modRequest;
 		bool closed;
-
+		bool unregisterHandlerRegistered;
+		
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
 			Stream = new LingeringNetworkStream (client, true);
@@ -427,7 +428,12 @@ namespace Mono.WebServer
 			}
 			modRequest = rr.Request;
 			
-			broker = (ModMonoRequestBroker) vapp.RequestBroker; 
+			broker = (ModMonoRequestBroker) vapp.RequestBroker;
+			if (!unregisterHandlerRegistered) {
+				broker.UnregisterRequestEvent += new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
+				unregisterHandlerRegistered = true;
+			}
+			
 			requestId = broker.RegisterRequest (this);
 			
 			host.ProcessRequest (requestId, 
@@ -444,6 +450,14 @@ namespace Mono.WebServer
 								modRequest.GetAllHeaderValues());
 		}
 
+		void OnUnregisterRequest (object sender, UnregisterRequestEventArgs args)
+		{
+			if (requestId == -1 || requestId != args.RequestId)
+				return;
+			
+			requestId = -1;
+		}
+		
 		public override int Read (byte[] buffer, int position, int size)
 		{
 			return modRequest.GetClientBlock (buffer, position, size);

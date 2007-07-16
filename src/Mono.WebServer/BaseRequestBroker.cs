@@ -34,6 +34,31 @@ using System.Collections;
 namespace Mono.WebServer
 {
 	/// <summary>
+	///   This class extends <see cref="EventArgs"/> to provide arguments for
+	///   <see cref="BaseRequestBroker.UnregisterRequestEventHandler"/>.
+	/// </summary>
+	public class UnregisterRequestEventArgs : EventArgs
+	{
+		int _requestId;
+
+		/// <summary>
+		///   Contains the id of a request that has just been unregistered.
+		/// </summary>
+		public int RequestId {
+			get { return _requestId; }
+		}
+
+		/// <summary>
+		///   Constructs an instance of the class for the specified request ID
+		/// </summary>
+		/// <param name="requestId">Request of the ID that has just been unregistered</param>
+		public UnregisterRequestEventArgs (int requestId)
+		{
+			_requestId = requestId;
+		}
+	}
+	
+	/// <summary>
 	///    This class provides a request broker covering the base
 	///    functionality.
 	/// </summary>
@@ -44,6 +69,23 @@ namespace Mono.WebServer
 	/// </remarks>
 	public class BaseRequestBroker: MarshalByRefObject, IRequestBroker
 	{
+		/// <summary>
+		///   This delegate is used to handle <see cref="UnregisterRequestEvent"/>
+		/// </summary>
+		/// <param name="sender">Origin of the event</param>
+		/// <param name="args">An <see cref="UnregisterRequestEventArgs"/> object with the event-specific arguments</param>
+		public delegate void UnregisterRequestEventHandler (object sender, UnregisterRequestEventArgs args);
+
+		/// <summary>
+		///   This event is called right after the request has been unregistered by the broker.
+		///   This gives the chance to clean up any private data associated with the event.
+		/// </summary>
+		/// <remarks>
+		///   The event handlers are invoked with a lock held on the issuing object, so that the event receiver
+		///   can do the cleanup without the chance of another thread stepping in at the wrong time.
+		/// </remarks>
+		public event UnregisterRequestEventHandler UnregisterRequestEvent;
+		
 		/// <summary>
 		///    Contains the initial request capacity of a <see
 		///    cref="BaseRequestBroker" />.
@@ -187,6 +229,19 @@ namespace Mono.WebServer
 		/// <param name="id">
 		///    A <see cref="int" /> containing the ID of the request.
 		/// </param>
+		/// <remarks>
+		///    After unregistering the request and freeing all of its data, the method
+		///    invokes the <see cref="UnregisterRequestEvent"/> handlers (if any).
+		///    <note type="caution"><para>
+		///       At the time the event handlers are called the request ID is invalid and
+		///       *MUST NOT* be used for any purpose other than referencing the event
+		///       receiver's internal housekeeping records for that particular ID.
+		///    </para></note>
+		///    <note type="caution"><para>
+		///       Make the event handler code as fast as possible, as until it returns no other
+		///       request shall be allocated another id.
+		///    </para></note>
+		/// </remarks>
 		public void UnregisterRequest (int id)
 		{
 			lock (reqlock) {
@@ -201,9 +256,29 @@ namespace Mono.WebServer
 				if (a != null)
 					Array.Clear (a, 0, a.Length);
 				requests_count--;
+
+				DoUnregisterRequest (id);
 			}
 		}
 
+		/// <summary>
+		///    Invokes registered handlers of <see cref="UnregisterRequestEvent"/>. Each handler is
+		///    passed an arguments object which contains the ID of a request that has just been unregistered.
+		/// </summary>
+		/// <param name="id">ID of a request that has just been unregistered</param>
+		void DoUnregisterRequest (int id)
+		{
+			if (UnregisterRequestEvent == null)
+				return;
+			Delegate[] handlers = UnregisterRequestEvent.GetInvocationList ();
+			if (handlers == null || handlers.Length == 0)
+				return;
+			
+			UnregisterRequestEventArgs args = new UnregisterRequestEventArgs (id);
+			foreach (UnregisterRequestEventHandler handler in handlers)
+				handler (this, args);
+		}
+		
 		/// <summary>
 		///    Gets whether or not the request with a specified ID is
 		///    valid.

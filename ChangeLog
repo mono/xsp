@@ -1,3 +1,12 @@
+2007-07-16  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseRequestBroker.cs: added an event fired
+	when the request has just been unregistered.
+
+	* src/ModMonoApplicationHost.cs: add an event handler for the
+	UnregisterRequest event in the request broker to make sure that
+	the same request is never unregistered twice.
+
 2007-07-09  Wade Berrier  <wberrier@novell.com>
 
 	* configure.in:

@@ -272,7 +272,6 @@ namespace Mono.WebServer
 		public LingeringNetworkStream Stream;
 		ModMonoRequest modRequest;
 		bool closed;
-		bool unregisterHandlerRegistered;
 		
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
@@ -429,10 +428,7 @@ namespace Mono.WebServer
 			modRequest = rr.Request;
 			
 			broker = (ModMonoRequestBroker) vapp.RequestBroker;
-			if (!unregisterHandlerRegistered) {
-				broker.UnregisterRequestEvent += new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
-				unregisterHandlerRegistered = true;
-			}
+			broker.UnregisterRequestEvent += new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
 			
 			requestId = broker.RegisterRequest (this);
 			
@@ -452,6 +448,10 @@ namespace Mono.WebServer
 
 		void OnUnregisterRequest (object sender, UnregisterRequestEventArgs args)
 		{
+			BaseRequestBroker broker = sender as BaseRequestBroker;
+			if (broker != null)
+				broker.UnregisterRequestEvent -= new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
+
 			if (requestId == -1 || requestId != args.RequestId)
 				return;
 			

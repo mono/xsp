@@ -404,6 +404,8 @@ namespace Mono.WebServer
 		/// </remarks>
 		public void Close (int requestId)
 		{
+//			Console.WriteLine ("{0}.Close ({1})", this, requestId);
+//			Console.WriteLine (Environment.StackTrace);
 			Worker worker = GetWorker (requestId);
 			if (worker != null)
 				worker.Close ();

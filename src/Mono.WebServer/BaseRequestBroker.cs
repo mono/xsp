@@ -42,7 +42,7 @@ namespace Mono.WebServer
 		int _requestId;
 
 		/// <summary>
-		///   Contains the id of a request that has just been unregistered.
+		///   Contains the id of a request that is about to be unregistered.
 		/// </summary>
 		public int RequestId {
 			get { return _requestId; }
@@ -77,7 +77,7 @@ namespace Mono.WebServer
 		public delegate void UnregisterRequestEventHandler (object sender, UnregisterRequestEventArgs args);
 
 		/// <summary>
-		///   This event is called right after the request has been unregistered by the broker.
+		///   This event is called just before the request is unregistered by the broker.
 		///   This gives the chance to clean up any private data associated with the event.
 		/// </summary>
 		/// <remarks>
@@ -230,10 +230,10 @@ namespace Mono.WebServer
 		///    A <see cref="int" /> containing the ID of the request.
 		/// </param>
 		/// <remarks>
-		///    After unregistering the request and freeing all of its data, the method
+		///    Before unregistering the request and freeing all of its data, the method
 		///    invokes the <see cref="UnregisterRequestEvent"/> handlers (if any).
 		///    <note type="caution"><para>
-		///       At the time the event handlers are called the request ID is invalid and
+		///       After the event handlers return the request ID is invalid and
 		///       *MUST NOT* be used for any purpose other than referencing the event
 		///       receiver's internal housekeeping records for that particular ID.
 		///    </para></note>
@@ -250,22 +250,22 @@ namespace Mono.WebServer
 				if (!request_ids [id])
 					return;
 				
+				DoUnregisterRequest (id);
+				
 				requests [id] = null;
 				request_ids [id] = false;
 				byte[] a = buffers [id];
 				if (a != null)
 					Array.Clear (a, 0, a.Length);
 				requests_count--;
-
-				DoUnregisterRequest (id);
 			}
 		}
 
 		/// <summary>
 		///    Invokes registered handlers of <see cref="UnregisterRequestEvent"/>. Each handler is
-		///    passed an arguments object which contains the ID of a request that has just been unregistered.
+		///    passed an arguments object which contains the ID of a request that is about to be unregistered.
 		/// </summary>
-		/// <param name="id">ID of a request that has just been unregistered</param>
+		/// <param name="id">ID of a request that is about to be unregistered</param>
 		void DoUnregisterRequest (int id)
 		{
 			if (UnregisterRequestEvent == null)

@@ -343,7 +343,7 @@ namespace Mono.WebServer
 			Worker w;
 
 			lock (reqlock) {
-				w = (Worker) requests [IdToIndex (requestId)];
+				w = GetWorker (requestId);
 				if (w == null)
 					return 0;
 
@@ -421,7 +421,7 @@ namespace Mono.WebServer
 		/// </remarks>
 		public void Close (int requestId)
 		{
-//			Console.WriteLine ("{0}.Close ({1})", this, requestId);
+//			Console.WriteLine ("{0}.Close (0x{1})", this, requestId.ToString ("x"));
 //			Console.WriteLine (Environment.StackTrace);
 			Worker worker = GetWorker (requestId);
 			if (worker != null)

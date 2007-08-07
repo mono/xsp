@@ -1,3 +1,4 @@
+
 //
 // Mono.WebServer.BaseRequestBroker
 //
@@ -101,8 +102,8 @@ namespace Mono.WebServer
 		/// <summary>
 		///    Contains the request ID's.
 		/// </summary>
-		bool[] request_ids = new bool [INITIAL_REQUESTS];
-		
+		int[] request_ids = new int [INITIAL_REQUESTS];
+
 		/// <summary>
 		///    Contains the registered workers.
 		/// </summary>
@@ -117,7 +118,12 @@ namespace Mono.WebServer
 		///    Contains the number of active requests.
 		/// </summary>
 		int requests_count = 0;
-		
+
+		/// <summary>
+		///    Contains the total number of requests served so far.
+		///    May freely wrap around.
+		/// </summary>
+		uint requests_served = 0;
 
 		/// <summary>
 		///    Grows the size of the request allocation tables by 33%.
@@ -138,7 +144,7 @@ namespace Mono.WebServer
 		void GrowRequests (ref int curlen, ref int newid)
 		{
 			int newsize = curlen + curlen/3;
-			bool[] new_request_ids = new bool [newsize];
+			int[] new_request_ids = new int [newsize];
 			Worker[] new_requests = new Worker [newsize];
 			byte[][] new_buffers = new byte [newsize][];
 
@@ -175,19 +181,26 @@ namespace Mono.WebServer
 			int reqlen = request_ids.Length;
 			int newid = -1;
 			
+			requests_served++; // increment to 1 before putting into request_ids
+					   // so that the 0 id is reserved for slot not used
+			if (requests_served == 0) // and check for wrap-around for the above
+				requests_served++; // condition
+
 			requests_count++;
 			if (requests_count >= reqlen)
 				GrowRequests (ref reqlen, ref newid);
 			if (newid == -1)
 				for (int i = 0; i < reqlen; i++) {
-					if (!request_ids [i]) {
+					if (request_ids [i] == 0) {
 						newid = i;
 						break;
 					}
 			}
 
 			if (newid != -1) {
-				request_ids [newid] = true;
+				// TODO: newid had better not exceed 0xFFFF.
+				newid = (int)((newid & 0xFFFF) | ((requests_served & 0x7FFF) << 16));
+				request_ids [IdToIndex(newid)] = newid;
 				return newid;
 			}
 				
@@ -210,7 +223,7 @@ namespace Mono.WebServer
 			int result = -1;
 			
 			lock (reqlock) {
-				result = GetNextRequestId ();
+				result = IdToIndex (GetNextRequestId ());
 				requests [result] = worker;
 				
 				// Don't create a new array if one already
@@ -220,9 +233,13 @@ namespace Mono.WebServer
 					buffers [result] = new byte [16384];
 			}
 
-			return result;
+			return request_ids [result];
 		}
-		
+
+		private int IdToIndex(int requestId) {
+			return requestId & 0xFFFF;
+		}
+
 		/// <summary>
 		///    Unregisters a request with the current instance.
 		/// </summary>
@@ -245,18 +262,17 @@ namespace Mono.WebServer
 		public void UnregisterRequest (int id)
 		{
 			lock (reqlock) {
-				if (id < 0 || id > request_ids.Length - 1)
-					return;
-				if (!request_ids [id])
+				if (!ValidRequest (id))
 					return;
 				
 				DoUnregisterRequest (id);
-				
-				requests [id] = null;
-				request_ids [id] = false;
-				byte[] a = buffers [id];
+				int idx = IdToIndex (id);
+
+				byte[] a = buffers [idx];
 				if (a != null)
 					Array.Clear (a, 0, a.Length);
+				requests [idx] = null;
+				request_ids [idx] = 0;
 				requests_count--;
 			}
 		}
@@ -292,8 +308,9 @@ namespace Mono.WebServer
 		/// </returns>
 		protected bool ValidRequest (int requestId)
 		{
-			return (requestId >= 0 && requestId < request_ids.Length && request_ids [requestId] &&
-				buffers [requestId] != null);
+			int idx = IdToIndex (requestId);
+			return (idx >= 0 && idx < request_ids.Length && request_ids [idx] == requestId &&
+				buffers [idx] != null);
 		}
 		
 		/// <summary>
@@ -320,24 +337,24 @@ namespace Mono.WebServer
 		public int Read (int requestId, int size, out byte[] buffer)
 		{
 			buffer = null;
+			
 			if (!ValidRequest (requestId))
 				return 0;
-			
-			if (size == 16384) {
-				buffer = buffers [requestId];
-			} else {
-				buffer = new byte[size];
-			}
 			Worker w;
+
 			lock (reqlock) {
-				w = (Worker) requests [requestId];
+				w = (Worker) requests [IdToIndex (requestId)];
+				if (w == null)
+					return 0;
+
+				if (size == 16384) {
+					buffer = buffers [IdToIndex (requestId)];
+				} else {
+					buffer = new byte[size];
+				}
 			}
 
-			int nread = 0;
-			if (w != null)
-				nread = w.Read (buffer, 0, size);
-
-			return nread;
+			return w.Read (buffer, 0, size);
 		}
 		
 		/// <summary>
@@ -353,11 +370,11 @@ namespace Mono.WebServer
 		/// </returns>
 		public Worker GetWorker (int requestId)
 		{
-			if (!ValidRequest (requestId))
-				return null;
-			
 			lock (reqlock) {
-				return (Worker) requests [requestId];
+				if (!ValidRequest (requestId))
+					return null;
+			
+				return (Worker) requests [IdToIndex (requestId)];
 			}
 		}
 		

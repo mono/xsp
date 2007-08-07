@@ -1,3 +1,13 @@
+2007-08-07  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseRequestBroker.cs: applied patch by Joshua
+	Tauberer (with minor changes) proposed in bug #82057. The change
+	turns request id into a compound of the unique request id in the
+	upper 16 bits and the index into request array in the lower 16
+	bits.
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: fixed documentation.
+
 2007-08-06  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/BaseApplicationHost.cs: added some more

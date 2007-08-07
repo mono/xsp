@@ -58,7 +58,8 @@ namespace Mono.WebServer
 		}
 
 		/// <summary>
-		///   Event handler for the <see cref="AppDomain.DomainUnloaded"/> event. Calls <see cref="Server.DestroyHost"/>
+		///   Event handler for the <see cref="System.AppDomain.DomainUnload"/>
+		///   event. Calls <see cref="ApplicationServer.DestroyHost"/>
 		///   to shut the host down.
 		/// </summary>
 		public void OnUnload (object o, EventArgs args)

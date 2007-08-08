@@ -43,7 +43,7 @@ xsp_sources = server.cs security.cs
 xsp_build_sources = $(addprefix $(srcdir)/, $(xsp_sources)) AssemblyInfo.cs
 
 modmono_only = ModMonoRequest.cs \
-	      ModMonoWorkerRequest.cs \	
+	      ModMonoWorkerRequest.cs \
 	      ModMonoApplicationHost.cs \
 	      ModMonoTCPWebSource.cs \
 	      ModMonoRequestBroker.cs \

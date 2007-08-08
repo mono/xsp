@@ -1,5 +1,10 @@
 2007-08-08  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/MonoWorkerRequest.cs: don't use the
+	SendResponseFromFile (IntPtr, long, long) overload from the
+	SendResponseFromFile (string, long, long) one - prevents double
+	close of the file handle.
+
 	* src/Mono.WebServer/ApplicationServer.cs: leave only the
 	implementation of the ApplicationServer class here, the other
 	classes are moved to own files, below.

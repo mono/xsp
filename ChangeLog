@@ -1,3 +1,36 @@
+2007-08-08  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/XSPApplicationHost.cs: leave only the
+	implementation of the XSPApplicationHost here, the other classes
+	are moved to own files, below.
+
+	* src/Mono.WebServer/XSPWorker.cs: new file, moved XSPWorker class
+	implementation here.
+
+	* src/Mono.WebServer/XSPWebSource.cs: new file, moved XSPWebSource
+	class implementation here.
+
+	* src/Mono.WebServer/XSPRequestBroker.cs: new file, moved
+	XSPRequestBroker class implementation here.
+
+	* src/Mono.WebServer/Makefile.am (monowebserver_sources): added
+	new source files.
+
+	* src/ModMonoApplicationHost.cs: leave only the implementation of
+	the ModMonoApplicationHost class here, the other classes are moved
+	to own files, below.
+
+	* src/ModMonoWorker.cs: new file, moved ModMonoWorker class
+	implementation here.
+
+	* src/ModMonoWebSource.cs: new file, moved ModMonoWebSource class
+	implementation here.
+
+	* src/ModMonoRequestBroker.cs: new file, moved
+	ModMonoRequestBroker class implementation here.
+	
+	* src/Makefile.am (modmono_only): added new source files.
+
 2007-08-07  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/BaseRequestBroker.cs: applied patch by Joshua

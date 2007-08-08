@@ -32,6 +32,9 @@ monowebserver_sources  = \
 			MonoWorkerRequest.cs \
 			XSPApplicationHost.cs \
 			XSPWorkerRequest.cs \
+			XSPRequestBroker.cs \
+			XSPWebSource.cs \
+			XSPWorker.cs \
 			Tracing.cs
 
 monowebserver_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo.cs)

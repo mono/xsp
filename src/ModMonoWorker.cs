@@ -42,10 +42,13 @@ namespace Mono.WebServer
 	//
 	internal class ModMonoWorker: Worker
 	{
-		ApplicationServer server;
 		public LingeringNetworkStream Stream;
+		
+		ApplicationServer server;
 		ModMonoRequest modRequest;
 		bool closed;
+		int requestId = -1;
+		ModMonoRequestBroker broker = null;
 		
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
@@ -53,9 +56,6 @@ namespace Mono.WebServer
 			Stream.EnableLingering = false;
 			this.server = server;
 		}
-
-		int requestId = -1;
-		ModMonoRequestBroker broker = null;
 			
 		public override void Run (object state)
 		{

@@ -1,5 +1,18 @@
 2007-08-08  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/ApplicationServer.cs: leave only the
+	implementation of the ApplicationServer class here, the other
+	classes are moved to own files, below.
+
+	* src/Mono.WebServer/Paths.cs: new file, moved Paths class
+	implementation here.
+
+	* src/Mono.WebServer/HttpErrors.cs: new file, moved HttpErrors
+	class implementation here.
+
+	* src/Mono.WebServer/VPathToHost.cs: new file, moved VPathToHost
+	class implementation here.
+
 	* src/Mono.WebServer/XSPApplicationHost.cs: leave only the
 	implementation of the XSPApplicationHost here, the other classes
 	are moved to own files, below.

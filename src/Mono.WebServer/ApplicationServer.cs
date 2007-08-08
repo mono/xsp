@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Lluis Sanchez Gual (lluis@ximian.com)
 //
-// Copyright (c) Copyright 2002,2003,2004 Novell, Inc
+// Copyright (c) Copyright 2002-2007 Novell, Inc
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -111,7 +111,7 @@ namespace Mono.WebServer
 				Console.WriteLine("Registering application:");
 				Console.WriteLine("    Host:          {0}", (vhost != null) ? vhost : "any");
 				Console.WriteLine("    Port:          {0}", (vport != -1) ?
-									     vport.ToString () : "any");
+						  vport.ToString () : "any");
 
 				Console.WriteLine("    Virtual path:  {0}", vpath);
 				Console.WriteLine("    Physical path: {0}", fullPath);
@@ -212,7 +212,7 @@ namespace Mono.WebServer
 
 				if (app.Length < 2 || app.Length > 4)
 					throw new ArgumentException ("Should be something like " +
-								"[[hostname:]port:]VPath:realpath");
+								     "[[hostname:]port:]VPath:realpath");
 
 				int vport;
 				string vhost;
@@ -409,214 +409,6 @@ namespace Mono.WebServer
 		public override object InitializeLifetimeService ()
 		{
 			return null;
-		}
-	}
-
-	public class VPathToHost
-	{
-		public readonly string vhost;
-		public readonly int vport;
-		public readonly string vpath;
-		public string realPath;
-		public readonly bool haveWildcard;
-
-		public IApplicationHost AppHost;
-		public IRequestBroker RequestBroker;
-
-		public VPathToHost (string vhost, int vport, string vpath, string realPath)
-		{
-			this.vhost = (vhost != null) ? vhost.ToLower (CultureInfo.InvariantCulture) : null;
-			this.vport = vport;
-			this.vpath = vpath;
-			if (vpath == null || vpath == "" || vpath [0] != '/')
-				throw new ArgumentException ("Virtual path must begin with '/': " + vpath,
-								"vpath");
-
-			this.realPath = realPath;
-			this.AppHost = null;
-			if (vhost != null && this.vhost.Length != 0 && this.vhost [0] == '*') {
-				haveWildcard = true;
-				if (this.vhost.Length > 2 && this.vhost [1] == '.')
-					this.vhost = this.vhost.Substring (2);
-			}
-		}
-
-
-		public bool TryClearHost (IApplicationHost host)
-		{
-			if (this.AppHost == host) {
-				this.AppHost = null;
-				return true;
-			}
-
-			return false;
-		}
-
-		public void UnloadHost ()
-		{
-			if (AppHost != null)
-				AppHost.Unload ();
-
-			AppHost = null;
-		}
-
-		public bool Redirect (string path, out string redirect)
-		{
-			redirect = null;
-			int plen = path.Length;
-			if (plen == this.vpath.Length - 1) {
-				redirect = this.vpath;
-				return true;
-			}
-
-			return false;
-		}
-
-		public bool Match (string vhost, int vport, string vpath)
-		{
-			if (vport != -1 && this.vport != -1 && vport != this.vport)
-				return false;
-
-			if (vhost != null && this.vhost != null && this.vhost != "*") {
-				int length = this.vhost.Length;
-				string lwrvhost = vhost.ToLower (CultureInfo.InvariantCulture);
-				if (haveWildcard) {
-					if (length > vhost.Length)
-						return false;
-
-					if (length == vhost.Length && this.vhost != lwrvhost)
-						return false;
-
-					if (vhost [vhost.Length - length - 1] != '.')
-						return false;
-
-					if (!lwrvhost.EndsWith (this.vhost))
-						return false;
-
-				} else if (this.vhost != lwrvhost) {
-					return false;
-				}
-			}
-
-			int local = vpath.Length;
-			int vlength = this.vpath.Length;
-			if (vlength > local) {
-				// Check for /xxx requests to be redirected to /xxx/
-				if (this.vpath [vlength - 1] != '/')
-					return false;
-
-				return (vlength - 1 == local && this.vpath.Substring (0, vlength - 1) == vpath);
-			}
-
-			return (vpath.StartsWith (this.vpath));
-		}
-
-		public void CreateHost (ApplicationServer server, WebSource webSource)
-		{
-			string v = vpath;
-			if (v != "/" && v.EndsWith ("/")) {
-				v = v.Substring (0, v.Length - 1);
-			}
-
-			AppHost = ApplicationHost.CreateApplicationHost (webSource.GetApplicationHostType(), v, realPath) as IApplicationHost;
-			AppHost.Server = server;
-			
-			// Link the host in the application domain with a request broker in the main domain
-			RequestBroker = webSource.CreateRequestBroker ();
-			AppHost.RequestBroker = RequestBroker;
-		}
-	}
-	
-	public class HttpErrors
-	{
-		static byte [] error500;
-		static byte [] badRequest;
-
-		static HttpErrors ()
-		{
-			string s = "HTTP/1.0 500 Server error\r\n" +
-				   "Connection: close\r\n\r\n" +
-				   "<html><head><title>500 Server Error</title><body><h1>Server error</h1>\r\n" +
-				   "Your client sent a request that was not understood by this server.\r\n" +
-				   "</body></html>\r\n";
-			error500 = Encoding.ASCII.GetBytes (s);
-
-			string br = "HTTP/1.0 400 Bad Request\r\n" + 
-				"Connection: close\r\n\r\n" +
-				"<html><head><title>400 Bad Request</title></head>" +
-				"<body><h1>Bad Request</h1>The request was not understood" +
-				"<p></body></html>";
-
-			badRequest = Encoding.ASCII.GetBytes (br);
-		}
-
-		public static byte [] NotFound (string uri)
-		{
-			string s = String.Format ("HTTP/1.0 404 Not Found\r\n" + 
-				"Connection: close\r\n\r\n" +
-				"<html><head><title>404 Not Found</title></head>\r\n" +
-				"<body><h1>Not Found</h1>The requested URL {0} was not found on this " +
-				"server.<p>\r\n</body></html>\r\n", uri);
-
-			return Encoding.ASCII.GetBytes (s);
-		}
-
-		public static byte [] BadRequest ()
-		{
-			return badRequest;
-		}
-
-		public static byte [] ServerError ()
-		{
-			return error500;
-		}
-	}
-
-	public class Paths {
-		private Paths ()
-		{
-		}
-
-		public static void GetPathsFromUri (string uri, out string realUri, out string pathInfo)
-		{
-			// There's a hidden missing feature here... :)
-			realUri = uri; pathInfo = "";
-			string basepath = HttpRuntime.AppDomainAppPath;
-			string vpath = HttpRuntime.AppDomainAppVirtualPath;
-			if (vpath [vpath.Length - 1] != '/')
-				vpath += '/';
-
-			if (vpath.Length > uri.Length)
-				return;
-
-			uri = uri.Substring (vpath.Length);
-			while (uri.Length > 0 && uri [0] == '/')
-				uri = uri.Substring (1);
-
-			int dot, slash;
-			int lastSlash = uri.Length;
-			bool windows = (Path.DirectorySeparatorChar == '\\');
-
-			for (dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
-				slash = uri.IndexOf ('/', dot);
-				string partial;
-				if (slash == -1)
-					slash = lastSlash;
-
-				partial = uri.Substring (0, slash);
-				lastSlash = slash;
-				string partial_win = null;
-				if (windows)
-					partial_win = partial.Replace ('/', '\\');
-
-				string path = Path.Combine (basepath, (windows ? partial_win : partial));
-				if (!File.Exists (path))
-					continue;
-				
-				realUri = vpath + uri.Substring (0, slash);
-				pathInfo = uri.Substring (slash);
-				break;
-			}
 		}
 	}
 }

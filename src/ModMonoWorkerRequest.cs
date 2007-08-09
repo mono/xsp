@@ -125,12 +125,16 @@ namespace Mono.WebServer
 
 		static ModMonoWorkerRequest ()
 		{
+			try {
 #if NET_2_0
-			string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
+				string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
 #else
-			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+				string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 #endif
-			SetDefaultIndexFiles (indexes);
+				SetDefaultIndexFiles (indexes);
+			} catch (Exception ex) {
+				Console.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
+			}
 
 			// by default the client certificate validity (CCV) checks are done by both Apache and Mono
 			// but this can be limited to either Apache or Mono using the MOD_MONO_CCV environment variable

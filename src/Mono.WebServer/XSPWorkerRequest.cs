@@ -106,12 +106,17 @@ namespace Mono.WebServer
 			server_software = String.Format ("{0}/{1}", title, version); 
 			serverHeader = String.Format ("Server: {0} {1}\r\n", server_software, plat);
 
+			
+			try {
 #if NET_2_0
-			string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
+				string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
 #else
-			string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
+				string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
 #endif
-			SetDefaultIndexFiles (indexes);
+				SetDefaultIndexFiles (indexes);
+			} catch (Exception ex) {
+				Console.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
+			}
 		}
 
 		static bool CheckOS ()

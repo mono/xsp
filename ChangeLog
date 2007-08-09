@@ -1,5 +1,10 @@
 2007-08-09  Marek Habersack  <mhabersack@novell.com>
 
+	* src/ModMonoWorkerRequest.cs,
+	src/Mono.WebServer/XSPWorkerRequest.cs: do not fail if default
+	index files configuration cannot be retrieved. Based on patch from
+	Juraj Skripsky <juraj@hotfeet.ch>, thanks! Fixes bug #82379.
+
 	* src/ModMonoWorker.cs: move request unregister call from the
 	finally block to the catch block. This is to avoid unregistering
 	the request while it is still being processed by the HttpRuntime

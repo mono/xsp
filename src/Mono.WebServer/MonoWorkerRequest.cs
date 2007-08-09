@@ -798,7 +798,7 @@ namespace Mono.WebServer
 			FileStream file = null;
 			try {
 				file = File.OpenRead (filename);
-				SendResponseFromFile (file.Handle, offset, length);
+				SendFromStream (file, offset, length);
 			} finally {
 				if (file != null)
 					file.Close ();

@@ -1,5 +1,5 @@
 //
-// Mono.WebServer.ModMonoApplicationHost
+// Mono.WebServer.ModMonoWorker
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
@@ -61,15 +61,14 @@ namespace Mono.WebServer
 		{
 			try {
 				InnerRun (state);
-			} catch (FileNotFoundException fnf) {
-				// We print this one, as it might be a sign of a bad deployment
-				// once we require the .exe and Mono.WebServer in bin or the GAC.
-				Console.Error.WriteLine (fnf);
-			} catch (IOException) {
-				// This is ok (including EndOfStreamException)
 			} catch (Exception e) {
+				// FileNotFoundException might be a sign of a bad deployment
+				// once we require the .exe and Mono.WebServer in bin or the GAC.
+
+				// IOException, like EndOfStreamException, might be ok.
+
 				Console.Error.WriteLine (e);
-			} finally {
+
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
 					if (Stream != null){
@@ -207,17 +206,17 @@ namespace Mono.WebServer
 			requestId = broker.RegisterRequest (this);
 			
 			host.ProcessRequest (requestId, 
-								modRequest.GetHttpVerbName(), 
-								modRequest.GetQueryString(), 
-								modRequest.GetUri(), 
-								modRequest.GetProtocol(), 
-								modRequest.GetLocalAddress(), 
-								modRequest.GetServerPort(), 
-								modRequest.GetRemoteAddress(), 
-								modRequest.GetRemotePort(), 
-								modRequest.GetRemoteName(), 
-								modRequest.GetAllHeaders(),
-								modRequest.GetAllHeaderValues());
+					     modRequest.GetHttpVerbName(), 
+					     modRequest.GetQueryString(), 
+					     modRequest.GetUri(), 
+					     modRequest.GetProtocol(), 
+					     modRequest.GetLocalAddress(), 
+					     modRequest.GetServerPort(), 
+					     modRequest.GetRemoteAddress(), 
+					     modRequest.GetRemotePort(), 
+					     modRequest.GetRemoteName(), 
+					     modRequest.GetAllHeaders(),
+					     modRequest.GetAllHeaderValues());
 		}
 
 		void OnUnregisterRequest (object sender, UnregisterRequestEventArgs args)

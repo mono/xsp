@@ -204,9 +204,9 @@ namespace Mono.WebServer
 		{
 			try {
 				stream.Write (buffer, position, size);
-			} catch (Exception) {
+			} catch (Exception ex) {
+				Console.WriteLine ("Peer unexpectedly closed the connection on write. Closing our end.\n{0}", ex);
 				Close ();
-				throw;
 			}
 		}
 		

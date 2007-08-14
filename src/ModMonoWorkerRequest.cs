@@ -555,7 +555,8 @@ namespace Mono.WebServer
 
 			byte [] readBuffer;
 			int nr = requestBroker.Read (requestId, size, out readBuffer);
-			Buffer.BlockCopy (readBuffer, 0, buffer, 0, nr);
+			if (nr > 0 && readBuffer != null)
+				Buffer.BlockCopy (readBuffer, 0, buffer, 0, nr);
 			return nr;
 		}
 

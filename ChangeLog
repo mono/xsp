@@ -1,3 +1,9 @@
+2007-08-14  Marek Habersack  <mhabersack@novell.com>
+
+	* src/ModMonoWorkerRequest.cs: ReadEntityBody makes sure the
+	number of bytes to copy is > 0 and that the read buffer is not
+	null.
+
 2007-08-09  Marek Habersack  <mhabersack@novell.com>
 
 	* src/ModMonoWorkerRequest.cs,

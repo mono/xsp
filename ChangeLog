@@ -1,5 +1,11 @@
 2007-08-14  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/XSPWorker.cs: do not rethrow an exception
+	that might occur on write, write an error message to the console
+	and close our end of the connection instead. Fixes bug #81699.
+
+2007-08-14  Marek Habersack  <mhabersack@novell.com>
+
 	* src/ModMonoWorkerRequest.cs: ReadEntityBody makes sure the
 	number of bytes to copy is > 0 and that the read buffer is not
 	null.

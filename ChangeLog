@@ -1,3 +1,9 @@
+2007-08-18  Josh Tauberer <jit@occams.info>
+
+	* src/Mono.WebServer/BaseRequestBroker.cs: Correct a mistake
+	in my previous patch: checking for wrap-around on requests_served
+	counter, since we bitmask it 0x7FFF, wrap-around occurs at 0x8000.
+
 2007-08-16  Wade Berrier  <wberrier@novell.com>
 
 	* configure.in: version bump -> 1.2.5

@@ -183,8 +183,8 @@ namespace Mono.WebServer
 			
 			requests_served++; // increment to 1 before putting into request_ids
 					   // so that the 0 id is reserved for slot not used
-			if (requests_served == 0) // and check for wrap-around for the above
-				requests_served++; // condition
+			if (requests_served == 0x8000) // and check for wrap-around for the above
+				requests_served = 1; // making sure we don't exceed 0x7FFF or go negative
 
 			requests_count++;
 			if (requests_count >= reqlen)

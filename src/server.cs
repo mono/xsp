@@ -237,8 +237,19 @@ namespace Mono.XSP
 			}
 		}
 
+		public static void CurrentDomain_UnhandledException (object sender, UnhandledExceptionEventArgs e)
+		{
+			Exception ex = (Exception)e.ExceptionObject;
+
+			Console.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
+			Console.WriteLine ("Message is {0}", ex.Message);
+			Console.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
+		}
+
 		public static int Main (string [] args)
 		{
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
+
 			SecurityConfiguration security = new SecurityConfiguration ();
 			bool nonstop = false;
 			bool verbose = false;

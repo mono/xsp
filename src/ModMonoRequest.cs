@@ -167,7 +167,7 @@ namespace Mono.WebServer
 
 		void WriteString (string s)
 		{
-			byte [] bytes = Encoding.Default.GetBytes (s);
+			byte [] bytes = Encoding.UTF8.GetBytes (s);
 			
 			writer.Write (bytes.Length);
 			writer.Write (bytes);

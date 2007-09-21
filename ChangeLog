@@ -1,3 +1,8 @@
+2007-09-21  Marek Habersack  <mhabersack@novell.com>
+
+	* src/ModMonoRequest.cs: use UTF8 when sending strings to
+	Apache. Fixes bug #325448
+
 2007-09-18  Daniel Nauck <dna@mono-project.de>
 
 	* src/server.cs: add a UnhandledExceptionEventHandler

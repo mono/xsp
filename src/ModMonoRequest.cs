@@ -97,6 +97,7 @@ namespace Mono.WebServer
 			get { return shutdown; }
 		}
 		
+		const byte protocol_version = 7;
 		void GetInitialData ()
 		{
 			byte cmd = reader.ReadByte ();
@@ -104,8 +105,9 @@ namespace Mono.WebServer
 			if (shutdown)
 				return;
 
-			if (cmd != 7) {
-				string msg = "mod_mono and xsp have different versions.";
+			if (cmd != protocol_version) {
+				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}",
+							    protocol_version, cmd);
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
 				throw new InvalidOperationException (msg);

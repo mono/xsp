@@ -1,3 +1,8 @@
+2007-10-02  Marek Habersack  <mhabersack@novell.com>
+
+	* src/ModMonoRequest.cs: make the protocol mismatch error message
+	more informative.
+
 2007-09-21  Marek Habersack  <mhabersack@novell.com>
 
 	* src/ModMonoRequest.cs: use UTF8 when sending strings to

@@ -62,10 +62,22 @@ namespace Mono.WebServer
 
 	struct ModMonoConfig
 	{
-		public bool OutputBuffering;
+		bool changed;
+		bool outputBuffering;
+		
+		public bool Changed {
+			get { return changed; }
+			set { changed = value; } 
+		}
 
-		public bool Changed;
-	};
+		public bool OutputBuffering {
+			get { return outputBuffering; }
+			set {
+				changed |= (value != outputBuffering);
+				outputBuffering = value;
+			}
+		}
+	}
 	
 	public class ModMonoRequest
 	{
@@ -252,11 +264,8 @@ namespace Mono.WebServer
 		}
 
 		public void SetOutputBuffering (bool doBuffer)
-		{			
-			if (mod_mono_config.OutputBuffering != doBuffer) {
-				mod_mono_config.OutputBuffering = doBuffer;
-				mod_mono_config.Changed = true;
-			}
+		{
+			mod_mono_config.OutputBuffering = doBuffer;
 		}
 		
 		public string [] GetAllHeaders ()

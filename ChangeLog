@@ -1,3 +1,8 @@
+2007-10-03  Juraj Skripsky  <js@hotfeet.ch>
+
+	* src/ModMonoRequest.cs: put the ModMonoConfig struct in charge to
+	tracking its property "Changed".
+
 2007-10-03  Marek Habersack  <mhabersack@novell.com>
 
 	* src/ModMonoRequestBroker.cs,src/ModMonoWorker.cs: added a method

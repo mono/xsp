@@ -56,9 +56,17 @@ namespace Mono.WebServer
 		NOT_FOUND,
 		IS_CONNECTED,
 		SEND_FILE,
+		SET_CONFIGURATION,
 		LAST_COMMAND
 	}
 
+	struct ModMonoConfig
+	{
+		public bool OutputBuffering;
+
+		public bool Changed;
+	};
+	
 	public class ModMonoRequest
 	{
 		const int MAX_STRING_SIZE = 1024 * 10;
@@ -85,19 +93,24 @@ namespace Mono.WebServer
 		StringBuilder out_headers = new StringBuilder ();
 		bool headers_sent;
 		string physical_path;
-
+		ModMonoConfig mod_mono_config;
+		
 		public ModMonoRequest (NetworkStream ns)
 		{
 			reader = new BinaryReader (ns);
 			writer = new BinaryWriter (ns);
+			
+			mod_mono_config.OutputBuffering = true;
+			
 			GetInitialData ();
 		}
 
 		public bool ShuttingDown {
 			get { return shutdown; }
 		}
-		
-		const byte protocol_version = 7;
+
+		// KEEP IN SYNC WITH mod_mono.h!!
+		const byte protocol_version = 8;
 		void GetInitialData ()
 		{
 			byte cmd = reader.ReadByte ();
@@ -197,8 +210,8 @@ namespace Mono.WebServer
 
 		public void SendResponseFromMemory (byte [] data, int position, int length)
 		{
-			if (!headers_sent)
-				SendHeaders ();
+			SendConfig ();
+			SendHeaders ();
 			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
 			writer.Write (data, position, length);
@@ -206,14 +219,26 @@ namespace Mono.WebServer
 
 		public void SendFile (string filename)
 		{
-			if (!headers_sent)
-				SendHeaders ();
+			SendConfig ();
+			SendHeaders ();
 			SendSimpleCommand (Cmd.SEND_FILE);
 			WriteString (filename);
 		}
 
+		void SendConfig ()
+		{
+			if (!mod_mono_config.Changed)
+				return;
+			mod_mono_config.Changed = false;
+			SendSimpleCommand (Cmd.SET_CONFIGURATION);
+			writer.Write (Convert.ToByte (mod_mono_config.OutputBuffering));
+		}
+		
 		void SendHeaders ()
 		{
+			if (headers_sent)
+				return;
+			
 			SendSimpleCommand (Cmd.SET_RESPONSE_HEADERS);
 			WriteString (out_headers.ToString ());
 			out_headers = null;
@@ -226,6 +251,14 @@ namespace Mono.WebServer
 				out_headers.AppendFormat ("{0}\0{1}\0", name, value);
 		}
 
+		public void SetOutputBuffering (bool doBuffer)
+		{			
+			if (mod_mono_config.OutputBuffering != doBuffer) {
+				mod_mono_config.OutputBuffering = doBuffer;
+				mod_mono_config.Changed = true;
+			}
+		}
+		
 		public string [] GetAllHeaders ()
 		{
 			ICollection k = headers.Keys;
@@ -327,8 +360,7 @@ namespace Mono.WebServer
 
 		public void Close ()
 		{
-			if (!headers_sent)
-				SendHeaders ();
+			SendHeaders ();
 			SendSimpleCommand (Cmd.CLOSE);
 		}
 
@@ -337,6 +369,7 @@ namespace Mono.WebServer
 			if (setupClientBlockCalled)
 				return clientBlock;
 
+			SendConfig ();
 			setupClientBlockCalled = true;
 			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
 			int i = reader.ReadInt32 ();
@@ -381,6 +414,7 @@ namespace Mono.WebServer
 
 		public void SetStatusCodeLine (int code, string status)
 		{
+			SendConfig ();
 			SendSimpleCommand (Cmd.SET_STATUS);
 			writer.Write (code);
 			WriteString (status);

@@ -1,3 +1,18 @@
+2007-10-03  Marek Habersack  <mhabersack@novell.com>
+
+	* src/ModMonoRequestBroker.cs,src/ModMonoWorker.cs: added a method
+	to support configuration of output buffering in mod_mono
+
+	* src/ModMonoRequest.cs: added support for new mod_mono
+	communication protocol, SET_CONFIGURATION. Configuration of
+	mod_mono is updated before write commands, if necessary. Currently
+	it supports only configuring the output buffering (based on the
+	value of HttpResponse.BufferOutput)
+	Bumped protocol version to 8
+
+	* src/ModMonoWorkerRequest.cs: added a method which updates the
+	mod_mono/apache configuration if necessary.
+
 2007-10-02  Marek Habersack  <mhabersack@novell.com>
 
 	* src/ModMonoRequest.cs: make the protocol mismatch error message

@@ -452,8 +452,20 @@ namespace Mono.WebServer
 			return result;
 		}
 
+		void UpdateModMonoConfig ()
+		{
+			// Reconfigure apache to be in synch with current application settings
+			HttpContext ctx = HttpContext.Current;
+			HttpResponse response = ctx != null ? ctx.Response : null;
+
+			if (response != null)
+				requestBroker.SetOutputBuffering (requestId, response.BufferOutput);
+		}
+		
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
+			UpdateModMonoConfig ();
+			
 			if (data.Length > length * 2) {
 				byte [] tmpbuffer = new byte [length];
 				Buffer.BlockCopy (data, 0, tmpbuffer, 0, length);
@@ -465,6 +477,7 @@ namespace Mono.WebServer
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
+			UpdateModMonoConfig ();			
 			requestBroker.SetStatusCodeLine (requestId, statusCode, String.Format("{0} {1}", statusCode, statusDescription));
 		}
 

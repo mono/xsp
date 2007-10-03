@@ -287,5 +287,10 @@ namespace Mono.WebServer
 		{
 			modRequest.SetResponseHeader (name, value);
 		}
+
+		public void SetOutputBuffering (bool doBuffer)
+		{
+			modRequest.SetOutputBuffering (doBuffer);
+		}
 	}	
 }

@@ -67,6 +67,14 @@ namespace Mono.WebServer
 			worker.SetResponseHeader (name, value);
 		}
 
+		public void SetOutputBuffering (int requestId, bool doBuffer)
+		{
+			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			if (worker == null)
+				return;
+			worker.SetOutputBuffering (doBuffer);
+		}
+		
 		public void SendFile (int requestId, string filename)
 		{
 			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;

@@ -28,7 +28,6 @@
 //
 
 using System;
-#if !MODMONO_SERVER
 using System.Collections;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -39,21 +38,10 @@ using Mono.Security.Protocol.Tls;
 using MSX = Mono.Security.X509;
 using Mono.Security.X509.Extensions;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
-#endif
 
-namespace Mono.XSP {
+namespace Mono.WebServer.XSP {
 
 	public class SecurityConfiguration {
-#if MODMONO_SERVER
-		public bool Enabled {
-			get { return false; }
-		}
-
-		public override string ToString ()
-		{
-			return String.Empty;
-		}
-#else
 		private bool enabled;
 		private bool valid;
 		private bool accept_client_certificates;
@@ -393,6 +381,5 @@ namespace Mono.XSP {
 			IDictionary attributes = pfx.GetAttributes (cert);
 			return (pfx.GetAsymmetricAlgorithm (attributes) as RSA);
 		}
-#endif
 	}
 }

@@ -1,3 +1,9 @@
+2007-10-22  Robert von Donop  <robertj@shiba-suse10.css.de>
+
+	* Mono.WebServer.Apache/Mono.WebServer.Apache.sources: Create.
+	* Mono.WebServer.Apache/SecurityConfiguration.cs:
+	Get rid of MODMONO.
+
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
 	* Makefile.am: FastCGI -> FastCgi.

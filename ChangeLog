@@ -1,3 +1,8 @@
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* configure.in, scripts/Makefile.am:
+	 Reflect src changes (fastcgi integration).
+
 2007-10-03  Juraj Skripsky  <js@hotfeet.ch>
 
 	* src/ModMonoRequest.cs: put the ModMonoConfig struct in charge to

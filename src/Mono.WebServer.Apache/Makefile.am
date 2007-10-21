@@ -1,0 +1,48 @@
+builddir=$(top_builddir)/src/Mono.WebServer.Apache
+
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
+
+GACUTIL1=$(GACUTIL) -package 1.0
+
+if NET_2_0
+MODMONOSERVER2_EXE = mod-mono-server2.exe
+GACUTIL2=$(GACUTIL) -package 2.0
+endif
+
+noinst_SCRIPTS=mod-mono-server.exe $(MODMONOSERVER2_EXE)
+
+CLEANFILES = *.exe *.mdb
+
+if PLATFORM_WIN32
+references= -lib:"$(prefix)/lib" -r:../Mono.WebServer/Mono.WebServer.dll \
+		-r:System.Web.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
+references2= -lib:"$(prefix)/lib" -r:../Mono.WebServer/Mono.WebServer2.dll \
+			-r:System.Web.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
+else
+references= -r:System.Web.dll -r:../Mono.WebServer/Mono.WebServer.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
+references2= -r:System.Web.dll -r:System.Configuration.dll -r:../Mono.WebServer/Mono.WebServer2.dll \
+			-r:Mono.Posix.dll -r:Mono.Security.dll 
+endif
+
+sources = $(addprefix $(srcdir)/, $(shell cat Mono.WebServer.Apache.sources))
+EXTRA_DIST = $(sources) AssemblyInfo.cs.in
+
+
+mod-mono-server.exe: $(sources)
+	$(MCS) $(MCSFLAGS) $(references) /d:MODMONO_SERVER /out:$@ $(sources)
+	$(SN) -q -R $(builddir)/$@ $(builddir)/../mono.snk
+
+mod-mono-server2.exe: $(sources)
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /d:MODMONO_SERVER /out:$@ $(sources)
+	$(SN) -q -R $(builddir)/$@ $(builddir)/../mono.snk
+
+install-data-local:
+	$(GACUTIL1) $(GACUTIL_FLAGS) -i $(builddir)/mod-mono-server.exe
+#if NET_2_0
+	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(builddir)/mod-mono-server2.exe
+#endif
+
+uninstall-local:
+	-for i in mod-mono-server mod-mono-server2 ; do \
+		$(GACUTIL) $(GACUTIL_FLAGS) -u $i ; \
+	done

@@ -1,0 +1,14 @@
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* Makefile.am: Reflect changes.
+	* Mono.WebServer.Apache/main.cs: Remove XSP-related code.
+	* Mono.WebServer.XSP/main.cs: Remove ModMono-related code.
+	* Mono.WebServer.Apache/Makefile.am: Create from .Makefile.am.
+	* Mono.WebServer.XSP/Makefile.am: Create from Makefile.am.
+	* server.cs: Copy as main.cs to Mono.WebServer.Apache and
+	Mono.WebServer.XSP
+	* security.cs: Move to Mono.WebServer.XSP/SecurityConfiguration.cs
+	* ModMono*.cs: Move to Mono.WebServer.Apache.
+	* Mono.WebServer.Apache: Create.
+	* Mono.WebServer.FastCgi: Create.
+	* Mono.WebServer.XSP: Create.

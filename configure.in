@@ -1,5 +1,5 @@
 AC_PREREQ(2.57)
-AC_INIT(src/server.cs)
+AC_INIT(src/Mono.WebServer.XSP/main.cs)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(xsp, 1.2.5)
 AM_MAINTAINER_MODE
@@ -91,13 +91,17 @@ AC_OUTPUT([
 	man/Makefile
 	scripts/Makefile
 	src/Makefile
-	src/AssemblyInfo.cs
-	src/AssemblyInfoModMono.cs
 	src/Mono.WebServer/AssemblyInfo.cs
 	src/Mono.WebServer/AssemblyInfo2.cs
 	src/Mono.WebServer/Makefile
 	src/Mono.WebServer/xsp.pc
 	src/Mono.WebServer/xsp-2.pc
+	src/Mono.WebServer.Apache/Makefile
+	src/Mono.WebServer.Apache/AssemblyInfo.cs
+	src/Mono.WebServer.FastCgi/Makefile
+	src/Mono.WebServer.FastCgi/AssemblyInfo.cs
+	src/Mono.WebServer.XSP/Makefile
+	src/Mono.WebServer.XSP/AssemblyInfo.cs
 	test/Makefile
 	test/1.1/Makefile
 	test/1.1/authtest/Makefile

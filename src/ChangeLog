@@ -1,5 +1,11 @@
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
+	* Mono.WebServer.FastCgi: Import Brian's files from his google
+	repository. Flatten hierarchies to adhere to mono's standards.
+	Disintegrate the Mono.FastCgi assembly.
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
 	* Makefile.am: Reflect changes.
 	* Mono.WebServer.Apache/main.cs: Remove XSP-related code.
 	* Mono.WebServer.XSP/main.cs: Remove ModMono-related code.

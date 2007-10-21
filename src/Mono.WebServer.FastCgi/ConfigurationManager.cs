@@ -70,13 +70,15 @@ namespace Mono.WebServer
 			string value;
 			if ((value = cmd_args [name]) != null) return value;
 			if ((value = xml_args [name]) != null) return value;
-			if ((value = default_args [name]) != null) return value;
 			
 			string app_setting = GetXmlValue (setting,
 				"AppSetting");
-			
-			return app_setting.Length > 0 ?
-				AppSettings [app_setting] : null;
+
+			if (app_setting.Length > 0)
+				if ((value = AppSettings [app_setting]) != null)
+					return value;
+
+			return default_args [name];
 		}
 		
 		public bool Contains (string name)

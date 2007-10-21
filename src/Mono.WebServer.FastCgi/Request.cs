@@ -289,8 +289,8 @@ namespace Mono.FastCgi {
 			get {
 				// It takes different strokes to move the world.
 				
-				if (path == null)
-					path = GetParameter ("PATH_INFO");
+				// if (path == null)
+				//	path = GetParameter ("PATH_INFO");
 				
 				if (path == null)
 					path = GetParameter ("SCRIPT_NAME");
@@ -310,8 +310,8 @@ namespace Mono.FastCgi {
 			get {
 				// It takes different strokes to move the world.
 				
-				if (rpath == null)
-					rpath = GetParameter ("PATH_TRANSLATED");
+				// if (rpath == null)
+				//	rpath = GetParameter ("PATH_TRANSLATED");
 				
 				if (rpath == null)
 					rpath = GetParameter ("SCRIPT_FILENAME");

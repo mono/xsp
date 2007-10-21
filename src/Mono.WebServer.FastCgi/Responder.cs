@@ -81,7 +81,7 @@ namespace Mono.WebServer.FastCgi
 			request.SendOutputText (PhysicalPath + "\r\n");
 		*/
 			
-			ApplicationHost host = Server.GetApplicationForPath (
+			VPathToHost host = Server.GetApplicationForPath (
 				HostName, PortNumber, Path, PhysicalPath);
 			
 			// If the host is null, the server was unable to
@@ -94,7 +94,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			try {
-				host.ProcessRequest (this);
+				((ApplicationHost)host.AppHost).ProcessRequest (this);
 			} catch (Exception e) {
 				Logger.Write (LogLevel.Error,
 					"ERROR PROCESSING REQUEST: " + e);

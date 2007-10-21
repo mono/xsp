@@ -82,20 +82,17 @@ namespace Mono.WebServer.FastCgi
 			configmanager.PrintHelp ();
 		}
 
-		private static ApplicationManager appmanager;
+		private static ApplicationServer appserver;
 		private static ConfigurationManager configmanager;
-		
-		public static ApplicationHost GetApplicationForPath (string vhost,
-		                                                     int port,
-		                                                     string path,
-		                                                     string realPath)
+
+		public static VPathToHost GetApplicationForPath (string vhost,
+                                                                 int port,
+                                                                 string path,
+                                                                 string realPath)
 		{
-			VPathToHost h = appmanager.GetApplicationForPath (vhost,
-				port, path, realPath);
-			
-			return h == null ? null : h.AppHost as ApplicationHost;
+			return appserver.GetApplicationForPath (vhost,	port, path, false);
 		}
-		
+
 		public static int Main (string [] args)
 		{
 			// Load the configuration file stored in the
@@ -285,10 +282,10 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			root_dir = Environment.CurrentDirectory;
-			bool auto_map = (bool) configmanager ["automappaths"];
-			appmanager = new ApplicationManager (
-				typeof (ApplicationHost), auto_map, false);
-			appmanager.Verbose = (bool) configmanager ["verbose"];
+			bool auto_map = false; //(bool) configmanager ["automappaths"];
+                        WebSource webSource = new WebSource ();
+			appserver = new ApplicationServer (webSource);
+			appserver.Verbose = (bool) configmanager ["verbose"];
 			
 			string applications = (string)
 				configmanager ["applications"];
@@ -306,15 +303,15 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			if (applications != null)
-				appmanager.AddApplicationsFromCommandLine (
+				appserver.AddApplicationsFromCommandLine (
 					applications);
 			
 			if (app_config_file != null)
-				appmanager.AddApplicationsFromConfigFile (
+				appserver.AddApplicationsFromConfigFile (
 					app_config_file);
 			
 			if (app_config_dir != null)
-				appmanager.AddApplicationsFromConfigDirectory (
+				appserver.AddApplicationsFromConfigDirectory (
 					app_config_dir);
 
 			if (applications == null && app_config_dir == null &&
@@ -323,8 +320,10 @@ namespace Mono.WebServer.FastCgi
 					"There are no applications defined, and path mapping is disabled.");
 				Console.WriteLine (
 					"Define an application using /applications, /appconfigfile, /appconfigdir");
+				/*
 				Console.WriteLine (
 					"or by enabling application mapping with /automappaths=True.");
+				*/
 				return 1;
 			}
 			

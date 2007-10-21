@@ -42,7 +42,7 @@
 	<!-- SOCKET SETTINGS -->
 	
 	<Setting Name="socket" Type="String" AppSetting="MonoSocketType"
-		ConsoleVisible="True">
+		ConsoleVisible="True" Value="pipe">
 		<Description>
 			<para>Specifies the type of socket to listen on. Valid
 			values are "pipe", "unix", and "tcp".</para>
@@ -80,7 +80,7 @@
 	</Setting>
 	
 	<Setting Name="filename" AppSetting="MonoUnixSocket" Type="String"
-		ConsoleVisible="True">
+		ConsoleVisible="True" Value="/tmp/fastcgi-mono-server">
 		<Description>
 			<para>Specifies a unix socket filename to listen on.<br />
 			To use this argument, "socket" must be set to "unix".</para>
@@ -184,20 +184,21 @@
 			</example>
 		</Description>
 	</Setting>
-	
+
+<!--	
 	<Setting Name="automappaths" AppSetting="MonoAutomapPaths"
-		Type="Bool" ConsoleVisible="True">
+		Type="Bool" ConsoleVisible="True" Value="False">
 		<Description>
 			<para>Automatically registers applications as they are
 			encountered, provided pages exist in standard
 			locations.</para>
 		</Description>
 	</Setting>
-	
+-->	
 	<!-- FASTCGI SETTINGS -->
 	
 	<Setting Name="maxconns" AppSetting="FastCgiMaxConnections"
-		Type="UInt16" ConsoleVisible="True" WebVisible="True">
+		Type="UInt16" ConsoleVisible="True" WebVisible="True" Value="1024">
 		<Description>
 			<para>Specifies the maximum number of concurrent
 			connections the server should accept.</para>
@@ -205,7 +206,7 @@
 	</Setting>
 	
 	<Setting Name="maxreqs" AppSetting="FastCgiMaxRequests" Type="UInt16"
-		ConsoleVisible="True" WebVisible="True">
+		ConsoleVisible="True" WebVisible="True" Value="1024">
 		<Description>
 			<para>Specifies the maximum number of concurrent
 			requests the server should accept.</para>

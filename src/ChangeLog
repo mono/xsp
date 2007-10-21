@@ -1,5 +1,29 @@
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
+	* Makefile.am: FastCGI -> FastCgi.
+
+	* Mono.WebServer.FastCgi/Makefile.am:
+	* Mono.WebServer.FastCgi/*.sources:
+	* Mono.WebServer.FastCgi/AssemblyInfo.cs.in:
+	Create.
+	
+	* Mono.WebServer.FastCgi/ConfigurationManager.xml:
+	Add some default values to be able to get rid of
+	the exe.config file. Comment out the automapping settings.
+	
+	* Mono.WebServer.FastCgi/ConfigurationManager.cs:
+	Implement ImportSettings (). Support for default settings
+	specified in ConfigurationManaged.xml.
+	
+	* Mono.WebServer.FastCgi/main.cs:
+	* Mono.WebServer.FastCgi/Responder.cs:
+	Take the ApplicationManager
+	out of the build until its automapping issues are fixed.
+	
+	* Mono.WebServer.FastCgi/server.cs: Rename to main.cs
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
 	* Mono.WebServer.FastCgi: Import Brian's files from his google
 	repository. Flatten hierarchies to adhere to mono's standards.
 	Disintegrate the Mono.FastCgi assembly.

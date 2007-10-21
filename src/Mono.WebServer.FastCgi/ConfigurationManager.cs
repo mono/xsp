@@ -20,12 +20,35 @@ namespace Mono.WebServer
 		
 		private NameValueCollection xml_args =
 			new NameValueCollection ();
+
+		private NameValueCollection default_args =
+			new NameValueCollection ();
 		
 		public ConfigurationManager (Assembly asm, string resource)
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.Load (asm.GetManifestResourceStream (resource));
+			ImportSettings (doc, default_args, true, false);
+
+		}
+
+		void ImportSettings (XmlDocument doc, NameValueCollection collection,
+				     bool allowDuplicates, bool insertEmptyValue)
+		{
 			elems = doc.GetElementsByTagName ("Setting");
+			foreach (XmlElement setting in elems) {
+				string name = GetXmlValue (setting, "Name");
+				string value = GetXmlValue (setting, "Value");
+				if (name.Length == 0)
+					throw AppExcept (except_bad_elem,
+						name, value);
+
+				if (!allowDuplicates && collection [name] != null)
+					throw AppExcept (except_xml_duplicate, name);
+
+				if (insertEmptyValue ||  value.Length > 0)
+					collection [name] = value;
+			}
 		}
 		
 		private XmlElement GetSetting (string name)
@@ -47,6 +70,7 @@ namespace Mono.WebServer
 			string value;
 			if ((value = cmd_args [name]) != null) return value;
 			if ((value = xml_args [name]) != null) return value;
+			if ((value = default_args [name]) != null) return value;
 			
 			string app_setting = GetXmlValue (setting,
 				"AppSetting");
@@ -154,8 +178,8 @@ namespace Mono.WebServer
 		}
 		
 		private ApplicationException AppExcept (Exception except,
-		                                        string message,
-		                                        params object [] args)
+							string message,
+							params object [] args)
 		{
 			return new ApplicationException (string.Format (
 				CultureInfo.InvariantCulture, message, args),
@@ -163,7 +187,7 @@ namespace Mono.WebServer
 		}
 		
 		private ApplicationException AppExcept (string message,
-		                                        params object [] args)
+							params object [] args)
 		{
 			return new ApplicationException (string.Format (
 				CultureInfo.InvariantCulture, message, args));
@@ -203,11 +227,12 @@ namespace Mono.WebServer
 				string type = GetXmlValue (setting,
 					"Type").ToUpper (
 						CultureInfo.InvariantCulture);
-				
+
+				string name = GetXmlValue (setting, "Name"); 
 				string arg = string.Format (
 					CultureInfo.InvariantCulture,
 					"  /{0}{1}",
-					GetXmlValue (setting, "Name"),
+					name,
 					type == "BOOL" ? "[=True|=False]" :
 						"=" + type);
 				
@@ -223,6 +248,9 @@ namespace Mono.WebServer
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
 					
+					if (val == null || val.Length == 0)
+						val = default_args [name];
+
 					if (val == null || val.Length == 0)
 						val = "none";
 					
@@ -379,20 +407,7 @@ namespace Mono.WebServer
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.Load (filename);
-			foreach (XmlElement setting in
-				doc.GetElementsByTagName ("Setting")) {
-				string name = GetXmlValue (setting, "Name");
-				string value = GetXmlValue (setting, "Value");
-				if (name.Length == 0)
-					throw AppExcept (except_bad_elem,
-						name, value);
-					
-				if (xml_args [name] != null)
-					throw AppExcept (except_xml_duplicate,
-						name);
-					
-				xml_args.Add (name, value);
-			}
+			ImportSettings (doc, xml_args, false, true);
 		}
 		
 		private int PrefixLength (string arg)

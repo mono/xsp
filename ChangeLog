@@ -1,6 +1,6 @@
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
-	* src/*/*.am : Fix `make distclean'.
+	* src/*/*.am : Fix `make distcheck'.
 	
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 

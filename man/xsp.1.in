@@ -1,7 +1,7 @@
 .\" 
 .\" xsp/mod-mono-server manual page.
 .\" (c) Copyright 2003 Ximian, Inc. 
-.\" (c) Copyright 2004 Novell, Inc. 
+.\" (c) Copyright 2004-2007 Novell, Inc. 
 .\" Author:
 .\"   Gonzalo Paniagua Javier (gonzalo@ximian.com)
 .\"
@@ -9,15 +9,20 @@
 .SH NAME 
 XSP \- Mono ASP.NET Web Server (xsp and xsp2)
 .SH SYNOPSIS
-.B mono xsp.exe
+.B xsp
 [options]
 .PP
 or
 .PP
-.B mono mod-mono-server.exe
+.B mod-mono-server
+[options]
+.PP
+or
+.PP
+.B fastcgi-mono-server
 [options]
 .SH DESCRIPTION
-XSP and mod-mono-server are both hosts for ASP.NET-based applications.
+XSP, mod-mono-server and fastcgi-mono-server are hosts for ASP.NET-based applications.
 .PP
 If run as `xsp', the process provides a minimalistic web server which
 hosts the ASP.NET runtime and can be used to test and debug web
@@ -25,9 +30,11 @@ applications that use the System.Web facilities in Mono.  This server is
 most convenient for testing and running small sites, does not offer
 everything a production web server offers. 
 .PP
-`mod-mono-server' is an ASP.NET runtime host that can communicate with
-another web server (at the time of this writing Apache 1.3 and Apache
-2.0 were supported). This mechanism is better used for high-traffic
+`mod-mono-server' and 'fastcgi-mono-server' are both ASP.NET runtimes hosts
+that can communicate with another web server (at the time of this writing,
+Apache 1.3-2.2 were supported through mod_mono and several other web
+servers through FastCGI).
+This mechanism is better used for high-traffic
 servers or production systems, since it can integrate with the main
 HTTP server and leverage all of the optimizations and extensions of an
 existing server, while providing the ASP.NET runtime. You can choose
@@ -47,10 +54,10 @@ requests.  By default XSP listens on port 8080 and mod-mono-server has
 no default.
 AppSettings key name: MonoServerPort
 .TP
-.I \-\-filename file (mod-mono-server only)
+.I \-\-filename file (mod-mono-server and fastcgi-mono-server)
 The unix socket file name to listen on.
-Default value: /tmp/mod_mono_server
-AppSettings key name: UnixSocketFileName
+Default value: /tmp/mod_mono_server (fastcgi-mono-server: /tmp/fastcgi-mono-server)
+AppSettings key name: UnixSocketFileName (fastcgi-mono-server: MonoUnixSocket)
 .TP
 .I \-\-root PATH
 The root directory for XSP.  The default is the directory where XSP is
@@ -253,7 +260,8 @@ file in the XSP samples directory.
 
 .SH AUTHORS
 The Mono XSP server was written by Gonzalo Paniagua Javier
-(gonzalo@ximian.com).
+(gonzalo@ximian.com). Fastcgi-mono-server was written by
+Brian Nickel <http://kerrick.wordpress.com>.
 .SH ENVIRONMENT VARIABLES
 .TP
 .I "MONO_ASPNET_NODELETE"

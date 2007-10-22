@@ -1,5 +1,11 @@
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
+	* man/*: Generate fastcgi-mono-server(1).
+	* doc/*: Temporarily fix for `make distcheck'.
+	* src/Mono.WebServer.FastCgi/Makefile.am: Cleanups.
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
 	* src/*/*.am : Fix `make distcheck'.
 	
 2007-10-22  Robert Jordan  <robertj@gmx.net>

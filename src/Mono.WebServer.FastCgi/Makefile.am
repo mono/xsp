@@ -9,7 +9,7 @@ XSP2_EXE = fastcgi-mono-server2.exe
 GACUTIL2=$(GACUTIL) -package 2.0
 endif
 
-noinst_SCRIPTS=fastcgi-mono-server.exe fastcgi-mono-server.exe $(XSP2_EXE)
+noinst_SCRIPTS = fastcgi-mono-server.exe $(XSP2_EXE)
 
 CLEANFILES = *.exe *.mdb
 
@@ -25,12 +25,12 @@ build_resources = $(addprefix $(srcdir)/, $(resources))
 
 EXTRA_DIST = $(sources) AssemblyInfo.cs.in $(resources) Mono.WebServer.FastCgi.sources
 
-fastcgi-mono-server.exe: $(build_sources)
+fastcgi-mono-server.exe: $(build_sources) $(build_resources)
 	$(MCS) $(MCSFLAGS) $(references) /out:$@ \
 		$(build_resources:%=-resource:%) $(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
-fastcgi-mono-server2.exe: $(build_sources)
+fastcgi-mono-server2.exe: $(build_sources) $(build_resources)
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ \
 		$(build_resources:%=-resource:%) $(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk

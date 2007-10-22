@@ -1,4 +1,7 @@
 
+* Fix PATH_INFO vs. SCRIPT_NAME inconsistency with mod_fastcgi,
+  mod_fcgid (and probably mod_fcgi as well) on Apache.
+
 * Move Mono.WebServer.FastCgi/CondifgurationManager.cs
   to Mono.WebServer.
 
@@ -9,4 +12,6 @@
 
 * Reuse the  Configuration- and ApplicatioManager in 
   Mono.WebServer.Apache and .XSP.
+
+* Write fastcgi-mono-server(1), import Brian's docs.
 

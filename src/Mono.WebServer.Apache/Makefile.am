@@ -24,17 +24,20 @@ references2= -r:System.Web.dll -r:System.Configuration.dll -r:../Mono.WebServer/
 			-r:Mono.Posix.dll -r:Mono.Security.dll 
 endif
 
-sources = $(addprefix $(srcdir)/, $(shell cat Mono.WebServer.Apache.sources))
-EXTRA_DIST = $(sources) AssemblyInfo.cs.in
+sources = $(shell cat $(srcdir)/Mono.WebServer.Apache.sources)
+
+build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
+
+EXTRA_DIST = $(sources) AssemblyInfo.cs.in Mono.WebServer.Apache.sources
 
 
 mod-mono-server.exe: $(sources)
-	$(MCS) $(MCSFLAGS) $(references) /d:MODMONO_SERVER /out:$@ $(sources)
-	$(SN) -q -R $(builddir)/$@ $(builddir)/../mono.snk
+	$(MCS) $(MCSFLAGS) $(references) /out:$@ $(build_sources)
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 mod-mono-server2.exe: $(sources)
-	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /d:MODMONO_SERVER /out:$@ $(sources)
-	$(SN) -q -R $(builddir)/$@ $(builddir)/../mono.snk
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ $(build_sources)
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 install-data-local:
 	$(GACUTIL1) $(GACUTIL_FLAGS) -i $(builddir)/mod-mono-server.exe
@@ -44,5 +47,5 @@ install-data-local:
 
 uninstall-local:
 	-for i in mod-mono-server mod-mono-server2 ; do \
-		$(GACUTIL) $(GACUTIL_FLAGS) -u $i ; \
+		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done

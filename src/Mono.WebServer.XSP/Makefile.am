@@ -25,11 +25,11 @@ EXTRA_DIST = $(sources) AssemblyInfo.cs.in
 
 xsp.exe: $(build_sources)
 	$(MCS) $(MCSFLAGS) $(references) /out:$@ $(build_sources)
-	$(SN) -q -R $(builddir)/$@ $(builddir)/../mono.snk
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 xsp2.exe: $(build_sources)
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ $(build_sources)
-	$(SN) -q -R $(builddir)/$@ $(builddir)/../mono.snk
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 install-data-local:
 	$(GACUTIL1) $(GACUTIL_FLAGS) -i $(builddir)/xsp.exe
@@ -40,5 +40,5 @@ install-data-local:
 
 uninstall-local:
 	-for i in xsp xsp2 ; do \
-		$(GACUTIL) $(GACUTIL_FLAGS) -u $i ; \
+		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done

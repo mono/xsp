@@ -1,5 +1,4 @@
 ApplicationHost.cs
-AssemblyInfo.cs
 main.cs
 RequestBroker.cs
 Request.cs

@@ -1,5 +1,9 @@
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
+	* src/*/*.am : Fix `make distclean'.
+	
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
 	* src/Mono.WebServer.FastCgi/Request.cs:
 	Reverted temporary hack for mod_fastcgi.
 

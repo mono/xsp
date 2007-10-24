@@ -175,7 +175,13 @@ namespace Mono.WebServer
 			this.requestBroker = requestBroker;
 			this.remoteEP = remoteEP;
 			this.verb = verb;
-			Paths.GetPathsFromUri (path, out this.path, out pathInfo);
+			try {
+				Paths.GetPathsFromUri (path, out this.path, out pathInfo);
+			} catch {
+				CloseConnection ();
+				throw;
+			}
+			
 			this.protocol = protocol;
 			if (protocol == "HTTP/1.1") {
 				if (!running_tests)

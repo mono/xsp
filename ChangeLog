@@ -1,3 +1,9 @@
+2007-10-24  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: gracefully handle
+	exceptions in the constructor, by closing the connection when
+	Exception happens.
+
 2007-10-03  Juraj Skripsky  <js@hotfeet.ch>
 
 	* src/ModMonoRequest.cs: put the ModMonoConfig struct in charge to

@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyVersion("@VERSION@")]
+[assembly: AssemblyVersion("@XSP_VERSION@")]
 [assembly: AssemblyTitle ("Mono ASP.NET State Server")]
 [assembly: AssemblyDescription ("Out of process ASP.NET State Server ")]
 [assembly: AssemblyCopyright ("2003 Novell, Inc.")]

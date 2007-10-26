@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyVersion("@VERSION@")]
+[assembly: AssemblyVersion("@XSP_VERSION@")]
 [assembly: AssemblyTitle ("Mono DB Session Tool")]
 [assembly: AssemblyDescription ("Tool for removing expired sessions from the session DB")]
 [assembly: AssemblyCopyright ("2003, 2004 Novell, Inc.")]

@@ -1,3 +1,16 @@
+2007-10-26  Wade Berrier  <wberrier@novell.com>
+
+	* configure.in:
+	* src/AssemblyInfoModMono.cs.in:
+	* src/AssemblyInfo.cs.in:
+	* tools/asp_state/AssemblyInfo.cs.in:
+	* tools/dbsessmgr/AssemblyInfo.cs.in:
+	Split VERSION to VERSION and XSP_VERSION in order to allow svn revision 
+	in VERSION and still satisfy mcs's numbering scheme (recently changed
+	to match csc)
+	Didn't replace VERSION, because we need the tarball version to not have
+	periods in the revision name.
+
 2007-10-24  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: gracefully handle

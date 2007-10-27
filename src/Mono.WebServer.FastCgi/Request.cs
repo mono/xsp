@@ -3,6 +3,7 @@
 //
 // Author:
 //   Brian Nickel (brian.nickel@gmail.com)
+//   Robert Jordan <robertj@gmx.net>
 //
 // Copyright (C) 2007 Brian Nickel
 // 
@@ -32,6 +33,8 @@ using System.Collections.Generic;
 #else
 using System.Collections;
 #endif
+using System.IO;
+using System.Text;
 
 namespace Mono.FastCgi {
 	public class Request
@@ -287,11 +290,6 @@ namespace Mono.FastCgi {
 		/// </value>
 		public string Path {
 			get {
-				// It takes different strokes to move the world.
-				
-				// if (path == null)
-				//	path = GetParameter ("PATH_INFO");
-				
 				if (path == null)
 					path = GetParameter ("SCRIPT_NAME");
 				
@@ -308,11 +306,6 @@ namespace Mono.FastCgi {
 		/// </value>
 		public string PhysicalPath {
 			get {
-				// It takes different strokes to move the world.
-				
-				// if (rpath == null)
-				//	rpath = GetParameter ("PATH_TRANSLATED");
-				
 				if (rpath == null)
 					rpath = GetParameter ("SCRIPT_FILENAME");
 				
@@ -420,7 +413,99 @@ namespace Mono.FastCgi {
 			} catch {
 				Abort (Strings.Request_CanNotParseParameters);
 			}
+
+			ParseParameterData ();
+		}
+
+		/// <summary>
+		///    Parses the parameters and tries to deduce SCRIPT_NAME & PATH_INFO
+		///    from several other params supplied by the web server.
+		///    Required by Apache.
+		/// </summary>
+		void ParseParameterData ()
+		{
+			string scriptName = GetParameter ("SCRIPT_NAME");
+			if (scriptName == null || scriptName == String.Empty)
+				return;
+
+			string pathInfo = GetParameter ("PATH_INFO");
+			if (pathInfo == null || pathInfo == String.Empty)
+				return;
+
+			string pathTranslated = GetParameter ("PATH_TRANSLATED");
+			if (pathTranslated == null || pathTranslated == String.Empty)
+				return;
+
+			string documentRoot = GetParameter ("DOCUMENT_ROOT");
+			if (documentRoot == null || documentRoot == String.Empty)
+				return;
+
+			string redirectUrl = GetParameter ("REDIRECT_URL");
+			if (redirectUrl == null || redirectUrl == String.Empty)
+				return;
+
+			if (pathInfo != redirectUrl)
+				return;
+
+			string[] parts = pathInfo.Split ('/');
+			// we expect at least "/" + some+path-component.
+			if (parts.Length < 2)
+				return;
+
+			// at this point we have:
+			//
+			// REDIRECT_URL=/dir/test.aspx/foo
+			// PATH_INFO=/dir/test.aspx/foo
+			// PATH_TRANSLATED=/srv/www/htdoc/dir/test.aspx/foo
+			// SCRIPT_NAME=/cgi-bin/fastcgi-mono-server
+			// SCRIPT_FILENAME=/srv/www/cgi-bin/fastcgi-mono-server
 			
+			for (int i = 1; i < parts.Length; i++) {
+				string vpath = Combine (parts, 1, i);
+				string ppath = System.IO.Path.GetFullPath (documentRoot + vpath);
+
+				if (File.Exists (ppath)) {
+
+					// now we set:
+					//
+					// PATH_INFO=/foo
+					// PATH_TRANSLATED=/srv/www/htdoc/dir/foo
+					// SCRIPT_NAME=/dir/test.aspx
+					// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
+					
+					SetParameter ("SCRIPT_NAME", vpath);
+					SetParameter ("SCRIPT_FILENAME", ppath);
+					
+					if (i == parts.Length - 1) {
+						SetParameter ("PATH_INFO", null);
+						SetParameter ("PATH_TRANSLATED", null);
+					} else {
+						string pt = Combine (parts, i + 1, parts.Length - 1);
+						SetParameter ("PATH_INFO", pt);
+						SetParameter ("PATH_TRANSLATED",
+							      System.IO.Path.GetFullPath (documentRoot + pt));
+					}
+					break;
+				} else if (!Directory.Exists (ppath)) {
+					break;
+				}
+			}
+		}
+
+		/// <summary>
+		///   Combines the specified virtual path components.
+		/// <summary>
+		/// <param name="paths">The path components.</param>
+		/// <param name="startIndex">The index inside "paths" to start with.</param>
+		/// <param name="endIndex">The index inside "paths" to end with.</param>
+		static string Combine (string[] paths, int startIndex, int endIndex)
+		{
+			StringBuilder b = new StringBuilder ();
+			for (int i = startIndex; i <= endIndex; i++) {
+				b.Append ('/');
+				b.Append (paths [i]);
+			}
+			return b.ToString ();
 		}
 		
 		/// <summary>
@@ -453,6 +538,12 @@ namespace Mono.FastCgi {
 				return (string) parameter_table [parameter];
 			
 			return null;
+		}
+
+		void SetParameter (string name, string value)
+		{
+			if (parameter_table != null)
+				parameter_table [name] = value;
 		}
 		
 		/// <summary>

@@ -1,3 +1,9 @@
+2007-10-28  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/Request.cs:
+	Compute PATH_INFO, PATH_TRANSLATED, SCRIPT_NAME,
+	SCRIPT_FILENAME when running under Apache.
+
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
 	* man/*: Generate fastcgi-mono-server(1).

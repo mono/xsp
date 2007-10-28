@@ -1,5 +1,13 @@
 2007-10-28  Robert Jordan  <robertj@gmx.net>
 
+	* src/Mono.WebServer.FastCgi/ConfigurationManager.*:
+	Implement an additional configuration source: environment.
+
+	* src/Mono.WebServer.FastCgi/Request.cs:
+	Take directory index (default documents) into account.
+
+2007-10-28  Robert Jordan  <robertj@gmx.net>
+
 	* src/Mono.WebServer.FastCgi/Request.cs:
 	Compute PATH_INFO, PATH_TRANSLATED, SCRIPT_NAME,
 	SCRIPT_FILENAME when running under Apache.

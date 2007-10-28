@@ -448,7 +448,7 @@ namespace Mono.FastCgi {
 				return;
 
 			string[] parts = pathInfo.Split ('/');
-			// we expect at least "/" + some+path-component.
+			// we expect at least "/" + path-component.
 			if (parts.Length < 2)
 				return;
 
@@ -463,9 +463,13 @@ namespace Mono.FastCgi {
 			for (int i = 1; i < parts.Length; i++) {
 				string vpath = Combine (parts, 1, i);
 				string ppath = System.IO.Path.GetFullPath (documentRoot + vpath);
+				bool isFile = File.Exists (ppath);
+				bool isDir = Directory.Exists (ppath);
 
-				if (File.Exists (ppath)) {
+				if (!(isFile || isDir))
+					break;
 
+				if (isFile || i == parts.Length - 1) {
 					// now we set:
 					//
 					// PATH_INFO=/foo
@@ -485,8 +489,6 @@ namespace Mono.FastCgi {
 						SetParameter ("PATH_TRANSLATED",
 							      System.IO.Path.GetFullPath (documentRoot + pt));
 					}
-					break;
-				} else if (!Directory.Exists (ppath)) {
 					break;
 				}
 			}

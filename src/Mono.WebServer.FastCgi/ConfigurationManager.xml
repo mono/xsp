@@ -42,7 +42,7 @@
 	<!-- SOCKET SETTINGS -->
 	
 	<Setting Name="socket" Type="String" AppSetting="MonoSocketType"
-		ConsoleVisible="True" Value="pipe">
+		Environment="MONO_FCGI_SOCKET" ConsoleVisible="True" Value="pipe">
 		<Description>
 			<para>Specifies the type of socket to listen on. Valid
 			values are "pipe", "unix", and "tcp".</para>
@@ -80,7 +80,7 @@
 	</Setting>
 	
 	<Setting Name="filename" AppSetting="MonoUnixSocket" Type="String"
-		ConsoleVisible="True" Value="/tmp/fastcgi-mono-server">
+		Environment="MONO_FCGI_FILENAME" ConsoleVisible="True" Value="/tmp/fastcgi-mono-server">
 		<Description>
 			<para>Specifies a unix socket filename to listen on.<br />
 			To use this argument, "socket" must be set to "unix".</para>
@@ -88,7 +88,7 @@
 	</Setting>
 	
 	<Setting Name="port" AppSetting="MonoServerPort" Type="UInt16"
-		ConsoleVisible="True">
+		Environment="MONO_FCGI_PORT" ConsoleVisible="True">
 		<Description>
 			<para>Specifies the TCP port number to listen on.<br />
 			To use this argument, "socket" must be set to "tcp".</para>
@@ -96,7 +96,7 @@
 	</Setting>
 	
 	<Setting Name="address" AppSetting="MonoServerAddress" Type="String"
-		ConsoleVisible="True">
+		Environment="MONO_FCGI_ADDRESS" ConsoleVisible="True">
 		<Description>
 			<para>Specifies the IP address to listen on.<br />
 			To use this argument, "socket" must be set to "tcp".</para>
@@ -106,7 +106,7 @@
 	<!-- APPLICATION SETTINGS -->
 	
 	<Setting Name="root" AppSetting="MonoServerRootDir" Type="Directory"
-		ConsoleVisible="True" WebVisible="True">
+		Environment="MONO_FCGI_ROOT" ConsoleVisible="True" WebVisible="True">
 		<Description>
 			<para>Specifies the root directory the server changes to
 			before doing performing any operations.</para>
@@ -118,7 +118,7 @@
 	</Setting>
 	
 	<Setting Name="appconfigfile" AppSetting="MonoApplicationsConfigFile"
-		Type="File" ConsoleVisible="True" WebVisible="True">
+		Environment="MONO_FCGI_APPCONFIGFILE" Type="File" ConsoleVisible="True" WebVisible="True">
 		<Description>
 			<para>Adds application definitions from an XML
 			configuration file, typically with the ".webapp"
@@ -128,7 +128,7 @@
 	</Setting>
 	
 	<Setting Name="appconfigdir" AppSetting="MonoApplicationsConfigDir"
-		Type="Directory" ConsoleVisible="True" WebVisible="True">
+		Environment="MONO_FCGI_APPCONFIGDIR" Type="Directory" ConsoleVisible="True" WebVisible="True">
 		<Description>
 			<para>Adds application definitions from all XML files
 			found in the specified directory DIR. Files must
@@ -137,7 +137,7 @@
 	</Setting>
 	
 	<Setting Name="applications" AppSetting="MonoApplications" Type="String"
-		ConsoleVisible="True" WebVisible="True">
+		Environment="MONO_FCGI_APPLICATIONS" ConsoleVisible="True" WebVisible="True">
 		<Description>
 			<para>Adds applications from a comma separated list of
 			virtual and physical directory pairs. The pairs are
@@ -187,7 +187,7 @@
 
 <!--	
 	<Setting Name="automappaths" AppSetting="MonoAutomapPaths"
-		Type="Bool" ConsoleVisible="True" Value="False">
+		Environment="MONO_FCGI_AUTOMAPPATHS" Type="Bool" ConsoleVisible="True" Value="False">
 		<Description>
 			<para>Automatically registers applications as they are
 			encountered, provided pages exist in standard
@@ -198,7 +198,7 @@
 	<!-- FASTCGI SETTINGS -->
 	
 	<Setting Name="maxconns" AppSetting="FastCgiMaxConnections"
-		Type="UInt16" ConsoleVisible="True" WebVisible="True" Value="1024">
+		Environment="MONO_FCGI_MAXCONNS" Type="UInt16" ConsoleVisible="True" WebVisible="True" Value="1024">
 		<Description>
 			<para>Specifies the maximum number of concurrent
 			connections the server should accept.</para>
@@ -206,7 +206,7 @@
 	</Setting>
 	
 	<Setting Name="maxreqs" AppSetting="FastCgiMaxRequests" Type="UInt16"
-		ConsoleVisible="True" WebVisible="True" Value="1024">
+		Environment="MONO_FCGI_MAXREQS" ConsoleVisible="True" WebVisible="True" Value="1024">
 		<Description>
 			<para>Specifies the maximum number of concurrent
 			requests the server should accept.</para>
@@ -214,7 +214,7 @@
 	</Setting>
 	
 	<Setting Name="multiplex" AppSetting="FastCgiMultiplexConnections"
-		Type="Bool" ConsoleVisible="True" WebVisible="True">
+		Environment="MONO_FCGI_MULTIPLEX" Type="Bool" ConsoleVisible="True" WebVisible="True">
 		<Description>
 			<para>Allows multiple requests to be send over a single
 			connection.</para>
@@ -224,7 +224,7 @@
 	<!-- LOG SETTINGS -->
 	
 	<Setting Name="loglevels" AppSetting="FastCgiLogLevels"
-		Type="String" ConsoleVisible="True">
+		Environment="MONO_FCGI_LOGLEVELS" Type="String" ConsoleVisible="True">
 		<Description>
 			<para>Specifies what log levels to log. It can be any
 			of the following values, or multiple if comma
@@ -243,13 +243,14 @@
 	</Setting>
 	
 	<Setting Name="logfile" AppSetting="FastCgiLogFile"
-		Type="String" ConsoleVisible="True">
+		Environment="MONO_FCGI_LOGFILE" Type="String" ConsoleVisible="True">
 		<Description>
 			<para>Specifies a file to log events to.</para>
 		</Description>
 	</Setting>
 	
-	<Setting Name="printlog" Type="Bool" ConsoleVisible="True">
+	<Setting Name="printlog" Type="Bool" ConsoleVisible="True"
+		Environment="MONO_FCGI_PRINTLOG">
 		<Description>
 			<para>Prints log messages to the console.</para>
 		</Description>

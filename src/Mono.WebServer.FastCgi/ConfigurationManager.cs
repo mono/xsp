@@ -1,3 +1,31 @@
+//
+// ConfigurationManager.cs: Generic multi-source configuration manager.
+//
+// Author:
+//   Brian Nickel (brian.nickel@gmail.com)
+//   Robert Jordan <robertj@gmx.net>
+//
+// Copyright (C) 2007 Brian Nickel
+// 
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 using System;
 using System.Xml;
 using System.IO;
@@ -70,6 +98,11 @@ namespace Mono.WebServer
 			string value;
 			if ((value = cmd_args [name]) != null) return value;
 			if ((value = xml_args [name]) != null) return value;
+
+			string env_setting = GetXmlValue (setting, "Environment");
+			if (env_setting.Length > 0)
+				if ((value = Environment.GetEnvironmentVariable (env_setting)) != null)
+					return value;
 			
 			string app_setting = GetXmlValue (setting,
 				"AppSetting");
@@ -261,9 +294,17 @@ namespace Mono.WebServer
 					values.Add (" AppSettings Key Name: " +
 						app_setting);
 					
-					values.Add (string.Empty);
 				}
+
+				string env_setting = GetXmlValue (setting,
+					"Environment");
 				
+				if (env_setting.Length > 0)
+					values.Add (" Environment Variable Name: " +
+						env_setting);
+				
+				values.Add (string.Empty);
+
 				int start = arg.Length;
 				foreach (string text in values) {
 					for (int i = start; i < left_margin; i++)

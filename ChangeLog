@@ -1,3 +1,11 @@
+2007-10-29  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/WorkerRequest.cs:
+	Implement IsSecure ().
+
+	* src/Mono.WebServer.FastCgi/Server.cs:
+	Use Type.IsAssignableFrom ().
+
 2007-10-28  Robert Jordan  <robertj@gmx.net>
 
 	* src/Mono.WebServer.FastCgi/ConfigurationManager.*:

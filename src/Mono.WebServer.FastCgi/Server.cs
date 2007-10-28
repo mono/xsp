@@ -698,16 +698,8 @@ namespace Mono.FastCgi {
 				responder_type = responder;
 				return;
 			}
-			
-			int i = 0;
-			System.Type [] faces = responder.GetInterfaces ();
-			System.Type iresp_type = typeof (IResponder);
-			while (i < faces.Length && faces [i] != iresp_type)
-				i ++;
-			
-			// If the list was looped through completely, the
-			// IResponder interface was not found.
-			if (i == faces.Length)
+
+			if (!typeof (IResponder).IsAssignableFrom (responder))
 				throw new ArgumentException (
 					Strings.Server_ResponderDoesNotImplement,
 					"responder");

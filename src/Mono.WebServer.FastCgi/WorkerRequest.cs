@@ -165,7 +165,7 @@ namespace Mono.WebServer.FastCgi
 
 		public override bool IsSecure ()
 		{
-			return false;
+			return responder.GetParameter ("HTTPS") == "on";
 		}
 		
 

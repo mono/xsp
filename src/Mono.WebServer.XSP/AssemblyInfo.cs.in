@@ -28,7 +28,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyVersion("@VERSION@")]
+[assembly: AssemblyVersion("@XSP_VERSION@")]
 [assembly: AssemblyTitle ("Mono.WebServer.XSP")]
 [assembly: AssemblyDescription ("Minimalistic web server for testing System.Web")]
 [assembly: AssemblyCopyright ("(c) 2002-2007 Novell, Inc.")]

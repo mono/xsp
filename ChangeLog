@@ -12,6 +12,25 @@
 	Compute PATH_INFO, PATH_TRANSLATED, SCRIPT_NAME,
 	SCRIPT_FILENAME when running under Apache.
 
+2007-10-26  Wade Berrier  <wberrier@novell.com>
+
+	* configure.in:
+	* src/AssemblyInfoModMono.cs.in:
+	* src/AssemblyInfo.cs.in:
+	* tools/asp_state/AssemblyInfo.cs.in:
+	* tools/dbsessmgr/AssemblyInfo.cs.in:
+	Split VERSION to VERSION and XSP_VERSION in order to allow svn revision 
+	in VERSION and still satisfy mcs's numbering scheme (recently changed
+	to match csc)
+	Didn't replace VERSION, because we need the tarball version to not have
+	periods in the revision name.
+
+2007-10-24  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: gracefully handle
+	exceptions in the constructor, by closing the connection when
+	Exception happens.
+
 2007-10-22  Robert Jordan  <robertj@gmx.net>
 
 	* man/*: Generate fastcgi-mono-server(1).

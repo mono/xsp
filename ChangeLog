@@ -1,3 +1,7 @@
+2007-10-30  Marek Habersack  <mhabersack@novell.com>
+
+	* tools/mono-asp-apps/mono-asp-apps: added
+
 2007-10-26  Wade Berrier  <wberrier@novell.com>
 
 	* configure.in:

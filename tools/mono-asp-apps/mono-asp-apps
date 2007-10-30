@@ -1,0 +1,206 @@
+#!/bin/bash
+ASP_APPS_ROOT=/usr/share/mono/asp.net
+ASP_APPS_APPS=$ASP_APPS_ROOT/apps
+ASP_APPS_DATA=$ASP_APPS_ROOT/data
+XSP_CONFIGS_ROOT=/etc/xsp/2.0
+XSP_ENABLED_APPS=$XSP_CONFIGS_ROOT/applications-enabled
+XSP_AVAILABLE_APPS=$XSP_CONFIGS_ROOT/applications-available
+PG_HBA_LOCATIONS="/var/lib/pgsql/data"
+APP_NAME=""
+APP_INFO=""
+APP_ROOT=""
+APP_DATA=""
+COMMAND=""
+
+function die ()
+{
+    echo Error executing the script:
+    echo $*
+    echo
+    exit 1
+}
+
+function findApplication ()
+{
+    if [ -z "$1" ]; then
+	die "Missing application name on the command line"
+    fi
+    
+    if [ ! -f "$ASP_APPS_DATA/$1/info" -o ! -d "$ASP_APPS_APPS/$1" ]; then
+	die "Application '$1' not found"
+    fi
+
+    APP_NAME="$1"
+    APP_DATA="$ASP_APPS_DATA/$1"
+    APP_INFO="$APP_DATA/info"
+    APP_ROOT="$ASP_APPS_APPS/$1"
+}
+
+function load_app_info ()
+{
+    . "$APP_INFO"
+    APP_NEEDS_INIT="`echo ${NeedsInit:-false} | tr A-Z a-z`"
+    APP_INITIALIZED="`echo ${Initialized:-false} | tr A-Z a-z`"
+
+    if [ "$COMMAND" != "init" -a "$APP_NEEDS_INIT" = "true" -a "$APP_INITIALIZED" = "false" ]; then
+	die -e "Application '$APP_NAME' needs to be initialized with command:\n\t/usr/bin/mono-asp-apps init $APP_NAME"
+    fi
+    
+    if [ -z "$WebappFile" -o ! -f "$WebappFile" ]; then
+	die "Missing webapp file for application '$1'"
+    fi
+
+    if [ -z "$Version" ]; then
+	die "Missing application '$1' version information"
+    fi
+}
+
+function check_postgres_access ()
+{
+    local ok=0
+    local hbaloc
+
+    for l in $PG_HBA_LOCATIONS; do
+	if [ ! -f "$l/pg_hba.conf" ]; then
+	    continue
+	fi
+	hbaloc="$l/pg_hba.conf"
+	if egrep "^host[[:space:]]+all[[:space:]]+test[[:space:]]+127\.0\.0\.1/32[[:space:]]+md5" "$hbaloc" > /dev/null 2>&1; then
+	    ok=1
+	    break
+	fi
+    done
+
+    if [ $ok -ne 1 ]; then
+	if [ -z "$hbaloc" ]; then
+	    cat <<EOF
+PostgreSQL configuration does not exist. Typically, it means that you haven't
+ran your PostgreSQL RDBMS for the first time yet. Please start the server
+process by issuing the following command as root:
+
+   /etc/init.d/postgresql start
+
+and then try runing $0 again.
+EOF
+	    die Missing PostgreSQL configuration
+	else
+	    cat <<EOF
+Your PostgreSQL configuration at $hbaloc is not ready for this application.
+Please add the following code in the first line of the above file:
+
+  host all test 127.0.0.1/32 md5
+
+And issue the following command:
+
+  /etc/init.d/postgresql restart
+EOF
+	    die Invalid PostgreSQL configuration
+	fi
+   fi
+}
+
+function command_init ()
+{
+    local initfile
+    load_app_info
+    if [ "$APP_NEEDS_INIT" = "false" ]; then
+	exit 0
+    fi
+    if [ "$APP_INITIALIZED" = "true" ]; then
+	exit 0
+    fi
+
+    initfile="$APP_DATA/init"
+    if [ ! -x "$initfile"  ]; then
+	die "Application '$APP_NAME' requires initialization, but init script '$initfile' is missing"
+    fi
+    check_postgres_access
+    pushd > /dev/null 2>&1
+    cd "$APP_DATA"
+
+    su -c "$initfile" -p postgres
+    popd > /dev/null 2>&1
+
+    sed -e 's/^Initialized="\(.*\)"/Initialized="true"/g' < "$APP_INFO" > "$APP_INFO".new
+    mv "$APP_INFO".new "$APP_INFO"
+}
+
+function command_enable ()
+{
+    load_app_info
+    ln -sf "$WebappFile" "$XSP_ENABLED_APPS/`basename $WebappFile`"
+}
+
+function command_disable ()
+{
+    local linkfile
+    load_app_info
+
+    linkfile="$XSP_ENABLED_APPS/`basename $WebappFile`"
+    if [ -L "$linkfile" ]; then
+	rm "$linkfile"
+    fi
+}
+
+function command_start ()
+{
+    load_app_info
+    export MONO_IOMAP=all
+    if [ -x "$APP_DATA/start" ]; then
+	cd "$APP_DATA"
+	exec "$APP_DATA/start" $*
+    fi
+
+    exec xsp2 --appconfigfile "$WebappFile" $*
+}
+
+function command_list ()
+{
+    local appname
+    local appversion
+
+    echo "Installed apps:"
+    for d in "$ASP_APPS_DATA"/*; do
+	if [ ! -d "$d" ]; then
+	    continue
+	fi
+	if [ ! -f "$d"/info ]; then
+	    continue
+	fi
+	appname="`cat \"$d\"/info | grep ^Name= | cut -d '\"' -f 2`"
+	appversion="`cat \"$d\"/info | grep ^Version= | cut -d '\"' -f 2`"
+	echo $appname-$appversion
+    done
+}
+
+function show_commands ()
+{
+    cat <<EOF
+Available commands:
+
+    init
+    enable
+    disable
+    start
+    list
+
+EOF
+    exit 1
+}
+
+case $1 in
+    init|enable|disable|start|list) COMMAND="$1" ;;
+    *) if [ -z "$1" ]; then
+	  show_commands
+       else
+          $die "Uknown command: $1" 
+       fi ;;
+esac
+
+if [ "$COMMAND" != "list" ]; then
+    findApplication "$2"
+    shift 2
+else
+    shift 1
+fi
+eval command_$COMMAND "$*"

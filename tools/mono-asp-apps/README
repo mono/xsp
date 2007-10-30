@@ -1,0 +1,5 @@
+This is a utility to manage ASP.NET applications installed from RPM
+packages.
+
+As such, it should not be installed with non-packaged XSP, only shipped
+in the XSP RPM.

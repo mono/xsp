@@ -1,1 +1,1 @@
-
+CLEANFILES = Mono.WebServer.xml

@@ -18,6 +18,28 @@
 
 	* tools/mono-asp-apps/mono-asp-apps: added
 
+2007-10-29  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/WorkerRequest.cs:
+	Implement IsSecure ().
+
+	* src/Mono.WebServer.FastCgi/Server.cs:
+	Use Type.IsAssignableFrom ().
+
+2007-10-28  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/ConfigurationManager.*:
+	Implement an additional configuration source: environment.
+
+	* src/Mono.WebServer.FastCgi/Request.cs:
+	Take directory index (default documents) into account.
+
+2007-10-28  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/Request.cs:
+	Compute PATH_INFO, PATH_TRANSLATED, SCRIPT_NAME,
+	SCRIPT_FILENAME when running under Apache.
+
 2007-10-26  Wade Berrier  <wberrier@novell.com>
 
 	* configure.in:
@@ -36,6 +58,76 @@
 	* src/Mono.WebServer/XSPWorkerRequest.cs: gracefully handle
 	exceptions in the constructor, by closing the connection when
 	Exception happens.
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* man/*: Generate fastcgi-mono-server(1).
+	* doc/*: Temporarily fix for `make distcheck'.
+	* src/Mono.WebServer.FastCgi/Makefile.am: Cleanups.
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* src/*/*.am : Fix `make distcheck'.
+	
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/Request.cs:
+	Reverted temporary hack for mod_fastcgi.
+
+	* src/Mono.WebServer.FastCgi/ConfigurationManager.cs:
+	The XML default settings have less precedence.
+	
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.Apache/Mono.WebServer.Apache.sources: Create.
+	* src/Mono.WebServer.Apache/SecurityConfiguration.cs:
+	Get rid of MODMONO.
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* src/Makefile.am: FastCGI -> FastCgi.
+
+	* src/Mono.WebServer.FastCgi/Makefile.am:
+	* src/Mono.WebServer.FastCgi/*.sources:
+	* src/Mono.WebServer.FastCgi/AssemblyInfo.cs.in:
+	Create.
+	
+	* src/Mono.WebServer.FastCgi/ConfigurationManager.xml:
+	Add some default values to be able to get rid of
+	the exe.config file. Comment out the automapping settings.
+	
+	* src/Mono.WebServer.FastCgi/ConfigurationManager.cs:
+	Implement ImportSettings (). Support for default settings
+	specified in ConfigurationManaged.xml.
+	
+	* src/Mono.WebServer.FastCgi/main.cs:
+	* src/Mono.WebServer.FastCgi/Responder.cs:
+	Take the ApplicationManager
+	out of the build until its automapping issues are fixed.
+	
+	* src/Mono.WebServer.FastCgi/server.cs: Rename to main.cs
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi: Import Brian's files from his google
+	repository. Flatten hierarchies to adhere to mono's standards.
+	Disintegrate the Mono.FastCgi assembly.
+
+2007-10-22  Robert Jordan  <robertj@gmx.net>
+
+	* configure.in, scripts/Makefile.am: Reflect changes.
+	* src/Makefile.am: Reflect changes.
+	* src/Mono.WebServer.Apache/main.cs: Remove XSP-related code.
+	* src/Mono.WebServer.XSP/main.cs: Remove ModMono-related code.
+	* src/Mono.WebServer.Apache/Makefile.am: Create from .Makefile.am.
+	* src/Mono.WebServer.XSP/Makefile.am: Create from Makefile.am.
+	* src/server.cs: Copy as main.cs to Mono.WebServer.Apache and
+	Mono.WebServer.XSP
+	* src/ecurity.cs: Move to Mono.WebServer.XSP/SecurityConfiguration.cs
+	* src/ModMono*.cs: Move to Mono.WebServer.Apache.
+	* src/Mono.WebServer.Apache: Create.
+	* src/Mono.WebServer.FastCgi: Create.
+	* src/Mono.WebServer.XSP: Create.
 
 2007-10-03  Juraj Skripsky  <js@hotfeet.ch>
 

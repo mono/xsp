@@ -1,11 +1,11 @@
 //
-// server.cs: Web Server that uses ASP.NET hosting
+// Mono.WebServer.Apache/main.cs: Mod_mono Backend for XSP.
 //
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
 // (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2007 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -35,20 +35,12 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Web.Hosting;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-#if !MODMONO_SERVER
-using Mono.Security.Protocol.Tls;
-#endif
 using Mono.WebServer;
 
-namespace Mono.XSP
+namespace Mono.WebServer.Apache
 {
 	public class Server
 	{
-#if !MODMONO_SERVER
-		static RSA key;
-#endif
 		
 		static void ShowVersion ()
 		{
@@ -66,7 +58,6 @@ namespace Mono.XSP
 
 		static void ShowHelp ()
 		{
-#if MODMONO_SERVER
 			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono.");
 			Console.WriteLine ("Usage is:\n");
 			Console.WriteLine ("    mod-mono-server.exe [...]");
@@ -76,60 +67,14 @@ namespace Mono.XSP
 			Console.WriteLine ("                    Default value: /tmp/mod_mono_server");
 			Console.WriteLine ("                    AppSettings key name: MonoUnixSocket");
 			Console.WriteLine ();
-#else
-			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
-			Console.WriteLine ("minimalistic HTTP server\n");
-			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    xsp.exe [...]");
-			Console.WriteLine ();
-#endif
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
-#if MODMONO_SERVER
 			Console.WriteLine ("                    Default value: none");
-#else
-			Console.WriteLine ("                    Default value: 8080");
-#endif
 			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
 			Console.WriteLine ();
 			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
-#if MODMONO_SERVER
 			Console.WriteLine ("                    Default value: 127.0.0.1");
-#else
-			Console.WriteLine ("                    Default value: 0.0.0.0");
-#endif
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
-#if !MODMONO_SERVER
-			Console.WriteLine ("    --https:        enable SSL for the server");
-			Console.WriteLine ("                    Default value: false.");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --https-client-accept: enable SSL for the server with optional client certificates");
-			Console.WriteLine ("                    Default value: false (non-ssl).");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --https-client-require: enable SSL for the server with mandatory client certificates");
-			Console.WriteLine ("                    Default value: false (non-ssl).");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --cert FILENAME: path to X.509 certificate file (cer)");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --pkfile FILENAME: path to private key file (pvk)");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --p12file FILENAME: path to a PKCS#12 file containing the certificate and the private");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --pkpwd PASSWORD: password to decrypt the private key");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --protocol:     specify which protocols are available for SSL");
-			Console.WriteLine ("                    Possible values: Default, Tls, Ssl2, Ssl3");
-			Console.WriteLine ("                    Default value: Default (all)");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-#endif
 			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
 			Console.WriteLine ("                    anything else.");
 			Console.WriteLine ("                    Default value: current directory.");
@@ -168,14 +113,12 @@ namespace Mono.XSP
 			Console.WriteLine ("                    Default value: /:.");
 			Console.WriteLine ("                    AppSettings key name: MonoApplications");
 			Console.WriteLine ();
-#if MODMONO_SERVER
 			Console.WriteLine ("    --terminate: gracefully terminates a running mod-mono-server instance.");
 			Console.WriteLine ("                 All other options but --filename or --address and --port");
 			Console.WriteLine ("                 are ignored if this option is provided.");
 			Console.WriteLine ("    --master: this instance will be used to by mod_mono to create ASP.NET");
 			Console.WriteLine ("              applications on demand. If this option is provided, there is no");
 			Console.WriteLine ("              need to provide a list of applications to start.");
-#endif
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
 			Console.WriteLine ();
@@ -220,13 +163,6 @@ namespace Mono.XSP
 			}
 		}
 
-#if !MODMONO_SERVER
-		static AsymmetricAlgorithm GetPrivateKey (X509Certificate certificate, string targetHost) 
-		{ 
-			return key; 
-		}
-#endif
-
 		static NameValueCollection AppSettings {
 			get {
 #if NET_2_0
@@ -250,7 +186,6 @@ namespace Mono.XSP
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
 
-			SecurityConfiguration security = new SecurityConfiguration ();
 			bool nonstop = false;
 			bool verbose = false;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
@@ -261,9 +196,7 @@ namespace Mono.XSP
 			object oport;
 			string ip = AppSettings ["MonoServerAddress"];
 			bool master = false;
-#if MODMONO_SERVER
 			string filename = AppSettings ["MonoUnixSocket"];
-#endif
 			if (ip == "" || ip == null)
 				ip = "0.0.0.0";
 
@@ -279,7 +212,6 @@ namespace Mono.XSP
 				hash ^= args [idx].GetHashCode () + i;
 				
 				switch (a){
-#if MODMONO_SERVER
 				case "--filename":
 					CheckAndSetOptions (a, Options.FileName, ref options);
 					filename = args [++i];
@@ -291,39 +223,6 @@ namespace Mono.XSP
 					CheckAndSetOptions (a, Options.Master, ref options);
 					master = true;
 					break;
-#else
-				case "--https":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					break;
-				case "--https-client-accept":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					security.AcceptClientCertificates = true;
-					security.RequireClientCertificates = false;
-					break;
-				case "--https-client-require":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					security.AcceptClientCertificates = true;
-					security.RequireClientCertificates = true;
-					break;
-				case "--p12file":
-					security.Pkcs12File = args [++i];
-					break;
-				case "--cert":
-					security.CertificateFile = args [++i];
-					break;
-				case "--pkfile":
-					security.PvkFile = args [++i];
-					break;
-				case "--pkpwd":
-					security.Password = args [++i];
-					break;
-				case "--protocols":
-					security.SetProtocol (args [++i]);
-					break;
-#endif
 				case "--port":
 					CheckAndSetOptions (a, Options.Port, ref options);
 					oport = args [++i];
@@ -367,7 +266,6 @@ namespace Mono.XSP
 				}
 			}
 
-#if MODMONO_SERVER
 			if (hash < 0)
 				hash = -hash;
 
@@ -388,7 +286,7 @@ namespace Mono.XSP
 				lockfile = Path.Combine (Path.GetTempPath (), "mod_mono_TCP_");
 				lockfile = String.Format ("{0}_{1}", lockfile, hash);
 			}
-#endif
+
 			IPAddress ipaddr = null;
 			ushort port;
 			try {
@@ -417,7 +315,6 @@ namespace Mono.XSP
 			rootDir = Directory.GetCurrentDirectory ();
 			
 			WebSource webSource;
-#if MODMONO_SERVER
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
@@ -434,22 +331,6 @@ namespace Mono.XSP
 
 				return (res) ? 0 : 1;
 			}
-#else
-			if (security.Enabled) {
-				try {
-					key = security.KeyPair;
-					webSource = new XSPWebSource (ipaddr, port, security.Protocol, security.ServerCertificate, 
-						new PrivateKeySelectionCallback (GetPrivateKey), 
-						security.AcceptClientCertificates, security.RequireClientCertificates);
-				}
-				catch (CryptographicException ce) {
-					Console.WriteLine (ce.Message);
-					return 1;
-				}
-			} else {
-				webSource = new XSPWebSource (ipaddr, port);
-			}
-#endif
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = verbose;
 
@@ -465,13 +346,10 @@ namespace Mono.XSP
 
 			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
-#if MODMONO_SERVER
 			if (!useTCP) {
 				Console.WriteLine ("Listening on: {0}", filename);
-			} else
-#endif
-			{
-				Console.WriteLine ("Listening on port: {0} {1}", port, security);
+			} else {
+				Console.WriteLine ("Listening on port: {0", port);
 				Console.WriteLine ("Listening on address: {0}", ip);
 			}
 			

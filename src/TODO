@@ -1,0 +1,14 @@
+
+* Move Mono.WebServer.FastCgi/CondifgurationManager.cs
+  to Mono.WebServer.
+
+* Fix Mono.WebServer.FastCgi/ApplicationManager.cs' automapping
+  feature and move it to Mono.WebServer.
+
+* Write unit tests for ApplicationManager.cs' automapping.
+
+* Reuse the  Configuration- and ApplicatioManager in 
+  Mono.WebServer.Apache and .XSP.
+
+* Write fastcgi-mono-server(1) (partly done), import Brian's docs.
+

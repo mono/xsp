@@ -1,12 +1,12 @@
 EXTRA_DIST = script.in
 
-bin2_scripts_real = xsp2 mod-mono-server2
+bin2_scripts_real = xsp2 mod-mono-server2 fastcgi-mono-server2
 if NET_2_0
 bin2_scripts = $(bin2_scripts_real)
 tool2_scripts = asp-state2 dbsessmgr2
 endif
 
-bin1_scripts = xsp mod-mono-server
+bin1_scripts = xsp mod-mono-server fastcgi-mono-server
 tool_scripts = asp-state dbsessmgr
 bin_SCRIPTS = $(bin1_scripts) $(bin2_scripts) $(tool_scripts) $(tool2_scripts)
 

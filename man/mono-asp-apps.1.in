@@ -1,0 +1,63 @@
+.\" 
+.\" mono-asp-apps manual page.
+.\" (c) Copyright 2007 Novell, Inc. 
+.\" Author:
+.\"   Marek Habersack <mhabersack@novell.com>
+.\"
+.TH mono-asp-apps "1" "31 Oct 2007" "mono-asp-apps @VERSION@" "User Commands"
+.SH NAME 
+mono-asp-apps - utility to manage ASP.NET 2.0 applications installed from RPMs
+.SH SYNOPSIS
+.B mono-asp-apps
+command [options]
+.SH DESCRIPTION
+The 'mono-asp-apps' command is useful on systems which install applications from
+RPM packages and when the RPM packages have been created according to the Mono
+RPM packaging guidelines for ASP.NET applications.
+.PP
+The utility allows one to initialize, enable, disable and start installed applications.
+Note that you do not use this utility to manage applications hosted and managed by
+the Apache (or other) web server, only by xsp.
+.PP
+Note that this utility is useful only on systems where at least one application packaged
+according to the Mono ASP.NET 2.0 RPM packaging guidelines has been installed.
+.SH COMMANDS
+The commands which take an application name, require the it to be one of the registered
+names. See the \fB`list`\fR command below.
+.TP
+.I init APPLICATION_NAME
+Initializes the application named \fBAPPLICATION_NAME\fR, if it hasn't been done already.
+Initialization actions performed are application specific, but may include creating
+databases and populating them, creating directories, downloading files etc.
+.TP
+.I enable APPLICATION_NAME
+Enables \fBAPPLICATION_NAME\fR for automatic start when XSP is started as part of the
+system bootup process.
+.TP
+.I disable APPLICATION_NAME
+Disables \fBAPPLICATION_NAME\fR, so that it is not started automatically when XSP is
+started as part of the system bootup process.
+.TP
+.I start APPLICATION_NAME [server_options]
+Manually starts the xsp2 process passing the configuration of APPLICATION_NAME to the
+xsp2 process. Applications may ship with a bundled \fIstart\fR script which will be
+used instead of xsp2 if present. \fBserver_options\fB are passed verbatim to the
+server process.
+.TP
+.I list
+Lists all the applications known to the utility.
+
+.SH AUTHORS
+Marek Habersack <mhabersack@novell.com>
+
+.SH SEE ALSO
+.BR xsp (1)
+
+.SH MORE INFORMATION
+The Mono project (http://www.go-mono.com) is a collaborative effort
+led by Novell (http://www.novell.com) to implement an open source
+version of the .NET Framework.
+.SH MAILING LISTS
+Mailing lists are listed at the
+http://www.mono-project.com/Mailing_Lists
+

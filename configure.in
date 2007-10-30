@@ -100,6 +100,7 @@ AC_OUTPUT([
 	man/xsp.1
 	man/dbsessmgr.1
         man/asp-state.1
+	man/mono-asp-apps.1
 	man/Makefile
 	scripts/Makefile
 	src/Makefile

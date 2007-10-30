@@ -1,5 +1,21 @@
 2007-10-30  Marek Habersack  <mhabersack@novell.com>
 
+	* man/Makefile.am (EXTRA_DIST): added mono-asp-apps.1.in
+	(CLEANFILES): added mono-asp-apps.1
+
+2007-10-30  Marek Habersack  <mhabersack@novell.com>
+
+	* configure.in: added man/mono-asp-apps.1 to the list of generated
+	files.
+
+	* man/mono-asp-apps.1.in: added
+
+2007-10-30  Marek Habersack  <mhabersack@novell.com>
+
+	* tools/mono-asp-apps/README: added
+
+2007-10-30  Marek Habersack  <mhabersack@novell.com>
+
 	* tools/mono-asp-apps/mono-asp-apps: added
 
 2007-10-26  Wade Berrier  <wberrier@novell.com>

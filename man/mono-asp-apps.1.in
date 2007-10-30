@@ -14,11 +14,11 @@ command [options]
 The 'mono-asp-apps' command is useful on systems which install applications from
 RPM packages and when the RPM packages have been created according to the Mono
 RPM packaging guidelines for ASP.NET applications.
-
+.PP
 The utility allows one to initialize, enable, disable and start installed applications.
 Note that you do not use this utility to manage applications hosted and managed by
 the Apache (or other) web server, only by xsp.
-
+.PP
 Note that this utility is useful only on systems where at least one application packaged
 according to the Mono ASP.NET 2.0 RPM packaging guidelines has been installed.
 .SH COMMANDS

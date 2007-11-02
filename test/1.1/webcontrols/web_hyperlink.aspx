@@ -5,7 +5,7 @@
 </head>
 <body>
 <asp:HyperLink id="hyper"
-	ImageUrl="http://www.ximian.com/images/index/button-top.gif"
+	ImageUrl="http://www.mono-project.com/files/8/8d/Mono-gorilla-aqua.100px.png"
 	NavigateUrl="http://www.ximian.com"
 	Text="Ximian"
 	Target="_top"

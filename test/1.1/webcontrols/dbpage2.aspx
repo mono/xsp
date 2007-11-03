@@ -68,6 +68,9 @@
 		GetConnectionData (out providerAssemblyName, out connectionTypeName, out cncString);
 		if (cncType == null) {		
 			Assembly dbAssembly = Assembly.LoadWithPartialName (providerAssemblyName);
+                        if (dbAssembly == null)
+                                throw new ApplicationException (String.Format ("Data provider assembly '{0}' not found",
+                                                                providerAssemblyName));
 			cncType = dbAssembly.GetType (connectionTypeName, true);
 			if (!typeof (IDbConnection).IsAssignableFrom (cncType))
 				throw new ApplicationException ("The type '" + cncType +

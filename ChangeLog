@@ -1,13 +1,18 @@
+2007-11-03  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/webcontrols/dbpage1.aspx,
+	  test/1.1/webcontrols/dbpage2.aspx:
+	Account for missing database provider assemblies.
+
 2007-11-02  Thomas Wiest  <twiest@novell.com>
 
-	* test/1.1/customcontrol/tabcontrol2.aspx
-	* test/1.1/html/htmlimage.aspx
-	* test/1.1/html/htmlinputimage.aspx
-	* test/1.1/webcontrols/web_hyperlink.aspx
-	* test/1.1/webcontrols/web_adrotator.xml
+	* test/1.1/customcontrol/tabcontrol2.aspx:
+	* test/1.1/html/htmlimage.aspx:
+	* test/1.1/html/htmlinputimage.aspx:
+	* test/1.1/webcontrols/web_hyperlink.aspx:
+	* test/1.1/webcontrols/web_adrotator.xml:
 	Changed http://www.ximian.com/images/index/button-top.gif to 
 	http://www.mono-project.com/files/8/8d/Mono-gorilla-aqua.100px.png
-
 
 2007-10-30  Marek Habersack  <mhabersack@novell.com>
 

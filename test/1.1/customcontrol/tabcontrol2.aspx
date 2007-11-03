@@ -38,7 +38,7 @@
         	<asp:Image id="im" runat="server"
         		AlternateText="Yes, again the dancing monkey"
         		ImageAlign="left"
-        		ImageUrl="http://www.ximian.com/images/index/button-top.gif"/>
+        		ImageUrl="http://www.mono-project.com/files/8/8d/Mono-gorilla-aqua.100px.png"/>
             </Mono:TabContent>
             <Mono:TabContent runat="server" Label="Form">
         	 <asp:Button id="btn"

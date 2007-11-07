@@ -6,7 +6,7 @@
     missingok
     notifempty
     size +4096k
-    create 640 root root
+    create 644 wwwrun www
     sharedscripts
 }
 

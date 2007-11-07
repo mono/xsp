@@ -192,7 +192,7 @@ case "$1" in
 	## the return value is set appropriately by startproc.
 	export MONO_OPTIONS
 	
-	MYPID=`/sbin/startproc -v -p $XSP_PIDFILE -l /var/log/xsp2.log -u monoxsp -g monoxsp -- $MONO_BIN $MONO_OPTIONS $XSP2_BIN $XSP_OPTIONS`
+	MYPID=`/sbin/startproc -v -p $XSP_PIDFILE -l /var/log/xsp2.log -u wwwrun -g www -- $MONO_BIN $MONO_OPTIONS $XSP2_BIN $XSP_OPTIONS`
 	if test "`readlink /proc/$MYPID/exe`" = "/usr/bin/mono"; then
 	    echo $MYPID > $XSP_PIDFILE
 	else

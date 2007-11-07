@@ -85,15 +85,11 @@ install -m 544 man/mono-asp-apps.1 ${RPM_BUILD_ROOT}/usr/share/man/man1/mono-asp
 rm -rf $RPM_BUILD_ROOT
 
 %if 0%{?suse_version}
-%pre
-/usr/sbin/groupadd -o -r monoxsp 2> /dev/null || :
-/usr/sbin/useradd -r -o -g monoxsp -s /bin/false -c "SSH daemon" -d /srv/xsp2 monoxsp 2> /dev/null || :
-
 %post
 %{fillup_and_insserv -n -s xsp2 xsp2 START_XSP2}
 
 %preun
-%stop_on_removal sshd
+%stop_on_removal xsp2
 
 %postun
 %restart_on_update xsp2
@@ -129,7 +125,7 @@ rm -rf $RPM_BUILD_ROOT
 %config /etc/init.d/xsp2
 %config /etc/logrotate.d/xsp2
 /var/adm/fillup-templates/*
-%attr(0711,monoxsp,monoxsp) /srv/xsp2
+%attr(0711,wwwrun,www) /srv/xsp2
 %{xspConfigsLocation}/*
 %endif
 %doc NEWS README

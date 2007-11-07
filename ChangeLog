@@ -1,3 +1,10 @@
+2007-11-07  Marek Habersack  <mhabersack@novell.com>
+
+	* packaging/opensuse/xsp2.init, packaging/opensuse/Makefile.am,
+	packaging/opensuse/xsp2.logrotate, tools/mono-asp-apps/Makefile.am,
+	packaging/opensuse/sysconfig.xsp2, packaging/opensuse/xsp.spec,
+	packaging/Makefile.am: added
+
 2007-11-03  Marek Habersack  <mhabersack@novell.com>
 
 	* test/1.1/webcontrols/dbpage1.aspx,

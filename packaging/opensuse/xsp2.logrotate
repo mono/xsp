@@ -1,0 +1,12 @@
+/var/log/xsp2.log {
+    compress
+    dateext
+    maxage 365
+    rotate 99
+    missingok
+    notifempty
+    size +4096k
+    create 640 root root
+    sharedscripts
+}
+

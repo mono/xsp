@@ -1,0 +1,29 @@
+## Path:	Network/Remote access/xsp2
+## Description:	XSP2 server settings
+## Type:	string
+## Default:	""
+## ServiceRestart: xsp2
+#
+# Port on which xsp2 is to listen for requests
+#
+XSP_PORT="8080"
+
+#
+# Address on which xsp2 is to listen for requests
+#
+XSP_ADDRESS="0.0.0.0"
+
+#
+# Configuration directory which contains application definition files
+#
+XSP_APPCONFIGDIR="/etc/xsp/2.0/applications-enabled/"
+
+#
+# Should mono be ran with debugging enabled (backtraces with lines on errors)
+#
+XSP_DEBUG="no"
+
+#
+# Extra options you might want to pass to xsp2, see man xsp
+#
+XSP_EXTRA_OPTIONS=""

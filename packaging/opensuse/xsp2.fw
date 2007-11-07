@@ -1,0 +1,5 @@
+## Name: Mono XSP2 ASP.NET Host Service
+## Description: Open ports for Mono XSP2 server
+
+# space separated list of allowed TCP ports
+TCP="8080"

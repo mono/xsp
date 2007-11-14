@@ -1,2 +1,2 @@
-SUBDIRS=man src test tools scripts docs packaging
+SUBDIRS=man src test tools scripts docs packaging unittests
 

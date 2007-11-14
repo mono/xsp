@@ -137,6 +137,9 @@ AC_OUTPUT([
 	tools/dbsessmgr/Makefile
 	tools/dbsessmgr/AssemblyInfo.cs
 	tools/mono-asp-apps/Makefile
+	unittests/Makefile
+	unittests/Tests.XSP.Security/Makefile
+	unittests/webroot/Makefile
 	docs/Makefile
 ])
 

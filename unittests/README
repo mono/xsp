@@ -1,6 +1,5 @@
 This directory contains a small test suite to check for any regressions
-in XSP that could cause security vulnerability. Contributions are welcome!
-
+in XSP that could cause security vulnerabilities. Contributions are welcome!
 
 Directory structure for the tests
 
@@ -8,8 +7,8 @@ Directory structure for the tests
 /webroot/
 	index.aspx
 
-Some tests tries to access index.aspx to retrieve it's source code. Other 
-tests tries to access the file NOACCESS that resides outside the root of
+Some tests try to access index.aspx to retrieve its source code. Other 
+tests try to access the file NOACCESS that resides outside the root of
 the web server.
 
 * Tests execution (using the same computer)

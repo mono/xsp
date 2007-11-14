@@ -10,7 +10,7 @@
 	void Signout_Click (object sender, EventArgs e)
 	{
 		FormsAuthentication.SignOut ();
-		Response.Redirect ("login.aspx");
+		Response.Redirect ("/1.1/authtest/login.aspx");
 	}
 </script>
 <body>

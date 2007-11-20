@@ -1,5 +1,8 @@
 2007-11-20  Marek Habersack  <mhabersack@novell.com>
 
+	* test/1.1/customcontrol/tabcontrol.aspx: explain how adding links
+	works.
+
 	* test/1.1/webcontrols/Makefile.am: generate the .sqlite files
 	when needed. Fixes make dist.
 

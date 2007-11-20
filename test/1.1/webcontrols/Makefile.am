@@ -34,7 +34,8 @@ samples_DATA = \
 		dbpage2.aspx \
 		people.xml \
 		web_adrotator.xml \
-		peopletable.xsl
+		peopletable.xsl \
+		index.aspx
 
 sqlitedir = $(pkglibdir)/test/1.1/webcontrols
 sqlite_DATA = dbpage1.sqlite \

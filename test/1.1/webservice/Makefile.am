@@ -4,7 +4,8 @@ testfiles = \
 		ConverterService.asmx \
 		TestService.asmx \
 		ServiceClient.exe.config  \
-		CompressExtension.cs
+		CompressExtension.cs \
+		index.aspx
 
 extensions_src = TraceExtension.cs EncryptExtension.cs DumpExtension.cs
 serviceclient_src = ServiceClient.cs Reference.cs

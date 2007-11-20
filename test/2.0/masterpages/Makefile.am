@@ -4,6 +4,7 @@ samples_DATA = \
 		simple.aspx \
 		frame.master \
 		content1.aspx \
-		content2.aspx
+		content2.aspx \
+		index.aspx
 
 EXTRA_DIST = $(samples_DATA)

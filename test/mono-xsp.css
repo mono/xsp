@@ -39,6 +39,7 @@ ul.dirlist {
 	list-style: url(small-icon.png);
 }
 
+a.indexDirectory { font-weight: bold; }
 a.aspx { background: #f1f1ed; }
 a.ashx { background: #0cc; }
 a.asmx { background: #ee0; }

@@ -1,3 +1,8 @@
+2007-11-21  Marek Habersack  <mhabersack@novell.com>
+
+	* Added several index.aspx files to avoid 404 errors on accessing
+	directories.
+
 2007-11-20  Marek Habersack  <mhabersack@novell.com>
 
 	* test/1.1/customcontrol/tabcontrol.aspx: explain how adding links

@@ -1,5 +1,9 @@
 2007-11-20  Marek Habersack  <mhabersack@novell.com>
 
+	* test/1.1/webcontrols/web_linkbutton.aspx: make the sample
+	work. Clicking 'Remove this link' actually does something
+	now. Same for the 'Click me!' button.
+
 	* All the samples are using common look now. A common header has
 	been added to provide consistent look and sample navigation. 1.1
 	mode uses a poor man's implementation of the 2.0 SiteMap reader,

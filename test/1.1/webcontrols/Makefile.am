@@ -34,9 +34,11 @@ samples_DATA = \
 		dbpage2.aspx \
 		people.xml \
 		web_adrotator.xml \
-		peopletable.xsl \
-	 	dbpage1.sqlite \
-		dbpage2.sqlite
+		peopletable.xsl
+
+sqlitedir = $(pkglibdir)/test/1.1/webcontrols
+sqlite_DATA = dbpage1.sqlite \
+	      dbpage2.sqlite
 
 samplesbindir = $(pkglibdir)/test/1.1/webcontrols
 samplesbin_SCRIPTS = dbpage_test_setup.exe
@@ -45,7 +47,5 @@ dbpage_test_setup_build = dbpage_test_setup.cs
 EXTRA_DIST = $(samples_DATA) $(dbpage_test_setup_build)
 
 dbpage_test_setup.exe: $(dbpage_test_setup_build)
-	$(MCS) -debug:full -r:Mono.Sqlite.dll -out:$@ $^
-
-dbpage1.sqlite, dbpage2.sqlite: dbpage_test_setup.exe
+	$(MCS) -debug:full -r:Mono.Data.SqliteClient.dll -out:$@ $^
 	$(RUNTIME) $@

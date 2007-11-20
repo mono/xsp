@@ -1,5 +1,5 @@
-authsampledir = $(pkglibdir)/test/1.1/webcontrols
-authsample_DATA = \
+samplesdir = $(pkglibdir)/test/1.1/webcontrols
+samples_DATA = \
 		listitem.aspx \
 		temperature.aspx \
 		validator1.aspx \
@@ -22,6 +22,7 @@ authsample_DATA = \
 		web_radiobutton.aspx \
 		web_radiobuttonlist.aspx \
 		web_regularexpressionvalidator.aspx \
+		web_comparevalidator.aspx \
 		web_repeater.aspx \
 		web_table2.aspx \
 		web_table.aspx \
@@ -33,6 +34,16 @@ authsample_DATA = \
 		dbpage2.aspx \
 		people.xml \
 		web_adrotator.xml \
-		peopletable.xsl
+		peopletable.xsl \
+	 	dbpage1.sqlite \
+		dbpage2.sqlite
 
-EXTRA_DIST = $(authsample_DATA)
+samplesbindir = $(pkglibdir)/test/1.1/webcontrols
+samplesbin_SCRIPTS = dbpage_test_setup.exe
+dbpage_test_setup_build = dbpage_test_setup.cs
+
+EXTRA_DIST = $(samples_DATA) $(dbpage_test_setup_build)
+
+dbpage_test_setup.exe: $(dbpage_test_setup_build)
+	$(MCS) -debug:full -r:Mono.Sqlite.dll -out:$@ $^
+	$(RUNTIME) $@

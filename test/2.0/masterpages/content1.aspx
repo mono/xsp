@@ -1,5 +1,4 @@
 <%@ Page Language="C#" MasterPageFile="frame.master" %>
-
 <asp:Content ID="Content1" ContentPlaceHolderID="title" Runat="server">
 Welcome to Master Pages!
 </asp:Content>

@@ -1,4 +1,5 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
 	<script runat="server">
@@ -18,8 +19,9 @@
 			msg.DataBind ();
 	}
 	</script>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 	<h3>Data binding in attribute values</h3>
 	Another silly example for your pleasure...
 	<form id="form" runat="server">     

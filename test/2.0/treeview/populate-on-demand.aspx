@@ -1,10 +1,12 @@
 <%@ Page Language="C#" Inherits="Populate"%>
-
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
     <title>Untitled Page</title>
+    <link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>
 <body>
+    <mono:MonoSamplesHeader runat="server"/>
     <form id="form1" runat="server">
 	<p>A sample tree populated on demand using callback (no postback).<br/>The code that generates the nodes can be found in <a href="populate.cs">populate.cs</a></p>
     <div>

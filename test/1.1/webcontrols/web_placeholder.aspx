@@ -1,4 +1,5 @@
-<%@ Page Language="C#" %>
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <script runat="server">
 	void Page_Load(Object sender, EventArgs e)
 	{
@@ -16,8 +17,11 @@
 	}
 </script>
 <html>
+<head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>PlaceHolder with a CheckBox and a HyperLink added in Page_Load</title>
-<body>
+</head>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form runat="server">
 	<asp:PlaceHolder id="ph" runat="server"/>
 </form>

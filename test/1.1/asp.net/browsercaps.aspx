@@ -1,4 +1,5 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ Import namespace="System.Reflection" %>
 <style type="text/css">
 <!--
@@ -73,8 +74,9 @@ div.normal {
 		}
 	}
 </script>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <h3>HttpBrowserCapabilities</h3>
 <form runat="server">
 	<div class="normal">User agent: <%= Request.UserAgent %></div><br>

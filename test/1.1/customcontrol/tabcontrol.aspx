@@ -1,5 +1,6 @@
 <%@ Page Language="C#" %>
 <%@ Import namespace="System.Reflection" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ Register TagPrefix="Mono" NAmespace="Mono.Controls" assembly="tabcontrol" %>
 <html>
 <!-- Authors:
@@ -134,7 +135,10 @@
 		SetPropertyValue (s.ID.Substring (1), s.Text);
 	}
 </script>
-<body>
+<head><title>Tab Control</title>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
+</head>
+<body><mono:MonoSamplesHeader runat="server"/>
 <center>
 <h3>Test for Tabs user control (tabcontrol.dll)</h3>
 <hr>

@@ -1,8 +1,14 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <HTML>
+  <head>
+    <title>TreeView - DataBound</title>
+    <link rel="stylesheet" type="text/css" href="/mono-xsp.css">
+  </head>
   <BODY bgcolor="white">
+    <mono:MonoSamplesHeader runat="server"/>
     <form runat="server">
       <asp:xmldatasource
         id="XmlDataSource1"

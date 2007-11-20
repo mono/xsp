@@ -1,4 +1,5 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <script runat="server">
 void Check_Click(Object src, EventArgs E) {
@@ -7,10 +8,11 @@ void Check_Click(Object src, EventArgs E) {
 </script>
 
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>CompareValidator</title>
 </head>
 
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form runat="server">
 <asp:Label text="Enter twice the same string:" runat="server"/><br>
 <asp:TextBox id="Text1" runat="server" /> ==

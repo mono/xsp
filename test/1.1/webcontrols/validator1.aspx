@@ -1,4 +1,5 @@
-<%@ language="C#" %>
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <script runat=server>
 	void txt_Changed (object sender, EventArgs e)
@@ -6,9 +7,10 @@
 	}
 </script>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>The textboxes should be filled</title>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form runat="server">
 Multiline:
 <br>

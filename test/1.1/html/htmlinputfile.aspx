@@ -1,7 +1,11 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
+<head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>HtmlInputFile</title>
-<body>
+</head>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form id="myForm" name="myform" action="htmlinputfile.aspx" method="post" enctype="image/jpeg" runat="server">
 Pick a JPEG file:
 <input id="myFile" type="file" runat="server"> 

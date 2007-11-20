@@ -10,7 +10,7 @@
       }
 </script>
 
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 This is pretty much the same as registertest.aspx, but splitted in 3 files.
 <p>
 <!-- #include virtual="body.inc" -->

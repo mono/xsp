@@ -1,6 +1,8 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <script language="C#" runat="server">
 	private string folks = "folks";
 	void Page_Load(object src, EventArgs e)
@@ -28,7 +30,7 @@
 	}
 </script>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <h3>Data binding and templates</h3>
 	Testing data bound literal inside templates.
 	<form runat=server>

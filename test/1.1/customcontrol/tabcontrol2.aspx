@@ -1,5 +1,6 @@
 <%@ Page Language="C#" %>
 <%@ Import namespace="System.Reflection" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ Register TagPrefix="Mono" Namespace="Mono.Controls" assembly="tabcontrol2" %>
 <html>
 <!-- You must compile tabcontrol2.cs and copy the dll to the output/ directory -->
@@ -7,9 +8,10 @@
 --	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 --	(c) 2002 Ximian, Inc (http://www.ximian.com)
 -->
-
+<head>
 <title>User Control tabcontrol2</title>
-<script runat=server>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
+<script runat="server">
 	private static int _clicked = 0;
 	void Clicked (object o, EventArgs e)
 	{
@@ -22,8 +24,9 @@
 		dos.InnerText = String.Format ("Text have changed {0} times.", ++_txt_changed);
 	}
 </script>
+</head>
 
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
     <center>
         <h3>Test for Tabs user control (tabcontrol2.dll)</h3>
         <hr>

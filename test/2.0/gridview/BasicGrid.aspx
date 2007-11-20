@@ -1,5 +1,5 @@
 <%@ Page Language="C#" %>
-
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
 <script runat="server">
@@ -8,8 +8,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
     <title>Untitled Page</title>
+    <link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>
 <body>
+    <mono:MonoSamplesHeader runat="server"/>
     <form id="form1" runat="server">
     <h1>Simple GridView</h1>
     <p>

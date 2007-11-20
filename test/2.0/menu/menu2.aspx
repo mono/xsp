@@ -1,10 +1,13 @@
 <%@ Page Language="c#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head runat="server">
     <title>Simple Menu</title>
+    <link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 	<META kk="iii">
 </head>
 <body>
+    <mono:MonoSamplesHeader runat="server"/>
     <form id="form1" runat="server">
 
     <asp:Label ID="Label1" Runat="Server" />

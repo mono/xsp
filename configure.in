@@ -118,6 +118,8 @@ AC_OUTPUT([
 	src/Mono.WebServer.XSP/Makefile
 	src/Mono.WebServer.XSP/AssemblyInfo.cs
 	test/Makefile
+	test/controls/Makefile
+	test/App_Code/Makefile
 	test/1.1/Makefile
 	test/1.1/authtest/Makefile
 	test/1.1/asp.net/Makefile

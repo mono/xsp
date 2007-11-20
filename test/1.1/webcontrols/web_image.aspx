@@ -1,9 +1,11 @@
-<%@ language="C#" %>
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>Image</title>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form runat="server">
 <asp:Image id="im" runat="server"
 	AlternateText="Yes, powered by Mono"

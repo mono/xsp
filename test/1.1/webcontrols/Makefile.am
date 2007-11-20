@@ -46,4 +46,6 @@ EXTRA_DIST = $(samples_DATA) $(dbpage_test_setup_build)
 
 dbpage_test_setup.exe: $(dbpage_test_setup_build)
 	$(MCS) -debug:full -r:Mono.Sqlite.dll -out:$@ $^
+
+dbpage1.sqlite, dbpage2.sqlite: dbpage_test_setup.exe
 	$(RUNTIME) $@

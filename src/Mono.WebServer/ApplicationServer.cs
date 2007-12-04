@@ -93,6 +93,23 @@ namespace Mono.WebServer
 
 		// This is much faster than hashtable for typical cases.
 		ArrayList vpathToHost = new ArrayList ();
+
+		public int Port {
+			get {
+				if (listen_socket == null
+#if NET_2_0
+				    || !listen_socket.IsBound
+#endif
+				)
+					return -1;
+
+				IPEndPoint iep = listen_socket.LocalEndPoint as IPEndPoint;
+				if (iep == null)
+					return -1;
+
+				return iep.Port;
+			}
+		}
 		
 		public ApplicationServer (WebSource source)
 		{

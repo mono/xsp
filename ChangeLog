@@ -1,3 +1,12 @@
+2007-12-04  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/ApplicationServer.cs: added a new property,
+	Port, to report the actual port ApplicationServer is listening on
+
+	* src/Mono.WebServer.XSP/main.cs: accept an extra parameter to
+	attach XSP to a random port. The actual port is printed to the
+	console instead of the configured one, as it was done before.
+
 2007-11-21  Marek Habersack  <mhabersack@novell.com>
 
 	* Added several index.aspx files to avoid 404 errors on accessing

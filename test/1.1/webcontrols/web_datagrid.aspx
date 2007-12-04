@@ -1,6 +1,8 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>DataGrid</title>
 <style type="text/css">
 <!--
@@ -69,7 +71,7 @@
 	}
 </script>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <h3>DataGrid sample</h3>
 <form runat="server">
 	<asp:datagrid id="dg" border="1" AutoGenerateColumns="false"

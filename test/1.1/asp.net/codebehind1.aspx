@@ -1,4 +1,5 @@
 <%@ Page language="c#" Inherits="MonoTest.Test" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
 <HTML>
 	<HEAD>
@@ -7,8 +8,9 @@
 		<meta name="CODE_LANGUAGE" Content="C#">
 		<meta name="vs_defaultClientScript" content="JavaScript">
 		<meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
+		<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 	</HEAD>
-	<body>
+	<body><mono:MonoSamplesHeader runat="server"/>
 		<form id="Test" method="post" runat="server">
 			<P>
 				<asp:Label id="Label1" runat="server">Text will go here.</asp:Label></P>

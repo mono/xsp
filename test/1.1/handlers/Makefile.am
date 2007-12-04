@@ -4,6 +4,7 @@ authsample_DATA = \
 		empty.ashx \
 		monodoc.ashx \
 		webhandler.ashx \
-		async.ashx
+		async.ashx \
+		index.aspx
 
 EXTRA_DIST = $(authsample_DATA)

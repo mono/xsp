@@ -2,7 +2,8 @@ testfiles = \
 		populate-on-demand.aspx \
 		populate.cs \
 		treeview.aspx \
-		treeview-databound.aspx
+		treeview-databound.aspx \
+		index.aspx
 
 treeview_src = populate.cs
 treeview_build = $(addprefix $(srcdir)/, $(treeview_src))

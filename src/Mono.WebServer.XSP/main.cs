@@ -59,7 +59,7 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
 					Path.GetFileName (assembly.Location), version, copyright, description);
 		}
-
+		
 		static void ShowHelp ()
 		{
 			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
@@ -70,6 +70,8 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
 			Console.WriteLine ("                    Default value: 8080");
 			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
+			Console.WriteLine ("    --random-port: listen on a randomly assigned port. The port numer");
+			Console.WriteLine ("                    will be reported to the caller via a text file.");
 			Console.WriteLine ();
 			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
 			Console.WriteLine ("                    Default value: 0.0.0.0");
@@ -164,7 +166,8 @@ namespace Mono.WebServer.XSP
 			Port = 1 << 8,
 			Terminate = 1 << 9,
 			Https = 1 << 10,
-			Master = 1 << 11
+			Master = 1 << 11,
+			RandomPort = 1 << 12
 		}
 
 		static void CheckAndSetOptions (string name, Options value, ref Options options)
@@ -182,6 +185,11 @@ namespace Mono.WebServer.XSP
 				ShowHelp ();
 				Console.WriteLine ();
 				Console.WriteLine ("ERROR: --port/--address and --filename are mutually exclusive");
+				Environment.Exit (1);
+			}
+
+			if ((options & Options.Port) != 0 && value == Options.RandomPort) {
+				Console.WriteLine ("ERROR: --port and --random-port are mutually exclusive");
 				Environment.Exit (1);
 			}
 		}
@@ -225,8 +233,8 @@ namespace Mono.WebServer.XSP
 			object oport;
 			string ip = AppSettings ["MonoServerAddress"];
 			bool master = false;
-
-			if (ip == "" || ip == null)
+			
+			if (ip == null || ip.Length == 0)
 				ip = "0.0.0.0";
 
 			oport = AppSettings ["MonoServerPort"];
@@ -276,6 +284,10 @@ namespace Mono.WebServer.XSP
 					CheckAndSetOptions (a, Options.Port, ref options);
 					oport = args [++i];
 					break;
+				case "--random-port":
+					CheckAndSetOptions (a, Options.RandomPort, ref options);
+					oport = 0;
+					break;
 				case "--address":
 					CheckAndSetOptions (a, Options.Address, ref options);
 					ip = args [++i];
@@ -318,6 +330,7 @@ namespace Mono.WebServer.XSP
 			IPAddress ipaddr = null;
 			ushort port;
 			try {
+				
 				port = Convert.ToUInt16 (oport);
 			} catch (Exception) {
 				Console.WriteLine ("The value given for the listen port is not valid: " + oport);
@@ -374,15 +387,17 @@ namespace Mono.WebServer.XSP
 			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 
-				Console.WriteLine ("Listening on port: {0} {1}", port, security);
-				Console.WriteLine ("Listening on address: {0}", ip);
-			
+			Console.WriteLine ("Listening on address: {0}", ip);
 			Console.WriteLine ("Root directory: {0}", rootDir);
 
 			try {
 				if (server.Start (!nonstop) == false)
 					return 2;
-
+				
+				Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
+				if (port == 0)
+					Console.Error.WriteLine ("Random port: {0}", server.Port);
+				
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
 					Console.ReadLine ();

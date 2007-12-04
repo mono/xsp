@@ -1,4 +1,5 @@
 <%@ Page Language = "C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <script runat="server">
 	string [] msgs = new string [] { "hi!", "hello", "hola", 
@@ -6,8 +7,9 @@
 </script>
 <head>
 <title>Code Render</title>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 	<% for (int i = 0; i < 5; i++) {%>
 	<%= msgs [i] %> message number <%= i %>.
 	<p>

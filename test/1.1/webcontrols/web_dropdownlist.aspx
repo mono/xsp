@@ -1,5 +1,8 @@
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <script language="C#" runat="server">
 	void Click (object o, EventArgs e) 
 	{
@@ -10,7 +13,7 @@
 <title>DropDownList</title>
 </head>
 <h3>DropDownList test</h3>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 	<form runat="server">
 		<asp:DropDownList id="ddl" runat="server">
 			<asp:ListItem>Item 1</asp:ListItem>

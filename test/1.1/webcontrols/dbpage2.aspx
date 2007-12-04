@@ -1,7 +1,9 @@
-<%@ language="C#" %>
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ import namespace="System.Data" %>
 <%@ import namespace="System.Data.SqlClient" %>
 <%@ import namespace="System.Reflection" %>
+<%@ Import namespace="System.IO" %>
 <%@ Register TagPrefix="Mono" Namespace="Mono.Controls" assembly="tabcontrol2" %>
 <html>
 <!-- You must compile tabcontrol2.cs and copy the dll to the output/ directory -->
@@ -31,14 +33,21 @@
 			}
 		}
 
+	        Version ver = Environment.Version;
 		if (providerAssembly == null || providerAssembly == "")
-			providerAssembly = "Npgsql";
-		
+	                if (ver.Major == 1)
+			         providerAssembly = "Mono.Data.SqliteClient, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+	                else if (ver.Major == 2)
+	                         providerAssembly = "Mono.Data.SqliteClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+
 		if (cncTypeName == null || cncTypeName == "")
-			cncTypeName = "Npgsql.NpgsqlConnection";
+			cncTypeName = "Mono.Data.SqliteClient.SqliteConnection";
 		
-		if (cncString == null || cncString == "")
-			cncString = "server=127.0.0.1;user id=monotest;password=monotest;dbname=monotest";
+		if (cncString == null || cncString == "") {
+	                string dbPath = Path.Combine (Path.GetDirectoryName (Request.MapPath (Request.FilePath)), "dbpage2.sqlite");
+			cncString = String.Format ("URI=file:{0},Version=3", dbPath);
+	        }
+
 	}
 
 	void Page_Unload ()
@@ -103,9 +112,11 @@
 
 		if (confirmDelete.Visible == true){
 			string s_deleteID = deleteID.Text.Trim ();
-			uint dbid = UInt32.Parse (s_deleteID);
-			string selectCmd = String.Format ("SELECT id, name, address FROM customers WHERE id = {0}", dbid);
-			UpdateTable (selectCmd, deleteTable);
+                        if (s_deleteID != null && s_deleteID.Length > 0) {
+			       uint dbid = UInt32.Parse (s_deleteID);
+			       string selectCmd = String.Format ("SELECT id, name, address FROM customers WHERE id = {0}", dbid);
+			       UpdateTable (selectCmd, deleteTable);
+                        }
 			return;
 		}
 	}
@@ -295,9 +306,10 @@
 	}
 </script>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>More DB testing plus tabcontrol2.dll</title>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <span runat="server" visible="false" id="noDBLine">
 <h3>Database Error</h3>
 Sorry, could not connect to a database.

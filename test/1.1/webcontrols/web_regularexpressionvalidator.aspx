@@ -1,4 +1,5 @@
-<%@ language="C#" %>
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <script runat="server">
 void Check_Click(Object src, EventArgs E) {
@@ -7,10 +8,12 @@ void Check_Click(Object src, EventArgs E) {
 </script>
 
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>RegularExpressionValidator</title>
 </head>
 
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
+
 <p>RegularExpressionValidator returns true if input string is empty.
 So we added RequiredFieldValidator to make sure 
 that all field are not empty and valid.

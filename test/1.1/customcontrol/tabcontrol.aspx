@@ -1,5 +1,6 @@
 <%@ Page Language="C#" %>
 <%@ Import namespace="System.Reflection" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ Register TagPrefix="Mono" NAmespace="Mono.Controls" assembly="tabcontrol" %>
 <html>
 <!-- Authors:
@@ -134,7 +135,16 @@
 		SetPropertyValue (s.ID.Substring (1), s.Text);
 	}
 </script>
-<body>
+<head><title>Tab Control</title>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
+</head>
+<body><mono:MonoSamplesHeader runat="server"/>
+<p>
+<strong>Note that when you add the first tab, its link will not be visible as the new tab will be the current one, and
+current tabs render without the link. In order to see that the link has been correctly associated with the tab, add
+another one making sure that you put the name of it in both <tt>Name</tt> and <tt>CurrentTabName</tt> input fields.
+</strong>
+</p>
 <center>
 <h3>Test for Tabs user control (tabcontrol.dll)</h3>
 <hr>
@@ -146,9 +156,9 @@
 <tr>
 <td width="50%">
 <font size=+1>Enter label name and link to add:</font><p>
-Name: <asp:TextBox runat="server" id="name" Text="Ximian" />
+Name: <asp:TextBox runat="server" id="name" Text="Mono Project" />
 <p>
-Link: <asp:TextBox runat="server" id="url" Text="http://www.ximian.com"/>
+Link: <asp:TextBox runat="server" id="url" Text="http://www.mono-project.com/"/>
 <p>
 <asp:Button runat="server" id="submit" OnClick="SubmitClicked" Text="Submit" />
 </td>

@@ -1,8 +1,11 @@
-<%@ PAge language="c#" %>
+<%@ Page language="c#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
+<title>List Items</title>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 
     <h3>ListItem test</h3>
     <form runat="server">

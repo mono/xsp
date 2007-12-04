@@ -1,6 +1,8 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 	<script runat="server">
 	public class NumberMessage
 	{
@@ -40,7 +42,7 @@
 	}
 	</script>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 	<object id="optionsList" runat="server" class="System.Collections.ArrayList" />
 	<h3>Data binding using an array list containing a class</h3>
 	DataTextField and DataValueField must contain property names of the

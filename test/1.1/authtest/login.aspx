@@ -1,4 +1,5 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ Import Namespace="System.Web.Security" %>
 <html>
 <script language="C#" runat=server>
@@ -11,7 +12,10 @@
 		}
 	}
 </script>
-<body>
+<head><title>Login</title>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
+</head>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form runat=server>
 	<h3><font face="Verdana">Login Page</font></h3>
 	<table>

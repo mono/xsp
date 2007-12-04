@@ -14,6 +14,7 @@ authsample_DATA = \
 		htmlinputtext.aspx \
 		htmlselect.aspx \
 		htmltable.aspx \
-		htmltextarea.aspx
+		htmltextarea.aspx \
+		index.aspx
 
 EXTRA_DIST = $(authsample_DATA)

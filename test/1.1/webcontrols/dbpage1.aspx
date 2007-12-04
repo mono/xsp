@@ -1,8 +1,9 @@
-<%@ language="C#" %>
+<%@ Page language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ import namespace="System.Configuration" %>
 <%@ import namespace="System.Data" %>
 <%@ import namespace="System.Reflection" %>
-
+<%@ import namespace="System.IO" %>
 <html>
 <script runat=server>
 
@@ -26,14 +27,20 @@
 			}
 		}
 
+	        Version ver = Environment.Version;
 		if (providerAssembly == null || providerAssembly == "")
-			providerAssembly = "Npgsql";
-		
+	                if (ver.Major == 1)
+			         providerAssembly = "Mono.Data.SqliteClient, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+	                else if (ver.Major == 2)
+	                         providerAssembly = "Mono.Data.SqliteClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+
 		if (cncTypeName == null || cncTypeName == "")
-			cncTypeName = "Npgsql.NpgqlConnection";
+			cncTypeName = "Mono.Data.SqliteClient.SqliteConnection";
 		
-		if (cncString == null || cncString == "")
-			cncString = "server=127.0.0.1;user id=monotest;password=monotest;dbname=monotest";
+		if (cncString == null || cncString == "") {
+	                string dbPath = Path.Combine (Path.GetDirectoryName (Request.MapPath (Request.FilePath)), "dbpage1.sqlite");
+			cncString = String.Format ("URI=file:{0},Version=3", dbPath);
+	        }
 	}
 
 	void ShowError (Exception exc)
@@ -56,6 +63,7 @@
                         if (dbAssembly == null)
                                 throw new ApplicationException (String.Format ("Data provider assembly '{0}' not found",
                                                                 providerAssemblyName));
+
 			cncType = dbAssembly.GetType (connectionTypeName, true);
 			if (!typeof (IDbConnection).IsAssignableFrom (cncType))
 				throw new ApplicationException ("The type '" + cncType +
@@ -127,18 +135,17 @@
 
 </script>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <title>Some DB testing</title>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <span runat="server" visible="false" id="noDBLine">
 <h3>Database Error</h3>
 Sorry, a database error has occurred.
 <p>
-You should set up a database for user <i>'monotest'</i>,
-password <i>'monotest'</i> and dbname <i>'monotest'</i>.
-<p>
-Then modify the variables DBProviderAssembly, DBConnectionType and
-DBConnectionString in server.exe.config file to fit your needs.
+You should set up a database of your choice and then modify the variables DBProviderAssembly, DBConnectionType and
+DBConnectionString in <tt>xsp.exe.config</tt> (or <tt>mod-mono-server.exe.config</tt> if running the tests under Apache/mod_mono)
+file to fit your needs.
 <p>
 The database should have a table called customers created with the following command (or similar):
 <pre>
@@ -149,13 +156,15 @@ CREATE TABLE "test" (
 
 </pre>
 </span>
+
 <form id="theForm" runat="server">
 Choose the SQL filters and click 'Submit'.
-<asp:Label Text="Person Filter: " />
-<asp:TextBox id="PersonFilter" Text="" TextMode="singleLine" OnTextChanged="Filter_Changed" runat="server" maxlength=40 />
 <p>
-<asp:Label Text="Mail Filter: " />
-<asp:TextBox id="MailFilter" Text="" TextMode="singleLine" OnTextChanged="Filter_Changed" runat="server" maxlength=40 visible=false />
+<asp:Label runat="server" Text="Person Filter: "/>
+<asp:TextBox id="PersonFilter" Text="" TextMode="singleLine" OnTextChanged="Filter_Changed" runat="server" maxlength="40" />
+<p>
+<asp:Label runat="server" Text="Mail Filter: " />
+<asp:TextBox id="MailFilter" Text="" TextMode="singleLine" OnTextChanged="Filter_Changed" runat="server" maxlength="40" />
 <p>
 <asp:Button id="btn" runat="server" Text="Submit" />
 <p>

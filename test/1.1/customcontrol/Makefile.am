@@ -2,7 +2,8 @@ samplesdir = $(pkglibdir)/test/1.1/customcontrol
 
 testfiles = \
 		tabcontrol2.aspx \
-		tabcontrol.aspx
+		tabcontrol.aspx \
+		index.aspx
 		
 tabcontrol_src = tabcontrol.cs
 tabcontrol2_src = tabcontrol2.cs

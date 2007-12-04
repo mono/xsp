@@ -1,7 +1,8 @@
+SUBDIRS = controls
 if NET_2_0
-SUBDIRS = 1.1 2.0
+SUBDIRS += 1.1 2.0 App_Code
 else
-SUBDIRS = 1.1
+SUBDIRS += 1.1
 endif
 
 testfiles = \
@@ -17,9 +18,20 @@ testfiles = \
 		small-icon.png \
 		sample.webapp \
 		favicon.ico \
-		mono-xsp.css
+		mono-xsp.css \
+		Web.sitemap \
+		missing_components.aspx
 
 samplesdir = $(pkglibdir)/test
 samples_DATA = $(testfiles)
 
-EXTRA_DIST = $(testfiles)
+samplesbindir = $(pkglibdir)/test/bin
+samplesbin_SCRIPTS = SiteMapReader_1.1.dll
+
+sitemapreader_build = SiteMapReader_1.1.cs
+
+CLEANFILES = $(samplesbin_SCRIPTS)
+EXTRA_DIST = $(testfiles) $(sitemapreader_build)
+
+SiteMapReader_1.1.dll: $(sitemapreader_build)
+	$(MCS) -pkg:dotnet -r:System.Xml.dll -target:library -out:$@ $^

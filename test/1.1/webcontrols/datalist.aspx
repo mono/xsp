@@ -1,9 +1,9 @@
 <%@ Page Language="C#" %>
-
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <HTML>
 
 	<HEAD>
-
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 		<title>DataList</title>
 
 		<script runat="server">
@@ -42,7 +42,7 @@
 
 	</HEAD>
 
-	<body>
+	<body><mono:MonoSamplesHeader runat="server"/>
 
 		<h3>Datalist sample</h3>
 

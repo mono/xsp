@@ -1,4 +1,5 @@
-<%@ language="C#" debug="true"%>
+<%@ Page language="C#" debug="true"%>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <%@ Import namespace="System.ComponentModel" %>
 <%@ Import namespace="System.Globalization" %>
 <!-- This test was used to fix bug #59495
@@ -9,6 +10,7 @@
 <html>
 <head>
 <title>ViewState + TypeConverter</title>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 <script runat="server">
 	public class MyStuffConverter : TypeConverter
 	{
@@ -73,7 +75,7 @@
 	}
 </script>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 <form runat="server">
 <asp:button type="submit" runat="server" Text="Click here" />
 <asp:label id="lbl" runat="server" />

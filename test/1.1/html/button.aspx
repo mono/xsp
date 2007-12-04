@@ -1,6 +1,8 @@
 <%@ Page Language="C#" %>
+<%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 	<script runat="server">
 	void Button1_OnClick(object Source, EventArgs e) 
 	{
@@ -17,7 +19,7 @@
 
 	</script>
 </head>
-<body>
+<body><mono:MonoSamplesHeader runat="server"/>
 	<h3>HtmlButton Sample</h3>
 	<form id="ServerForm" runat="server">     
 		<button id=Button1 runat="server" OnServerClick="Button1_OnClick">

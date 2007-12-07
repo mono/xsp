@@ -1,4 +1,4 @@
-<%@ Page Language="C# %>
+<%@ Page Language="C#" %>
 <%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html>
 <head>

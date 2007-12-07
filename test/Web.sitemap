@@ -94,14 +94,12 @@
 	<siteMapNode url="~/1.1/asp.net/registertest.aspx" title="registertest" />
 	<siteMapNode url="~/1.1/asp.net/transfer1.aspx" title="transfer1" />
 	<siteMapNode url="~/1.1/asp.net/typedesc.aspx" title="typedesc" />
-	<siteMapNode url="~/1.1/asp.net/registertest1.ascx" title="registertest1.ascx" />
 	<siteMapNode url="~/1.1/asp.net/browsercaps.aspx" title="browsercaps" />
 	<siteMapNode url="~/1.1/asp.net/codebehind1.aspx" title="codebehind1" />
 	<siteMapNode url="~/1.1/asp.net/server-side-object.aspx" title="server-side-object" />
 	<siteMapNode url="~/1.1/asp.net/session1.aspx" title="session1" />
 	<siteMapNode url="~/1.1/asp.net/includetest.aspx" title="includetest" />
 	<siteMapNode url="~/1.1/asp.net/code-render.aspx" title="code-render" />
-	<siteMapNode url="~/1.1/asp.net/registertest2.ascx" title="registertest2.ascx" />
 	<siteMapNode url="~/1.1/asp.net/transfer2.aspx" title="transfer2" />
       </siteMapNode>
       <siteMapNode url="~/1.1/handlers/" title="Handlers">

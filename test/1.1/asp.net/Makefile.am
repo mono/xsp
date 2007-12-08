@@ -13,7 +13,10 @@ testfiles = \
 		server-side-object.aspx \
 		session1.aspx \
 		typedesc.aspx \
-		index.aspx
+		index.aspx \
+		transfer1.aspx \
+		transfer2.aspx \
+		serial.aspx
 
 typedesc_src = typedesc.cs
 codebehind_src = codebehind1.cs

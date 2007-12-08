@@ -1,3 +1,10 @@
+2007-12-08  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/asp.net/Makefile.am (testfiles): added
+	transfer{1,2}.aspx and serial.aspx
+
+	* test/Web.sitemap: remove the .ascx controls from the menu.
+
 2007-12-04  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/ApplicationServer.cs: added a new property,

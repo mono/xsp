@@ -1,3 +1,11 @@
+2007-12-12  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/handlers/monodoc.ashx: fix the rendering of
+	links. Apparently, firefox lowercases the leading X: sequence in
+	links like 'N:System' and that, in turn, causes Monodoc to fail to
+	parse the link properly. Code stolen from the monodoc version of
+	monodoc.ashx.
+
 2007-12-08  Marek Habersack  <mhabersack@novell.com>
 
 	* test/1.1/asp.net/Makefile.am (testfiles): added

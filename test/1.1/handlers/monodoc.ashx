@@ -16,6 +16,7 @@ using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.UI;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Xsl;
 using Monodoc;
@@ -63,7 +64,9 @@ namespace Mono.Website.Handlers
                                return;
                        }
                        
-                       PrintDocs (link, context);
+                       Node n;
+                       string content = help_tree.RenderUrl (link, out n);
+                       PrintDocs (content, context);
                }
                
                
@@ -79,8 +82,9 @@ namespace Mono.Website.Handlers
                        
                        output.Flush();
                }
-               
-               void PrintDocs (string url, HttpContext ctx)
+
+	       string requestPath;               
+               void PrintDocs (string content, HttpContext ctx)
                {
                        Node n;
                        
@@ -134,12 +138,55 @@ function makeLink (link)
 
                        ");
                        
-                       ctx.Response.Write (help_tree.RenderUrl (url, out n));
-               
-                       ctx.Response.Write (@"
-                       </body>
-</html>");
+			 requestPath=ctx.Request.Path;
+                        string output;
+
+                        if (content == null)
+                                output = "No documentation available on this topic";
+                        else {
+                                output = MakeLinks(content);
+                        }
+                        ctx.Response.Write (output);
+                        ctx.Response.Write (@"</body></html>");
                }
+
+		string MakeLinks(string content)
+                {
+                        MatchEvaluator linkUpdater=new MatchEvaluator(MakeLink);
+                        if(content.Trim().Length<1|| content==null)
+                                return content;
+                        try
+                        {
+                                string updatedContents=Regex.Replace(content,"(<a[^>]*href=['\"])([^'\"]+)(['\"][^>]*)(>)", linkUpdater);
+                                return(updatedContents);
+                        }
+                        catch(Exception e)
+                        {
+                                return "LADEDA" + content+"!<!--Exception:"+e.Message+"-->";
+                        }
+                }
+                
+                // Delegate to be called from MakeLinks for fixing <a> tag
+                string MakeLink (Match theMatch)
+                {
+                        string updated_link = null;
+
+                        // Return the link without change if it of the form
+                        //      $protocol://... or #...
+                        string link = theMatch.Groups[2].ToString();
+                        if (Regex.Match(link, @"^\w+:\/\/").Success || Regex.Match(link, "^#").Success)
+                                updated_link = theMatch.Groups[0].ToString();
+                        else {
+                                updated_link = String.Format ("{0}{1}?link={2}{3} target=\"content\"{4}",
+                                        theMatch.Groups[1].ToString(),
+                                        requestPath,
+                                        HttpUtility.UrlEncode (link.Replace ("file://","")),
+                                                theMatch.Groups[3].ToString(),
+                                                theMatch.Groups[4].ToString());
+
+                        }
+                        return updated_link;
+                }
 
                bool IHttpHandler.IsReusable
                {

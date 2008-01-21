@@ -338,11 +338,12 @@ namespace Mono.WebServer
 		{
 			buffer = null;
 			
-			if (!ValidRequest (requestId))
-				return 0;
 			Worker w;
 
 			lock (reqlock) {
+				if (!ValidRequest (requestId))
+					return 0;
+
 				w = GetWorker (requestId);
 				if (w == null)
 					return 0;

@@ -1,3 +1,8 @@
+2008-01-19  Joshua Tauberer  <jit@occams.info>
+
+	* src/Mono.WebServer/BaseRequestBroker.cs: Read: Check the request
+	  ID is valid inside the lock.
+
 2007-12-12  Marek Habersack  <mhabersack@novell.com>
 
 	* test/1.1/handlers/monodoc.ashx: fix the rendering of

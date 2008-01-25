@@ -1,3 +1,9 @@
+2008-01-25  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/webcontrols/Makefile.am (EXTRA_DIST): include the
+	.sqlite files in the generated tarball, so that the build system
+	doesn't need to have sqlite installed.
+
 2008-01-19  Joshua Tauberer  <jit@occams.info>
 
 	* src/Mono.WebServer/BaseRequestBroker.cs: Read: Check the request

@@ -45,7 +45,7 @@ samplesbindir = $(pkglibdir)/test/1.1/webcontrols
 samplesbin_SCRIPTS = dbpage_test_setup.exe
 dbpage_test_setup_build = dbpage_test_setup.cs
 
-EXTRA_DIST = $(samples_DATA) $(dbpage_test_setup_build)
+EXTRA_DIST = $(sqlite_DATA) $(samples_DATA) $(dbpage_test_setup_build)
 
 dbpage_test_setup.exe: $(dbpage_test_setup_build)
 	$(MCS) -debug:full -r:Mono.Data.SqliteClient.dll -out:$@ $^

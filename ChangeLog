@@ -1,3 +1,10 @@
+2008-01-30  Robert Jordan  <robertj@gmx.net>
+
+	* src/Mono.WebServer.FastCgi/main.cs (Main):
+	Replace Console.WriteLines with Logger.Write. Always log to
+	console during Main (). Handle UnmagedSocket's exceptions gracefully.
+	Fixes #350779.
+
 2008-01-28  Wade Berrier  <wberrier@novell.com>
 
 	* configure.in: version bump -> 1.9

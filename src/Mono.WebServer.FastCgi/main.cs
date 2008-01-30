@@ -145,6 +145,9 @@ namespace Mono.WebServer.FastCgi
 				Console.WriteLine ("Using default levels: {0}",
 					Logger.Level);
 			}
+
+			// Enable console logging during Main ().
+			Logger.WriteToConsole = true;
 			
 			try {
 				string log_file = (string)
@@ -153,17 +156,17 @@ namespace Mono.WebServer.FastCgi
 				if (log_file != null)
 					Logger.Open (log_file);
 			} catch (Exception e) {
-				Console.WriteLine ("Error opening log file: {0}",
-					e.Message);
-				Console.WriteLine ("Events will not be logged.");
+				Logger.Write (LogLevel.Error,
+					      "Error opening log file: {0}",
+					      e.Message);
+				Logger.Write (LogLevel.Error,
+					      "Events will not be logged.");
 			}
-			
-			Logger.WriteToConsole = (bool) configmanager ["printlog"];
 
 			// Send the trace to the console.
 			Trace.Listeners.Add (
 				new TextWriterTraceListener (Console.Out));
-			Console.WriteLine (
+			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 			
 			
@@ -185,8 +188,12 @@ namespace Mono.WebServer.FastCgi
 					socket = SocketFactory.CreatePipeSocket (
 						IntPtr.Zero);
 				} catch (System.Net.Sockets.SocketException){
-					Console.WriteLine (
+					Logger.Write (LogLevel.Error,
 						"Error: Pipe socket is not bound.");
+					return 1;
+				} catch (System.NotSupportedException) {
+					Logger.Write (LogLevel.Error,
+						"Error: Pipe sockets are not supported on this system.");
 					return 1;
 				}
 				break;
@@ -205,14 +212,14 @@ namespace Mono.WebServer.FastCgi
 					socket = SocketFactory.CreateUnixSocket (
 						path);
 				} catch (System.Net.Sockets.SocketException e){
-					Console.WriteLine (
+					Logger.Write (LogLevel.Error,
 						"Error creating the socket: {0}",
 						e.Message);
 					return 1;
 				}
 				
-				Console.WriteLine ("Listening on file: {0}",
-					path);
+				Logger.Write (LogLevel.Debug,
+					      "Listening on file: {0}",	path);
 				break;
 			
 			// The TCP socket is of the format
@@ -230,7 +237,7 @@ namespace Mono.WebServer.FastCgi
 				try {
 					port = (ushort) configmanager ["port"];
 				} catch (ApplicationException e) {
-					Console.WriteLine (e.Message);
+					Logger.Write (LogLevel.Error, e.Message);
 					return 1;
 				}
 				
@@ -241,7 +248,7 @@ namespace Mono.WebServer.FastCgi
 				try {
 					address = IPAddress.Parse (address_str);
 				} catch {
-					Console.WriteLine (
+					Logger.Write (LogLevel.Error,
 						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
 						address_str);
 					return 1;
@@ -251,20 +258,20 @@ namespace Mono.WebServer.FastCgi
 					socket = SocketFactory.CreateTcpSocket (
 						address, port);
 				} catch (System.Net.Sockets.SocketException e){
-					Console.WriteLine (
+					Logger.Write (LogLevel.Error,
 						"Error creating the socket: {0}",
 						e.Message);
 					return 1;
 				}
 				
-				Console.WriteLine ("Listening on port: {0}",
-					address_str);
-				Console.WriteLine ("Listening on address: {0}",
-					port);
+				Logger.Write (LogLevel.Debug,
+					      "Listening on port: {0}", address_str);
+				Logger.Write (LogLevel.Debug,
+					      "Listening on address: {0}", port);
 				break;
 				
 			default:
-				Console.WriteLine (
+				Logger.Write (LogLevel.Error,
 					"Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
 					socket_parts [0]);
 				return 1;
@@ -275,8 +282,8 @@ namespace Mono.WebServer.FastCgi
 				try {
 					Environment.CurrentDirectory = root_dir;
 				} catch (Exception e) {
-					Console.WriteLine ("Error: {0}",
-						e.Message);
+					Logger.Write (LogLevel.Error,
+						      "Error: {0}", e.Message);
 					return 1;
 				}
 			}
@@ -298,7 +305,7 @@ namespace Mono.WebServer.FastCgi
 				app_config_dir = (string)
 					configmanager ["appconfigdir"];
 			} catch (ApplicationException e) {
-				Console.WriteLine (e.Message);
+				Logger.Write (LogLevel.Error, e.Message);
 				return 1;
 			}
 			
@@ -316,18 +323,18 @@ namespace Mono.WebServer.FastCgi
 
 			if (applications == null && app_config_dir == null &&
 				app_config_file == null && !auto_map) {
-				Console.WriteLine (
+				Logger.Write (LogLevel.Error,
 					"There are no applications defined, and path mapping is disabled.");
-				Console.WriteLine (
+				Logger.Write (LogLevel.Error,
 					"Define an application using /applications, /appconfigfile, /appconfigdir");
 				/*
-				Console.WriteLine (
+				Logger.Write (LogLevel.Error,
 					"or by enabling application mapping with /automappaths=True.");
 				*/
 				return 1;
 			}
 			
-			Console.WriteLine ("Root directory: {0}", root_dir);
+			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
 			Mono.FastCgi.Server server = new Mono.FastCgi.Server (
 				socket);
 			
@@ -340,18 +347,15 @@ namespace Mono.WebServer.FastCgi
 			server.MultiplexConnections = (bool)
 				configmanager ["multiplex"];
 			
-			Console.WriteLine ("Max connections: {0}",
-				server.MaxConnections);
-			Console.WriteLine ("Max requests: {0}",
-				server.MaxRequests);
-			Console.WriteLine ("Multiplex connections: {0}",
-				server.MultiplexConnections);
+			Logger.Write (LogLevel.Debug, "Max connections: {0}",
+				      server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}",
+				      server.MaxRequests);
+			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}",
+				      server.MultiplexConnections);
 			
 			bool stopable = (bool) configmanager ["stopable"];
-			if (!stopable)
-				Console.WriteLine (
-					"Use /stopable=True to enable stopping from the console.");
-			
+			Logger.WriteToConsole = (bool) configmanager ["printlog"];
 			server.Start (stopable);
 			
 			configmanager = null;

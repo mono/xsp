@@ -1,4 +1,8 @@
-2008-02-03  Pedro MartÌnez Juli·  <pedromj@gmail.com>
+2008-02-03  Pedro Mart√≠nez Juli√°  <pedromj@gmail.com>
+
+	* ChangeLog: Convert to UTF8 and change my old email with the new.
+
+2008-02-03  Pedro Mart√≠nez Juli√°  <pedromj@gmail.com>
 
 	* man: Add new generated manual page to svn:ignore.
 
@@ -1923,7 +1927,7 @@
 
 	* server/XSPApplicationHost.cs: removed workaround for the bug.
 
-2003-10-28  Pedro MartÌnez Juli·  <yoros@wanadoo.es>
+2003-10-28  Pedro Mart√≠nez Juli√°  <pedromj@gmail.com>
 
 	* server/XSPApplicationHost.cs: add a few lines to set the domain
 	data requested by XSPWorkerReqest (SimpleWorkerRequest). These are
@@ -1966,7 +1970,7 @@
 	* server/server.cs: added --version.
 	* test/Makefile.in: simplified.
 
-2003-10-05  Pedro MartÌnez Juli·  <yoros@wanadoo.es>
+2003-10-05  Pedro Mart√≠nez Juli√°  <pedromj@gmail.com>
 
 	* test/index.aspx: change directory where files are searched because
 	if test directory is not the root directory of the server, the index
@@ -2306,7 +2310,7 @@
 	* server/server.cs:
 	* server/server.exe.config: made the default index files list configurable.
 
-2003-05-03  Pedro MartÌnez Juli·  <yoros@wanadoo.es>
+2003-05-03  Pedro Mart√≠nez Juli√°  <pedromj@gmail.com>
 
 	* server/server.cs: new options to set listen address.
 

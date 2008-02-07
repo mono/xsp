@@ -1,5 +1,8 @@
 2008-02-08  Marek Habersack  <mhabersack@novell.com>
 
+	* test/Web.sitemap: /1.1/asp.net/transfer2.aspx removed from the
+	tree - it is not supposed to be accessed directly.
+
 	* test/1.1/asp.net/codebehind1.aspx: do not use automatic even
 	wireup. Fixes bug #359783
 

@@ -1,4 +1,4 @@
-<%@ Page language="c#" Inherits="MonoTest.Test" %>
+<%@ Page language="c#" Inherits="MonoTest.Test" AutoEventWireup="false" %>
 <%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
 <HTML>

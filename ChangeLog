@@ -1,3 +1,8 @@
+2008-02-08  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/asp.net/codebehind1.aspx: do not use automatic even
+	wireup. Fixes bug #359783
+
 2008-02-03  Pedro Martínez Juliá  <pedromj@gmail.com>
 
 	* ChangeLog: Convert to UTF8 and change my old email with the new.

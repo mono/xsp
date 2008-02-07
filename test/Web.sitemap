@@ -89,7 +89,7 @@
 	<siteMapNode url="~/1.1/webcontrols/web_comparevalidator.aspx" title="web_comparevalidator" />
 	<siteMapNode url="~/1.1/webcontrols/web_literal.aspx" title="web_literal" />
       </siteMapNode>
-      <siteMapNode url="~/1.1/aspnet/" title="ASP.NET Framework">
+      <siteMapNode url="~/1.1/asp.net/" title="ASP.NET Framework">
 	<siteMapNode url="~/1.1/asp.net/serial.aspx" title="serial" />
 	<siteMapNode url="~/1.1/asp.net/registertest.aspx" title="registertest" />
 	<siteMapNode url="~/1.1/asp.net/transfer1.aspx" title="transfer1" />
@@ -100,7 +100,6 @@
 	<siteMapNode url="~/1.1/asp.net/session1.aspx" title="session1" />
 	<siteMapNode url="~/1.1/asp.net/includetest.aspx" title="includetest" />
 	<siteMapNode url="~/1.1/asp.net/code-render.aspx" title="code-render" />
-	<siteMapNode url="~/1.1/asp.net/transfer2.aspx" title="transfer2" />
       </siteMapNode>
       <siteMapNode url="~/1.1/handlers/" title="Handlers">
 	<siteMapNode url="~/1.1/handlers/async.ashx" title="async.ashx" />

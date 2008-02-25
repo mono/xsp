@@ -1,6 +1,9 @@
 noinst_SCRIPTS = Tests.XSP.Security.dll
 
-security_test_sources = DirectoryTraversalTest.cs FileExtensionsTest.cs WebTestHelper.cs
+security_test_sources = \
+	$(srcdir)/DirectoryTraversalTest.cs	\
+	$(srcdir)/FileExtensionsTest.cs		\
+	$(srcdir)/WebTestHelper.cs
 
 CLEANFILES = Tests.XSP.Security.dll*
 EXTRA_DIST = $(security_test_sources) 

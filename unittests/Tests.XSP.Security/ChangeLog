@@ -1,3 +1,7 @@
+2008-02-25  Raja R Harinath  <harinath@hurrynot.org>
+
+	* Makefile.am (security_test_sources): Files are in $(srcdir).
+
 2007-01-08  Sebastien Pouliot  <sebastien@ximian.com>
 
 	* ChangeLog: Track changes in tests.

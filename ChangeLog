@@ -1,3 +1,8 @@
+2008-02-26  Kornél Pál  <kornelpal@gmail.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: Add a Date header because that's
+	the responsibility of the web server rather than ASP.NET. Fixes bug #363404.
+
 2008-02-08  Marek Habersack  <mhabersack@novell.com>
 
 	* test/Web.sitemap: /1.1/asp.net/transfer2.aspx removed from the

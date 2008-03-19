@@ -1,3 +1,10 @@
+2008-03-19  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/main.cs: Fix a CWL format typo, which
+	causes the apache backend to fail when --port is used. Fixes bug
+	#372220. Patch contributed by Daniel Cohen
+	<dcohenp@eduinnova.com>, thanks a lot!
+
 2008-02-26  Kornél Pál  <kornelpal@gmail.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: Add a Date header because that's

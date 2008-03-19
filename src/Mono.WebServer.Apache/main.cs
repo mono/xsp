@@ -349,7 +349,7 @@ namespace Mono.WebServer.Apache
 			if (!useTCP) {
 				Console.WriteLine ("Listening on: {0}", filename);
 			} else {
-				Console.WriteLine ("Listening on port: {0", port);
+				Console.WriteLine ("Listening on port: {0}", port);
 				Console.WriteLine ("Listening on address: {0}", ip);
 			}
 			

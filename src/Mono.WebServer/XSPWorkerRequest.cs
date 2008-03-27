@@ -57,7 +57,8 @@ namespace Mono.WebServer
 		string [][] unknownHeaders;
 		bool headersSent;
 		StringBuilder responseHeaders;
-		string status;
+		int statusCode;
+		string statusDescription;
 		byte [] inputBuffer;
 		int inputLength;
 		bool refilled;
@@ -104,7 +105,7 @@ namespace Mono.WebServer
 				plat = ((PlatformID) platform).ToString ();
 
 			server_software = String.Format ("{0}/{1}", title, version); 
-			serverHeader = String.Format ("Server: {0} {1}\r\n", server_software, plat);
+			serverHeader = String.Format ("\r\nServer: {0} {1}\r\n", server_software, plat);
 
 			
 			try {
@@ -216,8 +217,8 @@ namespace Mono.WebServer
 				keepAlive = false; //FIXME: until the NetworkStream don't own the socket for ssl streams. 
 
 			responseHeaders = new StringBuilder ();
-			responseHeaders.Append (serverHeader);
-			status = protocol + " 200 OK\r\n";
+			statusCode = 200;
+			statusDescription = "OK";
 			
 			localPort = ((IPEndPoint) localEP).Port;
 			localAddress = ((IPEndPoint) localEP).Address.ToString();
@@ -342,7 +343,21 @@ namespace Mono.WebServer
 
 		byte [] GetHeaders ()
 		{
-			responseHeaders.Insert (0, status);
+			StringBuilder basicHeaders = new StringBuilder();
+			basicHeaders.Append (protocol);
+			if (statusCode == 200)
+				basicHeaders.Append (" 200 ");
+			else {
+				basicHeaders.Append (' ');
+				basicHeaders.Append (statusCode.ToString (CultureInfo.InvariantCulture));
+				basicHeaders.Append (' ');
+			}
+			basicHeaders.Append (statusDescription);
+			basicHeaders.Append ("\r\nDate: ");
+			basicHeaders.Append (DateTime.UtcNow.ToString ("r", CultureInfo.InvariantCulture));
+			basicHeaders.Append (serverHeader);
+			responseHeaders.Insert (0, basicHeaders.ToString ());
+
 			if (!sentConnection) {
 				if (!haveContentLength)
 					keepAlive = false;
@@ -663,7 +678,8 @@ namespace Mono.WebServer
 		
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			status = String.Format ("{2} {0} {1}\r\n", statusCode, statusDescription, protocol);
+			this.statusCode = statusCode;
+			this.statusDescription = statusDescription;
 			if (statusCode == 400 || statusCode >= 500) {
 				sentConnection = false;
 				keepAlive = false;

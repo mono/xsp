@@ -1,3 +1,9 @@
+2008-04-25  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/WorkerRequest.cs: do not append the
+	default index to the request path if a directory is
+	requested. Fixes bug #324204
+
 2008-03-19  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/main.cs: Fix a CWL format typo, which

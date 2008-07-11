@@ -48,12 +48,14 @@ namespace Mono.WebServer
 		ModMonoRequest modRequest;
 		bool closed;
 		int requestId = -1;
-		ModMonoRequestBroker broker = null;
+		ModMonoRequestBroker broker;
+		Socket client;
 		
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
 			Stream = new LingeringNetworkStream (client, true);
 			Stream.EnableLingering = false;
+			this.client = client;
 			this.server = server;
 		}
 			
@@ -152,7 +154,7 @@ namespace Mono.WebServer
 			requestId = -1;
 			broker = null;
 			
-			RequestReader rr = new RequestReader (Stream);
+			RequestReader rr = new RequestReader (client);
 			if (rr.ShuttingDown) {
 				Close ();
 				server.Stop ();

@@ -1,3 +1,28 @@
+2008-07-11  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/Worker.cs: RequestReader is created
+	with the client socket as parameter now.
+
+	* src/Mono.WebServer.Apache/Mono.WebServer.Apache.sources: reflect
+	changes in file names.
+
+	* src/Mono.WebServer.Apache/ModMonoRequest.cs: renamed from
+	Request.cs.
+	Use Dictionary for caches for 2.0.
+	Instead of using NetworkStream (which would invoke socket
+	receive/send for every call to read/write an item) now using
+	MemoryStreams which are paired with BinaryReaders. Data
+	read/written from/to the client socket is put directly in the
+	MemoryStreams.
+	Protocol changes to sync with mod_mono changes (protocol version
+	9).
+
+	* src/Mono.WebServer.Apache/ModMonoWorkerRequest.cs: renamed from
+	WorkerRequest.cs
+
+	* src/Mono.WebServer.Apache/RequestReader.cs: added - moved the
+	RequestReader public class to here from WorkerRequest.cs
+
 2008-04-25  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/WorkerRequest.cs: do not append the

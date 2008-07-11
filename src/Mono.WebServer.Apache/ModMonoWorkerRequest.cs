@@ -8,7 +8,7 @@
 // Copyright (c) 2002 Daniel Lopez Ridruejo.
 //           (c) 2002,2003 Ximian, Inc.
 //           All rights reserved.
-// (C) Copyright 2004,2005 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2008 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -44,51 +44,6 @@ using Mono.Security.X509.Extensions;
 
 namespace Mono.WebServer
 {
-	public class RequestReader
-	{
-		ModMonoRequest request;
-
-		public ModMonoRequest Request {
-			get { return request; }
-		}
-		
-		public RequestReader (NetworkStream ns)
-		{
-			this.request = new ModMonoRequest (ns);
-		}
-
-		public string GetUriPath ()
-		{
-			string path = request.GetUri ();
-
-			int dot = path.LastIndexOf ('.');
-			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
-			if (dot > 0 && slash > 0)
-				path = path.Substring (0, slash);
-
-			return path;
-		}
-
-		public string GetPhysicalPath ()
-		{
-			return request.GetPhysicalPath ();
-		}
-
-		public void Decline ()
-		{
-			request.Decline ();
-		}
-
-		public void NotFound ()
-		{
-			request.NotFound ();
-		}
-
-		public bool ShuttingDown {
-			get { return request.ShuttingDown; }
-		}
-	}
-
 	public class ModMonoWorkerRequest : MonoWorkerRequest
 	{
 		bool closed;

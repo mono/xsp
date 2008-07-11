@@ -38,6 +38,10 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if NET_2_0
+using System.Collections.Generic;
+#endif
+
 namespace Mono.WebServer
 {
 	enum Cmd
@@ -82,11 +86,18 @@ namespace Mono.WebServer
 	public class ModMonoRequest
 	{
 		const int MAX_STRING_SIZE = 1024 * 10;
+		const int INITIAL_MEMORY_STREAM_SIZE = 1024;
+		
 		BinaryReader reader;
 		BinaryWriter writer;
+		MemoryStream reader_ms;
+		MemoryStream writer_ms;
 		bool got_server_vars;
-		Hashtable serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
-							   CaseInsensitiveComparer.DefaultInvariant);
+#if NET_2_0
+		Dictionary <string, string> serverVariables;
+#else
+		Hashtable serverVariables;
+#endif
 		string verb;
 		string queryString;
 		string protocol;
@@ -99,14 +110,19 @@ namespace Mono.WebServer
 		int remotePort;
 		int serverPort;
 		bool setupClientBlockCalled;
+#if NET_2_0
+		Dictionary <string, string> headers;
+#else
 		Hashtable headers;
+#endif
 		int clientBlock;
 		bool shutdown;
 		StringBuilder out_headers = new StringBuilder ();
 		bool headers_sent;
 		string physical_path;
 		ModMonoConfig mod_mono_config;
-		
+		Socket client;
+
 		public ModMonoRequest (NetworkStream ns)
 		{
 			reader = new BinaryReader (ns);
@@ -117,27 +133,67 @@ namespace Mono.WebServer
 			GetInitialData ();
 		}
 
+		public ModMonoRequest (Socket client)
+		{
+			mod_mono_config.OutputBuffering = true;
+			this.client = client;
+			reader_ms = new MemoryStream (INITIAL_MEMORY_STREAM_SIZE);
+			writer_ms = new MemoryStream (INITIAL_MEMORY_STREAM_SIZE);
+			reader = new BinaryReader (reader_ms);
+			writer = new BinaryWriter (writer_ms);
+
+#if NET_2_0
+			serverVariables = new Dictionary <string, string> (StringComparer.OrdinalIgnoreCase);
+#else
+			serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant, CaseInsensitiveComparer.DefaultInvariant);
+#endif
+			GetInitialData ();
+		}
+		
 		public bool ShuttingDown {
 			get { return shutdown; }
 		}
 
+		void FillBuffer (int count)
+		{
+			if (reader_ms.Capacity < count)
+				reader_ms.SetLength (count);
+
+			// This will "reset" the stream
+			reader_ms.SetLength (0);
+			reader_ms.Seek (0, SeekOrigin.Begin);
+			
+			byte[] buffer = reader_ms.GetBuffer ();
+			int received = client.Receive (buffer, count, SocketFlags.None);
+			reader_ms.SetLength (received);
+		}		
+
+		void Send ()
+		{
+			client.Send (writer_ms.GetBuffer (), (int) writer_ms.Length, SocketFlags.None);
+		}
+		
 		// KEEP IN SYNC WITH mod_mono.h!!
-		const byte protocol_version = 8;
+		const byte protocol_version = 9;
 		void GetInitialData ()
 		{
+			FillBuffer (5);
+			
 			byte cmd = reader.ReadByte ();
 			shutdown = (cmd == 0);
 			if (shutdown)
 				return;
 
 			if (cmd != protocol_version) {
-				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}",
-							    protocol_version, cmd);
+				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}", protocol_version, cmd);
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
 				throw new InvalidOperationException (msg);
 			}
 
+			Int32 dataSize = reader.ReadInt32 ();
+			FillBuffer (dataSize);
+			
 			verb = ReadString ();
 			vServerName = ReadString ();
 			uri = ReadString ();
@@ -148,12 +204,21 @@ namespace Mono.WebServer
 			remoteAddress = ReadString ();
 			remotePort = reader.ReadInt32 ();
 			remoteName = ReadString ();
+			int headersSize = reader.ReadInt32 ();
 			int nheaders = reader.ReadInt32 ();
-			headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
-						 CaseInsensitiveComparer.DefaultInvariant);
+#if NET_2_0
+			headers = new Dictionary <string, string> (StringComparer.OrdinalIgnoreCase);
+#else
+			headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant, CaseInsensitiveComparer.DefaultInvariant);
+#endif
+			
 			for (int i = 0; i < nheaders; i++) {
 				string key = ReadString ();
-				headers [key] = ReadString ();
+				if (headers.ContainsKey (key)) {
+					Console.WriteLine ("WARNING: duplicate header found! Overwriting old value with the new one.");
+					headers [key] = ReadString ();
+				} else
+					headers.Add (key, ReadString ());
 			}
 
 			if (reader.ReadByte () != 0)
@@ -162,10 +227,18 @@ namespace Mono.WebServer
 
 		void SendSimpleCommand (Cmd cmd)
 		{
-			int b = (int) cmd;
-			writer.Write (b);
+			writer_ms.SetLength (0);
+			writer.Write ((int) cmd);
+			Send ();
 		}
 
+		void SendSimpleCommand (Cmd cmd, bool resetWriter)
+		{
+			SendSimpleCommand (cmd);
+			if (resetWriter)
+				writer_ms.SetLength (0);
+		}
+		
 		string ReadString ()
 		{
 			int size = reader.ReadInt32 ();
@@ -224,26 +297,30 @@ namespace Mono.WebServer
 		{
 			SendConfig ();
 			SendHeaders ();
-			SendSimpleCommand (Cmd.SEND_FROM_MEMORY);
+			SendSimpleCommand (Cmd.SEND_FROM_MEMORY, true);
 			writer.Write (length);
 			writer.Write (data, position, length);
+			Send ();
 		}
 
 		public void SendFile (string filename)
 		{
 			SendConfig ();
 			SendHeaders ();
-			SendSimpleCommand (Cmd.SEND_FILE);
+			SendSimpleCommand (Cmd.SEND_FILE, true);
 			WriteString (filename);
+			Send ();
 		}
 
 		void SendConfig ()
 		{
 			if (!mod_mono_config.Changed)
 				return;
+
 			mod_mono_config.Changed = false;
-			SendSimpleCommand (Cmd.SET_CONFIGURATION);
+			SendSimpleCommand (Cmd.SET_CONFIGURATION, true);
 			writer.Write (Convert.ToByte (mod_mono_config.OutputBuffering));
+			Send ();
 		}
 		
 		void SendHeaders ()
@@ -251,8 +328,9 @@ namespace Mono.WebServer
 			if (headers_sent)
 				return;
 			
-			SendSimpleCommand (Cmd.SET_RESPONSE_HEADERS);
+			SendSimpleCommand (Cmd.SET_RESPONSE_HEADERS, true);
 			WriteString (out_headers.ToString ());
+			Send ();
 			out_headers = null;
 			headers_sent = true;
 		}
@@ -292,10 +370,20 @@ namespace Mono.WebServer
 		void GetServerVariables ()
 		{
 			SendSimpleCommand (Cmd.GET_SERVER_VARIABLES);
+			FillBuffer (4);
+			int blockSize = reader.ReadInt32 ();
+
+			FillBuffer (blockSize);
 			int nvars = reader.ReadInt32 ();
+			
 			while (nvars > 0) {
 				string key = ReadString ();
-				serverVariables [key] = ReadString ();
+				if (serverVariables.ContainsKey (key)) {
+					Console.WriteLine ("WARNING! Duplicate server variable found. Overwriting old value with the new one.");
+					serverVariables [key] = ReadString ();
+				} else
+					serverVariables.Add (key, ReadString ());
+				
 				nvars--;
 			}
 
@@ -307,7 +395,10 @@ namespace Mono.WebServer
 			if (!got_server_vars)
 				GetServerVariables ();
 
-			return (string) serverVariables [name];
+			if (serverVariables.ContainsKey (name))
+				return (string) serverVariables [name];
+
+			return null;
 		}
 
 		public string GetPhysicalPath ()
@@ -358,6 +449,7 @@ namespace Mono.WebServer
 				return localPort;
 
 			SendSimpleCommand (Cmd.GET_LOCAL_PORT);
+			FillBuffer (4);
 			localPort = reader.ReadInt32 ();
 			return localPort;
 		}
@@ -381,6 +473,7 @@ namespace Mono.WebServer
 			SendConfig ();
 			setupClientBlockCalled = true;
 			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
+			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			clientBlock = i;
 			return i;
@@ -389,6 +482,7 @@ namespace Mono.WebServer
 		public bool IsConnected ()
 		{
 			SendSimpleCommand (Cmd.IS_CONNECTED);
+			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			return (i != 0);
 		}
@@ -396,6 +490,7 @@ namespace Mono.WebServer
 		public bool ShouldClientBlock () 
 		{
 			SendSimpleCommand (Cmd.SHOULD_CLIENT_BLOCK);
+			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			return (i == 0);
 		} 
@@ -409,8 +504,10 @@ namespace Mono.WebServer
 			 * turns out that that GET_CLIENT_BLOCK (ap_get_client_block) can
 			 * return -1 if a socket is closed
 			 */
-			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK);
+			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK, true);
 			writer.Write (size);
+			Send ();
+			
 			int i = reader.ReadInt32 ();
 			if (i == -1)
 				return -1;
@@ -424,9 +521,10 @@ namespace Mono.WebServer
 		public void SetStatusCodeLine (int code, string status)
 		{
 			SendConfig ();
-			SendSimpleCommand (Cmd.SET_STATUS);
+			SendSimpleCommand (Cmd.SET_STATUS, true);
 			writer.Write (code);
 			WriteString (status);
+			Send ();
 		}
 	}
 }

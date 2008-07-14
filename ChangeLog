@@ -1,3 +1,8 @@
+2008-07-14  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/ModMonoRequest.cs: fill the buffer
+	when reading the client block. Fixes bug #408723
+
 2008-07-11  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/Worker.cs: RequestReader is created

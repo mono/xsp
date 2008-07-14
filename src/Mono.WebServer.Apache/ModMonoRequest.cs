@@ -508,6 +508,7 @@ namespace Mono.WebServer
 			writer.Write (size);
 			Send ();
 			
+			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			if (i == -1)
 				return -1;
@@ -515,6 +516,7 @@ namespace Mono.WebServer
 			if (i > size)
 				throw new Exception ("Houston...");
 
+			FillBuffer (i);
 			return reader.Read (bytes, position, i);
 		} 
 

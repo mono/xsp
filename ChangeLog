@@ -1,3 +1,15 @@
+2008-07-29  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/webcontrols/dbpage1.aspx: do not rely on the
+	OnTextChanged to fire the Filter_Changed handler method. Doing
+	that makes the sample miss situations when the user clicks Submit
+	several times in a row without changing the filters - the result
+	of this is that no table is show in the output. Filter_Changed is
+	fired as the OnClick handler of the Submit button. Fixes bug
+	#381972.
+	Should the filter fail to return any results, an appropriate
+	information is shown. 
+
 2008-07-14  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/ModMonoRequest.cs: fill the buffer

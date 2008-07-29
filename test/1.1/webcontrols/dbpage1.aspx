@@ -117,6 +117,7 @@
 					 "email like '" + filterMail + "'";
 
 		selectCommand.CommandText = selectCmd;
+                int rowCount = 0;
 		try {
 			reader = selectCommand.ExecuteReader ();
 			while (reader.Read ()) {
@@ -126,6 +127,14 @@
 					cell.Controls.Add (new LiteralControl (reader.GetValue (i).ToString ()));
 					row.Cells.Add (cell);
 				}
+				myTable.Rows.Add (row);
+				rowCount++;
+			}
+			if (rowCount == 0) {
+				TableRow row = new TableRow ();
+				TableCell cell = new TableCell ();
+				cell.Controls.Add (new LiteralControl ("No results returned from query."));
+				row.Cells.Add (cell);
 				myTable.Rows.Add (row);
 			}
 		} catch (Exception exc) {
@@ -161,12 +170,12 @@ CREATE TABLE "test" (
 Choose the SQL filters and click 'Submit'.
 <p>
 <asp:Label runat="server" Text="Person Filter: "/>
-<asp:TextBox id="PersonFilter" Text="" TextMode="singleLine" OnTextChanged="Filter_Changed" runat="server" maxlength="40" />
+<asp:TextBox id="PersonFilter" Text="" TextMode="singleLine" runat="server" maxlength="40" />
 <p>
 <asp:Label runat="server" Text="Mail Filter: " />
-<asp:TextBox id="MailFilter" Text="" TextMode="singleLine" OnTextChanged="Filter_Changed" runat="server" maxlength="40" />
+<asp:TextBox id="MailFilter" Text="" TextMode="singleLine" runat="server" maxlength="40" />
 <p>
-<asp:Button id="btn" runat="server" Text="Submit" />
+<asp:Button id="btn" runat="server" Text="Submit" OnClick="Filter_Changed" />
 <p>
 <asp:Table id="myTable" HorizontalAlign="Left" Font-Size="12pt" GridLines="both" 
 CellPadding="5" runat="server"/>

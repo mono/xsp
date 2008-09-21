@@ -6,11 +6,15 @@ bin2_scripts = $(bin2_scripts_real)
 tool2_scripts = asp-state2 dbsessmgr2
 endif
 
-bin1_scripts = xsp mod-mono-server fastcgi-mono-server
+bin_scripts = xsp mod-mono-server fastcgi-mono-server
 tool_scripts = asp-state dbsessmgr
-bin_SCRIPTS = $(bin1_scripts) $(bin2_scripts) $(tool_scripts) $(tool2_scripts)
 
-CLEANFILES = $(bin1_scripts) $(bin2_scripts_real) $(tool_scripts) $(tool2_scripts)
+bin1_scripts = xsp1 mod-mono-server1 fastcgi-mono-server1
+tool1_scripts = asp-state1 dbsessmgr1
+
+bin_SCRIPTS = $(bin1_scripts) $(bin2_scripts) $(tool1_scripts) $(tool2_scripts) $(tool_scripts) $(bin_scripts)
+
+CLEANFILES = $(bin1_scripts) $(bin2_scripts_real) $(tool1_scripts) $(tool2_scripts) $(bin_scripts) $(tool_scripts)
 
 plat_bindir = $(prefix)/lib/mono/1.0
 plat_bindir2 = $(prefix)/lib/mono/2.0
@@ -41,7 +45,7 @@ $(bin1_scripts): $(srcdir)/script.in Makefile.am
 	$(REWRITE) $(srcdir)/script.in > $@.tmp
 	mv $@.tmp $@
 
-$(tool_scripts): $(srcdir)/script.in Makefile.am
+$(tool1_scripts): $(srcdir)/script.in Makefile.am
 	$(REWRITE_TOOLS) $(srcdir)/script.in > $@.tmp
 	mv $@.tmp $@
 
@@ -52,6 +56,22 @@ $(bin2_scripts): $(srcdir)/script.in Makefile.am
 
 $(tool2_scripts): $(srcdir)/script.in Makefile.am
 	$(REWRITE_TOOLS2) $(srcdir)/script.in > $@.tmp
+	mv $@.tmp $@
+
+$(bin_scripts): $(srcdir)/script.in Makefile.am
+	$(REWRITE2) $(srcdir)/script.in > $@.tmp
+	mv $@.tmp $@
+
+$(tool_scripts): $(srcdir)/script.in Makefile.am
+	$(REWRITE_TOOLS2) $(srcdir)/script.in > $@.tmp
+	mv $@.tmp $@
+else
+$(bin_scripts): $(srcdir)/script.in Makefile.am
+	$(REWRITE) $(srcdir)/script.in > $@.tmp
+	mv $@.tmp $@
+
+$(tool_scripts): $(srcdir)/script.in Makefile.am
+	$(REWRITE_TOOLS) $(srcdir)/script.in > $@.tmp
 	mv $@.tmp $@
 endif
 

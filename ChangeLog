@@ -1,3 +1,9 @@
+2008-09-21  Miguel de Icaza  <miguel@novell.com>
+
+	* scripts/Makefile.am ($(tool_scripts)): Follow the naming pattern
+	used in Mono 2.0.  By default the `script' is a 2.0 script,
+	`script1' is the 1.0 script, and `script2' is the 2.0 script.
+
 2008-07-29  Marek Habersack  <mhabersack@novell.com>
 
 	* test/1.1/webcontrols/dbpage1.aspx: do not rely on the

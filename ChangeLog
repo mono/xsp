@@ -1,3 +1,12 @@
+2008-10-01  Miguel de Icaza  <miguel@novell.com>
+
+	* Fix the scripts, my previous commit was untested, and some
+	scripts ended up not pointing to the right place (xsp was trying
+	to call 2.0/xsp.exe instead of 2.0/xsp2.exe and xsp1 was trying to
+	call 1.0/xsp1.exe instead of 1.0/xsp.exe).
+
+	Fixes #431121
+
 2008-09-21  Miguel de Icaza  <miguel@novell.com>
 
 	* scripts/Makefile.am ($(tool_scripts)): Follow the naming pattern

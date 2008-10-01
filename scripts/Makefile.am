@@ -23,26 +23,26 @@ plat_tooldir2 = $(prefix)/lib/xsp/2.0
 
 REWRITE = sed \
 	-e 's,@''plat_bindir@,$(plat_bindir),g'		\
-	-e 's,@''exe_file@,$@.exe,g'			\
+	-e 's,@''exe_file@,'`basename $@ 1`'.exe,g'	\
 	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
 REWRITE2 = sed \
 	-e 's,@''plat_bindir@,$(plat_bindir2),g'		\
-	-e 's,@''exe_file@,$@.exe,g'				\
+	-e 's,@''exe_file@,'`basename $@ 2`'2.exe,g'				\
 	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
 REWRITE_TOOLS = sed \
 	-e 's,@''plat_bindir@,$(plat_tooldir),g'		\
-	-e 's,@''exe_file@,$@.exe,g'			\
+	-e 's,@''exe_file@,'`basename $@ 1`'.exe,g'		\
 	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
-REWRITE_TOOLS2 = sed \
+REWRITE_TOOLS2 = echo dd $@ dd; sed \
 	-e 's,@''plat_bindir@,$(plat_tooldir2),g'		\
-	-e 's,@''exe_file@,$@.exe,g'				\
+	-e 's,@''exe_file@,'`basename $@ 2`'2.exe,g'		\
 	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
 $(bin1_scripts): $(srcdir)/script.in Makefile.am
-	$(REWRITE) $(srcdir)/script.in > $@.tmp
+	e=`basename $@ 1`; $(REWRITE) $(srcdir)/script.in > $@.tmp
 	mv $@.tmp $@
 
 $(tool1_scripts): $(srcdir)/script.in Makefile.am

@@ -92,6 +92,15 @@ namespace Mono.WebServer
 		///    cref="BaseRequestBroker" />.
 		/// </summary>
 		const int INITIAL_REQUESTS = 200;
+
+		/// <summary>
+		///    The size of a request buffer in bytes.
+		/// </summary>
+		/// <remarks>
+		///    This number should be equal or greater than INPUT_BUFFER_SIZE
+		///    in System.Web.HttpRequest.
+		/// </remarks>
+		const int BUFFER_SIZE = 32*1024;
 		
 		/// <summary>
 		///    Contains a lock to use when accessing and modifying the
@@ -229,8 +238,8 @@ namespace Mono.WebServer
 				// Don't create a new array if one already
 				// exists.
 				byte[] a = buffers [result];
-				if (a == null || a.Length != 16384)
-					buffers [result] = new byte [16384];
+				if (a == null)
+					buffers [result] = new byte [BUFFER_SIZE];
 			}
 
 			return request_ids [result];
@@ -348,7 +357,7 @@ namespace Mono.WebServer
 				if (w == null)
 					return 0;
 
-				if (size == 16384) {
+				if (size <= BUFFER_SIZE) {
 					buffer = buffers [IdToIndex (requestId)];
 				} else {
 					buffer = new byte[size];

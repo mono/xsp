@@ -1,3 +1,10 @@
+2008-10-03  Juraj Skripsky  <js@hotfeet.ch>
+
+	* src/Mono.WebServer/BaseRequestBroker.cs: Actually use the allocated
+	request buffers. Make the size of a request buffer equal INPUT_BUFFER_SIZE
+	in System.Web.HttpRequest, so that it is used for requests >= 32kb as well
+	(e.g. uploads of big files). Fixes bug #431675.
+
 2008-10-01  Miguel de Icaza  <miguel@novell.com>
 
 	* Fix the scripts, my previous commit was untested, and some

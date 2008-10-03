@@ -97,7 +97,7 @@ namespace Mono.WebServer
 		///    The size of a request buffer in bytes.
 		/// </summary>
 		/// <remarks>
-		///    This number should be equal or greater than INPUT_BUFFER_SIZE
+		///    This number should be equal to INPUT_BUFFER_SIZE
 		///    in System.Web.HttpRequest.
 		/// </remarks>
 		const int BUFFER_SIZE = 32*1024;
@@ -357,7 +357,10 @@ namespace Mono.WebServer
 				if (w == null)
 					return 0;
 
-				if (size <= BUFFER_SIZE) {
+				//use a pre-allocated buffer only when the size matches
+				//as it will be transferred across appdomain boundaries
+				//in full length
+				if (size == BUFFER_SIZE) {
 					buffer = buffers [IdToIndex (requestId)];
 				} else {
 					buffer = new byte[size];

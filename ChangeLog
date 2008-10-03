@@ -1,5 +1,11 @@
 2008-10-03  Juraj Skripsky  <js@hotfeet.ch>
 
+	* src/Mono.WebServer/BaseRequestBroker.cs: Reverted part of the last
+	commit. Use a pre-allocated buffer only when the size matches as it
+	will be transferred across appdomain boundaries in full length.
+
+2008-10-03  Juraj Skripsky  <js@hotfeet.ch>
+
 	* src/Mono.WebServer/BaseRequestBroker.cs: Actually use the allocated
 	request buffers. Make the size of a request buffer equal INPUT_BUFFER_SIZE
 	in System.Web.HttpRequest, so that it is used for requests >= 32kb as well

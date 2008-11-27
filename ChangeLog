@@ -1,3 +1,8 @@
+2008-11-28  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: add locking to avoid
+	races when two requests are being created at the same time.
+
 2008-11-27  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/IApplicationHost.cs: added new method -

@@ -41,6 +41,12 @@ namespace Mono.WebServer
 {
 	public class BaseApplicationHost : MarshalByRefObject, IApplicationHost
 	{
+#if NET_2_0
+		static readonly object matchedPathsCacheLock = new object ();
+		static readonly object cachedMatchesLock = new object ();
+#endif
+		static readonly object handlersCacheLock = new object ();
+		
 		string path;
 		string vpath;
 		IRequestBroker requestBroker;
@@ -189,29 +195,33 @@ namespace Mono.WebServer
 		public virtual bool IsHttpHandler (string verb, string uri)
 		{
 			string cacheKey = verb + "_" + uri;
-			if (handlersCache != null) {
-				bool found;
+			lock (handlersCacheLock) {
+				if (handlersCache != null) {
+					bool found;
 #if NET_2_0
-				if (handlersCache.TryGetValue (cacheKey, out found))
-					return found;
+					if (handlersCache.TryGetValue (cacheKey, out found))
+						return found;
 #else
-				if (handlersCache.ContainsKey (cacheKey))
-					return (bool) handlersCache [cacheKey];
+					if (handlersCache.ContainsKey (cacheKey))
+						return (bool) handlersCache [cacheKey];
 #endif
-			}
+				} else {
 			
 #if NET_2_0
-			handlersCache = new Dictionary <string, bool> ();
+					handlersCache = new Dictionary <string, bool> ();
 #else
-			handlersCache = new Hashtable ();
+					handlersCache = new Hashtable ();
 #endif
-			if (!LocateHandler (verb, uri)) {
-				handlersCache.Add (cacheKey, false);
-				return false;
+				}
 			}
 			
-			handlersCache.Add (cacheKey, true);
-			return true;
+			bool handlerFound = LocateHandler (verb, uri);
+
+			lock (handlersCacheLock) {
+				handlersCache.Add (cacheKey, handlerFound);
+			}
+			
+			return handlerFound;
 		}
 
 		bool LocateHandler (string verb, string uri)
@@ -251,20 +261,24 @@ namespace Mono.WebServer
 		bool PathMatches (HttpHandlerAction handler, string uri)
 		{
 			Dictionary <string, bool> cachedMatches;
-			if (matchedPathsCache == null) {
-				cachedMatches = new Dictionary <string, bool> ();
-				matchedPathsCache = new Dictionary <HttpHandlerAction, Dictionary <string, bool>> ();
-				matchedPathsCache.Add (handler, cachedMatches);
-			} else {
-				if (!matchedPathsCache.TryGetValue (handler, out cachedMatches)) {
+			lock (matchedPathsCacheLock) {
+				if (matchedPathsCache == null) {
 					cachedMatches = new Dictionary <string, bool> ();
+					matchedPathsCache = new Dictionary <HttpHandlerAction, Dictionary <string, bool>> ();
 					matchedPathsCache.Add (handler, cachedMatches);
+				} else {
+					if (!matchedPathsCache.TryGetValue (handler, out cachedMatches)) {
+						cachedMatches = new Dictionary <string, bool> ();
+						matchedPathsCache.Add (handler, cachedMatches);
+					}
 				}
 			}
-			
-			if (cachedMatches.ContainsKey (uri))
-                                return cachedMatches [uri];
 
+			lock (cachedMatchesLock) {
+				if (cachedMatches.ContainsKey (uri))
+					return cachedMatches [uri];
+			}
+			
 			bool result = false;
 			string[] handlerPaths = handler.Path.Split (',');
 			int slash = uri.LastIndexOf ('/');
@@ -329,9 +343,11 @@ namespace Mono.WebServer
 				}
 			}
 
-			if (!cachedMatches.ContainsKey (origUri))
-				cachedMatches.Add (origUri, result);
-
+			lock (cachedMatchesLock) {
+				if (!cachedMatches.ContainsKey (origUri))
+					cachedMatches.Add (origUri, result);
+			}
+			
 			return result;
 		}
 #else

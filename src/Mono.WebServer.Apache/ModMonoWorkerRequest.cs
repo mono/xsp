@@ -64,7 +64,8 @@ namespace Mono.WebServer
 		int requestId;
 		bool gotSecure;
 		bool isSecure;
-
+		IApplicationHost appHost;
+		
 		// client certificate validity support
 		string cert_hash;
 		bool cert_validity;
@@ -138,6 +139,7 @@ namespace Mono.WebServer
 			this.requestId = requestId;
 			this.requestBroker = requestBroker;
 			this.verb = verb;
+			this.appHost = appHost;
 			//this.protocol = protocol;
 			// Don't let System.Web know if it's 1.1. This way apache handles the chunked
 			// encoding for us, without sys.web interfering.
@@ -209,7 +211,7 @@ namespace Mono.WebServer
 			}
 
 			string old_path = path;
-			Paths.GetPathsFromUri (old_path, out path, out pathInfo);
+			Paths.GetPathsFromUri (appHost, verb, old_path, out path, out pathInfo);
 			return true;
 		}
 		

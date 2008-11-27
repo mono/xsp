@@ -41,17 +41,18 @@ using System.IO;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
+#if NET_2_0
+using System.Collections.Generic;
+#endif
+
 namespace Mono.WebServer
 {
-	public class Paths {
-		private Paths ()
-		{
-		}
-
-		public static void GetPathsFromUri (string uri, out string realUri, out string pathInfo)
+	public static class Paths
+	{
+		public static void GetPathsFromUri (IApplicationHost appHost, string verb, string uri, out string realUri, out string pathInfo)
 		{
 			// There's a hidden missing feature here... :)
-			realUri = uri; pathInfo = "";
+			realUri = uri; pathInfo = String.Empty;
 			string basepath = HttpRuntime.AppDomainAppPath;
 			string vpath = HttpRuntime.AppDomainAppVirtualPath;
 			if (vpath [vpath.Length - 1] != '/')
@@ -66,28 +67,51 @@ namespace Mono.WebServer
 
 			int dot, slash;
 			int lastSlash = uri.Length;
+#if !NET_2_0
 			bool windows = (Path.DirectorySeparatorChar == '\\');
-
+#endif
+			string partial;
+				
 			for (dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
 				slash = uri.IndexOf ('/', dot);
-				string partial;
+
 				if (slash == -1)
 					slash = lastSlash;
 
 				partial = uri.Substring (0, slash);
 				lastSlash = slash;
-				string partial_win = null;
-				if (windows)
-					partial_win = partial.Replace ('/', '\\');
 
-				string path = Path.Combine (basepath, (windows ? partial_win : partial));
-				if (!File.Exists (path))
+#if NET_2_0
+				if (!VirtualPathExists (appHost, verb, partial))
 					continue;
+#else
+				if (windows)
+					partial = partial.Replace ('/', '\\');
+				
+				string path = Path.Combine (basepath, (partial));
+				if (!File.Exists (path) && !VirtualPathExists (appHost, verb, partial))
+					continue;
+#endif
+				if (uri.IndexOf ('.', slash) != -1)
+					break;
 				
 				realUri = vpath + uri.Substring (0, slash);
 				pathInfo = uri.Substring (slash);
 				break;
 			}
+		}
+
+		static bool VirtualPathExists (IApplicationHost appHost, string verb, string uri)
+		{
+			if (appHost.IsHttpHandler (verb, uri))
+				return true;
+
+#if NET_2_0
+			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
+			if (vpp != null && vpp.FileExists (uri))
+				return true;
+#endif
+			return false;
 		}
 	}
 }

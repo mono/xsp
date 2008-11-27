@@ -98,6 +98,11 @@ namespace Mono.WebServer
 		///    Unloads the application host.
 		/// </summary>
 		void Unload ();
+
+		/// <summary>
+		///    Checks if the passed URI maps to a HTTP handler
+		/// </summary>
+		bool IsHttpHandler (string verb, string uri);
 	}
 	
 	/// <summary>

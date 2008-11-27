@@ -1,3 +1,21 @@
+2008-11-27  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/IApplicationHost.cs: added new method -
+	IsHttpHandler which checks whether the passed URI matches a HTTP
+	handler definition. Fixes bug #448522
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: implemented the new
+	IApplicationHost method - IsHttpHandler (2.0+ only - need to
+	figure out how to portably do the same for 1.1). Fixes bug #448522
+
+	* src/Mono.WebServer/Paths.cs: GetPathsFromUri now checks not only
+	whether a path physically exists, but also whether it's a handler
+	or a virtual file (on 2.0+). Fixes bug #448522
+
+	* src/Mono.WebServer.Apache/ModMonoWorkerRequest.cs,
+	src/Mono.WebServer/XSPWorkerRequest.cs:
+	Paths.GetPathsFromUri now accepts two more arguments.
+
 2008-10-03  Juraj Skripsky  <js@hotfeet.ch>
 
 	* src/Mono.WebServer/BaseRequestBroker.cs: Reverted part of the last

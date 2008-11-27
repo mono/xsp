@@ -27,7 +27,15 @@
 //
 
 using System;
+using System.Collections;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.Configuration;
+
+#if NET_2_0
+using System.Collections.Generic;
+#endif
 
 namespace Mono.WebServer
 {
@@ -38,7 +46,13 @@ namespace Mono.WebServer
 		IRequestBroker requestBroker;
 		EndOfRequestHandler endOfRequest;
 		ApplicationServer appserver;
-
+#if NET_2_0
+		Dictionary <string, bool> handlersCache;
+		Dictionary <HttpHandlerAction, Dictionary <string, bool>> matchedPathsCache;
+#else
+		Hashtable handlersCache;
+#endif
+		
 		/// <summary>
 		///   Creates the <see cref="EndOfRequest"/> event handler and registers
 		///   a handler (<see cref="OnUnload"/>) with the <see cref="AppDomain.DomainUnload"/> event.
@@ -167,6 +181,172 @@ namespace Mono.WebServer
 				if (brb != null)
 					brb.UnregisterRequest (mwr.RequestId);
 			}
+		}
+
+		/// <summary>
+		///    Checks if the passed URI maps to a HTTP handler
+		/// </summary>
+		public virtual bool IsHttpHandler (string verb, string uri)
+		{
+			string cacheKey = verb + "_" + uri;
+			if (handlersCache != null) {
+				bool found;
+#if NET_2_0
+				if (handlersCache.TryGetValue (cacheKey, out found))
+					return found;
+#else
+				if (handlersCache.ContainsKey (cacheKey))
+					return (bool) handlersCache [cacheKey];
+#endif
+			}
+			
+#if NET_2_0
+			handlersCache = new Dictionary <string, bool> ();
+#else
+			handlersCache = new Hashtable ();
+#endif
+			if (!LocateHandler (verb, uri)) {
+				handlersCache.Add (cacheKey, false);
+				return false;
+			}
+			
+			handlersCache.Add (cacheKey, true);
+			return true;
+		}
+
+		bool LocateHandler (string verb, string uri)
+		{
+#if NET_2_0
+			HttpHandlersSection config = WebConfigurationManager.GetSection ("system.web/httpHandlers") as HttpHandlersSection;
+			HttpHandlerActionCollection handlers = config != null ? config.Handlers : null;
+			int count = handlers != null ? handlers.Count : 0;
+			
+			if (count == 0)
+				return false;
+
+			HttpHandlerAction handler;
+			string[] verbs;
+			for (int i = 0; i < count; i++) {
+				handler = handlers [i];
+				verbs = SplitVerbs (handler.Verb);
+
+				if (verbs == null) {
+					if (PathMatches (handler, uri))
+						return true;
+					continue;
+				}
+
+				for (int j = 0; j < verbs.Length; j++) {
+					if (verbs [j] != verb)
+						continue;
+					if (PathMatches (handler, uri))
+						return true;
+				}
+			}
+#endif
+			return false;
+		}
+
+#if NET_2_0
+		bool PathMatches (HttpHandlerAction handler, string uri)
+		{
+			Dictionary <string, bool> cachedMatches;
+			if (matchedPathsCache == null) {
+				cachedMatches = new Dictionary <string, bool> ();
+				matchedPathsCache = new Dictionary <HttpHandlerAction, Dictionary <string, bool>> ();
+				matchedPathsCache.Add (handler, cachedMatches);
+			} else {
+				if (!matchedPathsCache.TryGetValue (handler, out cachedMatches)) {
+					cachedMatches = new Dictionary <string, bool> ();
+					matchedPathsCache.Add (handler, cachedMatches);
+				}
+			}
+			
+			if (cachedMatches.ContainsKey (uri))
+                                return cachedMatches [uri];
+
+			bool result = false;
+			string[] handlerPaths = handler.Path.Split (',');
+			int slash = uri.LastIndexOf ('/');
+			string origUri = uri;
+			if (slash != -1)
+				uri = uri.Substring (slash);
+
+			foreach (string handlerPath in handlerPaths) {
+				if (handlerPath == "*") {
+					result = true;
+					break;
+				}
+
+				string matchExact = null;
+				string endsWith = null;
+				Regex regEx = null;
+
+				if (handlerPath.Length > 0) {
+					if (handlerPath [0] == '*' && (handlerPath.IndexOf ('*', 1) == -1))
+						endsWith = handlerPath.Substring (1);
+
+					if (handlerPath.IndexOf ('*') == -1)
+						if (handlerPath [0] != '/')
+						{
+							HttpContext ctx = HttpContext.Current;
+							HttpRequest req = ctx != null ? ctx.Request : null;
+							string vpath = HttpRuntime.AppDomainAppVirtualPath;
+
+							if (vpath == "/")
+								vpath = String.Empty;
+
+							matchExact = String.Concat (vpath, "/", handlerPath);
+						}
+				}
+
+				if (matchExact != null) {
+					result = matchExact.Length == origUri.Length && origUri.EndsWith (matchExact, StringComparison.OrdinalIgnoreCase);
+					if (result == true)
+						break;
+					else
+						continue;
+				} else if (endsWith != null) {
+					result = uri.EndsWith (endsWith, StringComparison.OrdinalIgnoreCase);
+					if (result == true)
+						break;
+					else
+						continue;
+				}
+
+				if (handlerPath != "*") {
+					string expr = handlerPath.Replace (".", "\\.").Replace ("?", "\\?").Replace ("*", ".*");
+					if (expr.Length > 0 && expr [0] == '/')
+						expr = expr.Substring (1);
+
+					expr += "\\z";
+					regEx = new Regex (expr, RegexOptions.IgnoreCase);
+
+					if (regEx.IsMatch (origUri)) {
+						result = true;
+						break;
+					}
+				}
+			}
+
+			if (!cachedMatches.ContainsKey (origUri))
+				cachedMatches.Add (origUri, result);
+
+			return result;
+		}
+#else
+		bool PathMatches (object handler, string uri)
+		{
+			return false;
+		}
+#endif
+		
+		string[] SplitVerbs (string verb)
+		{
+			if (verb == "*")
+				return null;
+
+			return verb.Split (',');
 		}
 	}
 }

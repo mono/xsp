@@ -177,7 +177,7 @@ namespace Mono.WebServer
 			this.remoteEP = remoteEP;
 			this.verb = verb;
 			try {
-				Paths.GetPathsFromUri (path, out this.path, out pathInfo);
+				Paths.GetPathsFromUri (appHost, verb, path, out this.path, out pathInfo);
 			} catch {
 				CloseConnection ();
 				throw;

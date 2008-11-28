@@ -274,12 +274,12 @@ namespace Mono.WebServer
 				}
 			}
 
-			lock (cachedMatchesLock) {
-				if (cachedMatches.ContainsKey (uri))
-					return cachedMatches [uri];
-			}
-			
 			bool result = false;
+			lock (cachedMatchesLock) {
+				if (cachedMatches.TryGetValue (uri, out result))
+					return result;
+			}			
+
 			string[] handlerPaths = handler.Path.Split (',');
 			int slash = uri.LastIndexOf ('/');
 			string origUri = uri;

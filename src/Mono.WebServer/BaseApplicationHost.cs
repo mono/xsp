@@ -218,7 +218,10 @@ namespace Mono.WebServer
 			bool handlerFound = LocateHandler (verb, uri);
 
 			lock (handlersCacheLock) {
-				handlersCache.Add (cacheKey, handlerFound);
+				if (handlersCache.ContainsKey (cacheKey))
+					handlersCache [cacheKey] = handlerFound;
+				else
+					handlersCache.Add (cacheKey, handlerFound);
 			}
 			
 			return handlerFound;

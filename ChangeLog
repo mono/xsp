@@ -1,3 +1,9 @@
+2008-12-01  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: check if the key
+	exists in the handlers cache after acquiring the lock and update
+	it instead of adding.
+
 2008-11-28  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/BaseApplicationHost.cs: add locking to avoid

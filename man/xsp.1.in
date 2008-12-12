@@ -208,6 +208,9 @@ Shows the list of options and exits.
 .TP
 .I \-\-verbose
 Prints extra messages. Useful for debugging.
+.TP
+.I \-\-pidfile FILE
+Writes the xsp PID to the specified file.
 .SH MONO RUNTIME OPTIONS
 xsp and xsp2 are scripts that call mono.  If you want to pass options
 to mono (for example, options to get line numbers in stack traces),

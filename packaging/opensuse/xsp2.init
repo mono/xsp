@@ -122,7 +122,7 @@ test -x $MONO_BIN || { echo "$XSP2_BIN not installed";
 
 # Check for existence of needed config file and read it
 XSP2_CONFIG=/etc/sysconfig/xsp2
-test -r $XSP2_CONFIG || { echo "$XSP2_CONFIG not existing";
+test -r $XSP2_CONFIG || { echo "$XSP2_CONFIG does not exist";
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 6; fi; }
 
@@ -138,7 +138,7 @@ XSP_DEBUG="no"
 XSP_ROOTDIR="/srv/xsp2"
 XSP_ROOTAPP="--applications /:$XSP_ROOTDIR"
 XSP_OPTIONS="--nonstop --port $XSP_PORT --address $XSP_ADDRESS $XSP_ROOTAPP --appconfigdir $XSP_APPCONFIGDIR --root $XSP_ROOTDIR $XSP_EXTRA_OPTIONS"
-XSP_PIDFILE=/var/run/xsp2.pid
+XSP_PIDFILE=/var/run/xsp2/xsp2.pid
 
 if test "x$XSP_DEBUG" = "xyes"; then
     MONO_OPTIONS="$MONO_OPTIONS --debug"
@@ -192,10 +192,18 @@ case "$1" in
 	## the return value is set appropriately by startproc.
 	export MONO_OPTIONS
 	
-	MYPID=`/sbin/startproc -v -p $XSP_PIDFILE -l /var/log/xsp2.log -u wwwrun -g www -- $MONO_BIN $MONO_OPTIONS $XSP2_BIN $XSP_OPTIONS`
-	if test "`readlink /proc/$MYPID/exe`" = "/usr/bin/mono"; then
-	    echo $MYPID > $XSP_PIDFILE
+	/sbin/startproc -p $XSP_PIDFILE -l /var/log/xsp2.log -u wwwrun -g www -- $MONO_BIN $MONO_OPTIONS $XSP2_BIN $XSP_OPTIONS --pidfile $XSP_PIDFILE
+	
+	# Wait for it to warm up
+	sleep 1
+	
+	if [ -f "$XSP_PIDFILE" ]; then
+		MYPID=`cat $XSP_PIDFILE`
 	else
+		MYPID=
+	fi
+	
+	if ! test "`readlink /proc/$MYPID/exe`" = "$MONO_BIN"; then
 	    rc_failed 7
 	fi
 
@@ -206,7 +214,7 @@ case "$1" in
 	echo -n "Shutting down xsp2 "
 	if test -f $XSP_PIDFILE; then
 	    MYPID=`cat $XSP_PIDFILE`
-	    if test "`readlink /proc/$MYPID/exe`" = "/usr/bin/mono"; then
+	    if test "`readlink /proc/$MYPID/exe`" = "$MONO_BIN"; then
 		kill -TERM $MYPID
 	    else
 		rc_failed 7
@@ -288,7 +296,7 @@ case "$1" in
 	# 5--199 reserved (5--99 LSB, 100--149 distro, 150--199 appl.)
 	
 	# NOTE: checkproc returns LSB compliant status values.
-	/sbin/checkproc $XSP2_BIN
+	#/sbin/checkproc $XSP2_BIN
 	# NOTE: rc_status knows that we called this init script with
 	# "status" option and adapts its messages accordingly.
 	rc_status -v

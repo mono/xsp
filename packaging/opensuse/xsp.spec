@@ -7,7 +7,7 @@ License:        GNU General Public License (GPL)
 Group:          Productivity/Networking/Web/Servers
 Autoreqprov:    on
 Version:	1.2.5
-Release:	2.novell
+Release:	3.novell
 Summary:        Small Web Server Hosting ASP.NET
 Source:         %{name}-%{version}.tar.bz2
 #Patch:        xsp-libexecdir.patch
@@ -119,6 +119,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/lib/mono/2.0/fastcgi-mono-server2.exe
 %{_prefix}/lib/mono/gac/fastcgi-mono-server/
 %{_prefix}/lib/mono/gac/fastcgi-mono-server2/
+%{_prefix}/var/run/xsp2/
 
 %if 0%{?suse_version}
 %config %{_fwdefdir}/xsp2
@@ -126,6 +127,7 @@ rm -rf $RPM_BUILD_ROOT
 %config /etc/logrotate.d/xsp2
 /var/adm/fillup-templates/*
 %attr(0711,wwwrun,www) /srv/xsp2
+%attr(0711,wwwrun,www) /var/run/xsp2
 %{xspConfigsLocation}/*
 %endif
 %doc NEWS README

@@ -1,5 +1,11 @@
 2008-12-12  Marek Habersack  <mhabersack@novell.com>
 
+	* packaging/opensuse/xsp.spec: rpm now creates the /var/run/xsp2/
+	directory and chowns it to wwwrun.www
+
+	* packaging/opensuse/xsp2.init: modified the script to properly
+	start the xsp process.
+
 	* man/xsp.1.in: added documentation for --pidfile
 
 	* src/Mono.WebServer.XSP/main.cs: added a --pidfile option which

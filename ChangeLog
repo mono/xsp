@@ -1,3 +1,10 @@
+2008-12-12  Marek Habersack  <mhabersack@novell.com>
+
+	* man/xsp.1.in: added documentation for --pidfile
+
+	* src/Mono.WebServer.XSP/main.cs: added a --pidfile option which
+	tells xsp to write its PID to the specified path.
+
 2008-12-01  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/BaseApplicationHost.cs: check if the key

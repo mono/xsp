@@ -149,6 +149,7 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ();
 			Console.WriteLine ("    --version: displays version information and exits.");
 			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
+			Console.WriteLine ("    --pidfile file: write the process PID to the specified file.");
 
 			Console.WriteLine ();
 		}
@@ -320,6 +321,15 @@ namespace Mono.WebServer.XSP
 				case "--verbose":
 					verbose = true;
 					break;
+				case "--pidfile": {
+					string portfile = args[++i];
+					if (portfile != null && portfile.Length > 0) {
+						using (StreamWriter sw = File.CreateText (portfile))
+							sw.Write (Process.GetCurrentProcess ().Id);
+					}
+					break;
+				}
+					
 				default:
 					Console.WriteLine ("Unknown argument: {0}", a);
 					ShowHelp ();

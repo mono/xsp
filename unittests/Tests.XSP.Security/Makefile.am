@@ -8,9 +8,6 @@ security_test_sources = \
 CLEANFILES = Tests.XSP.Security.dll*
 EXTRA_DIST = $(security_test_sources) 
 
-unittestsdir = $(pkglibdir)/unittests/Tests.XSP.Security
-unittests_DATA = $(security_test_sources) Tests.XSP.Security.dll Makefile
-
 Tests.XSP.Security.dll: $(security_test_sources)
 	mcs -debug -pkg:mono-nunit -out:$@ -t:library $(security_test_sources)
 

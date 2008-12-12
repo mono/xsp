@@ -1,3 +1,7 @@
+2008-12-11  Andrew Jorgensen  <ajorgensen@novell.com>
+
+	* Makefile.am: Don't install unittests to system
+
 2007-01-08  Sebastien Pouliot  <sebastien@ximian.com>
 
 	* webroot/*: Web files used for the tests.

@@ -42,8 +42,8 @@ class App
                          VALUES (:person, :email)";
 
 		for (int i = emails.Length - 1; i > 0; i -= 2) {
-			cmd.Parameters.Add (new SqliteParameter ("person", emails [i]));
-			cmd.Parameters.Add (new SqliteParameter ("email", emails [i - 1]));
+			cmd.Parameters.Add (new SqliteParameter ("email", emails [i]));
+			cmd.Parameters.Add (new SqliteParameter ("person", emails [i - 1]));
 			cmd.ExecuteNonQuery ();
 			cmd.Parameters.Clear ();
 		}

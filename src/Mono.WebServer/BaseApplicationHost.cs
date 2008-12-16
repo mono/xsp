@@ -290,10 +290,8 @@ namespace Mono.WebServer
 				uri = uri.Substring (slash);
 
 			foreach (string handlerPath in handlerPaths) {
-				if (handlerPath == "*") {
-					result = true;
-					break;
-				}
+				if (handlerPath == "*")
+					continue; // ignore
 
 				string matchExact = null;
 				string endsWith = null;

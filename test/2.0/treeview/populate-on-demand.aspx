@@ -2,7 +2,7 @@
 <%@ Register TagPrefix="mono" TagName="MonoSamplesHeader" src="~/controls/MonoSamplesHeader.ascx" %>
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
-    <title>Untitled Page</title>
+    <title>Treeview - populate-on-demand</title>
     <link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>
 <body>

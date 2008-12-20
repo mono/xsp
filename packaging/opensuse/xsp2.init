@@ -112,11 +112,12 @@
 # Check for missing binaries (stale symlinks should not happen)
 # Note: Special treatment of stop for LSB conformance
 XSP2_BIN=/usr/lib/mono/2.0/xsp2.exe
+XSP2_WRAPPER=/usr/bin/xsp2
 MONO_BIN=/usr/bin/mono
 test -x $XSP2_BIN || { echo "$XSP2_BIN not installed"; 
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 5; fi; }
-test -x $MONO_BIN || { echo "$XSP2_BIN not installed"; 
+test -x $MONO_BIN || { echo "$MONO_BIN not installed"; 
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 5; fi; }
 
@@ -131,11 +132,13 @@ XSP_PORT="8080"
 XSP_ADDRESS="0.0.0.0"
 XSP_APPCONFIGDIR="/etc/xsp/2.0/applications-enabled/"
 XSP_DEBUG="no"
+XSP_ROOTDIR="/srv/xsp2"
+XSP_USER="wwwrun"
+XSP_GROUP="www"
 
 # Read config	
 . $XSP2_CONFIG
 
-XSP_ROOTDIR="/srv/xsp2"
 XSP_ROOTAPP="--applications /:$XSP_ROOTDIR"
 XSP_OPTIONS="--nonstop --port $XSP_PORT --address $XSP_ADDRESS $XSP_ROOTAPP --appconfigdir $XSP_APPCONFIGDIR --root $XSP_ROOTDIR $XSP_EXTRA_OPTIONS"
 XSP_PIDFILE=/var/run/xsp2/xsp2.pid
@@ -192,13 +195,16 @@ case "$1" in
 	## the return value is set appropriately by startproc.
 	export MONO_OPTIONS
 	
-	/sbin/startproc -p $XSP_PIDFILE -l /var/log/xsp2.log -u wwwrun -g www -- $MONO_BIN $MONO_OPTIONS $XSP2_BIN $XSP_OPTIONS --pidfile $XSP_PIDFILE
-	
-	# Wait for it to warm up
-	sleep 1
+	if [ -f "$XSP_PIDFILE" ] && [ "$(readlink /proc/$(cat $XSP_PIDFILE)/exe)" == "$MONO_BIN" ]; then
+		rc_check 0
+	else
+		/sbin/startproc -p $XSP_PIDFILE -l /var/log/xsp2.log -u $XSP_USER -g $XSP_GROUP $XSP2_WRAPPER $XSP_OPTIONS --pidfile $XSP_PIDFILE
+		# Wait for it to warm up
+		sleep 1
+	fi
 	
 	if [ -f "$XSP_PIDFILE" ]; then
-		MYPID=`cat $XSP_PIDFILE`
+		MYPID=$(cat $XSP_PIDFILE)
 	else
 		MYPID=
 	fi

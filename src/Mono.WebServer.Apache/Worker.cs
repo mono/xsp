@@ -42,7 +42,7 @@ namespace Mono.WebServer
 	//
 	internal class ModMonoWorker: Worker
 	{
-		public LingeringNetworkStream Stream;
+		public NetworkStream Stream;
 		
 		ApplicationServer server;
 		ModMonoRequest modRequest;
@@ -53,8 +53,7 @@ namespace Mono.WebServer
 		
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
-			Stream = new LingeringNetworkStream (client, true);
-			Stream.EnableLingering = false;
+			Stream = new NetworkStream (client, true);
 			this.client = client;
 			this.server = server;
 		}
@@ -69,7 +68,8 @@ namespace Mono.WebServer
 
 				// IOException, like EndOfStreamException, might be ok.
 
-				Console.Error.WriteLine (e);
+				if (!(e is EndOfStreamException))
+					Console.Error.WriteLine (e);
 
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x

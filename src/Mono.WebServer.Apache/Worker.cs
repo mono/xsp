@@ -69,7 +69,8 @@ namespace Mono.WebServer
 
 				// IOException, like EndOfStreamException, might be ok.
 
-				Console.Error.WriteLine (e);
+				if (!(e is EndOfStreamException))
+					Console.Error.WriteLine (e);
 
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x

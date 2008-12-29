@@ -154,8 +154,15 @@ namespace Mono.WebServer
 			initial.FreeBuffer ();
 			string vhost = null; // TODO: read the headers in InitialWorkerRequest
 			int port = ((IPEndPoint) localEP).Port;
+			VPathToHost vapp; 
+
+			try {
+				vapp = server.GetApplicationForPath (vhost, port, rdata.Path, true);
+			} catch (Exception e){
+				Console.Error.WriteLine (e);
+				return;
+			}
 			
-			VPathToHost vapp = server.GetApplicationForPath (vhost, port, rdata.Path, true);
 			XSPApplicationHost host = null;
 			if (vapp != null)
 				host = (XSPApplicationHost) vapp.AppHost;

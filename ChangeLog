@@ -1,3 +1,7 @@
+2008-12-29  Miguel de Icaza  <miguel@novell.com>
+
+	* src/Mono.WebServer/XSPWorker.cs: Exception to assist in debuggin
+	reusable versions of Mono.WebServer.
 
 2008-12-23 Gonzalo Paniagua Javier <gonzalo@novell.com>
 

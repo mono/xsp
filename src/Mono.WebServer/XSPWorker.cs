@@ -159,6 +159,10 @@ namespace Mono.WebServer
 			try {
 				vapp = server.GetApplicationForPath (vhost, port, rdata.Path, true);
 			} catch (Exception e){
+				//
+				// This happens if the assembly is not in the GAC, so we report this
+				// error here.
+				//
 				Console.Error.WriteLine (e);
 				return;
 			}

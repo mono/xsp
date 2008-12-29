@@ -99,7 +99,7 @@ namespace Mono.WebServer
 
 			int platform = (int) Environment.OSVersion.Platform;
 			string plat;
-			if (platform == 4 || platform == 128)
+			if (platform == 4 || platform == 6 || platform == 128)
 				plat = "Unix";
 			else
 				plat = ((PlatformID) platform).ToString ();

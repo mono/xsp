@@ -4,6 +4,7 @@ AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(xsp, 2.0)
 AM_MAINTAINER_MODE
 
+
 AC_PROG_INSTALL
 
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
@@ -28,10 +29,23 @@ else
 	WEBTRACING=""
 fi
 
+AC_ARG_WITH([runtime],
+ AC_HELP_STRING([--with-runtime],[use the specified runtime when xsp is installed]),
+ [RUNTIME=$withval])
+
 AC_PATH_PROG(CSC, csc, no)
 AC_PATH_PROG(MCS, mcs, no)
 AC_PATH_PROG(GMCS, gmcs, no)
-AC_PATH_PROG(RUNTIME, mono, no)
+
+if test "x$RUNTIME" = "x" ; then
+   if test -x "${prefix}/bin/mono" ; then
+	   AC_MSG_CHECKING([for runtime in the installation prefix])
+	   RUNTIME="${prefix}/bin/mono"
+	   AC_MSG_RESULT([$RUNTIME])
+   else
+	   AC_PATH_PROG(RUNTIME, mono, no)
+   fi
+fi
 AC_PATH_PROG(GACUTIL, gacutil, no)
 AC_PATH_PROG(SN, sn, no)
 CS="C#"
@@ -69,9 +83,6 @@ esac
 AM_CONDITIONAL(PLATFORM_WIN32, test x$platform_win32 = xyes)
 AM_CONDITIONAL(NET_2_0, test ! x$GMCS = xno)
 AM_CONDITIONAL(XSP_ONLY, test x$platform_win32 = xyes)
-
-echo "$CS compiler: $MCS"
-test x$GMCS = xno || echo "$CS 2.0 compiler: $GMCS"
 
 GACUTIL_FLAGS='-root $(DESTDIR)$(prefix)/lib'
 
@@ -145,3 +156,7 @@ AC_OUTPUT([
 	docs/Makefile
 ])
 
+echo
+echo "Runtime: $RUNTIME"
+echo "$CS compiler: $MCS"
+test x$GMCS = xno || echo "$CS 2.0 compiler: $GMCS"

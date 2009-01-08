@@ -1,3 +1,11 @@
+2009-01-08  Marek Habersack  <mhabersack@novell.com>
+
+	* configure.in: added the --with-runtime option to make it
+	possible to specify a different runtime to be used with xsp than
+	the first one found in the path.
+	If --with-runtime is not specified and ${prefix}/bin/mono exists,
+	then it is used as the runtime for compiled xsp
+
 2008-12-29  Miguel de Icaza  <miguel@novell.com>
 
 	* src/Mono.WebServer/XSPWorker.cs: Exception to assist in debuggin

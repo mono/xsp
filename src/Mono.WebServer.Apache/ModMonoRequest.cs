@@ -8,7 +8,7 @@
 // Copyright (c) 2002 Daniel Lopez Ridruejo.
 //           (c) 2002,2003 Ximian, Inc.
 //           All rights reserved.
-// (C) Copyright 2004,2005 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2009 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -122,16 +122,6 @@ namespace Mono.WebServer
 		string physical_path;
 		ModMonoConfig mod_mono_config;
 		Socket client;
-
-		public ModMonoRequest (NetworkStream ns)
-		{
-			reader = new BinaryReader (ns);
-			writer = new BinaryWriter (ns);
-			
-			mod_mono_config.OutputBuffering = true;
-			
-			GetInitialData ();
-		}
 
 		public ModMonoRequest (Socket client)
 		{

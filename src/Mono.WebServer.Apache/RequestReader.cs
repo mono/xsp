@@ -52,11 +52,6 @@ namespace Mono.WebServer
 			get { return request; }
 		}
 		
-		public RequestReader (NetworkStream ns)
-		{
-			this.request = new ModMonoRequest (ns);
-		}
-
 		public RequestReader (Socket client)
 		{
 			this.request = new ModMonoRequest (client);

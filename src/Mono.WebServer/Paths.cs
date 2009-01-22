@@ -55,13 +55,15 @@ namespace Mono.WebServer
 			realUri = uri; pathInfo = String.Empty;
 			string basepath = HttpRuntime.AppDomainAppPath;
 			string vpath = HttpRuntime.AppDomainAppVirtualPath;
-			if (vpath [vpath.Length - 1] != '/')
+			int vpathLen = vpath.Length;
+			
+			if (vpath [vpathLen - 1] != '/')
 				vpath += '/';
 
-			if (vpath.Length > uri.Length)
+			if (vpathLen > uri.Length)
 				return;
 
-			uri = uri.Substring (vpath.Length);
+			uri = uri.Substring (vpathLen);
 			while (uri.Length > 0 && uri [0] == '/')
 				uri = uri.Substring (1);
 
@@ -74,10 +76,10 @@ namespace Mono.WebServer
 				
 			for (dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
 				slash = uri.IndexOf ('/', dot);
-
+				
 				if (slash == -1)
 					slash = lastSlash;
-
+				
 				partial = uri.Substring (0, slash);
 				lastSlash = slash;
 
@@ -108,7 +110,7 @@ namespace Mono.WebServer
 
 #if NET_2_0
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
-			if (vpp != null && vpp.FileExists (uri))
+			if (vpp != null && vpp.FileExists ("/" + uri))
 				return true;
 #endif
 			return false;

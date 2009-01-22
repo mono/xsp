@@ -11,7 +11,8 @@ noinst_SCRIPTS= Mono.WebServer.dll $(monowebserver2_install)
 GACUTIL1=$(GACUTIL) -package 1.0
 if NET_2_0
 monowebserver2_install = Mono.WebServer2.dll
-monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Security.dll
+monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Security.dll 
+
 GACUTIL2=$(GACUTIL) -package 2.0
 endif
 
@@ -48,7 +49,7 @@ Mono.WebServer.dll: $(monowebserver_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 Mono.WebServer2.dll: $(monowebserver2_build_sources)
-	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(SYSTEMCORE_DEP) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 install-data-local:

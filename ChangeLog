@@ -1,5 +1,10 @@
 2009-01-23  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/Makefile.am (monowebserver_sources): added
+	SearchPattern.cs
+
+	* src/Mono.WebServer/SearchPattern.cs: added
+
 	* configure.in: added option to disable linking with System.Core
 	(--disable-systemcore)
 

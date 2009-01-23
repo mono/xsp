@@ -39,7 +39,8 @@ monowebserver_sources  = \
 			HttpErrors.cs \
 			Paths.cs \
 			VPathToHost.cs \
-			Tracing.cs
+			Tracing.cs \
+			SearchPattern.cs
 
 monowebserver_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo.cs)
 monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)

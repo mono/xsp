@@ -1,5 +1,10 @@
 2009-01-23  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/ApplicationServer.cs: if fullPath passed to
+	AddApplication doesn't end with a directory separator character,
+	append it to the path. Fixes bug #463483. Patch from Chuck
+	McCrobie <mccrobie2000@yahoo.com>, thanks!
+
 	* src/Mono.WebServer/ReaderWriterLockSlim.cs: added to avoid
 	having to link with System.Core
 

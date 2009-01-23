@@ -208,7 +208,7 @@ namespace Mono.WebServer
 #if NET_2_0 && SYSTEMCORE_DEP
 				handlersCacheLock.EnterReadLock ();
 #else
-				handlersCacheLock.AcquireReaderLock (0);
+				handlersCacheLock.AcquireReaderLock (-1);
 #endif
 				locked = true;
 				if (handlersCache != null) {
@@ -247,8 +247,9 @@ namespace Mono.WebServer
 #if NET_2_0 && SYSTEMCORE_DEP
 				handlersCacheLock.EnterWriteLock ();
 #else
-				handlersCacheLock.AcquireWriterLock (0);
+				handlersCacheLock.AcquireWriterLock (-1);
 #endif
+				locked = true;
 				if (handlersCache.ContainsKey (cacheKey))
 					handlersCache [cacheKey] = handlerFound;
 				else

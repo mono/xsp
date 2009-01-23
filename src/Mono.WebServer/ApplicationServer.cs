@@ -123,6 +123,10 @@ namespace Mono.WebServer
 
 		public void AddApplication (string vhost, int vport, string vpath, string fullPath)
 		{
+			char dirSepChar = Path.DirectorySeparatorChar;
+			if (fullPath != null && !fullPath.EndsWith (dirSepChar.ToString ()))
+				fullPath += dirSepChar;
+			
 			// TODO - check for duplicates, sort, optimize, etc.
 			if (verbose) {
 				Console.WriteLine("Registering application:");

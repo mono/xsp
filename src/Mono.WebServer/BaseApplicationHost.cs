@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections;
+using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -45,7 +46,12 @@ namespace Mono.WebServer
 		static readonly object matchedPathsCacheLock = new object ();
 		static readonly object cachedMatchesLock = new object ();
 #endif
-		static readonly object handlersCacheLock = new object ();
+
+#if NET_2_0 && SYSTEMCORE_DEP
+		static readonly ReaderWriterLockSlim handlersCacheLock = new ReaderWriterLockSlim ();
+#else
+		static readonly ReaderWriterLock handlersCacheLock = new ReaderWriterLock ();
+#endif
 		
 		string path;
 		string vpath;
@@ -195,7 +201,16 @@ namespace Mono.WebServer
 		public virtual bool IsHttpHandler (string verb, string uri)
 		{
 			string cacheKey = verb + "_" + uri;
-			lock (handlersCacheLock) {
+			bool locked;
+
+			locked = false;
+			try {
+#if NET_2_0 && SYSTEMCORE_DEP
+				handlersCacheLock.EnterReadLock ();
+#else
+				handlersCacheLock.AcquireReaderLock (0);
+#endif
+				locked = true;
 				if (handlersCache != null) {
 					bool found;
 #if NET_2_0
@@ -213,15 +228,39 @@ namespace Mono.WebServer
 					handlersCache = new Hashtable ();
 #endif
 				}
+			} finally {
+				if (locked) {
+#if NET_2_0 && SYSTEMCORE_DEP
+					handlersCacheLock.ExitReadLock ();
+#else
+					handlersCacheLock.ReleaseReaderLock ();
+#endif
+				}
 			}
+			
 			
 			bool handlerFound = LocateHandler (verb, uri);
 
-			lock (handlersCacheLock) {
+			locked = false;
+			
+			try {
+#if NET_2_0 && SYSTEMCORE_DEP
+				handlersCacheLock.EnterWriteLock ();
+#else
+				handlersCacheLock.AcquireWriterLock (0);
+#endif
 				if (handlersCache.ContainsKey (cacheKey))
 					handlersCache [cacheKey] = handlerFound;
 				else
 					handlersCache.Add (cacheKey, handlerFound);
+			} finally {
+				if (locked) {
+#if NET_2_0 && SYSTEMCORE_DEP
+					handlersCacheLock.ExitWriteLock ();
+#else
+					handlersCacheLock.ReleaseWriterLock ();
+#endif
+				}
 			}
 			
 			return handlerFound;

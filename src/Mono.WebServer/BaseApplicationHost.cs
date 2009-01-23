@@ -47,7 +47,7 @@ namespace Mono.WebServer
 		static readonly object cachedMatchesLock = new object ();
 #endif
 
-#if NET_2_0 && SYSTEMCORE_DEP
+#if NET_2_0
 		static readonly ReaderWriterLockSlim handlersCacheLock = new ReaderWriterLockSlim ();
 #else
 		static readonly ReaderWriterLock handlersCacheLock = new ReaderWriterLock ();
@@ -205,7 +205,7 @@ namespace Mono.WebServer
 
 			locked = false;
 			try {
-#if NET_2_0 && SYSTEMCORE_DEP
+#if NET_2_0
 				handlersCacheLock.EnterReadLock ();
 #else
 				handlersCacheLock.AcquireReaderLock (-1);
@@ -230,7 +230,7 @@ namespace Mono.WebServer
 				}
 			} finally {
 				if (locked) {
-#if NET_2_0 && SYSTEMCORE_DEP
+#if NET_2_0
 					handlersCacheLock.ExitReadLock ();
 #else
 					handlersCacheLock.ReleaseReaderLock ();
@@ -244,7 +244,7 @@ namespace Mono.WebServer
 			locked = false;
 			
 			try {
-#if NET_2_0 && SYSTEMCORE_DEP
+#if NET_2_0
 				handlersCacheLock.EnterWriteLock ();
 #else
 				handlersCacheLock.AcquireWriterLock (-1);
@@ -256,7 +256,7 @@ namespace Mono.WebServer
 					handlersCache.Add (cacheKey, handlerFound);
 			} finally {
 				if (locked) {
-#if NET_2_0 && SYSTEMCORE_DEP
+#if NET_2_0
 					handlersCacheLock.ExitWriteLock ();
 #else
 					handlersCacheLock.ReleaseWriterLock ();

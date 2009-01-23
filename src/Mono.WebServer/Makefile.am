@@ -41,17 +41,22 @@ monowebserver_sources  = \
 			Paths.cs \
 			VPathToHost.cs \
 			Tracing.cs \
-			SearchPattern.cs
+			SearchPattern.cs 
+
+monowebserver2_sources = $(monowebserver_sources) \
+			ReaderWriterLockSlim.cs \
+			LockRecursionException.cs \
+			LockRecursionPolicy.cs
 
 monowebserver_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo.cs)
-monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
+monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 
 Mono.WebServer.dll: $(monowebserver_build_sources)
 	$(MCS) $(MCSFLAGS) $(monowebserver_references) /target:library /out:$@ $(monowebserver_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 Mono.WebServer2.dll: $(monowebserver2_build_sources)
-	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(SYSTEMCORE_DEP) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
+	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 install-data-local:

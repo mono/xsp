@@ -13,22 +13,6 @@ if test "x$PKG_CONFIG" = "xno"; then
 fi
 
 #
-# --disable-systemcore
-#
-AC_MSG_CHECKING([if System.Core should be used])
-AC_ARG_ENABLE([systemcore],
- AC_HELP_STRING([--disable-systemcore],[disable linking with System.Core]),
- [enable_systemcore=$enableval],
- [enable_systemcore=yes])
-if test "x$enable_systemcore" = "xyes" ; then
-   	AC_MSG_RESULT([yes])
-	SYSTEMCORE_DEP="-define:SYSTEMCORE_DEP -r:System.Core.dll"
-else
-	AC_MSG_RESULT([no])
-	SYSTEMCORE_DEP=""
-fi
-
-#
 # --enable-tracing
 #
 AC_MSG_CHECKING([if tracing is requested])
@@ -114,7 +98,6 @@ export VERSION
 
 
 AC_SUBST(WEBTRACING)
-AC_SUBST(SYSTEMCORE_DEP)
 AC_SUBST(MCS)
 AC_SUBST(GMCS)
 AC_SUBST(RUNTIME)

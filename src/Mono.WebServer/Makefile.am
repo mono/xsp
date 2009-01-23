@@ -1,6 +1,7 @@
 pkgconfigdir=$(libdir)/pkgconfig
 builddir=$(top_builddir)/src/Mono.WebServer
 MCSFLAGS= -debug+ -debug:full -nologo -unsafe -nowarn:618 $(WEBTRACING) -doc:$(top_builddir)/docs/Mono.WebServer.xml
+SYSTEMCORE_DEP=@SYSTEMCORE_DEP@
 
 monowebserverdir = $(prefix)/lib/xsp/1.0
 monowebserver2dir = $(prefix)/lib/xsp/2.0

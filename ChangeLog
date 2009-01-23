@@ -1,16 +1,17 @@
 2009-01-23  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer/ReaderWriterLockSlim.cs,
+	src/Mono.WebServer/LockRecursionException.cs,
+	src/Mono.WebServer/LockRecursionPolicy.cs: added to avoid having
+	to link with System.Core
+
 	* src/Mono.WebServer/Makefile.am (monowebserver_sources): added
 	SearchPattern.cs
 
 	* src/Mono.WebServer/SearchPattern.cs: added
 
-	* configure.in: added option to disable linking with System.Core
-	(--disable-systemcore)
-
 	* src/Mono.WebServer/BaseApplicationHost.cs: use
-	ReaderWriterLockSlim or ReaderWriterLock (if System.Core linking
-	is disabled) for handlersCacheLock.
+	ReaderWriterLockSlim for handlersCacheLock.
 
 2009-01-22  Marek Habersack  <mhabersack@novell.com>
 

@@ -1,3 +1,17 @@
+2009-01-27  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/SearchPattern.cs: made the class reusable and
+	removed the check for invalid characters, it doesn't make sense
+	for virtual paths.
+
+	* src/Mono.WebServer/ReaderWriterLockSlim.cs: made the class
+	internal.
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: gotten rid of matched
+	paths cache (and two locks with them).
+	Regexps are no longer used to match handlers, we now use
+	SearchPattern (copied from System.dll) instead.
+
 2009-01-23  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/ApplicationServer.cs: if fullPath passed to

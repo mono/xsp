@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections;
+using System.IO;
 using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -43,11 +44,6 @@ namespace Mono.WebServer
 	public class BaseApplicationHost : MarshalByRefObject, IApplicationHost
 	{
 #if NET_2_0
-		static readonly object matchedPathsCacheLock = new object ();
-		static readonly object cachedMatchesLock = new object ();
-#endif
-
-#if NET_2_0
 		static readonly ReaderWriterLockSlim handlersCacheLock = new ReaderWriterLockSlim ();
 #else
 		static readonly ReaderWriterLock handlersCacheLock = new ReaderWriterLock ();
@@ -60,7 +56,6 @@ namespace Mono.WebServer
 		ApplicationServer appserver;
 #if NET_2_0
 		Dictionary <string, bool> handlersCache;
-		Dictionary <HttpHandlerAction, Dictionary <string, bool>> matchedPathsCache;
 #else
 		Hashtable handlersCache;
 #endif
@@ -240,9 +235,7 @@ namespace Mono.WebServer
 			
 			
 			bool handlerFound = LocateHandler (verb, uri);
-
 			locked = false;
-			
 			try {
 #if NET_2_0
 				handlersCacheLock.EnterWriteLock ();
@@ -303,36 +296,18 @@ namespace Mono.WebServer
 #if NET_2_0
 		bool PathMatches (HttpHandlerAction handler, string uri)
 		{
-			Dictionary <string, bool> cachedMatches;
-			lock (matchedPathsCacheLock) {
-				if (matchedPathsCache == null) {
-					cachedMatches = new Dictionary <string, bool> ();
-					matchedPathsCache = new Dictionary <HttpHandlerAction, Dictionary <string, bool>> ();
-					matchedPathsCache.Add (handler, cachedMatches);
-				} else {
-					if (!matchedPathsCache.TryGetValue (handler, out cachedMatches)) {
-						cachedMatches = new Dictionary <string, bool> ();
-						matchedPathsCache.Add (handler, cachedMatches);
-					}
-				}
-			}
-
 			bool result = false;
-			lock (cachedMatchesLock) {
-				if (cachedMatches.TryGetValue (uri, out result))
-					return result;
-			}			
-
 			string[] handlerPaths = handler.Path.Split (',');
 			int slash = uri.LastIndexOf ('/');
 			string origUri = uri;
 			if (slash != -1)
 				uri = uri.Substring (slash);
 
+			SearchPattern sp = null;
 			foreach (string handlerPath in handlerPaths) {
 				if (handlerPath == "*")
 					continue; // ignore
-
+				
 				string matchExact = null;
 				string endsWith = null;
 				Regex regEx = null;
@@ -342,8 +317,7 @@ namespace Mono.WebServer
 						endsWith = handlerPath.Substring (1);
 
 					if (handlerPath.IndexOf ('*') == -1)
-						if (handlerPath [0] != '/')
-						{
+						if (handlerPath [0] != '/') {
 							HttpContext ctx = HttpContext.Current;
 							HttpRequest req = ctx != null ? ctx.Request : null;
 							string vpath = HttpRuntime.AppDomainAppVirtualPath;
@@ -369,24 +343,21 @@ namespace Mono.WebServer
 						continue;
 				}
 
-				if (handlerPath != "*") {
-					string expr = handlerPath.Replace (".", "\\.").Replace ("?", "\\?").Replace ("*", ".*");
-					if (expr.Length > 0 && expr [0] == '/')
-						expr = expr.Substring (1);
+				string pattern;
+				if (handlerPath.Length > 0 && handlerPath [0] == '/')
+					pattern = handlerPath.Substring (1);
+				else
+					pattern = handlerPath;
 
-					expr += "\\z";
-					regEx = new Regex (expr, RegexOptions.IgnoreCase);
-
-					if (regEx.IsMatch (origUri)) {
-						result = true;
-						break;
-					}
-				}
-			}
-
-			lock (cachedMatchesLock) {
-				if (!cachedMatches.ContainsKey (origUri))
-					cachedMatches.Add (origUri, result);
+				if (sp == null)
+					sp = new SearchPattern (pattern, true);
+				else
+					sp.SetPattern (pattern, true);
+				
+				if (sp.IsMatch (origUri)) {
+					result = true;
+					break;
+				}				
 			}
 			
 			return result;

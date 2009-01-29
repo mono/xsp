@@ -1,3 +1,8 @@
+2009-01-29  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/Makefile.am (EXTRA_DIST): added
+	$(monowebserver2_sources)
+
 2009-01-27  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/SearchPattern.cs: made the class reusable and

@@ -18,7 +18,7 @@ GACUTIL2=$(GACUTIL) -package 2.0
 endif
 
 CLEANFILES = Mono.WebServer.dll* Mono.WebServer2.dll*
-EXTRA_DIST = $(monowebserver_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in
+EXTRA_DIST = $(monowebserver_sources) $(monowebserver2_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in
 
 # 
 monowebserver_references= -r:System.Web.dll -r:Mono.Security.dll

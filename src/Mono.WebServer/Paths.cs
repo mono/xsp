@@ -94,8 +94,6 @@ namespace Mono.WebServer
 				if (!File.Exists (path) && !VirtualPathExists (appHost, verb, partial))
 					continue;
 #endif
-				if (uri.IndexOf ('.', slash) != -1)
-					break;
 				
 				realUri = vpath + uri.Substring (0, slash);
 				pathInfo = uri.Substring (slash);

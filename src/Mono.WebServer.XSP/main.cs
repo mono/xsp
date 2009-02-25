@@ -42,7 +42,7 @@ using Mono.WebServer;
 
 namespace Mono.WebServer.XSP
 {
-	public class Server
+	public class Server : MarshalByRefObject
 	{
 		static RSA key;
 		
@@ -222,7 +222,12 @@ namespace Mono.WebServer.XSP
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
+			return new Server ().RealMain (args, true, null);
+		}
 
+
+		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost)
+		{
 			SecurityConfiguration security = new SecurityConfiguration ();
 			bool nonstop = false;
 			bool verbose = false;
@@ -371,20 +376,20 @@ namespace Mono.WebServer.XSP
 					key = security.KeyPair;
 					webSource = new XSPWebSource (ipaddr, port, security.Protocol, security.ServerCertificate, 
 						new PrivateKeySelectionCallback (GetPrivateKey), 
-						security.AcceptClientCertificates, security.RequireClientCertificates);
+						security.AcceptClientCertificates, security.RequireClientCertificates, !root);
 				}
 				catch (CryptographicException ce) {
 					Console.WriteLine (ce.Message);
 					return 1;
 				}
 			} else {
-				webSource = new XSPWebSource (ipaddr, port);
+				webSource = new XSPWebSource (ipaddr, port, !root);
 			}
 
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = verbose;
+			server.SingleApplication = !root;
 
-			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
 			if (apps != null)
 				server.AddApplicationsFromCommandLine (apps);
 
@@ -397,6 +402,18 @@ namespace Mono.WebServer.XSP
 			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 
+
+			VPathToHost vh = server.GetSingleApp ();
+			if (root && vh != null) {
+				// Redo in new domain
+				vh.CreateHost (server, webSource);
+				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
+				webSource.Dispose ();
+				return svr.RealMain (args, false, vh.AppHost);
+			}
+			server.AppHost = ext_apphost;
+
+			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
 			Console.WriteLine ("Listening on address: {0}", ip);
 			Console.WriteLine ("Root directory: {0}", rootDir);
 
@@ -419,6 +436,11 @@ namespace Mono.WebServer.XSP
 			}
 
 			return 0;
+		}
+
+		public override object InitializeLifetimeService ()
+		{
+			return null;
 		}
 	}
 }

@@ -88,11 +88,27 @@ namespace Mono.WebServer
 		bool stop;
 		bool verbose;
 		Socket listen_socket;
+		bool single_app;
 
 		Thread runner;
 
 		// This is much faster than hashtable for typical cases.
 		ArrayList vpathToHost = new ArrayList ();
+
+		public bool SingleApplication {
+			get { return single_app; }
+			set { single_app = value; }
+		}
+
+		public IApplicationHost AppHost {
+			get { return ((VPathToHost) vpathToHost [0]).AppHost; }
+			set { ((VPathToHost) vpathToHost [0]).AppHost = value; }
+		}
+
+		public IRequestBroker Broker {
+			get { return ((VPathToHost) vpathToHost [0]).RequestBroker; }
+			set { ((VPathToHost) vpathToHost [0]).RequestBroker = value; }
+		}
 
 		public int Port {
 			get {
@@ -273,6 +289,14 @@ namespace Mono.WebServer
  			if (vpathToHost == null)
  				throw new InvalidOperationException ("SetApplications must be called first.");
 
+			if (single_app) {
+				VPathToHost v = (VPathToHost) vpathToHost [0];
+				v.AppHost = AppHost;
+				// Link the host in the application domain with a request broker in the *same* domain
+				// Not needed for SingleApplication and mod_mono
+				v.RequestBroker = webSource.CreateRequestBroker ();
+				AppHost.RequestBroker = v.RequestBroker;
+			}
 			listen_socket = webSource.CreateSocket ();
 			listen_socket.Listen (500);
 			listen_socket.Blocking = false;
@@ -385,6 +409,9 @@ namespace Mono.WebServer
 		public VPathToHost GetApplicationForPath (string vhost, int port, string path,
 							  bool defaultToRoot)
 		{
+			if (single_app)
+				return (VPathToHost) vpathToHost [0];
+
 			VPathToHost bestMatch = null;
 			int bestMatchLength = 0;
 
@@ -414,6 +441,13 @@ namespace Mono.WebServer
 			if (verbose)
 				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
 
+			return null;
+		}
+
+		public VPathToHost GetSingleApp ()
+		{
+			if (vpathToHost.Count == 1)
+				return (VPathToHost) vpathToHost [0];
 			return null;
 		}
 

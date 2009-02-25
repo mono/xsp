@@ -39,7 +39,7 @@ using Mono.WebServer;
 
 namespace Mono.WebServer.Apache
 {
-	public class Server
+	public class Server : MarshalByRefObject
 	{
 		
 		static void ShowVersion ()
@@ -182,10 +182,15 @@ namespace Mono.WebServer.Apache
 			Console.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
 		}
 
+		
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
+			return new Server ().RealMain (args, true, null);
+		}
 
+		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost)
+		{
 			bool nonstop = false;
 			bool verbose = false;
 			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
@@ -318,7 +323,7 @@ namespace Mono.WebServer.Apache
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
-				webSource = new ModMonoWebSource (filename, lockfile);
+				webSource = new ModMonoWebSource (filename, lockfile, !root);
 			}
 
 			if ((options & Options.Terminate) != 0) {
@@ -331,8 +336,10 @@ namespace Mono.WebServer.Apache
 
 				return (res) ? 0 : 1;
 			}
+
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = verbose;
+			server.SingleApplication = !root;
 
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
 			if (apps != null)
@@ -346,6 +353,17 @@ namespace Mono.WebServer.Apache
 
 			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
+
+			VPathToHost vh = server.GetSingleApp ();
+			if (root && vh != null) {
+				// Redo in new domain
+				vh.CreateHost (server, webSource);
+				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
+				webSource.Dispose ();
+				return svr.RealMain (args, false, vh.AppHost);
+			}
+			server.AppHost = ext_apphost;
+
 			if (!useTCP) {
 				Console.WriteLine ("Listening on: {0}", filename);
 			} else {

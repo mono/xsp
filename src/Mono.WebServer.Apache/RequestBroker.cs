@@ -82,5 +82,10 @@ namespace Mono.WebServer
 				return;
 			worker.SendFile (filename);
 		}
+
+		public bool GetHeadersSent (int requestId) {
+			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			return (worker != null) ? worker.HeadersSent : false;
+		}
 	}
 }

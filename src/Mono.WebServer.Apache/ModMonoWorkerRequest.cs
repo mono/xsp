@@ -58,6 +58,7 @@ namespace Mono.WebServer
 		int remotePort;
 		string remoteName;
 		ModMonoRequestBroker requestBroker;
+		ModMonoWorker worker;
 		string[] headers;
 		int [] headersHash;
 		string[] headerValues;
@@ -155,6 +156,17 @@ namespace Mono.WebServer
 			this.headerValues = headerValues;
 		}
 
+		public ModMonoWorkerRequest (object worker,
+					IApplicationHost appHost, string verb, string path,
+					string queryString, string protocol, string localAddress,
+					int serverPort, string remoteAddress, int remotePort,
+					string remoteName, string[] headers, string[] headerValues)
+			: this (-1, null, appHost, verb, path, queryString, protocol, localAddress,
+				serverPort, remoteAddress, remotePort, remoteName, headers, headerValues)
+		{
+			this.worker = (ModMonoWorker) worker;
+		}
+
 		public override int RequestId {
 			get { return requestId; }
 		}
@@ -217,8 +229,9 @@ namespace Mono.WebServer
 		
 		public override bool HeadersSent ()
 		{
-			//FIXME!!!!: how do we know this?
-			return false;
+			if (requestId == -1)
+				return worker.HeadersSent;
+			return requestBroker.GetHeadersSent (requestId);
 		}
 		
 		public override void FlushResponse (bool finalFlush)
@@ -232,7 +245,7 @@ namespace Mono.WebServer
 		public override bool IsSecure ()
 		{
 			if (!gotSecure) {
-				string val = requestBroker.GetServerVariable (requestId, "SERVER_PORT_SECURE");
+				string val = GetServerVariable (requestId, "SERVER_PORT_SECURE");
 				isSecure =  (val != null && val != "");
 				gotSecure = true;
 			}
@@ -240,9 +253,16 @@ namespace Mono.WebServer
 			return isSecure;
 		}
 
+		string GetServerVariable (int requestId, string name)
+		{
+			if (requestId == -1)
+				return worker.GetServerVariable (name);
+			return requestBroker.GetServerVariable (requestId, name);
+		}
+
 		private bool IsClientCertificateValidForApache ()
 		{
-			string val = requestBroker.GetServerVariable (requestId, "SSL_CLIENT_VERIFY");
+			string val = GetServerVariable (requestId, "SSL_CLIENT_VERIFY");
 			if ((val == null) || (val.Length == 0))
 				return false;
 			return (val.Trim () == "SUCCESS");
@@ -333,7 +353,10 @@ namespace Mono.WebServer
 		public override void CloseConnection ()
 		{
 			if (!closed) {
-				requestBroker.Close (requestId);
+				if (requestId == -1)
+					worker.Close ();
+				else 
+					requestBroker.Close (requestId);
 				closed = true;
 			}
 		}
@@ -384,7 +407,7 @@ namespace Mono.WebServer
 			if (o != null)
 				return (string) o;
 
-			string result = requestBroker.GetServerVariable (requestId, name);
+			string result = GetServerVariable (requestId, name);
 			if (result != null && result.Length > 0) {
 				server_vars [name] = result;
 				return result;
@@ -413,36 +436,53 @@ namespace Mono.WebServer
 			HttpContext ctx = HttpContext.Current;
 			HttpResponse response = ctx != null ? ctx.Response : null;
 
-			if (response != null)
-				requestBroker.SetOutputBuffering (requestId, response.BufferOutput);
+			if (response != null) {
+				if (requestId == -1)
+					worker.SetOutputBuffering (response.BufferOutput);
+				else
+					requestBroker.SetOutputBuffering (requestId, response.BufferOutput);
+			}
 		}
 		
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
 			UpdateModMonoConfig ();
 			
-			if (data.Length > length * 2) {
+			if (requestId > -1 && data.Length > length * 2) {
+				// smaller buffer when using remoting
 				byte [] tmpbuffer = new byte [length];
 				Buffer.BlockCopy (data, 0, tmpbuffer, 0, length);
 				requestBroker.Write (requestId, tmpbuffer, 0, length);
 			} else {
-				requestBroker.Write (requestId, data, 0, length);
+				if (requestId == -1)
+					worker.Write (data, 0, length);
+				else
+					requestBroker.Write (requestId, data, 0, length);
 			}
 		}
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			UpdateModMonoConfig ();			
-			requestBroker.SetStatusCodeLine (requestId, statusCode, String.Format("{0} {1}", statusCode, statusDescription));
+			UpdateModMonoConfig ();
+			string line = String.Format("{0} {1}", statusCode, statusDescription);
+			if (requestId == -1)
+				worker.SetStatusCodeLine (statusCode, line);
+			else
+				requestBroker.SetStatusCodeLine (requestId, statusCode, line);
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
 		{
-			requestBroker.SetResponseHeader (requestId, name, value);
+			if (requestId == -1)
+				worker.SetResponseHeader (name, value);
+			else
+				requestBroker.SetResponseHeader (requestId, name, value);
 		}
 
 		public override bool IsClientConnected ()
 		{
+			if (requestId == -1)
+				return worker.IsConnected ();
 			return (requestBroker != null && requestBroker.IsConnected (requestId));
 		}
 
@@ -521,11 +561,14 @@ namespace Mono.WebServer
 			if (buffer == null || size <= 0)
 				return 0;
 
-			byte [] readBuffer;
-			int nr = requestBroker.Read (requestId, size, out readBuffer);
-			if (nr > 0 && readBuffer != null)
-				Buffer.BlockCopy (readBuffer, 0, buffer, 0, nr);
-			return nr;
+			if (requestId > -1) {
+				byte [] readBuffer;
+				int nr = requestBroker.Read (requestId, size, out readBuffer);
+				if (nr > 0 && readBuffer != null)
+					Buffer.BlockCopy (readBuffer, 0, buffer, 0, nr);
+				return nr;
+			}
+			return worker.Read (buffer, 0, size);
 		}
 
 		public override void SendResponseFromFile (string filename, long offset, long length)
@@ -533,7 +576,10 @@ namespace Mono.WebServer
 			if (offset == 0) {
 				FileInfo info = new FileInfo (filename);
 				if (info.Length == length) {
-					requestBroker.SendFile (requestId, filename);
+					if (requestId == -1)
+						worker.SendFile (filename);
+					else
+						requestBroker.SendFile (requestId, filename);
 					return;
 				}
 			}

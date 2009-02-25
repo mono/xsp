@@ -58,12 +58,21 @@ namespace Mono.WebServer
 
 		public void ProcessRequest (int reqId, string verb, string queryString, string path,
 					    string protocol, string localAddress, int serverPort, string remoteAddress,
-					    int remotePort, string remoteName, string [] headers, string [] headerValues)
+					    int remotePort, string remoteName, string [] headers, string [] headerValues, object worker)
 		{
-			ModMonoRequestBroker broker = (ModMonoRequestBroker) RequestBroker;
-			ModMonoWorkerRequest mwr = new ModMonoWorkerRequest (reqId, broker, this, verb, path, queryString,
-									     protocol, localAddress, serverPort, remoteAddress,
-									     remotePort, remoteName, headers, headerValues);
+			ModMonoRequestBroker broker = null;
+			ModMonoWorkerRequest mwr = null;
+			if (reqId > -1) {
+				broker = (ModMonoRequestBroker) RequestBroker;
+				mwr = new ModMonoWorkerRequest (reqId, broker, this, verb, path, queryString,
+								protocol, localAddress, serverPort, remoteAddress,
+								remotePort, remoteName, headers, headerValues);
+			} else {
+				mwr = new ModMonoWorkerRequest ((ModMonoWorker) worker, this, verb, path, queryString,
+								protocol, localAddress, serverPort, remoteAddress,
+								remotePort, remoteName, headers, headerValues);
+			}
+
 			if (mwr.IsSecure ()) {
 				// note: we're only setting what we use (and not the whole lot)
 				mwr.AddServerVariable ("CERT_KEYSIZE", broker.GetServerVariable (reqId, "SSL_CIPHER_USEKEYSIZE"));

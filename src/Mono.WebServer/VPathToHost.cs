@@ -150,9 +150,11 @@ namespace Mono.WebServer
 			AppHost = ApplicationHost.CreateApplicationHost (webSource.GetApplicationHostType(), v, realPath) as IApplicationHost;
 			AppHost.Server = server;
 			
-			// Link the host in the application domain with a request broker in the main domain
-			RequestBroker = webSource.CreateRequestBroker ();
-			AppHost.RequestBroker = RequestBroker;
+			if (!server.SingleApplication) {
+				// Link the host in the application domain with a request broker in the main domain
+				RequestBroker = webSource.CreateRequestBroker ();
+				AppHost.RequestBroker = RequestBroker;
+			}
 		}
 	}
 }

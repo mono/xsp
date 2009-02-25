@@ -46,6 +46,7 @@ namespace Mono.WebServer
 		bool file_bound;
 		Stream locker;
 		string lockfile;
+		bool single_app;
 
 		protected ModMonoWebSource (string lockfile)
 		{
@@ -59,13 +60,14 @@ namespace Mono.WebServer
 			}
 		}
 
-		public ModMonoWebSource (string filename, string lockfile)
+		public ModMonoWebSource (string filename, string lockfile, bool single_app)
 			: this (lockfile)
 		{
 			if (filename == null)
 				throw new ArgumentNullException ("filename");
 
 			this.filename = filename;
+			this.single_app = single_app;
 		}
 
 		public virtual bool GracefulShutdown ()

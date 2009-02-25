@@ -78,7 +78,7 @@ namespace Mono.WebServer
 						Stream = null;
 					}
 				} catch {}
-				if (broker != null && requestId != -1) {
+				if (!server.SingleApplication && broker != null && requestId != -1) {
 					broker.UnregisterRequest (requestId);
 					requestId = -1;
 				}
@@ -202,10 +202,11 @@ namespace Mono.WebServer
 			}
 			modRequest = rr.Request;
 			
-			broker = (ModMonoRequestBroker) vapp.RequestBroker;
-			broker.UnregisterRequestEvent += new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
-			
-			requestId = broker.RegisterRequest (this);
+			if (!server.SingleApplication) {
+				broker = (ModMonoRequestBroker) vapp.RequestBroker;
+				broker.UnregisterRequestEvent += new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
+				requestId = broker.RegisterRequest (this);
+			}
 			
 			host.ProcessRequest (requestId, 
 					     modRequest.GetHttpVerbName(), 
@@ -218,7 +219,8 @@ namespace Mono.WebServer
 					     modRequest.GetRemotePort(), 
 					     modRequest.GetRemoteName(), 
 					     modRequest.GetAllHeaders(),
-					     modRequest.GetAllHeaderValues());
+					     modRequest.GetAllHeaderValues(),
+					     (requestId == -1) ? this : null);
 		}
 
 		void OnUnregisterRequest (object sender, UnregisterRequestEventArgs args)
@@ -293,6 +295,10 @@ namespace Mono.WebServer
 		public void SetOutputBuffering (bool doBuffer)
 		{
 			modRequest.SetOutputBuffering (doBuffer);
+		}
+
+		public bool HeadersSent {
+			get { return modRequest.HeadersSent; }
 		}
 	}	
 }

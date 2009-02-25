@@ -37,6 +37,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 #if NET_2_0
 using System.Collections.Generic;
@@ -86,7 +87,7 @@ namespace Mono.WebServer
 	public class ModMonoRequest
 	{
 		const int MAX_STRING_SIZE = 1024 * 10;
-		const int INITIAL_MEMORY_STREAM_SIZE = 1024;
+		const int INITIAL_MEMORY_STREAM_SIZE = 2048;
 		
 		BinaryReader reader;
 		BinaryWriter writer;
@@ -139,7 +140,11 @@ namespace Mono.WebServer
 #endif
 			GetInitialData ();
 		}
-		
+
+		public bool HeadersSent {
+			get { return headers_sent; }
+		}
+
 		public bool ShuttingDown {
 			get { return shutdown; }
 		}
@@ -161,6 +166,8 @@ namespace Mono.WebServer
 		void Send ()
 		{
 			client.Send (writer_ms.GetBuffer (), (int) writer_ms.Length, SocketFlags.None);
+			writer_ms.Position = 0;
+			writer_ms.SetLength (0);
 		}
 		
 		// KEEP IN SYNC WITH mod_mono.h!!
@@ -194,7 +201,7 @@ namespace Mono.WebServer
 			remoteAddress = ReadString ();
 			remotePort = reader.ReadInt32 ();
 			remoteName = ReadString ();
-			int headersSize = reader.ReadInt32 ();
+			reader.ReadInt32 (); // This is autoApp!!! (unused!?
 			int nheaders = reader.ReadInt32 ();
 #if NET_2_0
 			headers = new Dictionary <string, string> (StringComparer.OrdinalIgnoreCase);
@@ -215,20 +222,6 @@ namespace Mono.WebServer
 				physical_path = ReadString ();
 		}
 
-		void SendSimpleCommand (Cmd cmd)
-		{
-			writer_ms.SetLength (0);
-			writer.Write ((int) cmd);
-			Send ();
-		}
-
-		void SendSimpleCommand (Cmd cmd, bool resetWriter)
-		{
-			SendSimpleCommand (cmd);
-			if (resetWriter)
-				writer_ms.SetLength (0);
-		}
-		
 		string ReadString ()
 		{
 			int size = reader.ReadInt32 ();
@@ -258,19 +251,20 @@ namespace Mono.WebServer
 		void WriteString (string s)
 		{
 			byte [] bytes = Encoding.UTF8.GetBytes (s);
-			
 			writer.Write (bytes.Length);
 			writer.Write (bytes);
 		}
 		
 		public void Decline ()
 		{
-			SendSimpleCommand (Cmd.DECLINE_REQUEST);
+			writer.Write ((int) Cmd.DECLINE_REQUEST);
+			Send ();
 		}
 
 		public void NotFound ()
 		{
-			SendSimpleCommand (Cmd.NOT_FOUND);
+			writer.Write ((int) Cmd.NOT_FOUND);
+			Send ();
 		}
 
 		public string GetProtocol ()
@@ -285,42 +279,40 @@ namespace Mono.WebServer
 
 		public void SendResponseFromMemory (byte [] data, int position, int length)
 		{
-			SendConfig ();
-			SendHeaders ();
-			SendSimpleCommand (Cmd.SEND_FROM_MEMORY, true);
+			BufferConfig ();
+			BufferHeaders ();
+			writer.Write ((int) Cmd.SEND_FROM_MEMORY);
 			writer.Write (length);
-			writer.Write (data, position, length);
 			Send ();
+			client.Send (data, position, length, SocketFlags.None);
 		}
 
 		public void SendFile (string filename)
 		{
-			SendConfig ();
-			SendHeaders ();
-			SendSimpleCommand (Cmd.SEND_FILE, true);
+			BufferConfig ();
+			BufferHeaders ();
+			writer.Write ((int) Cmd.SEND_FILE);
 			WriteString (filename);
 			Send ();
 		}
 
-		void SendConfig ()
+		void BufferConfig ()
 		{
 			if (!mod_mono_config.Changed)
 				return;
 
 			mod_mono_config.Changed = false;
-			SendSimpleCommand (Cmd.SET_CONFIGURATION, true);
+			writer.Write ((int) Cmd.SET_CONFIGURATION);
 			writer.Write (Convert.ToByte (mod_mono_config.OutputBuffering));
-			Send ();
 		}
 		
-		void SendHeaders ()
+		void BufferHeaders ()
 		{
 			if (headers_sent)
 				return;
-			
-			SendSimpleCommand (Cmd.SET_RESPONSE_HEADERS, true);
+
+			writer.Write ((int) Cmd.SET_RESPONSE_HEADERS);
 			WriteString (out_headers.ToString ());
-			Send ();
 			out_headers = null;
 			headers_sent = true;
 		}
@@ -359,13 +351,14 @@ namespace Mono.WebServer
 
 		void GetServerVariables ()
 		{
-			SendSimpleCommand (Cmd.GET_SERVER_VARIABLES);
+			writer.Write ((int) Cmd.GET_SERVER_VARIABLES);
+			Send ();
+
 			FillBuffer (4);
 			int blockSize = reader.ReadInt32 ();
 
 			FillBuffer (blockSize);
 			int nvars = reader.ReadInt32 ();
-			
 			while (nvars > 0) {
 				string key = ReadString ();
 				if (serverVariables.ContainsKey (key)) {
@@ -438,7 +431,8 @@ namespace Mono.WebServer
 			if (localPort != 0)
 				return localPort;
 
-			SendSimpleCommand (Cmd.GET_LOCAL_PORT);
+			writer.Write ((int) Cmd.GET_LOCAL_PORT);
+			Send ();
 			FillBuffer (4);
 			localPort = reader.ReadInt32 ();
 			return localPort;
@@ -451,8 +445,9 @@ namespace Mono.WebServer
 
 		public void Close ()
 		{
-			SendHeaders ();
-			SendSimpleCommand (Cmd.CLOSE);
+			BufferHeaders ();
+			writer.Write ((int) Cmd.CLOSE);
+			Send ();
 		}
 
 		public int SetupClientBlock ()
@@ -460,9 +455,10 @@ namespace Mono.WebServer
 			if (setupClientBlockCalled)
 				return clientBlock;
 
-			SendConfig ();
+			BufferConfig ();
 			setupClientBlockCalled = true;
-			SendSimpleCommand (Cmd.SETUP_CLIENT_BLOCK);
+			writer.Write ((int) Cmd.SETUP_CLIENT_BLOCK);
+			Send ();
 			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			clientBlock = i;
@@ -471,7 +467,8 @@ namespace Mono.WebServer
 
 		public bool IsConnected ()
 		{
-			SendSimpleCommand (Cmd.IS_CONNECTED);
+			writer.Write ((int) Cmd.IS_CONNECTED);
+			Send ();
 			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			return (i != 0);
@@ -479,7 +476,8 @@ namespace Mono.WebServer
 
 		public bool ShouldClientBlock () 
 		{
-			SendSimpleCommand (Cmd.SHOULD_CLIENT_BLOCK);
+			writer.Write ((int) Cmd.SHOULD_CLIENT_BLOCK);
+			Send ();
 			FillBuffer (4);
 			int i = reader.ReadInt32 ();
 			return (i == 0);
@@ -487,14 +485,14 @@ namespace Mono.WebServer
 
 		public int GetClientBlock ([Out] byte [] bytes, int position, int size) 
 		{
-			if (!ShouldClientBlock ()) return 0;
 			if (SetupClientBlock () != 0) return 0;
+			if (!ShouldClientBlock ()) return 0;
 
 			/*
 			 * turns out that that GET_CLIENT_BLOCK (ap_get_client_block) can
 			 * return -1 if a socket is closed
 			 */
-			SendSimpleCommand (Cmd.GET_CLIENT_BLOCK, true);
+			writer.Write ((int) Cmd.GET_CLIENT_BLOCK);
 			writer.Write (size);
 			Send ();
 			
@@ -512,8 +510,7 @@ namespace Mono.WebServer
 
 		public void SetStatusCodeLine (int code, string status)
 		{
-			SendConfig ();
-			SendSimpleCommand (Cmd.SET_STATUS, true);
+			writer.Write ((int) Cmd.SET_STATUS);
 			writer.Write (code);
 			WriteString (status);
 			Send ();

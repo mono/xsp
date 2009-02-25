@@ -1,3 +1,50 @@
+2009-02-25 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* src/Mono.WebServer.XSP/main.cs: changes needed to run the Accept
+	thread in the ASP.NET appdomain when there is a single application
+	configured.
+
+	* src/Mono.WebServer.Apache/ModMonoWorkerRequest.cs: avoid the lock in
+	RequestBroker for single applications. Implemented GetHeadersSent().
+
+	* src/Mono.WebServer.Apache/RequestBroker.cs: implemented
+	GetHeadersSent ().
+
+	* src/Mono.WebServer.Apache/WebSource.cs: propagate the single_app
+	setting.
+
+	* src/Mono.WebServer.Apache/ApplicationHost.cs: for single_app, pass
+	the instance of ModMonoWorker to the worker request.
+
+	* src/Mono.WebServer.Apache/ModMonoRequest.cs: reduced number of
+	writes. Implemented GetHeadersSent ().
+
+	* src/Mono.WebServer.Apache/main.cs: changes needed to run the Accept
+	thread in the ASP.NET appdomain when there is a single application
+	configured.
+
+	* src/Mono.WebServer.Apache/Worker.cs: don't register/unregister the
+	request for single application. Implemented GetHeadersSent ().
+
+	* src/Mono.WebServer/VPathToHost.cs: for multiple application, set the
+	request broker of the application host to one main appdomain.
+
+	* src/Mono.WebServer/XSPWebSource.cs: propagate the single_app
+	setting.
+
+	* src/Mono.WebServer/ApplicationServer.cs: allow setting application
+	host and broker. For single application, set the request broker of the
+	application host to one created in the ASP.NET application domain.
+	GetApplicationForPath just returns the registered application without
+	checking the parameters.
+
+	All these yadaa, yadaa can be summarized in:
+		* Avoid remoting through the cross appdomain channel when
+		there is only one ASP.NET application registered (single_app).
+		* Avoid locking in RequestBroker for single_app.
+		* Implement GetHeadersSent.
+		* Reduced number of writes to mod_mono.
+
 2009-01-30  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/Paths.cs: path info with a dot is

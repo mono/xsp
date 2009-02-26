@@ -144,7 +144,7 @@ namespace Mono.WebServer
 				fullPath += dirSepChar;
 			
 			// TODO - check for duplicates, sort, optimize, etc.
-			if (verbose) {
+			if (verbose && !single_app) {
 				Console.WriteLine("Registering application:");
 				Console.WriteLine("    Host:          {0}", (vhost != null) ? vhost : "any");
 				Console.WriteLine("    Port:          {0}", (vport != -1) ?
@@ -159,7 +159,7 @@ namespace Mono.WebServer
 
  		public void AddApplicationsFromConfigDirectory (string directoryName)
  		{
-			if (verbose) {
+			if (verbose && !single_app) {
 				Console.WriteLine ("Adding applications from *.webapp files in " +
 						   "directory '{0}'", directoryName);
 			}
@@ -176,7 +176,7 @@ namespace Mono.WebServer
 
  		public void AddApplicationsFromConfigFile (string fileName)
  		{
-			if (verbose) {
+			if (verbose && !single_app) {
 				Console.WriteLine ("Adding applications from config file '{0}'", fileName);
 			}
 
@@ -212,7 +212,7 @@ namespace Mono.WebServer
 #else
 			// TODO: support vhosts in xsp.exe
 			string name = el.SelectSingleNode ("name").InnerText;
-			if (verbose)
+			if (verbose && !single_app)
 				Console.WriteLine ("Ignoring vhost {0} for {1}", n.InnerText, name);
 #endif
 
@@ -223,7 +223,7 @@ namespace Mono.WebServer
 				vport = Convert.ToInt32 (n.InnerText);
 #else
 			// TODO: Listen on different ports
-			if (verbose)
+			if (verbose && !single_app)
 				Console.WriteLine ("Ignoring vport {0} for {1}", n.InnerText, name);
 #endif
 
@@ -238,7 +238,7 @@ namespace Mono.WebServer
  			if (applications == "")
 				return;
 
-			if (verbose) {
+			if (verbose && !single_app) {
 				Console.WriteLine("Adding applications '{0}'...", applications);
 			}
 

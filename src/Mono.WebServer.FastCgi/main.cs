@@ -163,9 +163,6 @@ namespace Mono.WebServer.FastCgi
 					      "Events will not be logged.");
 			}
 
-			// Send the trace to the console.
-			Trace.Listeners.Add (
-				new TextWriterTraceListener (Console.Out));
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 			

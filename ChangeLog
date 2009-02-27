@@ -1,3 +1,10 @@
+2009-02-27 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* src/Mono.WebServer.XSP/main.cs:
+	* src/Mono.WebServer.FastCgi/main.cs: 
+	* src/Mono.WebServer.Apache/main.cs: do not sent the Trace output to
+	the Console by default.
+
 2009-02-25 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Mono.WebServer.XSP/main.cs: changes needed to run the Accept

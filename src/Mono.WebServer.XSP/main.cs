@@ -231,7 +231,6 @@ namespace Mono.WebServer.XSP
 			SecurityConfiguration security = new SecurityConfiguration ();
 			bool nonstop = false;
 			bool verbose = false;
-			Trace.Listeners.Add (new TextWriterTraceListener (Console.Out));
 			string apps = AppSettings ["MonoApplications"];
 			string appConfigDir = AppSettings ["MonoApplicationsConfigDir"];
 			string appConfigFile = AppSettings ["MonoApplicationsConfigFile"];

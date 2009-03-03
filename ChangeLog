@@ -1,3 +1,9 @@
+2009-03-03  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/ModMonoRequest.cs: removed a
+	ShouldClientBlock () check from GetClientBlock (). Fixes bug
+	#481370
+
 2009-02-27 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Mono.WebServer.XSP/main.cs:

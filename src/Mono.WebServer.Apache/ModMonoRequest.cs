@@ -486,7 +486,6 @@ namespace Mono.WebServer
 		public int GetClientBlock ([Out] byte [] bytes, int position, int size) 
 		{
 			if (SetupClientBlock () != 0) return 0;
-			if (!ShouldClientBlock ()) return 0;
 
 			/*
 			 * turns out that that GET_CLIENT_BLOCK (ap_get_client_block) can

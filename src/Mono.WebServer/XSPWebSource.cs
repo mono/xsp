@@ -98,7 +98,7 @@ namespace Mono.WebServer
 		
 		public override Socket CreateSocket ()
 		{
-			Socket listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+			Socket listen_socket = new Socket (bindAddress.AddressFamily, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (bindAddress);
 			return listen_socket;
 		} 

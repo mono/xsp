@@ -190,10 +190,10 @@ namespace Mono.WebServer
 			try {
 				string redirect;
 				vapp.Redirect (rdata.Path, out redirect);
-				host.ProcessRequest (requestId, localEP.Address.Address, localEP.Port,
-						remoteEP.Address.Address, remoteEP.Port, rdata.Verb,
-						rdata.Path, rdata.QueryString,
-						rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
+				host.ProcessRequest (requestId, localEP,
+						     remoteEP, rdata.Verb,
+						     rdata.Path, rdata.QueryString,
+						     rdata.Protocol, rdata.InputBuffer, redirect, sock.Handle, ssl);
 			} catch (FileNotFoundException fnf) {
 				// We print this one, as it might be a sign of a bad deployment
 				// once we require the .exe and Mono.WebServer in bin or the GAC.

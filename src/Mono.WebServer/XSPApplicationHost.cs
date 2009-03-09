@@ -48,17 +48,26 @@ namespace Mono.WebServer
 	//
 	public class XSPApplicationHost : BaseApplicationHost
 	{
-		public void ProcessRequest (int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
-					int remoteEPPort, string verb, string path,
-					string queryString, string protocol, byte [] inputBuffer, string redirect,
-					IntPtr socket, SslInformations ssl)
+		// This method is only compatible with IPv4, please use IPEndPoint based overload.
+		public void ProcessRequest(int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
+					   int remoteEPPort, string verb, string path,
+					   string queryString, string protocol, byte[] inputBuffer, string redirect,
+					   IntPtr socket, SslInformations ssl)
 		{
-			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
 			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
 			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
+			ProcessRequest (reqId, localEP, remoteEP, verb, path, queryString, protocol, inputBuffer, redirect, socket, ssl);
+		}
+
+		public void ProcessRequest(int reqId, IPEndPoint localEP, IPEndPoint remoteEP,
+					   string verb, string path,
+					   string queryString, string protocol, byte [] inputBuffer, string redirect,
+					   IntPtr socket, SslInformations ssl)
+		{
+			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
 			bool secure = (ssl != null);
 			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
-								queryString, protocol, inputBuffer, socket, secure);
+								     queryString, protocol, inputBuffer, socket, secure);
 
 			if (secure) {
 				// note: we're only setting what we use (and not the whole lot)

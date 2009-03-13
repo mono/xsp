@@ -1,3 +1,8 @@
+2009-03-13 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* src/Mono.WebServer.Apache/main.cs: fix error when --master is passed.
+	Bug #481597 fixed.
+
 2009-03-09  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/XSPWorker.cs, XSPWebSource.cs,

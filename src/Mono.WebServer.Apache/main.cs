@@ -361,7 +361,8 @@ namespace Mono.WebServer.Apache
 				webSource.Dispose ();
 				return svr.RealMain (args, false, vh.AppHost);
 			}
-			server.AppHost = ext_apphost;
+			if (ext_apphost != null)
+				server.AppHost = ext_apphost;
 
 			if (!useTCP) {
 				Console.WriteLine ("Listening on: {0}", filename);

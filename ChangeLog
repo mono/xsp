@@ -1,3 +1,8 @@
+2009-03-13 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* main.cs: fix error when --master is passed.
+	Bug #481597 fixed.
+
 2009-03-03  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/ModMonoRequest.cs: removed a

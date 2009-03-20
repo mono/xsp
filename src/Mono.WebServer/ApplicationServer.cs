@@ -89,7 +89,8 @@ namespace Mono.WebServer
 		bool verbose;
 		Socket listen_socket;
 		bool single_app;
-
+		Exception initialException;
+		
 		Thread runner;
 
 		// This is much faster than hashtable for typical cases.
@@ -280,7 +281,13 @@ namespace Mono.WebServer
 				AddApplication (vhost, vport, vpath, fullPath);
  			}
  		}
- 
+
+		public bool Start (bool bgThread, Exception initialException)
+		{
+			this.initialException = initialException;
+			return Start (bgThread);
+		}
+		
 		public bool Start (bool bgThread)
 		{
 			if (started)
@@ -385,10 +392,48 @@ namespace Mono.WebServer
 			StartRequest (accepted, 0);
 		}
 
+		void SendException (Socket socket, Exception ex)
+		{
+			StringBuilder sb = new StringBuilder ();
+			string now = DateTime.Now.ToUniversalTime ().ToString ("r");
+
+			sb.Append ("HTTP/1.0 500 Server error\r\n");
+			sb.AppendFormat ("Date: {0}\r\n" +
+					 "Expires: {0}\r\n" +
+					 "Last-Modified: {0}\r\n", now);
+			sb.AppendFormat ("Expires; {0}\r\n", now);
+			sb.Append ("Cache-Control: private, must-revalidate, max-age=0\r\n");
+			sb.Append ("Content-Type: text/html; charset=UTF-8\r\n");
+			sb.Append ("Connection: close\r\n\r\n");
+			
+			sb.AppendFormat ("<html><head><title>Exception: {0}</title></head><body>" +
+					 "<h1>Exception caught.</h1>" +
+					 "<pre>{0}</pre>" +
+					 "</body></html>", ex);
+
+			byte[] data = Encoding.UTF8.GetBytes (sb.ToString ());
+			try {
+				socket.Send (data);
+			} catch (Exception ex2) {
+				Console.WriteLine ("Failed to send exception:");
+				Console.WriteLine (ex);
+				Console.WriteLine ();
+				Console.WriteLine ("Exception ocurred while sending:");
+				Console.WriteLine (ex2);
+			}	
+		}
+		
 		void StartRequest (Socket accepted, int reuses)
 		{
 			Worker worker = null;
 			try {
+				if (initialException != null) {
+					SendException (accepted, initialException);
+					initialException = null;
+					accepted.Close ();
+					return;
+				}
+				
 				// The next line can throw (reusing and the client closed)
 				worker = webSource.CreateWorker (accepted, this);
 				worker.SetReuseCount (reuses);

@@ -1,3 +1,14 @@
+2009-03-21  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/ApplicationServer.cs: added an overload for
+	the Start method which takes an exception as an argument. This
+	exception, if not null, will be sent to the client on the first
+	connection attempt.
+
+	* src/Mono.WebServer.XSP/main.cs: read AppSettings in the
+	constructor of a new ApplicationSettings class, to isolate
+	errors.
+
 2009-03-13 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Mono.WebServer.Apache/main.cs: fix error when --master is passed.

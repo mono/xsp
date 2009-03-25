@@ -1,3 +1,12 @@
+2009-03-25  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/ModMonoWorkerRequest.cs: made
+	GetServerVariable public and a bit safer.
+
+	* src/Mono.WebServer.Apache/ApplicationHost.cs: do not use broker
+	here, ModMonoWorkerRequest can do it for us if need be. Fixes bug
+	#488630
+
 2009-03-25  Rolf Bjarne Kvinge  <RKvinge@novell.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: if send fails with

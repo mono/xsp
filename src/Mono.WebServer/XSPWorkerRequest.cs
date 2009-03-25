@@ -775,7 +775,7 @@ namespace Mono.WebServer
 					int n = send (socket, ptr + total, (IntPtr) (len - total), (IntPtr) 0x4000);
 					if (n >= 0) {
 						total += n;
-					} else {
+					} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {
 						throw new IOException ();
 					}
 				}

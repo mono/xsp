@@ -60,11 +60,10 @@ namespace Mono.WebServer
 					    string protocol, string localAddress, int serverPort, string remoteAddress,
 					    int remotePort, string remoteName, string [] headers, string [] headerValues, object worker)
 		{
-			ModMonoRequestBroker broker = null;
 			ModMonoWorkerRequest mwr = null;
+			
 			if (reqId > -1) {
-				broker = (ModMonoRequestBroker) RequestBroker;
-				mwr = new ModMonoWorkerRequest (reqId, broker, this, verb, path, queryString,
+				mwr = new ModMonoWorkerRequest (reqId, (ModMonoRequestBroker) RequestBroker, this, verb, path, queryString,
 								protocol, localAddress, serverPort, remoteAddress,
 								remotePort, remoteName, headers, headerValues);
 			} else {
@@ -75,10 +74,10 @@ namespace Mono.WebServer
 
 			if (mwr.IsSecure ()) {
 				// note: we're only setting what we use (and not the whole lot)
-				mwr.AddServerVariable ("CERT_KEYSIZE", broker.GetServerVariable (reqId, "SSL_CIPHER_USEKEYSIZE"));
-				mwr.AddServerVariable ("CERT_SECRETKEYSIZE", broker.GetServerVariable (reqId, "SSL_CIPHER_ALGKEYSIZE"));
+				mwr.AddServerVariable ("CERT_KEYSIZE", mwr.GetServerVariable (reqId, "SSL_CIPHER_USEKEYSIZE"));
+				mwr.AddServerVariable ("CERT_SECRETKEYSIZE", mwr.GetServerVariable (reqId, "SSL_CIPHER_ALGKEYSIZE"));
 
-				string pem_cert = broker.GetServerVariable (reqId, "SSL_CLIENT_CERT");
+				string pem_cert = mwr.GetServerVariable (reqId, "SSL_CLIENT_CERT");
 				// 52 is the minimal PEM size for certificate header/footer
 				if ((pem_cert != null) && (pem_cert.Length > 52)) {
 					byte[] certBytes = FromPEM (pem_cert);
@@ -96,7 +95,7 @@ namespace Mono.WebServer
 					mwr.AddServerVariable ("CERT_FLAGS", "0");
 				}
 
-				pem_cert = broker.GetServerVariable (reqId, "SSL_SERVER_CERT");
+				pem_cert = mwr.GetServerVariable (reqId, "SSL_SERVER_CERT");
 				// 52 is the minimal PEM size for certificate header/footer
 				if ((pem_cert != null) && (pem_cert.Length > 52)) {
 					byte[] certBytes = FromPEM (pem_cert);

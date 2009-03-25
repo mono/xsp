@@ -253,11 +253,13 @@ namespace Mono.WebServer
 			return isSecure;
 		}
 
-		string GetServerVariable (int requestId, string name)
+		public string GetServerVariable (int requestId, string name)
 		{
 			if (requestId == -1)
 				return worker.GetServerVariable (name);
-			return requestBroker.GetServerVariable (requestId, name);
+			if (requestBroker != null)
+				return requestBroker.GetServerVariable (requestId, name);
+			return null;
 		}
 
 		private bool IsClientCertificateValidForApache ()

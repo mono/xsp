@@ -1,3 +1,10 @@
+2009-03-25  Rolf Bjarne Kvinge  <RKvinge@novell.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: if send fails with
+	EINTR, try to send again instead of throwing an exception.
+
+	[Backport of r130198]
+
 2009-03-13 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* main.cs: fix error when --master is passed.

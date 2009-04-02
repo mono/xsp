@@ -1,3 +1,18 @@
+2009-04-02 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* configure.in:
+	* test/2.0/gridview/Makefile.am:
+	* test/2.0/Makefile.am: gridview sample was not being
+	installed.
+
+	* src/Mono.WebServer/ApplicationServer.cs: backport initial exception
+	handling.
+	* src/Mono.WebServer.XSP/main.cs: backport ApplicationSettings.
+	* src/Mono.WebServer.Apache/main.cs: when running in single-app mode,
+	corretly handle application restarts.
+
+	* src/Mono.WebServer.Apache/WebSource.cs: remove unused variable.
+
 2009-03-25  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/ModMonoWorkerRequest.cs: made

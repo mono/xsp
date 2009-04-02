@@ -142,6 +142,7 @@ AC_OUTPUT([
 	test/1.1/customcontrol/Makefile
 	test/2.0/Makefile
 	test/2.0/menu/Makefile
+	test/2.0/gridview/Makefile
 	test/2.0/treeview/Makefile
 	test/2.0/masterpages/Makefile
 	tools/Makefile

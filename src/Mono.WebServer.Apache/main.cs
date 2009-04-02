@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
 // (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
-// (C) Copyright 2004-2007 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2009 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,6 +34,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Web.Hosting;
 using Mono.WebServer;
 
@@ -180,16 +181,27 @@ namespace Mono.WebServer.Apache
 			Console.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
 			Console.WriteLine ("Message is {0}", ex.Message);
 			Console.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
+			if (e.IsTerminating)
+				Console.WriteLine (ex);
 		}
 
 		
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
-			return new Server ().RealMain (args, true, null);
+			bool quiet = false;
+			while (true) {
+				try {
+					return new Server ().RealMain (args, true, null, quiet);
+				} catch (ThreadAbortException) {
+					// Single-app mode and ASP.NET appdomain unloaded
+					Thread.ResetAbort ();
+					quiet = true; // hush 'RealMain'
+				}
+			}
 		}
 
-		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost)
+		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			bool nonstop = false;
 			bool verbose = false;
@@ -322,7 +334,7 @@ namespace Mono.WebServer.Apache
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
-				webSource = new ModMonoWebSource (filename, lockfile, !root);
+				webSource = new ModMonoWebSource (filename, lockfile);
 			}
 
 			if ((options & Options.Terminate) != 0) {
@@ -359,19 +371,20 @@ namespace Mono.WebServer.Apache
 				vh.CreateHost (server, webSource);
 				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
-				return svr.RealMain (args, false, vh.AppHost);
+				return svr.RealMain (args, false, vh.AppHost, quiet);
 			}
 			if (ext_apphost != null)
 				server.AppHost = ext_apphost;
 
-			if (!useTCP) {
+			if (!useTCP && !quiet) {
 				Console.WriteLine ("Listening on: {0}", filename);
-			} else {
+			} else if (!quiet) {
 				Console.WriteLine ("Listening on port: {0}", port);
 				Console.WriteLine ("Listening on address: {0}", ip);
 			}
-			
-			Console.WriteLine ("Root directory: {0}", rootDir);
+
+			if (!quiet)
+				Console.WriteLine ("Root directory: {0}", rootDir);
 
 			try {
 				if (server.Start (!nonstop) == false)
@@ -379,11 +392,21 @@ namespace Mono.WebServer.Apache
 
 				if (!nonstop) {
 					Console.WriteLine ("Hit Return to stop the server.");
-					Console.ReadLine ();
+					while (true) {
+						try {
+							Console.ReadLine ();
+							break;
+						} catch (IOException) {
+							// This might happen on appdomain unload
+							// until the previous threads are terminated.
+							Thread.Sleep (500);
+						}
+					}
 					server.Stop ();
 				}
 			} catch (Exception e) {
-				Console.WriteLine ("Error: {0}", e.Message);
+				if (!(e is ThreadAbortException))
+					Console.WriteLine ("Error: {0}", e.Message);
 				return 1;
 			}
 

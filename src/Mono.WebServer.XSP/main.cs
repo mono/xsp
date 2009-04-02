@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
 // (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
-// (C) Copyright 2004-2007 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2009 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,6 +34,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Web.Hosting;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -44,6 +45,37 @@ namespace Mono.WebServer.XSP
 {
 	public class Server : MarshalByRefObject
 	{
+		private class ApplicationSettings
+		{
+			public string Apps;
+			public string AppConfigDir;
+			public string AppConfigFile;
+			public string RootDir;
+			public object Oport = 8080;
+			public string IP = "0.0.0.0";
+			public Exception Exception;
+			public bool NonStop;
+			public bool Verbose;
+			//public bool Master; This field is not used for XSP
+			
+			public ApplicationSettings ()
+			{
+				this.Exception = null;
+				try {
+					this.Apps = AppSettings ["MonoApplications"];
+					this.AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
+					this.AppConfigFile = AppSettings ["MonoApplicationsConfigFile"];
+					this.RootDir = AppSettings ["MonoServerRootDir"];
+					this.IP = AppSettings ["MonoServerAddress"];
+					this.Oport = AppSettings ["MonoServerPort"];
+				} catch (Exception ex) {
+					Console.WriteLine ("Exception caught during reading the configuration file:");
+					Console.WriteLine (ex);
+					this.Exception = ex;
+				}
+			}
+		}
+		
 		static RSA key;
 		
 		static void ShowVersion ()
@@ -217,34 +249,35 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
 			Console.WriteLine ("Message is {0}", ex.Message);
 			Console.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
+			if (e.IsTerminating)
+				Console.WriteLine (ex);
 		}
 
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
-			return new Server ().RealMain (args, true, null);
+			bool quiet = false;
+			while (true) {
+				try {
+					return new Server ().RealMain (args, true, null, quiet);
+				} catch (ThreadAbortException) {
+					// Single-app mode and ASP.NET appdomain unloaded
+					Thread.ResetAbort ();
+					quiet = true; // hush 'RealMain'
+				}
+			}
 		}
 
-
-		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost)
+		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			SecurityConfiguration security = new SecurityConfiguration ();
-			bool nonstop = false;
-			bool verbose = false;
-			string apps = AppSettings ["MonoApplications"];
-			string appConfigDir = AppSettings ["MonoApplicationsConfigDir"];
-			string appConfigFile = AppSettings ["MonoApplicationsConfigFile"];
-			string rootDir = AppSettings ["MonoServerRootDir"];
-			object oport;
-			string ip = AppSettings ["MonoServerAddress"];
-			bool master = false;
+			ApplicationSettings settings = new ApplicationSettings ();
 			
-			if (ip == null || ip.Length == 0)
-				ip = "0.0.0.0";
-
-			oport = AppSettings ["MonoServerPort"];
-			if (oport == null)
-				oport = 8080;
+			if (settings.IP == null || settings.IP.Length == 0)
+				settings.IP = "0.0.0.0";
+			
+			if (settings.Oport == null)
+				settings.Oport = 8080;
 
 			Options options = 0;
 			int hash = 0;
@@ -287,34 +320,34 @@ namespace Mono.WebServer.XSP
 					break;
 				case "--port":
 					CheckAndSetOptions (a, Options.Port, ref options);
-					oport = args [++i];
+					settings.Oport = args [++i];
 					break;
 				case "--random-port":
 					CheckAndSetOptions (a, Options.RandomPort, ref options);
-					oport = 0;
+					settings.Oport = 0;
 					break;
 				case "--address":
 					CheckAndSetOptions (a, Options.Address, ref options);
-					ip = args [++i];
+					settings.IP = args [++i];
 					break;
 				case "--root":
 					CheckAndSetOptions (a, Options.Root, ref options);
-					rootDir = args [++i];
+					settings.RootDir = args [++i];
 					break;
 				case "--applications":
 					CheckAndSetOptions (a, Options.Applications, ref options);
-					apps = args [++i];
+					settings.Apps = args [++i];
 					break;
 				case "--appconfigfile":
 					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
-					appConfigFile = args [++i];
+					settings.AppConfigFile = args [++i];
 					break;
 				case "--appconfigdir":
 					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
-					appConfigDir = args [++i];
+					settings.AppConfigDir = args [++i];
 					break;
 				case "--nonstop":
-					nonstop = true;
+					settings.NonStop = true;
 					break;
 				case "--help":
 					ShowHelp ();
@@ -323,7 +356,7 @@ namespace Mono.WebServer.XSP
 					ShowVersion ();
 					return 0;
 				case "--verbose":
-					verbose = true;
+					settings.Verbose = true;
 					break;
 				case "--pidfile": {
 					string portfile = args[++i];
@@ -345,29 +378,29 @@ namespace Mono.WebServer.XSP
 			ushort port;
 			try {
 				
-				port = Convert.ToUInt16 (oport);
+				port = Convert.ToUInt16 (settings.Oport);
 			} catch (Exception) {
-				Console.WriteLine ("The value given for the listen port is not valid: " + oport);
+				Console.WriteLine ("The value given for the listen port is not valid: " + settings.Oport);
 				return 1;
 			}
 
 			try {
-				ipaddr = IPAddress.Parse (ip);
+				ipaddr = IPAddress.Parse (settings.IP);
 			} catch (Exception) {
-				Console.WriteLine ("The value given for the address is not valid: " + ip);
+				Console.WriteLine ("The value given for the address is not valid: " + settings.IP);
 				return 1;
 			}
 
-			if (rootDir != null && rootDir != "") {
+			if (settings.RootDir != null && settings.RootDir.Length != 0) {
 				try {
-					Environment.CurrentDirectory = rootDir;
+					Environment.CurrentDirectory = settings.RootDir;
 				} catch (Exception e) {
 					Console.WriteLine ("Error: {0}", e.Message);
 					return 1;
 				}
 			}
 
-			rootDir = Directory.GetCurrentDirectory ();
+			settings.RootDir = Directory.GetCurrentDirectory ();
 			
 			WebSource webSource;
 			if (security.Enabled) {
@@ -386,19 +419,19 @@ namespace Mono.WebServer.XSP
 			}
 
 			ApplicationServer server = new ApplicationServer (webSource);
-			server.Verbose = verbose;
+			server.Verbose = settings.Verbose;
 			server.SingleApplication = !root;
 
-			if (apps != null)
-				server.AddApplicationsFromCommandLine (apps);
+			if (settings.Apps != null)
+				server.AddApplicationsFromCommandLine (settings.Apps);
 
-			if (appConfigFile != null)
-				server.AddApplicationsFromConfigFile (appConfigFile);
+			if (settings.AppConfigFile != null)
+				server.AddApplicationsFromConfigFile (settings.AppConfigFile);
 
-			if (appConfigDir != null)
-				server.AddApplicationsFromConfigDirectory (appConfigDir);
+			if (settings.AppConfigDir != null)
+				server.AddApplicationsFromConfigDirectory (settings.AppConfigDir);
 
-			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
+			if (settings.Apps == null && settings.AppConfigDir == null && settings.AppConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 
 
@@ -408,29 +441,44 @@ namespace Mono.WebServer.XSP
 				vh.CreateHost (server, webSource);
 				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
-				return svr.RealMain (args, false, vh.AppHost);
+				return svr.RealMain (args, false, vh.AppHost, quiet);
 			}
 			server.AppHost = ext_apphost;
 
-			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
-			Console.WriteLine ("Listening on address: {0}", ip);
-			Console.WriteLine ("Root directory: {0}", rootDir);
+			if (!quiet) {
+				Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
+				Console.WriteLine ("Listening on address: {0}", settings.IP);
+				Console.WriteLine ("Root directory: {0}", settings.RootDir);
+			}
 
 			try {
-				if (server.Start (!nonstop) == false)
+				if (server.Start (!settings.NonStop, settings.Exception) == false)
 					return 2;
 				
-				Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
-				if (port == 0)
+				if (!quiet)
+					Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
+				if (port == 0 && !quiet)
 					Console.Error.WriteLine ("Random port: {0}", server.Port);
 				
-				if (!nonstop) {
-					Console.WriteLine ("Hit Return to stop the server.");
-					Console.ReadLine ();
+				if (!settings.NonStop) {
+					if (!quiet)
+						Console.WriteLine ("Hit Return to stop the server.");
+
+					while (true) {
+						try {
+							Console.ReadLine ();
+							break;
+						} catch (IOException) {
+							// This might happen on appdomain unload
+							// until the previous threads are terminated.
+							Thread.Sleep (500);
+						}
+					}
 					server.Stop ();
 				}
 			} catch (Exception e) {
-				Console.WriteLine ("Error: {0}", e.Message);
+				if (!(e is ThreadAbortException))
+					Console.WriteLine ("Error: {0}", e);
 				return 1;
 			}
 

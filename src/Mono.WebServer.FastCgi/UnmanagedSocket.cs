@@ -37,6 +37,9 @@ using System.Threading;
 namespace Mono.FastCgi {
 	internal class UnmanagedSocket : Socket
 	{
+		[DllImport ("libc", SetLastError=true, EntryPoint="close")] 
+		unsafe extern static int close (IntPtr s);
+
 		private IntPtr socket;
 		private bool connected = false;
 		
@@ -65,6 +68,8 @@ namespace Mono.FastCgi {
 			connected = false;
 			if (shutdown (socket, (int) sock.SocketShutdown.Both) != 0)
 				throw GetException ();
+			/* lighttpd makes the assumption that the FastCGI handler will close the unix socket */
+			close(socket);
 		}
 		
 		unsafe public override int Receive (byte [] buffer, int offset,

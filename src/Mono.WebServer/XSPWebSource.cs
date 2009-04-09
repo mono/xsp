@@ -77,7 +77,11 @@ namespace Mono.WebServer
 			this.single_app = single_app;
 			SetListenAddress (address, port);
 		}
-		
+
+		public XSPWebSource (IPAddress address, int port) : this (address, port, false)
+		{
+		}
+
 		public void SetListenAddress (int port)
 		{
 			SetListenAddress (IPAddress.Any, port);

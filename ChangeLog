@@ -1,3 +1,8 @@
+2009-04-09 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* src/Mono.WebServer/XSPWebSource.cs: re-add the 2 parameter ctor.
+	Compatibility with existing apps was broken.
+
 2009-04-02 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* configure.in:

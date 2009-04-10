@@ -773,7 +773,6 @@ namespace Mono.WebServer
 				fixed (byte *ptr = buffer) {
 					// 0x4000 no sigpipe
 					int n = send ((int) socket, ptr + total, (IntPtr) (len - total), (int) 0x4000);
-					Console.WriteLine (n);
 					if (n >= 0) {
 						total += n;
 					} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {

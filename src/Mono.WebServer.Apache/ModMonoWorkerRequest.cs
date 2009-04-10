@@ -446,6 +446,16 @@ namespace Mono.WebServer
 			}
 		}
 		
+		public override void SendResponseFromMemory (IntPtr data, int length)
+		{
+			if (requestId > -1) {
+				base.SendResponseFromMemory (data, length);
+				return;
+			}
+
+			worker.Write (data, length);
+		}
+
 		public override void SendResponseFromMemory (byte [] data, int length)
 		{
 			UpdateModMonoConfig ();

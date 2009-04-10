@@ -36,6 +36,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
@@ -123,6 +124,21 @@ namespace Mono.WebServer
 		string physical_path;
 		ModMonoConfig mod_mono_config;
 		Socket client;
+		static bool use_libc;
+
+		static ModMonoRequest ()
+		{
+			if (Environment.GetEnvironmentVariable ("XSP_NO_LIBC") != null)
+				return;
+
+			try {
+				string os = "";
+				using (StreamReader sr = new StreamReader (File.OpenRead ("/proc/sys/kernel/ostype")))
+					os = sr.ReadToEnd ();
+				use_libc = os.StartsWith ("Linux");
+			} catch {
+			}
+		}
 
 		public ModMonoRequest (Socket client)
 		{
@@ -169,7 +185,7 @@ namespace Mono.WebServer
 			writer_ms.Position = 0;
 			writer_ms.SetLength (0);
 		}
-		
+
 		// KEEP IN SYNC WITH mod_mono.h!!
 		const byte protocol_version = 9;
 		void GetInitialData ()
@@ -276,6 +292,54 @@ namespace Mono.WebServer
 		{
 			return verb;
 		}
+
+		public void SendResponseFromMemory (IntPtr ptr, int length)
+		{
+			BufferConfig ();
+			BufferHeaders ();
+			writer.Write ((int) Cmd.SEND_FROM_MEMORY);
+			writer.Write (length);
+			Send ();
+			if (use_libc) {
+				Send (ptr, length);
+				return;
+			}
+			
+			while (length > 0) {
+				if (writer_ms.Position != 0)
+					throw new Exception ("Should not happen... We called Send()!");
+
+				int size = System.Math.Min (16384, length);
+				if (writer_ms.Capacity < size)
+					writer_ms.Capacity = size;
+
+				byte [] buf = writer_ms.GetBuffer ();
+				Marshal.Copy (ptr, buf, 0, size);
+				length -= size;
+				client.Send (buf, size, SocketFlags.None);
+			}
+		}
+
+		unsafe int Send (IntPtr ptr, int len)
+		{
+			int total = 0;
+			byte *bptr = (byte *) ptr.ToPointer ();
+			while (total < len) {
+				// 0x4000 no sigpipe
+				int n = send_libc (client.Handle.ToInt32 (), bptr + total, (IntPtr) (len - total), (int) 0x4000);
+				Console.WriteLine ("HEre: {0}", n);
+				if (n >= 0) {
+					total += n;
+				} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {
+					throw new IOException ();
+				}
+			}
+
+			return total;
+		}
+
+		[DllImport ("libc", SetLastError=true, EntryPoint="send")]
+		unsafe extern static int send_libc (int s, byte *buffer, IntPtr len, int flags);
 
 		public void SendResponseFromMemory (byte [] data, int position, int length)
 		{

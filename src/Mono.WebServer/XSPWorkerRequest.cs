@@ -728,7 +728,7 @@ namespace Mono.WebServer
 				Cork (true);
 				SendHeaders ();
 				while (length > 0) {
-					result = sendfile (socket, handle, ref offset, (IntPtr) length);
+					result = sendfile ((int) socket, (int) handle, ref offset, (IntPtr) length);
 					if (result == -1)
 						throw new System.ComponentModel.Win32Exception ();
 
@@ -758,7 +758,7 @@ namespace Mono.WebServer
 				return 0;
 			// 6 -> SOL_TCP, 3 -> TCP_CORK
 			bool t = val;
-			return setsockopt (socket, (IntPtr) 6, (IntPtr) 3, ref t, (IntPtr) IntPtr.Size);
+			return setsockopt ((int) socket, 6, 3, ref t, (IntPtr) IntPtr.Size);
 		}
 
 		unsafe int Send (byte [] buffer, int offset, int len)
@@ -772,7 +772,8 @@ namespace Mono.WebServer
 			while (total < len) {
 				fixed (byte *ptr = buffer) {
 					// 0x4000 no sigpipe
-					int n = send (socket, ptr + total, (IntPtr) (len - total), (IntPtr) 0x4000);
+					int n = send ((int) socket, ptr + total, (IntPtr) (len - total), (int) 0x4000);
+					Console.WriteLine (n);
 					if (n >= 0) {
 						total += n;
 					} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {
@@ -788,13 +789,13 @@ namespace Mono.WebServer
 		static bool use_sendfile;
 
 		[DllImport ("libc", SetLastError=true)]
-		extern static int setsockopt (IntPtr handle, IntPtr level, IntPtr opt, ref bool val, IntPtr len);
+		extern static int setsockopt (int handle, int level, int opt, ref bool val, IntPtr len);
 
 		[DllImport ("libc", SetLastError=true)]
-		extern static int sendfile (IntPtr out_fd, IntPtr in_fd, ref long offset, IntPtr count);
+		extern static int sendfile (int out_fd, int in_fd, ref long offset, IntPtr count);
 
 		[DllImport ("libc", SetLastError=true, EntryPoint="send")]
-		unsafe extern static int send (IntPtr s, byte *buffer, IntPtr len, IntPtr flags);
+		unsafe extern static int send (int s, byte *buffer, IntPtr len, int flags);
 	}
 }
 

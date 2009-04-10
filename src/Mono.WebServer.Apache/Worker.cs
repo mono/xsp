@@ -244,7 +244,12 @@ namespace Mono.WebServer
 		{
 			modRequest.SendResponseFromMemory (buffer, position, size);
 		}
-		
+
+		public void Write (IntPtr ptr, int size)
+		{
+			modRequest.SendResponseFromMemory (ptr, size);
+		}
+
 		public override void Close ()
 		{
 			if (closed)

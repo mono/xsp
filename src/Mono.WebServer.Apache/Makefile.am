@@ -1,6 +1,6 @@
 builddir=$(top_builddir)/src/Mono.WebServer.Apache
 
-MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
+MCSFLAGS= -unsafe -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
 
 GACUTIL1=$(GACUTIL) -package 1.0
 

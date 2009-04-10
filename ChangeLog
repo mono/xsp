@@ -1,3 +1,18 @@
+2009-04-10 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs: the libc function signatures
+	were wrong.
+
+	* src/Mono.WebServer/BaseApplicationHost.cs: call ResetAbort if we get
+	an unexpected ThreadAbortException.
+
+	* src/Mono.WebServer.Apache/ModMonoWorkerRequest.cs:
+	* src/Mono.WebServer.Apache/ModMonoRequest.cs:
+	* src/Mono.WebServer.Apache/Makefile.am:
+	* src/Mono.WebServer.Apache/Worker.cs: add new SendResponseFromMemory
+	overloads that will write directly to mod_mono without copying (linux
+	only).
+
 2009-04-09 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Mono.WebServer/XSPWebSource.cs: re-add the 2 parameter ctor.

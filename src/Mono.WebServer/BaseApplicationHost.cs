@@ -169,6 +169,8 @@ namespace Mono.WebServer
 			mwr.EndOfRequestEvent += endOfRequest;
 			try {
 				mwr.ProcessRequest ();
+			} catch (ThreadAbortException) {
+				Thread.ResetAbort ();
 			} catch (Exception ex) { // should "never" happen
 				// we don't know what the request state is,
 				// better write the exception to the console

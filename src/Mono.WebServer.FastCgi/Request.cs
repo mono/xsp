@@ -425,32 +425,29 @@ namespace Mono.FastCgi {
 		void ParseParameterData ()
 		{
 			string scriptName = GetParameter ("SCRIPT_NAME");
-			if (scriptName == null || scriptName == String.Empty)
+			if (scriptName == null || scriptName.Length == 0)
 				return;
 
 			string pathInfo = GetParameter ("PATH_INFO");
-			if (pathInfo == null || pathInfo == String.Empty)
+			if (pathInfo == null || pathInfo.Length == 0)
 				return;
 
 			string pathTranslated = GetParameter ("PATH_TRANSLATED");
-			if (pathTranslated == null || pathTranslated == String.Empty)
+			if (pathTranslated == null || pathTranslated.Length == 0)
 				return;
 
 			string documentRoot = GetParameter ("DOCUMENT_ROOT");
-			if (documentRoot == null || documentRoot == String.Empty)
+			if (documentRoot == null || documentRoot.Length == 0)
 				return;
 
 			string redirectUrl = GetParameter ("REDIRECT_URL");
-			if (redirectUrl == null || redirectUrl == String.Empty)
+			if (redirectUrl == null || redirectUrl.Length == 0)
 				return;
 
-			if (pathInfo != redirectUrl)
+			if (pathInfo != redirectUrl || !pathInfo.StartsWith("/"))
 				return;
 
 			string[] parts = pathInfo.Split ('/');
-			// we expect at least "/" + path-component.
-			if (parts.Length < 2)
-				return;
 
 			// at this point we have:
 			//
@@ -459,39 +456,41 @@ namespace Mono.FastCgi {
 			// PATH_TRANSLATED=/srv/www/htdoc/dir/test.aspx/foo
 			// SCRIPT_NAME=/cgi-bin/fastcgi-mono-server
 			// SCRIPT_FILENAME=/srv/www/cgi-bin/fastcgi-mono-server
-			
-			for (int i = 1; i < parts.Length; i++) {
+			// DOCUMENT_ROOT=/srv/www/htdoc
+
+			for (int i = parts.Length - 1; i >= 0; i--) {
 				string vpath = Combine (parts, 1, i);
 				string ppath = System.IO.Path.GetFullPath (documentRoot + vpath);
-				bool isFile = File.Exists (ppath);
-				bool isDir = Directory.Exists (ppath);
 
-				if (!(isFile || isDir))
-					break;
+				if (!File.Exists (ppath))
+					continue;
 
-				if (isFile || i == parts.Length - 1) {
-					// now we set:
-					//
-					// PATH_INFO=/foo
-					// PATH_TRANSLATED=/srv/www/htdoc/dir/foo
-					// SCRIPT_NAME=/dir/test.aspx
-					// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
-					
-					SetParameter ("SCRIPT_NAME", vpath);
-					SetParameter ("SCRIPT_FILENAME", ppath);
-					
-					if (i == parts.Length - 1) {
-						SetParameter ("PATH_INFO", null);
-						SetParameter ("PATH_TRANSLATED", null);
-					} else {
-						string pt = Combine (parts, i + 1, parts.Length - 1);
-						SetParameter ("PATH_INFO", pt);
-						SetParameter ("PATH_TRANSLATED",
-							      System.IO.Path.GetFullPath (documentRoot + pt));
-					}
-					break;
+				// now we set:
+				//
+				// PATH_INFO=/foo
+				// PATH_TRANSLATED=/srv/www/htdoc/dir/foo
+				// SCRIPT_NAME=/dir/test.aspx
+				// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
+				
+				SetParameter ("SCRIPT_NAME", vpath);
+				SetParameter ("SCRIPT_FILENAME", ppath);
+				
+				if (i == parts.Length - 1) {
+					SetParameter ("PATH_INFO", null);
+					SetParameter ("PATH_TRANSLATED", null);
+				} else {
+					string pt = Combine (parts, i + 1, parts.Length - 1);
+					SetParameter ("PATH_INFO", pt);
+					SetParameter ("PATH_TRANSLATED",
+						      System.IO.Path.GetFullPath (documentRoot + pt));
 				}
+				return;
 			}
+
+			SetParameter ("SCRIPT_NAME", pathInfo);
+			SetParameter ("SCRIPT_FILENAME", pathTranslated);
+			SetParameter ("PATH_INFO", null);
+			SetParameter ("PATH_TRANSLATED", null);
 		}
 
 		/// <summary>

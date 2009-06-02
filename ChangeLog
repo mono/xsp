@@ -1,3 +1,12 @@
+2009-06-02  Kornél Pál  <kornelpal@gmail.com>
+
+	* autogen.sh, configure.in: Set EOL style to Unix to fix cygwin build. 
+	* src/Mono.WebServer.FastCgi/Responder.cs (Process): Properly set status
+	code when no application is found.
+	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): Use a simple
+	reverse scan of path components until the first existing file and allow
+	non-existent files.
+
 2009-04-10 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: the libc function signatures

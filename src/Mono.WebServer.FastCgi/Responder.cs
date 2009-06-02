@@ -40,9 +40,9 @@ namespace Mono.WebServer.FastCgi
 {
 	public class Responder : MarshalByRefObject, IResponder
 	{
-		private static string error500 = 
-			"HTTP/1.0 500 No Application Found\r\n" +
-			"Content-type: text/html\r\n" + 
+		private static string error500 =
+			"Status: 500 Internal Server Error\r\n" +
+			"Content-Type: text/html; charset=utf-8\r\n" +
 			"Connection: close\r\n\r\n" +
 			"<html>\r\n" +
 			"	<head>\r\n" +
@@ -50,9 +50,7 @@ namespace Mono.WebServer.FastCgi
 			"	</head>\r\n" +
 			"	<body>\r\n" +
 			"		<h1>No Application Found</h1>\r\n" +
-			"		<p>The server could not find our register\r\n" +
-			"		an application matching the following\r\n" +
-			"		characteristics:</p>\r\n" +
+			"		<p>Unable to find a matching application for request:</p>\r\n" +
 			"		<table>\r\n" +
 			"			<tr><th>Host</th><td>{0}</td>\r\n" +
 			"			<tr><th>Port</th><td>{1}</td>\r\n" +

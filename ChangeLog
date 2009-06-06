@@ -1,3 +1,10 @@
+2009-06-06  Kornél Pál  <kornelpal@gmail.com>
+
+	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): More closely
+	resemble Apache and PHP behavior provides better support for non-existent
+	files, takes a fast path when there is no path info and tests earlier for
+	Apache variables.
+
 2009-06-02  Kornél Pál  <kornelpal@gmail.com>
 
 	* autogen.sh, configure.in: Set EOL style to Unix to fix cygwin build. 

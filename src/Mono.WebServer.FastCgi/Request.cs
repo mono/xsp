@@ -35,6 +35,7 @@ using System.Collections;
 #endif
 using System.IO;
 using System.Text;
+using IOPath = System.IO.Path;
 
 namespace Mono.FastCgi {
 	public class Request
@@ -424,12 +425,15 @@ namespace Mono.FastCgi {
 		/// </summary>
 		void ParseParameterData ()
 		{
-			string scriptName = GetParameter ("SCRIPT_NAME");
-			if (scriptName == null || scriptName.Length == 0)
+			string redirectUrl = GetParameter ("REDIRECT_URL");
+			if (redirectUrl == null || redirectUrl.Length == 0)
 				return;
 
 			string pathInfo = GetParameter ("PATH_INFO");
 			if (pathInfo == null || pathInfo.Length == 0)
+				return;
+
+			if (pathInfo [0] != '/' || pathInfo != redirectUrl)
 				return;
 
 			string pathTranslated = GetParameter ("PATH_TRANSLATED");
@@ -440,75 +444,102 @@ namespace Mono.FastCgi {
 			if (documentRoot == null || documentRoot.Length == 0)
 				return;
 
-			string redirectUrl = GetParameter ("REDIRECT_URL");
-			if (redirectUrl == null || redirectUrl.Length == 0)
-				return;
-
-			if (pathInfo != redirectUrl || !pathInfo.StartsWith("/"))
-				return;
-
-			string[] parts = pathInfo.Split ('/');
-
-			// at this point we have:
+			// At this point we have:
 			//
 			// REDIRECT_URL=/dir/test.aspx/foo
 			// PATH_INFO=/dir/test.aspx/foo
-			// PATH_TRANSLATED=/srv/www/htdoc/dir/test.aspx/foo
+			// PATH_TRANSLATED=/srv/www/htdocs/dir/test.aspx/foo
 			// SCRIPT_NAME=/cgi-bin/fastcgi-mono-server
 			// SCRIPT_FILENAME=/srv/www/cgi-bin/fastcgi-mono-server
-			// DOCUMENT_ROOT=/srv/www/htdoc
+			// DOCUMENT_ROOT=/srv/www/htdocs
 
-			for (int i = parts.Length - 1; i >= 0; i--) {
-				string vpath = Combine (parts, 1, i);
-				string ppath = System.IO.Path.GetFullPath (documentRoot + vpath);
+			bool trailingSlash = pathTranslated [pathTranslated.Length - 1] == '/' ||
+				(IOPath.DirectorySeparatorChar != '/' && pathTranslated [pathTranslated.Length - 1] == IOPath.DirectorySeparatorChar);
 
-				if (!File.Exists (ppath))
-					continue;
+			if ((!trailingSlash && !File.Exists (pathTranslated)) || (trailingSlash && !Directory.Exists (pathTranslated))) {
+				char [] separators;
+				string physPath = pathTranslated;
+				string filePath = null;
 
-				// now we set:
-				//
-				// PATH_INFO=/foo
-				// PATH_TRANSLATED=/srv/www/htdoc/dir/foo
-				// SCRIPT_NAME=/dir/test.aspx
-				// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
-				
-				SetParameter ("SCRIPT_NAME", vpath);
-				SetParameter ("SCRIPT_FILENAME", ppath);
-				
-				if (i == parts.Length - 1) {
-					SetParameter ("PATH_INFO", null);
-					SetParameter ("PATH_TRANSLATED", null);
-				} else {
-					string pt = Combine (parts, i + 1, parts.Length - 1);
-					SetParameter ("PATH_INFO", pt);
-					SetParameter ("PATH_TRANSLATED",
-						      System.IO.Path.GetFullPath (documentRoot + pt));
+				if (IOPath.DirectorySeparatorChar == '/')
+					separators = null;
+				else
+					separators = new char [] { '/', IOPath.DirectorySeparatorChar };
+
+				// Reverse scan until the first existing file is found.
+				// When the last existing component is a directory the next
+				// component is considered to be the file name.
+
+				while (true) {
+					int index;
+					string virtPath;
+					string virtPathInfo;
+
+					if (IOPath.DirectorySeparatorChar == '/')
+						index = physPath.LastIndexOf ('/');
+					else
+						index = physPath.LastIndexOfAny (separators);
+
+					// No more path components to trim
+					if (index <= 0 || pathInfo.Length <= (pathTranslated.Length - index)) {
+						if (filePath == null)
+							break;
+
+						physPath = filePath;
+					} else {
+						physPath = pathTranslated.Substring (0, index);
+
+						if (!File.Exists (physPath)) {
+							if (Directory.Exists (physPath)) {
+								if (filePath == null)
+									break;
+
+								physPath = filePath;
+							} else {
+								filePath = physPath;
+								continue;
+							}
+						}
+					}
+
+					// Now we set:
+					//
+					// SCRIPT_NAME=/dir/test.aspx
+					// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
+					// PATH_INFO=/foo
+					// PATH_TRANSLATED=/srv/www/htdocs/dir/foo
+
+					virtPath = pathInfo.Substring (0, pathInfo.Length - (pathTranslated.Length - physPath.Length));
+					virtPathInfo = pathInfo.Substring (virtPath.Length);
+
+					// Ensure that physical and virtual path info are the same.
+					if (IOPath.DirectorySeparatorChar == '/') {
+						if (string.Compare (pathTranslated, physPath.Length, virtPathInfo, 0, virtPathInfo.Length) != 0)
+							break;
+					} else {
+						if (pathTranslated.Substring (physPath.Length).Replace (IOPath.DirectorySeparatorChar, '/') != virtPathInfo)
+							break;
+					}
+
+					SetParameter ("SCRIPT_NAME", virtPath);
+					SetParameter ("SCRIPT_FILENAME", physPath);
+					SetParameter ("PATH_INFO", virtPathInfo);
+					// Actual physical path info may be different but this is safe and PHP does the same.
+					if (documentRoot [documentRoot.Length - 1] == '/' ||
+						(IOPath.DirectorySeparatorChar != '/' && documentRoot [documentRoot.Length - 1] == IOPath.DirectorySeparatorChar))
+						documentRoot = documentRoot.Substring (0, documentRoot.Length - 1);
+					SetParameter ("PATH_TRANSLATED", IOPath.GetFullPath (documentRoot + virtPathInfo));
+					return;
 				}
-				return;
 			}
 
+			// There is no path info
 			SetParameter ("SCRIPT_NAME", pathInfo);
 			SetParameter ("SCRIPT_FILENAME", pathTranslated);
 			SetParameter ("PATH_INFO", null);
 			SetParameter ("PATH_TRANSLATED", null);
 		}
 
-		/// <summary>
-		///   Combines the specified virtual path components.
-		/// <summary>
-		/// <param name="paths">The path components.</param>
-		/// <param name="startIndex">The index inside "paths" to start with.</param>
-		/// <param name="endIndex">The index inside "paths" to end with.</param>
-		static string Combine (string[] paths, int startIndex, int endIndex)
-		{
-			StringBuilder b = new StringBuilder ();
-			for (int i = startIndex; i <= endIndex; i++) {
-				b.Append ('/');
-				b.Append (paths [i]);
-			}
-			return b.ToString ();
-		}
-		
 		/// <summary>
 		///    Gets a parameter with a specified name.
 		/// </summary>

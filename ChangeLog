@@ -1,3 +1,26 @@
+2009-06-08  Kornél Pál  <kornelpal@gmail.com>
+
+	Backport of 135678.
+
+	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): Fast test for
+	directory with no trailing slash. Avoid testing last component twice. There
+	is no need to call GetFullPath on the physical path info.
+
+	Backport of 135595.
+
+	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): More closely
+	resemble Apache and PHP behavior provides better support for non-existent
+	files, takes a fast path when there is no path info and tests earlier for
+	Apache variables.
+
+	Backport of 135200.
+
+	* src/Mono.WebServer.FastCgi/Responder.cs (Process): Properly set status
+	code when no application is found.
+	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): Use a simple
+	reverse scan of path components until the first existing file and allow
+	non-existent files.
+
 2009-04-09 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Mono.WebServer/XSPWebSource.cs: re-add the 2 parameter ctor.

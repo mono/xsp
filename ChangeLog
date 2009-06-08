@@ -1,3 +1,9 @@
+2009-06-08  Kornél Pál  <kornelpal@gmail.com>
+
+	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): Fast test for
+	directory with no trailing slash. Avoid testing last component twice. There
+	is no need to call GetFullPath on the physical path info.
+
 2009-06-06  Kornél Pál  <kornelpal@gmail.com>
 
 	* src/Mono.WebServer.FastCgi/Request.cs (ParseParameterData): More closely

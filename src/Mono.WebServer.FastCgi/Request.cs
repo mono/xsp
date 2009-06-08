@@ -456,7 +456,7 @@ namespace Mono.FastCgi {
 			bool trailingSlash = pathTranslated [pathTranslated.Length - 1] == '/' ||
 				(IOPath.DirectorySeparatorChar != '/' && pathTranslated [pathTranslated.Length - 1] == IOPath.DirectorySeparatorChar);
 
-			if ((!trailingSlash && !File.Exists (pathTranslated)) || (trailingSlash && !Directory.Exists (pathTranslated))) {
+			if ((trailingSlash || !File.Exists (pathTranslated)) && !Directory.Exists (pathTranslated)) {
 				char [] separators;
 				string physPath = pathTranslated;
 				string filePath = null;
@@ -467,13 +467,14 @@ namespace Mono.FastCgi {
 					separators = new char [] { '/', IOPath.DirectorySeparatorChar };
 
 				// Reverse scan until the first existing file is found.
-				// When the last existing component is a directory the next
-				// component is considered to be the file name.
+				// When the last existing component is a directory the
+				// following component is considered to be the file name.
 
 				while (true) {
 					int index;
 					string virtPath;
 					string virtPathInfo;
+					string physPathInfo;
 
 					if (IOPath.DirectorySeparatorChar == '/')
 						index = physPath.LastIndexOf ('/');
@@ -490,7 +491,8 @@ namespace Mono.FastCgi {
 						physPath = pathTranslated.Substring (0, index);
 
 						if (!File.Exists (physPath)) {
-							if (Directory.Exists (physPath)) {
+							// Last component with a trailing slash has already been tested.
+							if ((filePath != null || !trailingSlash) && Directory.Exists (physPath)) {
 								if (filePath == null)
 									break;
 
@@ -516,8 +518,10 @@ namespace Mono.FastCgi {
 					if (IOPath.DirectorySeparatorChar == '/') {
 						if (string.Compare (pathTranslated, physPath.Length, virtPathInfo, 0, virtPathInfo.Length) != 0)
 							break;
+						physPathInfo = virtPathInfo;
 					} else {
-						if (pathTranslated.Substring (physPath.Length).Replace (IOPath.DirectorySeparatorChar, '/') != virtPathInfo)
+						physPathInfo = pathTranslated.Substring (physPath.Length);
+						if (physPathInfo.Replace (IOPath.DirectorySeparatorChar, '/') != virtPathInfo)
 							break;
 					}
 
@@ -528,7 +532,7 @@ namespace Mono.FastCgi {
 					if (documentRoot [documentRoot.Length - 1] == '/' ||
 						(IOPath.DirectorySeparatorChar != '/' && documentRoot [documentRoot.Length - 1] == IOPath.DirectorySeparatorChar))
 						documentRoot = documentRoot.Substring (0, documentRoot.Length - 1);
-					SetParameter ("PATH_TRANSLATED", IOPath.GetFullPath (documentRoot + virtPathInfo));
+					SetParameter ("PATH_TRANSLATED", documentRoot + physPathInfo);
 					return;
 				}
 			}

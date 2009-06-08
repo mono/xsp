@@ -35,6 +35,7 @@ using System.Collections;
 #endif
 using System.IO;
 using System.Text;
+using IOPath = System.IO.Path;
 
 namespace Mono.FastCgi {
 	public class Request
@@ -424,92 +425,125 @@ namespace Mono.FastCgi {
 		/// </summary>
 		void ParseParameterData ()
 		{
-			string scriptName = GetParameter ("SCRIPT_NAME");
-			if (scriptName == null || scriptName == String.Empty)
+			string redirectUrl = GetParameter ("REDIRECT_URL");
+			if (redirectUrl == null || redirectUrl.Length == 0)
 				return;
 
 			string pathInfo = GetParameter ("PATH_INFO");
-			if (pathInfo == null || pathInfo == String.Empty)
+			if (pathInfo == null || pathInfo.Length == 0)
+				return;
+
+			if (pathInfo [0] != '/' || pathInfo != redirectUrl)
 				return;
 
 			string pathTranslated = GetParameter ("PATH_TRANSLATED");
-			if (pathTranslated == null || pathTranslated == String.Empty)
+			if (pathTranslated == null || pathTranslated.Length == 0)
 				return;
 
 			string documentRoot = GetParameter ("DOCUMENT_ROOT");
-			if (documentRoot == null || documentRoot == String.Empty)
+			if (documentRoot == null || documentRoot.Length == 0)
 				return;
 
-			string redirectUrl = GetParameter ("REDIRECT_URL");
-			if (redirectUrl == null || redirectUrl == String.Empty)
-				return;
-
-			if (pathInfo != redirectUrl)
-				return;
-
-			string[] parts = pathInfo.Split ('/');
-			// we expect at least "/" + path-component.
-			if (parts.Length < 2)
-				return;
-
-			// at this point we have:
+			// At this point we have:
 			//
 			// REDIRECT_URL=/dir/test.aspx/foo
 			// PATH_INFO=/dir/test.aspx/foo
-			// PATH_TRANSLATED=/srv/www/htdoc/dir/test.aspx/foo
+			// PATH_TRANSLATED=/srv/www/htdocs/dir/test.aspx/foo
 			// SCRIPT_NAME=/cgi-bin/fastcgi-mono-server
 			// SCRIPT_FILENAME=/srv/www/cgi-bin/fastcgi-mono-server
-			
-			for (int i = 1; i < parts.Length; i++) {
-				string vpath = Combine (parts, 1, i);
-				string ppath = System.IO.Path.GetFullPath (documentRoot + vpath);
-				bool isFile = File.Exists (ppath);
-				bool isDir = Directory.Exists (ppath);
+			// DOCUMENT_ROOT=/srv/www/htdocs
 
-				if (!(isFile || isDir))
-					break;
+			bool trailingSlash = pathTranslated [pathTranslated.Length - 1] == '/' ||
+				(IOPath.DirectorySeparatorChar != '/' && pathTranslated [pathTranslated.Length - 1] == IOPath.DirectorySeparatorChar);
 
-				if (isFile || i == parts.Length - 1) {
-					// now we set:
+			if ((trailingSlash || !File.Exists (pathTranslated)) && !Directory.Exists (pathTranslated)) {
+				char [] separators;
+				string physPath = pathTranslated;
+				string filePath = null;
+
+				if (IOPath.DirectorySeparatorChar == '/')
+					separators = null;
+				else
+					separators = new char [] { '/', IOPath.DirectorySeparatorChar };
+
+				// Reverse scan until the first existing file is found.
+				// When the last existing component is a directory the
+				// following component is considered to be the file name.
+
+				while (true) {
+					int index;
+					string virtPath;
+					string virtPathInfo;
+					string physPathInfo;
+
+					if (IOPath.DirectorySeparatorChar == '/')
+						index = physPath.LastIndexOf ('/');
+					else
+						index = physPath.LastIndexOfAny (separators);
+
+					// No more path components to trim
+					if (index <= 0 || pathInfo.Length <= (pathTranslated.Length - index)) {
+						if (filePath == null)
+							break;
+
+						physPath = filePath;
+					} else {
+						physPath = pathTranslated.Substring (0, index);
+
+						if (!File.Exists (physPath)) {
+							// Last component with a trailing slash has already been tested.
+							if ((filePath != null || !trailingSlash) && Directory.Exists (physPath)) {
+								if (filePath == null)
+									break;
+
+								physPath = filePath;
+							} else {
+								filePath = physPath;
+								continue;
+							}
+						}
+					}
+
+					// Now we set:
 					//
-					// PATH_INFO=/foo
-					// PATH_TRANSLATED=/srv/www/htdoc/dir/foo
 					// SCRIPT_NAME=/dir/test.aspx
 					// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
-					
-					SetParameter ("SCRIPT_NAME", vpath);
-					SetParameter ("SCRIPT_FILENAME", ppath);
-					
-					if (i == parts.Length - 1) {
-						SetParameter ("PATH_INFO", null);
-						SetParameter ("PATH_TRANSLATED", null);
+					// PATH_INFO=/foo
+					// PATH_TRANSLATED=/srv/www/htdocs/dir/foo
+
+					virtPath = pathInfo.Substring (0, pathInfo.Length - (pathTranslated.Length - physPath.Length));
+					virtPathInfo = pathInfo.Substring (virtPath.Length);
+
+					// Ensure that physical and virtual path info are the same.
+					if (IOPath.DirectorySeparatorChar == '/') {
+						if (string.Compare (pathTranslated, physPath.Length, virtPathInfo, 0, virtPathInfo.Length) != 0)
+							break;
+						physPathInfo = virtPathInfo;
 					} else {
-						string pt = Combine (parts, i + 1, parts.Length - 1);
-						SetParameter ("PATH_INFO", pt);
-						SetParameter ("PATH_TRANSLATED",
-							      System.IO.Path.GetFullPath (documentRoot + pt));
+						physPathInfo = pathTranslated.Substring (physPath.Length);
+						if (physPathInfo.Replace (IOPath.DirectorySeparatorChar, '/') != virtPathInfo)
+							break;
 					}
-					break;
+
+					SetParameter ("SCRIPT_NAME", virtPath);
+					SetParameter ("SCRIPT_FILENAME", physPath);
+					SetParameter ("PATH_INFO", virtPathInfo);
+					// Actual physical path info may be different but this is safe and PHP does the same.
+					if (documentRoot [documentRoot.Length - 1] == '/' ||
+						(IOPath.DirectorySeparatorChar != '/' && documentRoot [documentRoot.Length - 1] == IOPath.DirectorySeparatorChar))
+						documentRoot = documentRoot.Substring (0, documentRoot.Length - 1);
+					SetParameter ("PATH_TRANSLATED", documentRoot + physPathInfo);
+					return;
 				}
 			}
+
+			// There is no path info
+			SetParameter ("SCRIPT_NAME", pathInfo);
+			SetParameter ("SCRIPT_FILENAME", pathTranslated);
+			SetParameter ("PATH_INFO", null);
+			SetParameter ("PATH_TRANSLATED", null);
 		}
 
-		/// <summary>
-		///   Combines the specified virtual path components.
-		/// <summary>
-		/// <param name="paths">The path components.</param>
-		/// <param name="startIndex">The index inside "paths" to start with.</param>
-		/// <param name="endIndex">The index inside "paths" to end with.</param>
-		static string Combine (string[] paths, int startIndex, int endIndex)
-		{
-			StringBuilder b = new StringBuilder ();
-			for (int i = startIndex; i <= endIndex; i++) {
-				b.Append ('/');
-				b.Append (paths [i]);
-			}
-			return b.ToString ();
-		}
-		
 		/// <summary>
 		///    Gets a parameter with a specified name.
 		/// </summary>

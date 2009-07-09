@@ -31,11 +31,11 @@ build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 EXTRA_DIST = $(sources) AssemblyInfo.cs.in Mono.WebServer.Apache.sources
 
 
-mod-mono-server.exe: $(sources)
+mod-mono-server.exe: $(sources) AssemblyInfo.cs
 	$(MCS) $(MCSFLAGS) $(references) /out:$@ $(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
-mod-mono-server2.exe: $(sources)
+mod-mono-server2.exe: $(sources) AssemblyInfo.cs
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ $(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 

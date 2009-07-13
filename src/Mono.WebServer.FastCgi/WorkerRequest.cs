@@ -451,7 +451,7 @@ namespace Mono.WebServer.FastCgi
 			System.Net.IPAddress [] addresses = null;
 			try {
 				#if NET_2_0
-				addresses = Dns.GetHostEntry (host).AddressList;
+				addresses = Dns.GetHostAddresses (host);
 				#else
 				addresses = Dns.GetHostByName (host).AddressList;
 				#endif

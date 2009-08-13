@@ -470,8 +470,23 @@ namespace Mono.WebServer
 			if (inputLength == 0)
 				return null;
 
-			byte [] result = new byte [inputLength - position];
-			Buffer.BlockCopy (inputBuffer, position, result, 0, inputLength - position);
+			string content_length = (string) headers ["Content-Length"];
+			long length = -1;
+			try {
+				if (content_length != null && content_length.Length > 0)
+					length = Int64.Parse (content_length);
+				if (length > Int32.MaxValue)
+					throw new InvalidOperationException ("Content-Length exceeds the maximum accepted size.");
+			} catch {
+				// ignore
+			}
+
+			int input_data_length = inputLength - position;
+			if (length == -1 || length > input_data_length)
+				length = input_data_length;
+
+			byte [] result = new byte [length];
+			Buffer.BlockCopy (inputBuffer, position, result, 0, (int)length);
 			position = 0;
 			inputLength = 0;
 			inputBuffer = null;

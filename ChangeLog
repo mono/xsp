@@ -1,3 +1,9 @@
+2009-08-20  Marek Habersack  <mhabersack@novell.com>
+
+	* test/1.1/asp.net/browsercaps.aspx: sort the output in MS.NET
+	compatible way. Fixes bug #514155. Patch from Robert Jordan
+	<robertj@gmx.net>, thanks!
+
 2009-08-13  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/XSPWorkerRequest.cs: if the Content-Length

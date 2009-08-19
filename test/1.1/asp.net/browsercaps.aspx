@@ -39,7 +39,7 @@ div.normal {
 			foreach (PropertyInfo prop in props) {
 				list.Add (new Property (prop));
 			}
-
+			list.Sort (new PropertyComparer ());
 			dg.DataSource = list;
 			dg.DataBind ();
 		}
@@ -73,6 +73,15 @@ div.normal {
 			}
 		}
 	}
+
+	class PropertyComparer : IComparer
+	{
+		public int Compare(object x, object y)
+		{
+			return String.Compare (((Property)x).PropertyName, ((Property)y).PropertyName);
+		}
+	}	
+
 </script>
 <link rel="stylesheet" type="text/css" href="/mono-xsp.css">
 </head>

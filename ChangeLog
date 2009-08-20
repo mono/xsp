@@ -1,3 +1,10 @@
+2009-08-21  Marek Habersack  <mhabersack@novell.com>
+
+	* test/2.0/treeview/treeview.aspx: use
+	http://go-mono.com/status/images/se.gif instead of
+	http://mono.ximian.com/class-status/mono-HEAD-vs-fx-2/cm/se.gif. Fixes
+	bug #479736
+
 2009-08-20  Marek Habersack  <mhabersack@novell.com>
 
 	* test/1.1/asp.net/browsercaps.aspx: sort the output in MS.NET

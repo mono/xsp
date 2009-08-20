@@ -22,7 +22,7 @@
 			  ShowLines="true"
 			  ImageSet="Custom"
 			  ShowExpandCollapse="true"
-			  CollapseImageUrl="http://mono.ximian.com/class-status/mono-HEAD-vs-fx-2/cm/se.gif"
+			  CollapseImageUrl="http://go-mono.com/status/images/se.gif"
 			  
 			  EnableClientScript="true"
 			  NodeIndent="50"
@@ -43,7 +43,7 @@
               
                     </asp:TreeNode>
               
-                    <asp:TreeNode Text="Section 1.1" ImageUrl="http://mono.ximian.com/class-status/mono-HEAD-vs-fx-2/cm/se.gif" ImageToolTip="untipbo">
+                    <asp:TreeNode Text="Section 1.1" ImageUrl="http://go-mono.com/status/images/se.gif" ImageToolTip="untipbo">
               
                       <asp:TreeNode Text="Topic 1.1.1"/>
                       <asp:TreeNode Text="Topic 1.1.2"/>

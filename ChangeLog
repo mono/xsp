@@ -1,3 +1,8 @@
+2009-09-15  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.XSP/main.cs: sleep after catching
+	ThreadAbortException in RealMain, before exiting.
+
 2009-08-21  Marek Habersack  <mhabersack@novell.com>
 
 	* test/2.0/treeview/treeview.aspx: use

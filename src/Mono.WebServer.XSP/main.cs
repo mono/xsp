@@ -260,7 +260,7 @@ namespace Mono.WebServer.XSP
 			while (true) {
 				try {
 					return new Server ().RealMain (args, true, null, quiet);
-				} catch (ThreadAbortException) {
+				} catch (ThreadAbortException ex) {
 					// Single-app mode and ASP.NET appdomain unloaded
 					Thread.ResetAbort ();
 					quiet = true; // hush 'RealMain'
@@ -464,15 +464,22 @@ namespace Mono.WebServer.XSP
 					if (!quiet)
 						Console.WriteLine ("Hit Return to stop the server.");
 
+					bool doSleep;
 					while (true) {
+						doSleep = false;
 						try {
 							Console.ReadLine ();
 							break;
 						} catch (IOException) {
 							// This might happen on appdomain unload
 							// until the previous threads are terminated.
-							Thread.Sleep (500);
+							doSleep = true;
+						} catch (ThreadAbortException) {
+							doSleep = true;
 						}
+
+						if (doSleep)
+							Thread.Sleep (500);
 					}
 					server.Stop ();
 				}

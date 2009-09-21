@@ -267,7 +267,6 @@ namespace Mono.WebServer
 		
 		static MonoWorkerRequest ()
 		{
-			Console.WriteLine ("MonoWorkerRequest..ctor ()");
 			PlatformID pid = Environment.OSVersion.Platform;
                         runningOnWindows = ((int) pid != 128
 #if NET_2_0

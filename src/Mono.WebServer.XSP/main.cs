@@ -179,6 +179,8 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
 			Console.WriteLine ();
+			Console.WriteLine ("    --no-hidden: allow access to hidden files (see 'man xsp' for details)");
+			Console.WriteLine ();
 			Console.WriteLine ("    --version: displays version information and exits.");
 			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
 			Console.WriteLine ("    --pidfile file: write the process PID to the specified file.");
@@ -366,9 +368,11 @@ namespace Mono.WebServer.XSP
 					}
 					break;
 				}
+				case "--no-hidden":
+					MonoWorkerRequest.CheckFileAccess = false;
+					break;
 					
 				default:
-					Console.WriteLine ("Unknown argument: {0}", a);
 					ShowHelp ();
 					return 1;
 				}

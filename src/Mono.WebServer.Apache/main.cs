@@ -123,6 +123,8 @@ namespace Mono.WebServer.Apache
 			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
 			Console.WriteLine ("               when the server has no controlling terminal.");
 			Console.WriteLine ();
+			Console.WriteLine ("    --no-hidden: allow access to hidden files (see 'man xsp' for details)");
+			Console.WriteLine ();
 			Console.WriteLine ("    --version: displays version information and exits.");
 			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
 
@@ -274,6 +276,9 @@ namespace Mono.WebServer.Apache
 					return 0;
 				case "--verbose":
 					verbose = true;
+					break;
+				case "--no-hidden":
+					MonoWorkerRequest.CheckFileAccess = false;
 					break;
 				default:
 					Console.WriteLine ("Unknown argument: {0}", a);

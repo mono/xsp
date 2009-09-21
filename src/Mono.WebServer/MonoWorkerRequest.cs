@@ -37,6 +37,7 @@
 using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -174,6 +175,9 @@ namespace Mono.WebServer
 	/// </summary>
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
+		static bool runningOnWindows;
+		static bool checkFileAccess = true;
+		
 		/// <summary>
 		///    Contains the application host used by the current
 		///    instance.
@@ -261,6 +265,33 @@ namespace Mono.WebServer
 		/// </remarks>
 		bool inUnhandledException;
 		
+		static MonoWorkerRequest ()
+		{
+			Console.WriteLine ("MonoWorkerRequest..ctor ()");
+			PlatformID pid = Environment.OSVersion.Platform;
+                        runningOnWindows = ((int) pid != 128
+#if NET_2_0
+                                            && pid != PlatformID.Unix && pid != PlatformID.MacOSX
+#endif
+                        );
+
+			try {
+#if NET_2_0
+				string v = ConfigurationManager.AppSettings ["MonoServerCheckHiddenFiles"];
+				if (v != null && v.Length > 0) {
+					if (!Boolean.TryParse (v, out checkFileAccess))
+						checkFileAccess = true;
+				}
+#else
+				string v = ConfigurationSettings.AppSettings ["MonoServerCheckHiddenFiles"];
+				if (v != null && v.Length > 0)
+					checkFileAccess = Boolean.Parse (v);
+#endif
+			} catch (Exception) {
+				// ignore
+				checkFileAccess = true;
+			}
+		}
 		
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
@@ -307,6 +338,15 @@ namespace Mono.WebServer
 		///    operations.
 		/// </summary>
 		public event EndOfRequestHandler EndOfRequestEvent;
+
+		protected static bool RunningOnWindows {
+			get { return runningOnWindows; }
+		}
+
+		public static bool CheckFileAccess {
+			get { return checkFileAccess; }
+			set { checkFileAccess = value; }
+		}
 		
 		/// <summary>
 		///    Gets the physical path of the application host of the
@@ -622,7 +662,62 @@ namespace Mono.WebServer
 		///    exception is the second argument.
 		/// </remarks>
 		static readonly string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
+
+		void LocationAccessible (string localPath)
+		{
+			bool doThrow = false;
+			
+			if (runningOnWindows) {
+				try {
+					FileInfo fi = new FileInfo (localPath);
+					FileAttributes attr = fi.Attributes;
+
+					if ((attr & FileAttributes.Hidden) != 0 || (attr & FileAttributes.System) != 0)
+						doThrow = true;
+				} catch (Exception) {
+					// ignore, will be handled in system.web
+					return;
+				}
+			} else {
+				// throw only if the file exists, let system.web handle the request
+				// otherwise 
+				if (File.Exists (localPath) || Directory.Exists (localPath))
+					if (Path.GetFileName (localPath) [0] == '.')
+						doThrow = true;
+			}
+
+			if (doThrow)
+				throw new HttpException (403, "Forbidden.");
+		}
 		
+		void AssertFileAccessible ()
+		{
+			if (!checkFileAccess)
+				return;
+			
+			string localPath = GetFilePathTranslated ();
+			if (localPath == null || localPath.Length == 0)
+				return;
+
+			char dirsep = Path.DirectorySeparatorChar;
+			string appPath = GetAppPathTranslated ();
+			string[] segments = localPath.Substring (appPath.Length).Split (dirsep);
+
+			StringBuilder sb = new StringBuilder (appPath);
+			foreach (string s in segments) {
+				if (s.Length == 0)
+					continue;
+				
+				if (s [0] != '.') {
+					sb.Append (s);
+					sb.Append (dirsep);
+					continue;
+				}
+
+				sb.Append (s);
+				LocationAccessible (sb.ToString ());
+			}
+		}
 		
 		/// <summary>
 		///    Processes the request contained in the current instance.
@@ -633,6 +728,7 @@ namespace Mono.WebServer
 			inUnhandledException = false;
 			
 			try {
+				AssertFileAccessible ();
 				HttpRuntime.ProcessRequest (this);
 			} catch (HttpException ex) {
 				inUnhandledException = true;

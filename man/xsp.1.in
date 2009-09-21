@@ -107,6 +107,14 @@ This applies only to xsp.exe: by default xsp will stop processing
 requests when the return key is pressed.  Use this to avoid this
 behavior. 
 .TP
+.I \-\-no-hidden
+Do not protect hidden files/directories from being accessed by clients. Hidden files/directories are those with 
+Hidden attribute on Windows and whose name starts with a dot on Unix. Any file/directory below a hidden directory
+is inacessible. This option turns the default behavior of protecting such locations off. If your application
+does not contain any hidden files/directories, you might want to use this option as the checking process has a
+per-request cost.
+AppSettings key name: MonoServerCheckHiddenFiles (a boolean accepting 'true' or 'false')
+.TP
 .I \-\-https
 Enables HTTPS support on the server, you must supply an X.509 certificate
 and a private key with either the --cert/--pkfile options or with the 

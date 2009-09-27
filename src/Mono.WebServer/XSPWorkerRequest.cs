@@ -730,6 +730,13 @@ namespace Mono.WebServer
  			return secure;
  		}
 
+		public override void SendResponseFromFile (string filename, long offset, long length)
+		{
+			using (FileStream fs = File.OpenRead (filename)) {
+				SendResponseFromFile (fs.Handle, offset, length);
+			}
+		}
+
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{
 			if (secure || no_libc || (tried_sendfile && !use_sendfile)) {

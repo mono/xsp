@@ -40,10 +40,7 @@ using System.Threading;
 using System.IO;
 using System.Globalization;
 using System.Runtime.InteropServices;
-
-#if NET_2_0
 using System.Collections.Generic;
-#endif
 
 namespace Mono.WebServer
 {
@@ -69,9 +66,6 @@ namespace Mono.WebServer
 
 			int dot, slash;
 			int lastSlash = uri.Length;
-#if !NET_2_0
-			bool windows = (Path.DirectorySeparatorChar == '\\');
-#endif
 			string partial;
 				
 			for (dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
@@ -83,17 +77,8 @@ namespace Mono.WebServer
 				partial = uri.Substring (0, slash);
 				lastSlash = slash;
 
-#if NET_2_0
 				if (!VirtualPathExists (appHost, verb, partial))
 					continue;
-#else
-				if (windows)
-					partial = partial.Replace ('/', '\\');
-				
-				string path = Path.Combine (basepath, (partial));
-				if (!File.Exists (path) && !VirtualPathExists (appHost, verb, partial))
-					continue;
-#endif
 				
 				realUri = vpath + uri.Substring (0, slash);
 				pathInfo = uri.Substring (slash);
@@ -106,11 +91,10 @@ namespace Mono.WebServer
 			if (appHost.IsHttpHandler (verb, uri))
 				return true;
 
-#if NET_2_0
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
 			if (vpp != null && vpp.FileExists ("/" + uri))
 				return true;
-#endif
+
 			return false;
 		}
 	}

@@ -83,11 +83,7 @@ namespace Mono.WebServer
 		static ModMonoWorkerRequest ()
 		{
 			try {
-#if NET_2_0
 				string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
-#else
-				string indexes = ConfigurationSettings.AppSettings ["MonoServerDefaultIndexFiles"];
-#endif
 				SetDefaultIndexFiles (indexes);
 			} catch (Exception ex) {
 				Console.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);

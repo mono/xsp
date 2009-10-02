@@ -268,24 +268,14 @@ namespace Mono.WebServer
 		static MonoWorkerRequest ()
 		{
 			PlatformID pid = Environment.OSVersion.Platform;
-                        runningOnWindows = ((int) pid != 128
-#if NET_2_0
-                                            && pid != PlatformID.Unix && pid != PlatformID.MacOSX
-#endif
-                        );
+                        runningOnWindows = ((int) pid != 128 && pid != PlatformID.Unix && pid != PlatformID.MacOSX);
 
 			try {
-#if NET_2_0
 				string v = ConfigurationManager.AppSettings ["MonoServerCheckHiddenFiles"];
 				if (v != null && v.Length > 0) {
 					if (!Boolean.TryParse (v, out checkFileAccess))
 						checkFileAccess = true;
 				}
-#else
-				string v = ConfigurationSettings.AppSettings ["MonoServerCheckHiddenFiles"];
-				if (v != null && v.Length > 0)
-					checkFileAccess = Boolean.Parse (v);
-#endif
 			} catch (Exception) {
 				// ignore
 				checkFileAccess = true;
@@ -408,7 +398,6 @@ namespace Mono.WebServer
 		/// </value>
 		protected virtual Encoding HeaderEncoding {
 			get {
-#if NET_2_0
 				if (headerEncoding == null) {
 					HttpContext ctx = HttpContext.Current;
 					HttpResponse response = ctx != null ? ctx.Response : null;
@@ -420,10 +409,6 @@ namespace Mono.WebServer
 						headerEncoding = this.Encoding;
 				}
 				return headerEncoding;
-					
-#else
-				return this.Encoding;
-#endif
 			}
 		}
 

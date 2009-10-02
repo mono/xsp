@@ -47,14 +47,8 @@ namespace Mono.WebServer
 
 		static string GetExtraInfo (StackFrame sf)
 		{
-#if NET_2_0
 			string threadid = String.Format ("thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
-			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));
-#else
-			string threadid = String.Format ("thread_hash: {0}", Thread.CurrentThread.GetHashCode ().ToString ("x"));
-			string domainid = String.Format ("appdomain_hash: {0}", AppDomain.CurrentDomain.GetHashCode ().ToString ("x"));
-#endif
-			
+			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));			
 			string filepath = sf != null ? sf.GetFileName () : null;
 			if (filepath != null && filepath.Length > 0)
 				return String.Format (" [{0}, {1}, in {2}:{3}]", domainid, threadid, filepath, sf.GetFileLineNumber ());

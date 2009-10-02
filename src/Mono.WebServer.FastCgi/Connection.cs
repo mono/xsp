@@ -27,11 +27,7 @@
 //
 
 using System;
-#if NET_2_0
 using System.Collections.Generic;
-#else
-using System.Collections;
-#endif
 
 namespace Mono.FastCgi {
 	/// <summary>
@@ -45,11 +41,7 @@ namespace Mono.FastCgi {
 		/// <summary>
 		///    Contains a list of the current requests.
 		/// </summary>
-		#if NET_2_0
 		private List<Request> requests = new List<Request> ();
-		#else
-		private ArrayList requests = new ArrayList ();
-		#endif
 		
 		/// <summary>
 		///    Contains the socket to communicate over.
@@ -264,21 +256,8 @@ namespace Mono.FastCgi {
 					
 					// Look up the data from the server.
 					try {
-						#if NET_2_0
-						IDictionary<string,string> pairs_in  =
-							NameValuePair.FromData (
-								record.GetBody ());
-						IDictionary<string,string> pairs_out = 
-							server.GetValues (
-								pairs_in.Keys);
-						#else
-						IDictionary pairs_in  =
-							NameValuePair.FromData (
-								record.GetBody ());
-						IDictionary pairs_out =
-							server.GetValues (
-								pairs_in.Keys);
-						#endif
+						IDictionary<string,string> pairs_in = NameValuePair.FromData (record.GetBody ());
+						IDictionary<string,string> pairs_out = server.GetValues (pairs_in.Keys);
 						response_data = NameValuePair.GetData (pairs_out);
 					} catch {
 						response_data = new byte [0];
@@ -499,13 +478,8 @@ namespace Mono.FastCgi {
 		{
 			stop = true;
 			
-			#if NET_2_0
 			foreach (Request req in new List<Request> (requests))
-			#else
-			foreach (Request req in new ArrayList (requests))
-			#endif
-				EndRequest (req.RequestID, -1,
-					ProtocolStatus.RequestComplete);
+				EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
 		}
 		
 		#endregion

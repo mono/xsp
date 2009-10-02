@@ -28,11 +28,7 @@
 //
 
 using System;
-#if NET_2_0
 using System.Collections.Generic;
-#else
-using System.Collections;
-#endif
 using System.IO;
 using System.Text;
 using IOPath = System.IO.Path;
@@ -331,20 +327,12 @@ namespace Mono.FastCgi {
 		///    server. Upon completion, the parameter data is parsed and
 		///    the value is set to <see langword="null" />.
 		/// </summary>
-		#if NET_2_0
 		List<byte> parameter_data = new List<byte> ();
-		#else
-		ArrayList parameter_data = new ArrayList ();
-		#endif
 		
 		/// <summary>
 		///    Contains the name/value pairs as they have been parsed.
 		/// </summary>
-		#if NET_2_0
 		IDictionary<string,string> parameter_table = null;
-		#else
-		IDictionary parameter_table = null;
-		#endif
 		
 		/// <summary>
 		///    Adds a block of FastCGI parameter data to the current
@@ -395,12 +383,7 @@ namespace Mono.FastCgi {
 			// of data. When it is received, the data can then be
 			// examined and worked on.
 			
-			#if NET_2_0
-			data = parameter_data.ToArray ();
-			#else
-			data = (byte []) parameter_data.ToArray (typeof (byte));
-			#endif
-			
+			data = parameter_data.ToArray ();			
 			try {
 				parameter_table = NameValuePair.FromData (data);
 				// The parameter data is no longer needed and
@@ -564,13 +547,7 @@ namespace Mono.FastCgi {
 		/// </remarks>
 		public string GetParameter (string parameter)
 		{
-			#if NET_2_0
-			if (parameter_table != null &&
-				parameter_table.ContainsKey (parameter))
-			#else
-			if (parameter_table != null &&
-				parameter_table.Contains (parameter))
-			#endif
+			if (parameter_table != null && parameter_table.ContainsKey (parameter))
 				return (string) parameter_table [parameter];
 			
 			return null;
@@ -586,11 +563,7 @@ namespace Mono.FastCgi {
 		///    Gets all parameter contained in the current instance.
 		/// </summary>
 		/// <returns>
-		#if NET_2_0
 		///    A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
-		#else
-		///    A <see cref="IDictionary" />
-		#endif
 		///    containing all the parameters contained in the current
 		///    instance.
 		/// </returns>
@@ -600,11 +573,7 @@ namespace Mono.FastCgi {
 		///    FastCGI parameters represent environment variables that
 		///    would be passed to a CGI/1.1 program.
 		/// </remarks>
-		#if NET_2_0
 		public IDictionary<string,string> GetParameters ()
-		#else
-		public IDictionary GetParameters ()
-		#endif
 		{
 			return parameter_table;
 		}

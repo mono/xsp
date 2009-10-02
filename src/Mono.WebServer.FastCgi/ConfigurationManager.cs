@@ -472,13 +472,7 @@ namespace Mono.WebServer
 		}
 		
 		private static NameValueCollection AppSettings {
-			get {
-				#if NET_2_0
-				return System.Configuration.ConfigurationManager.AppSettings;
-				#else
-				return System.Configuration.ConfigurationSettings.AppSettings;
-				#endif
-			}
+			get { return System.Configuration.ConfigurationManager.AppSettings; }
 		}
 		
 		private static string GetXmlValue (XmlElement elem, string name)

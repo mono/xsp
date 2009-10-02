@@ -34,31 +34,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Configuration;
-
-#if NET_2_0
 using System.Collections.Generic;
-#endif
 
 namespace Mono.WebServer
 {
 	public class BaseApplicationHost : MarshalByRefObject, IApplicationHost
 	{
-#if NET_2_0
 		static readonly ReaderWriterLockSlim handlersCacheLock = new ReaderWriterLockSlim ();
-#else
-		static readonly ReaderWriterLock handlersCacheLock = new ReaderWriterLock ();
-#endif
 		
 		string path;
 		string vpath;
 		IRequestBroker requestBroker;
 		EndOfRequestHandler endOfRequest;
 		ApplicationServer appserver;
-#if NET_2_0
 		Dictionary <string, bool> handlersCache;
-#else
-		Hashtable handlersCache;
-#endif
 		
 		/// <summary>
 		///   Creates the <see cref="EndOfRequest"/> event handler and registers
@@ -202,61 +191,35 @@ namespace Mono.WebServer
 
 			locked = false;
 			try {
-#if NET_2_0
 				handlersCacheLock.EnterReadLock ();
-#else
-				handlersCacheLock.AcquireReaderLock (-1);
-#endif
+
 				locked = true;
 				if (handlersCache != null) {
 					bool found;
-#if NET_2_0
 					if (handlersCache.TryGetValue (cacheKey, out found))
 						return found;
-#else
-					if (handlersCache.ContainsKey (cacheKey))
-						return (bool) handlersCache [cacheKey];
-#endif
 				} else {
-			
-#if NET_2_0
 					handlersCache = new Dictionary <string, bool> ();
-#else
-					handlersCache = new Hashtable ();
-#endif
 				}
 			} finally {
-				if (locked) {
-#if NET_2_0
+				if (locked)
 					handlersCacheLock.ExitReadLock ();
-#else
-					handlersCacheLock.ReleaseReaderLock ();
-#endif
-				}
 			}
 			
 			
 			bool handlerFound = LocateHandler (verb, uri);
 			locked = false;
 			try {
-#if NET_2_0
 				handlersCacheLock.EnterWriteLock ();
-#else
-				handlersCacheLock.AcquireWriterLock (-1);
-#endif
+
 				locked = true;
 				if (handlersCache.ContainsKey (cacheKey))
 					handlersCache [cacheKey] = handlerFound;
 				else
 					handlersCache.Add (cacheKey, handlerFound);
 			} finally {
-				if (locked) {
-#if NET_2_0
+				if (locked)
 					handlersCacheLock.ExitWriteLock ();
-#else
-					handlersCacheLock.ReleaseWriterLock ();
-#endif
-				}
 			}
 			
 			return handlerFound;
@@ -264,7 +227,6 @@ namespace Mono.WebServer
 
 		bool LocateHandler (string verb, string uri)
 		{
-#if NET_2_0
 			HttpHandlersSection config = WebConfigurationManager.GetSection ("system.web/httpHandlers") as HttpHandlersSection;
 			HttpHandlerActionCollection handlers = config != null ? config.Handlers : null;
 			int count = handlers != null ? handlers.Count : 0;
@@ -291,11 +253,10 @@ namespace Mono.WebServer
 						return true;
 				}
 			}
-#endif
+
 			return false;
 		}
 
-#if NET_2_0
 		bool PathMatches (HttpHandlerAction handler, string uri)
 		{
 			bool result = false;
@@ -364,12 +325,6 @@ namespace Mono.WebServer
 			
 			return result;
 		}
-#else
-		bool PathMatches (object handler, string uri)
-		{
-			return false;
-		}
-#endif
 		
 		string[] SplitVerbs (string verb)
 		{

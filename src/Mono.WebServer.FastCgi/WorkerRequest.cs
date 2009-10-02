@@ -28,11 +28,7 @@
 //
 
 using System;
-#if NET_2_0
 using System.Collections.Generic;
-#else
-using System.Collections;
-#endif
 using Mono.FastCgi;
 using Mono.WebServer;
 using System.Text;
@@ -51,13 +47,7 @@ namespace Mono.WebServer.FastCgi
 		
 		static WorkerRequest ()
 		{
-			#if NET_2_0
-			SetDefaultIndexFiles (System.Configuration.ConfigurationManager.AppSettings [
-				"MonoServerDefaultIndexFiles"]);
-			#else
-			SetDefaultIndexFiles (System.Configuration.ConfigurationSettings.AppSettings [
-				"MonoServerDefaultIndexFiles"]);
-			#endif
+			SetDefaultIndexFiles (System.Configuration.ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"]);
 		}
 		
 		private StringBuilder headers = new StringBuilder ();
@@ -232,11 +222,7 @@ namespace Mono.WebServer.FastCgi
 			string ip = GetRemoteAddress ();
 			string name = null;
 			try {
-				#if NET_2_0
 				IPHostEntry entry = Dns.GetHostEntry (ip);
-				#else
-				IPHostEntry entry = Dns.GetHostByName (ip);
-				#endif
 				name = entry.HostName;
 			} catch {
 				name = ip;
@@ -304,12 +290,7 @@ namespace Mono.WebServer.FastCgi
 			
 			foreach (string file in indexFiles) {
 				foreach (FileInfo info in files) {
-					#if NET_2_0
-					if (file.Equals (info.Name,
-						StringComparison.InvariantCultureIgnoreCase)) {
-					#else
-					if (file.ToLower () == info.Name.ToLower ()) {
-					#endif
+					if (file.Equals (info.Name, StringComparison.InvariantCultureIgnoreCase)) {
 						file_path += info.Name;
 						return file_path;
 					}
@@ -336,12 +317,7 @@ namespace Mono.WebServer.FastCgi
 			if (unknownHeaders != null)
 				return unknownHeaders;
 			
-			#if NET_2_0
-			IDictionary<string,string> pairs =
-				responder.GetParameters ();
-			#else
-			IDictionary pairs = responder.GetParameters ();
-			#endif
+			IDictionary<string,string> pairs = responder.GetParameters ();
 			knownHeaders = new string [RequestHeaderMaximum];
 			string [][] headers = new string [pairs.Count][];
 			int count = 0;
@@ -450,11 +426,7 @@ namespace Mono.WebServer.FastCgi
 			
 			System.Net.IPAddress [] addresses = null;
 			try {
-				#if NET_2_0
 				addresses = Dns.GetHostAddresses (host);
-				#else
-				addresses = Dns.GetHostByName (host).AddressList;
-				#endif
 			} catch (System.Net.Sockets.SocketException) {
 				return null;
 			} catch (ArgumentException) {
@@ -498,11 +470,7 @@ namespace Mono.WebServer.FastCgi
 			if (list == null)
 				return;
 			
-			#if NET_2_0
 			List<string> files = new List<string> ();
-			#else
-			ArrayList files = new ArrayList ();
-			#endif
 			
 			string [] fs = list.Split (',');
 			foreach (string f in fs) {
@@ -513,11 +481,7 @@ namespace Mono.WebServer.FastCgi
 				files.Add (trimmed);
 			}
 
-			#if NET_2_0
 			indexFiles = files.ToArray ();
-			#else
-			indexFiles = (string []) files.ToArray (typeof (string));
-			#endif
 		}
 		
 		#endregion

@@ -39,10 +39,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-
-#if NET_2_0
 using System.Collections.Generic;
-#endif
 
 namespace Mono.WebServer
 {
@@ -95,11 +92,7 @@ namespace Mono.WebServer
 		MemoryStream reader_ms;
 		MemoryStream writer_ms;
 		bool got_server_vars;
-#if NET_2_0
 		Dictionary <string, string> serverVariables;
-#else
-		Hashtable serverVariables;
-#endif
 		string verb;
 		string queryString;
 		string protocol;
@@ -112,11 +105,7 @@ namespace Mono.WebServer
 		int remotePort;
 		int serverPort;
 		bool setupClientBlockCalled;
-#if NET_2_0
 		Dictionary <string, string> headers;
-#else
-		Hashtable headers;
-#endif
 		int clientBlock;
 		bool shutdown;
 		StringBuilder out_headers = new StringBuilder ();
@@ -148,12 +137,7 @@ namespace Mono.WebServer
 			writer_ms = new MemoryStream (INITIAL_MEMORY_STREAM_SIZE);
 			reader = new BinaryReader (reader_ms);
 			writer = new BinaryWriter (writer_ms);
-
-#if NET_2_0
 			serverVariables = new Dictionary <string, string> (StringComparer.OrdinalIgnoreCase);
-#else
-			serverVariables = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant, CaseInsensitiveComparer.DefaultInvariant);
-#endif
 			GetInitialData ();
 		}
 
@@ -219,11 +203,7 @@ namespace Mono.WebServer
 			remoteName = ReadString ();
 			reader.ReadInt32 (); // This is autoApp!!! (unused!?
 			int nheaders = reader.ReadInt32 ();
-#if NET_2_0
 			headers = new Dictionary <string, string> (StringComparer.OrdinalIgnoreCase);
-#else
-			headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant, CaseInsensitiveComparer.DefaultInvariant);
-#endif
 			
 			for (int i = 0; i < nheaders; i++) {
 				string key = ReadString ();

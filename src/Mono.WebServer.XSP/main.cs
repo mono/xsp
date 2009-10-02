@@ -235,13 +235,7 @@ namespace Mono.WebServer.XSP
 		}
 
 		static NameValueCollection AppSettings {
-			get {
-#if NET_2_0
-				return ConfigurationManager.AppSettings;
-#else
-				return ConfigurationSettings.AppSettings;
-#endif
-			}
+			get { return ConfigurationManager.AppSettings; }
 		}
 
 		public static void CurrentDomain_UnhandledException (object sender, UnhandledExceptionEventArgs e)

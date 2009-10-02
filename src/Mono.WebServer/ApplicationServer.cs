@@ -113,11 +113,7 @@ namespace Mono.WebServer
 
 		public int Port {
 			get {
-				if (listen_socket == null
-#if NET_2_0
-				    || !listen_socket.IsBound
-#endif
-				)
+				if (listen_socket == null || !listen_socket.IsBound)
 					return -1;
 
 				IPEndPoint iep = listen_socket.LocalEndPoint as IPEndPoint;

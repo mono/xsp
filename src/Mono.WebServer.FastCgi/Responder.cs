@@ -28,11 +28,7 @@
 //
 
 using System;
-#if NET_2_0
 using System.Collections.Generic;
-#else
-using System.Collections;
-#endif
 using Mono.FastCgi;
 using System.Text;
 
@@ -122,11 +118,7 @@ namespace Mono.WebServer.FastCgi
 			return request.GetParameter (name);
 		}
 		
-		#if NET_2_0
 		public IDictionary<string,string> GetParameters ()
-		#else
-		public IDictionary GetParameters ()
-		#endif
 		{
 			return request.GetParameters ();
 		}

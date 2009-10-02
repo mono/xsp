@@ -4,7 +4,7 @@ testfiles = \
 		tabcontrol2.aspx \
 		tabcontrol.aspx \
 		index.aspx
-		
+
 tabcontrol_src = tabcontrol.cs
 tabcontrol2_src = tabcontrol2.cs
 
@@ -19,11 +19,11 @@ samplesbin_SCRIPTS = tabcontrol.dll tabcontrol2.dll
 EXTRA_DIST = $(testfiles) \
 	     $(tabcontrol_src) \
 	     $(tabcontrol2_src)
-		 
+
 CLEANFILES = $(samplesbin_SCRIPTS)
 
 %.dll: %.cs
-	$(MCS) -r:System.Web.dll -t:library -out:$@ $^
+	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
 
 tabcontrol.dll: $(tabcontrol_build)
 

@@ -35,7 +35,7 @@ EXTRA_DIST = $(testfiles) \
 CLEANFILES = $(samplesbin_SCRIPTS)
 
 %.dll: %.cs
-	$(MCS) -r:System.Web.dll -t:library -out:$@ $^
+	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
 
 typedesc.dll: $(typedesc_build)
 

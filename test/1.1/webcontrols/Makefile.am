@@ -48,7 +48,7 @@ dbpage_test_setup_build = dbpage_test_setup.cs
 EXTRA_DIST = $(sqlite_DATA) $(samples_DATA) $(dbpage_test_setup_build)
 
 dbpage_test_setup.exe: $(dbpage_test_setup_build)
-	$(MCS) -debug:full -r:Mono.Data.SqliteClient.dll -out:$@ $^
+	$(GMCS) -debug:full -r:Mono.Data.SqliteClient.dll -out:$@ $^
 
 dbpage1.sqlite: dbpage_test_setup.exe
 	$(RUNTIME) dbpage_test_setup.exe

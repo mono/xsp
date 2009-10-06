@@ -410,7 +410,9 @@ namespace Mono.WebServer
 
 		public string GetRequestHeader (string name)
 		{
-			return headers [name] as string;
+			if (headers.ContainsKey (name))
+				return headers [name] as string;
+			return null;
 		}
 
 		void GetServerVariables ()

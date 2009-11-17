@@ -433,7 +433,7 @@ namespace Mono.FastCgi {
 				return;
 			}
 			
-			data [index++] = (byte) ((length & 0x7F000000) >> 24);
+			data [index++] = (byte)(((length & 0x7F000000) >> 24) | 0x80);
 			data [index++] = (byte) ((length & 0xFF0000) >> 16);
 			data [index++] = (byte) ((length & 0xFF00) >> 8);
 			data [index++] = (byte)  (length & 0xFF);

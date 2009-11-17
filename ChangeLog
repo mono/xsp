@@ -1,3 +1,9 @@
+2009-11-17  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.FastCgi/NameValuePair.cs: fix for incorrect
+	encoding of string lengths greater than 127 bytes. Patch from Tiaan
+	<tagdev@gmail.com>, thanks!
+
 2009-09-21  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/MonoWorkerRequest.cs: added support for

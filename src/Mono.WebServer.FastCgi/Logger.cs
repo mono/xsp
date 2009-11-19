@@ -310,8 +310,12 @@ namespace Mono.FastCgi {
 				if (logger.writer == null)
 					return;
 				
-				logger.writer.Flush ();
-				logger.writer.Close ();
+				try {
+					logger.writer.Flush ();
+					logger.writer.Close ();
+				} catch (System.ObjectDisposedException) {
+					// Already done
+				}
 				logger.writer = null;
 			}
 		}

@@ -641,21 +641,48 @@ namespace Mono.FastCgi {
 			}
 			
 			try {
-				Socket accepted = listen_socket.EndAccept (ares);
-				connection = new Connection (accepted, this);
-				connections.Add (connection);
-			} catch (System.Net.Sockets.SocketException e) {
+				try {
+					Socket accepted = listen_socket.EndAccept (ares);
+					connection = new Connection (accepted, this);
+					connections.Add (connection);
+				} catch (System.Net.Sockets.SocketException e) {
+					Logger.Write (LogLevel.Error,
+						Strings.Server_AcceptFailed, e.Message);
+					if (e.ErrorCode == 10022)
+						Stop ();
+				} catch (System.ObjectDisposedException) {
+					Logger.Write (LogLevel.Debug, Strings.Server_ConnectionClosed);
+					return; // Already done (e.g., shutdown)
+				}
+			
+				if (CanAccept)
+					BeginAccept ();
+			} catch (System.Exception e) {
 				Logger.Write (LogLevel.Error,
 					Strings.Server_AcceptFailed, e.Message);
-				if (e.ErrorCode == 10022)
-					Stop ();
 			}
 			
-			if (CanAccept)
-				BeginAccept ();
-			
-			if (connection != null)
+			if (connection == null)
+				return;
+			try {
 				connection.Run ();
+			} catch (System.Exception e) {
+				Logger.Write (LogLevel.Error,
+					Strings.Server_ConnectionFailed, e.Message);
+				try {
+					// Upon catastrophic failure, forcefully stop 
+					// all remaining connection activity, since no 
+					// specific error-handling kicked in to rescue 
+					// the connection or its requests and the 
+					// connection's main loop has now terminated.
+					// This prevents abandoned FastCGI connections 
+					// from staying open indefinitely.
+					EndConnection(connection);
+					Logger.Write (LogLevel.Debug, Strings.Server_ConnectionClosed);
+				} catch {
+					// Ignore at this point -- too bad
+				}
+			}
 		}
 		
 		/// <summary>

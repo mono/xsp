@@ -1,3 +1,14 @@
+2009-11-19  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.FastCgi/Server.cs: prevent connection and
+	resource leaking by catching unhandled exceptions.
+
+	* src/Mono.WebServer.FastCgi/Logger.cs: Close() catches
+	ObjectDisposedException in case writer is already disposed.
+
+	The above patches were contributed by Tiaan <tagdev@gmail.com>,
+	thanks!
+
 2009-11-17  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.FastCgi/NameValuePair.cs: fix for incorrect

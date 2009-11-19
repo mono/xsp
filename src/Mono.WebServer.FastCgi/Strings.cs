@@ -7,6 +7,8 @@ namespace Mono.FastCgi {
 		public static string Server_ValueUnknown = "Unknown value, {0}, requested by client.";
 		public static string Server_Accepting = "Accepting an incoming connection.";
 		public static string Server_AcceptFailed = "Failed to accept connection. Reason: {0}";
+		public static string Server_ConnectionFailed = "Failed to process connection. Reason: {0}";
+		public static string Server_ConnectionClosed = "The FastCGI connection has been closed.";
 		public static string Server_ResponderDoesNotImplement = "Responder must implement the FastCgi.IResponder interface.";
 		public static string Server_ResponderLacksProperConstructor = "Responder must contain public constructor {0}(ResponderRequest)";
 		public static string Server_ResponderNotSupported = "Responder role is not supported.";

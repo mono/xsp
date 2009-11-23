@@ -247,6 +247,12 @@ namespace Mono.FastCgi {
 		private string rpath = null;
 		
 		/// <summary>
+		///    Contains the application host, after 
+		///    <see cref="ParseParameterData" /> is called.
+		/// </summary>
+		private Mono.WebServer.FastCgi.ApplicationHost appHost;
+		
+		/// <summary>
 		///    Gets the host name used to make the request handled by
 		///    the current instance.
 		/// </summary>
@@ -311,6 +317,22 @@ namespace Mono.FastCgi {
 					rpath = GetParameter ("SCRIPT_FILENAME");
 				
 				return rpath;
+			}
+		}
+		
+		/// <summary>
+		///    Gets the application host mapped to the current instance.
+		/// </summary>
+		/// <value>
+		///    A <see cref="Mono.WebServer.FastCgi.ApplicationHost" /> 
+		///    containing the application host mapped to current instance.
+		/// </value>
+		/// <remarks>
+		///    This is a marshalled object from the hosting <see cref="AppDomain" />.
+		/// </remarks>
+		internal protected Mono.WebServer.FastCgi.ApplicationHost ApplicationHost {
+			get {
+				return appHost;
 			}
 		}
 		
@@ -419,129 +441,111 @@ namespace Mono.FastCgi {
 		}
 
 		/// <summary>
-		///    Parses the parameters and tries to deduce SCRIPT_NAME & PATH_INFO
-		///    from several other params supplied by the web server.
+		///    Parses the parameters and tries to deduce consistent 
+		///    values for the following from other parameters that 
+		///    may be supplied by the web server:
+		///        SCRIPT_NAME (virtual path), 
+		///        SCRIPT_FILENAME (physical path), 
+		///        PATH_INFO (virtual path-info) and 
+		///        PATH_TRANSLATED (physical path-info).
 		///    Required by Apache.
 		/// </summary>
 		void ParseParameterData ()
 		{
-			string redirectUrl = GetParameter ("REDIRECT_URL");
-			if (redirectUrl == null || redirectUrl.Length == 0)
-				return;
-
+			string redirectUrl;
 			string pathInfo = GetParameter ("PATH_INFO");
-			if (pathInfo == null || pathInfo.Length == 0)
-				return;
-
-			if (pathInfo [0] != '/' || pathInfo != redirectUrl)
-				return;
-
 			string pathTranslated = GetParameter ("PATH_TRANSLATED");
-			if (pathTranslated == null || pathTranslated.Length == 0)
+			Mono.WebServer.VPathToHost vapp;
+			if (pathTranslated == null || pathTranslated.Length == 0 || 
+				pathInfo == null || pathInfo.Length == 0 || pathInfo [0] != '/' || 
+				(null != (redirectUrl = GetParameter ("REDIRECT_URL")) && redirectUrl.Length != 0 && pathInfo != redirectUrl)) {
+				// Only consider REDIRECT_URL if it actually contains 
+				// something, since it may not always be present (depending 
+				// on installed Apache modules & setup).  Also, never allow 
+				// PATH_INFO to be null (nor PATH_TRANSLATED), even for 
+				// cases where this method is mostly short-circuited.
+				if (pathInfo == null)
+					SetParameter ("PATH_INFO", String.Empty);
+				if (pathTranslated == null)
+					SetParameter ("PATH_TRANSLATED", String.Empty);
+				vapp = Mono.WebServer.FastCgi.Server.GetApplicationForPath (this.HostName, this.PortNumber, this.Path, this.PhysicalPath);
+				if (vapp != null)
+					appHost = (Mono.WebServer.FastCgi.ApplicationHost)vapp.AppHost;
 				return;
+			}
 
-			string documentRoot = GetParameter ("DOCUMENT_ROOT");
-			if (documentRoot == null || documentRoot.Length == 0)
-				return;
-
-			// At this point we have:
+			// At this point we have:  (with REDIRECT_URL being optional)
 			//
 			// REDIRECT_URL=/dir/test.aspx/foo
 			// PATH_INFO=/dir/test.aspx/foo
 			// PATH_TRANSLATED=/srv/www/htdocs/dir/test.aspx/foo
 			// SCRIPT_NAME=/cgi-bin/fastcgi-mono-server
 			// SCRIPT_FILENAME=/srv/www/cgi-bin/fastcgi-mono-server
-			// DOCUMENT_ROOT=/srv/www/htdocs
 
-			bool trailingSlash = pathTranslated [pathTranslated.Length - 1] == '/' ||
-				(IOPath.DirectorySeparatorChar != '/' && pathTranslated [pathTranslated.Length - 1] == IOPath.DirectorySeparatorChar);
+			string virtPath = pathInfo;
+			string physPath = pathTranslated;
+			string virtPathInfo = String.Empty;
+			string physPathInfo = String.Empty;
+			try {
+				vapp = Mono.WebServer.FastCgi.Server.GetApplicationForPath (
+					this.HostName, this.PortNumber, virtPath, physPath);
+				if (vapp == null)
+					return;  // Set values in finally
+				appHost = (Mono.WebServer.FastCgi.ApplicationHost)vapp.AppHost;
+				if (appHost == null)
+					return;  // Set values in finally
 
-			if ((trailingSlash || !File.Exists (pathTranslated)) && !Directory.Exists (pathTranslated)) {
-				char [] separators;
-				string physPath = pathTranslated;
-				string filePath = null;
+				// Split the virtual path and virtual path-info
+				string verb = GetParameter ("REQUEST_METHOD");
+				if (verb == null || verb.Length == 0)
+					verb = "GET";  // For the sake of paths, assume a default
+				appHost.GetPathsFromUri (verb, pathInfo, out virtPath, out virtPathInfo);
+				if (virtPathInfo == null)
+					virtPathInfo = String.Empty;
+				if (virtPath == null)
+					virtPath = String.Empty;
 
-				if (IOPath.DirectorySeparatorChar == '/')
-					separators = null;
-				else
-					separators = new char [] { '/', IOPath.DirectorySeparatorChar };
+				// Re-map the physical path
+				physPath = appHost.MapPath (virtPath);
+				if (physPath == null)
+					physPath = String.Empty;
 
-				// Reverse scan until the first existing file is found.
-				// When the last existing component is a directory the
-				// following component is considered to be the file name.
-
-				while (true) {
-					int index;
-					string virtPath;
-					string virtPathInfo;
-					string physPathInfo;
-
-					if (IOPath.DirectorySeparatorChar == '/')
-						index = physPath.LastIndexOf ('/');
-					else
-						index = physPath.LastIndexOfAny (separators);
-
-					// No more path components to trim
-					if (index <= 0 || pathInfo.Length <= (pathTranslated.Length - index)) {
-						if (filePath == null)
-							break;
-
-						physPath = filePath;
-					} else {
-						physPath = pathTranslated.Substring (0, index);
-
-						if (!File.Exists (physPath)) {
-							// Last component with a trailing slash has already been tested.
-							if ((filePath != null || !trailingSlash) && Directory.Exists (physPath)) {
-								if (filePath == null)
-									break;
-
-								physPath = filePath;
-							} else {
-								filePath = physPath;
-								continue;
-							}
-						}
-					}
-
-					// Now we set:
-					//
-					// SCRIPT_NAME=/dir/test.aspx
-					// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
-					// PATH_INFO=/foo
-					// PATH_TRANSLATED=/srv/www/htdocs/dir/foo
-
-					virtPath = pathInfo.Substring (0, pathInfo.Length - (pathTranslated.Length - physPath.Length));
-					virtPathInfo = pathInfo.Substring (virtPath.Length);
-
-					// Ensure that physical and virtual path info are the same.
-					if (IOPath.DirectorySeparatorChar == '/') {
-						if (string.Compare (pathTranslated, physPath.Length, virtPathInfo, 0, virtPathInfo.Length) != 0)
-							break;
-						physPathInfo = virtPathInfo;
-					} else {
-						physPathInfo = pathTranslated.Substring (physPath.Length);
-						if (physPathInfo.Replace (IOPath.DirectorySeparatorChar, '/') != virtPathInfo)
-							break;
-					}
-
-					SetParameter ("SCRIPT_NAME", virtPath);
-					SetParameter ("SCRIPT_FILENAME", physPath);
-					SetParameter ("PATH_INFO", virtPathInfo);
-					// Actual physical path info may be different but this is safe and PHP does the same.
-					if (documentRoot [documentRoot.Length - 1] == '/' ||
-						(IOPath.DirectorySeparatorChar != '/' && documentRoot [documentRoot.Length - 1] == IOPath.DirectorySeparatorChar))
-						documentRoot = documentRoot.Substring (0, documentRoot.Length - 1);
-					SetParameter ("PATH_TRANSLATED", documentRoot + physPathInfo);
-					return;
+				// Re-map the physical path-info
+				string relaPathInfo = virtPathInfo;
+				if (relaPathInfo.Length != 0 && IOPath.DirectorySeparatorChar != '/')
+					relaPathInfo = relaPathInfo.Replace ('/', IOPath.DirectorySeparatorChar);
+				while (relaPathInfo.Length > 0 && relaPathInfo[0] == IOPath.DirectorySeparatorChar) {
+					relaPathInfo = relaPathInfo.Substring (1);
 				}
-			}
+				if (physPath.Length == 0) {
+					physPathInfo = relaPathInfo;
+					return;  // Set values in finally
+				}
+				string physRoot = physPath;
+				try {
+					if (appHost.VirtualFileExists (virtPath)) {
+						physRoot = IOPath.GetDirectoryName (physRoot);
+						if (physRoot == null)
+							physRoot = String.Empty;
+					}
+				} catch {
+					// Assume virtPath, physPath & physRoot 
+					// specify directories (and not files)
+				}
+				physPathInfo = IOPath.Combine (physRoot, relaPathInfo);
+			} finally {
+				// Now, if all went well, we set:
+				//
+				// SCRIPT_NAME=/dir/test.aspx
+				// SCRIPT_FILENAME=/srv/www/htdocs/dir/test.aspx
+				// PATH_INFO=/foo
+				// PATH_TRANSLATED=/srv/www/htdocs/dir/foo
 
-			// There is no path info
-			SetParameter ("SCRIPT_NAME", pathInfo);
-			SetParameter ("SCRIPT_FILENAME", pathTranslated);
-			SetParameter ("PATH_INFO", null);
-			SetParameter ("PATH_TRANSLATED", null);
+				SetParameter ("SCRIPT_NAME", virtPath);
+				SetParameter ("SCRIPT_FILENAME", physPath);
+				SetParameter ("PATH_INFO", virtPathInfo);
+				SetParameter ("PATH_TRANSLATED", physPathInfo);
+			}
 		}
 
 		/// <summary>

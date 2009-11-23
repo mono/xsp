@@ -1,8 +1,19 @@
 2009-11-23  Marek Habersack  <mhabersack@novell.com>
 
+	* src/Mono.WebServer.FastCgi/Request.cs: better parsing for
+	parameter data.
+	New internal property ApplicationHost
+
+	* src/Mono.WebServer.FastCgi/ApplicationHost.cs: added support for
+	mapping virtual paths, so that ASP.NET MVC sites work correctly
+	when hosted under Mono's FastCGI server. 
+
 	* src/Mono.WebServer.FastCgi/WorkerRequest.cs: GetPathInfo returns
 	an empty string if the PATH_INFO environment variable is
-	missing. Patch from Tiaan Geldenhuys <tagdev@gmail.com>, thanks!
+	missing. 
+
+	All of the above from patches submitted by Tiaan Geldenhuys
+	<tagdev@gmail.com>, thanks!
 
 2009-11-19  Marek Habersack  <mhabersack@novell.com>
 

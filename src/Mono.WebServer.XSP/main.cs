@@ -257,6 +257,7 @@ namespace Mono.WebServer.XSP
 				try {
 					return new Server ().RealMain (args, true, null, quiet);
 				} catch (ThreadAbortException ex) {
+					Console.WriteLine (ex);
 					// Single-app mode and ASP.NET appdomain unloaded
 					Thread.ResetAbort ();
 					quiet = true; // hush 'RealMain'

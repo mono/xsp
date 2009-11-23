@@ -74,13 +74,12 @@ namespace Mono.WebServer.FastCgi
 			request.SendOutputText (Path + "\r\n");
 			request.SendOutputText (PhysicalPath + "\r\n");
 		*/
+
+			ApplicationHost appHost = request.ApplicationHost;
 			
-			VPathToHost host = Server.GetApplicationForPath (
-				HostName, PortNumber, Path, PhysicalPath);
-			
-			// If the host is null, the server was unable to
-			// determine a sane plan. Alert the client.
-			if (host == null) {
+			// If the application host is null, the server was
+			// unable to determine a sane plan. Alert the client.
+			if (appHost == null) {
 				request.SendOutputText (string.Format (error500,
 					HostName, PortNumber,
 					Path, PhysicalPath));
@@ -88,7 +87,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			try {
-				((ApplicationHost)host.AppHost).ProcessRequest (this);
+				appHost.ProcessRequest (this);
 			} catch (Exception e) {
 				Logger.Write (LogLevel.Error,
 					"ERROR PROCESSING REQUEST: " + e);

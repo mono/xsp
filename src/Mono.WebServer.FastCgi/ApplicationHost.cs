@@ -131,9 +131,11 @@ namespace Mono.WebServer.FastCgi
 		{
 			string physPath;
 
+#if NET_2_0
 			physPath = HostingEnvironment.MapPath ((virtualPath == null || virtualPath.Length == 0 || virtualPath.TrimStart().Length == 0) ? "/" : virtualPath);
 			if (physPath != null && physPath.Length != 0)
 				return physPath;
+#endif
 
 			// For old .NET 1.x, and as a fallback mechanism until Mono's 
 			// HostingEnvironment.MapPath method can perform the mapping 

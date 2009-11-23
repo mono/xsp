@@ -145,6 +145,7 @@ namespace Mono.WebServer.FastCgi
 			string ret = responder.GetParameter ("PATH_INFO");
 			if (ret == null)
 				return String.Empty;
+			return ret;
 		}
 		
 		public override string GetRawUrl ()

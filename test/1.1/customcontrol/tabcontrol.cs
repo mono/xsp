@@ -4,7 +4,7 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
-// Licensed under the terms of the GNU GPL
+// Licensed under the terms of the MIT X11 license
 //
 // (C) 2002 Ximian, Inc (http://www.ximian.com)
 //

@@ -1,3 +1,18 @@
+2009-12-02  Marek Habersack  <mhabersack@novell.com>
+
+	* configure.in, scripts/Makefile.am,
+	src/Mono.WebServer.Apache/Makefile.am,
+	src/Mono.WebServer.FastCgi/Makefile.am,
+	src/Mono.WebServer.XSP/Makefile.am,
+	src/Mono.WebServer/AssemblyInfo4.cs.in,
+	src/Mono.WebServer/Makefile.am,
+	src/Mono.WebServer/xsp-4.pc.in,
+	tools/asp_state/Makefile.am,
+	tools/asp_state/asp-state4.exe.config,
+	tools/dbsessmgr/Makefile.am,
+	tools/dbsessmgr/dbsessmgr4.exe.config: added support for compiling
+	.NET 4.0 versions of the assemblies and tools.
+
 2009-11-23  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.FastCgi/Request.cs: better parsing for

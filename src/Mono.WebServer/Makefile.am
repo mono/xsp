@@ -4,17 +4,26 @@ MCSFLAGS= -debug+ -debug:full -nologo -unsafe -nowarn:618 $(WEBTRACING) -doc:$(t
 SYSTEMCORE_DEP=@SYSTEMCORE_DEP@
 
 monowebserver2dir = $(prefix)/lib/xsp/2.0
-
-pkgconfig_DATA = xsp-2.pc
-noinst_SCRIPTS= $(monowebserver2_install)
-
-monowebserver2_install = Mono.WebServer2.dll
+monowebserver2_install = 2.0/Mono.WebServer2.dll
 monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Security.dll 
-
 GACUTIL2=$(GACUTIL) -package 2.0
 
-CLEANFILES = Mono.WebServer.dll* Mono.WebServer2.dll*
-EXTRA_DIST = $(monowebserver_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in
+if NET_4_0
+monowebserver4dir = $(prefix)/lib/xsp/4.0
+monowebserver4_install = 4.0/Mono.WebServer2.dll
+monowebserver4_references = $(monowebserver2_references)
+GACUTIL4=$(GACUTIL) -package 4.0
+endif
+
+pkgconfig_DATA = xsp-2.pc
+if NET_4_0
+pkgconfig_DATA += xsp-4.pc
+endif
+
+noinst_SCRIPTS= $(monowebserver2_install) $(monowebserver4_install)
+
+CLEANFILES = 2.0/Mono.WebServer2.dll* 4.0/Mono.WebServer2.dll*
+EXTRA_DIST = $(monowebserver_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in AssemblyInfo4.cs.in
 
 monowebserver2_sources  = \
 			ApplicationServer.cs \
@@ -41,15 +50,32 @@ monowebserver2_sources  = \
 
 monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 
-Mono.WebServer2.dll: $(monowebserver2_build_sources)
+if NET_4_0
+monowebserver4_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo4.cs)
+endif
+
+2.0/Mono.WebServer2.dll: $(monowebserver2_build_sources)
+	-mkdir 2.0
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
+if NET_4_0
+4.0/Mono.WebServer2.dll: $(monowebserver4_build_sources)
+	-mkdir 4.0
+	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(monowebserver4_references) /target:library /out:$@ $(monowebserver4_build_sources)
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
+endif
+
 install-data-local:
-	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(builddir)/Mono.WebServer2.dll
+	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(builddir)/2.0/Mono.WebServer2.dll
+if NET_4_0
+	$(GACUTIL4) $(GACUTIL_FLAGS) -i $(builddir)/4.0/Mono.WebServer2.dll
+endif
 
 uninstall-local:
 	-for i in Mono.WebServer2 ; do \
 		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done
 
+clean-local:
+	rm -rf 2.0 4.0

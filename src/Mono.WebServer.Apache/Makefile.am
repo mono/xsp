@@ -5,16 +5,27 @@ MCSFLAGS= -unsafe -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
 MODMONOSERVER2_EXE = mod-mono-server2.exe
 GACUTIL2=$(GACUTIL) -package 2.0
 
-noinst_SCRIPTS = $(MODMONOSERVER2_EXE)
+if NET_4_0
+MODMONOSERVER4_EXE = mod-mono-server4.exe
+GACUTIL4=$(GACUTIL) -package 4.0
+endif
+
+noinst_SCRIPTS = $(MODMONOSERVER2_EXE) $(MODMONOSERVER4_EXE)
 
 CLEANFILES = *.exe *.mdb
 
+references_common = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
+references2 = $(references_common) -r:../Mono.WebServer/2.0/Mono.WebServer2.dll
+
+if NET_4_0
+references4 = $(references_common) -r:../Mono.WebServer/4.0/Mono.WebServer2.dll
+endif
+
 if PLATFORM_WIN32
-references2= -lib:"$(prefix)/lib" -r:../Mono.WebServer/Mono.WebServer2.dll \
-			-r:System.Web.dll -r:Mono.Posix.dll -r:Mono.Security.dll 
-else
-references2= -r:System.Web.dll -r:System.Configuration.dll -r:../Mono.WebServer/Mono.WebServer2.dll \
-			-r:Mono.Posix.dll -r:Mono.Security.dll 
+references2 += -lib:"$(prefix)/lib"
+if NET_4_0
+references4 += -lib:"$(prefix)/lib"
+endif
 endif
 
 sources = $(shell cat $(srcdir)/Mono.WebServer.Apache.sources)
@@ -27,10 +38,19 @@ mod-mono-server2.exe: $(sources) AssemblyInfo.cs
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ $(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
+if NET_4_0
+mod-mono-server4.exe: $(sources) AssemblyInfo.cs
+	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(references4) /out:$@ $(build_sources)
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
+endif
+
 install-data-local:
 	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(builddir)/mod-mono-server2.exe
+if NET_4_0
+	$(GACUTIL4) $(GACUTIL_FLAGS) -i $(builddir)/mod-mono-server4.exe
+endif
 
 uninstall-local:
-	-for i in mod-mono-server2 ; do \
+	-for i in $(noinst_SCRIPTS); do \
 		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done

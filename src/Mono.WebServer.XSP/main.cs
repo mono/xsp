@@ -454,8 +454,10 @@ namespace Mono.WebServer.XSP
 				if (server.Start (!settings.NonStop, settings.Exception) == false)
 					return 2;
 				
-				if (!quiet)
+				if (!quiet) {
+					// MonoDevelop depends on this string. If you change it, let them know.
 					Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
+				}
 				if (port == 0 && !quiet)
 					Console.Error.WriteLine ("Random port: {0}", server.Port);
 				

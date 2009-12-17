@@ -58,6 +58,18 @@ namespace Mono.FastCgi {
 		
 		public override void Close ()
 		{
+			// Make sure that all remaining data are sent and received 
+			// before closing; For example, this ensures that all queued 
+			// FCGI_STDOUT stream data are sent to the web server for 
+			// forwarding to the web client and also that any lingering 
+			// FCGI_END_REQUEST response is indeed sent to the web server
+			try {
+				socket.Shutdown(System.Net.Sockets.SocketShutdown.Both);
+			} catch (System.Net.Sockets.SocketException) {
+				// Ignore
+			}
+			
+			// Only now close the socket
 			socket.Close ();
 		}
 		

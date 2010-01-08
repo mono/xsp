@@ -327,7 +327,6 @@ namespace Mono.WebServer
 			while (total < len) {
 				// 0x4000 no sigpipe
 				int n = send_libc (client.Handle.ToInt32 (), bptr + total, (IntPtr) (len - total), (int) 0x4000);
-				Console.WriteLine ("HEre: {0}", n);
 				if (n >= 0) {
 					total += n;
 				} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {

@@ -88,7 +88,7 @@ namespace Mono.WebServer.XSP
 			string copyright = ((AssemblyCopyrightAttribute) att [0]).Copyright;
 			att = assembly.GetCustomAttributes (typeof (AssemblyDescriptionAttribute), false);
 			string description = ((AssemblyDescriptionAttribute) att [0]).Description;
-			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
+			Console.WriteLine ("{0} {1}\nCopyright {2}\n{3}",
 					Path.GetFileName (assembly.Location), version, copyright, description);
 		}
 		

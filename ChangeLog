@@ -1,3 +1,10 @@
+2010-01-18  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/XSPWorkerRequest.cs,
+	src/Mono.WebServer/InitialWorkerRequest.cs: correctly handle \r\n
+	on buffer/packet boundary. Fixes bug #569363. Patch from Tobias
+	Polley <tobias.polley@miaplaza.com>, thanks!
+
 2009-12-17  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.FastCgi/StandardSocket.cs: Close () makes

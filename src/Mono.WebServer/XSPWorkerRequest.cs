@@ -277,6 +277,9 @@ namespace Mono.WebServer
 					b = inputBuffer [inputLength - 1];
 					if (b != '\r' && b != '\n')
 						continue;
+					FillBuffer();
+					if (b == '\r' && inputLength > 0 && inputBuffer[0] == '\n')
+						position++;
 				}
 				break;
 			} while (true);

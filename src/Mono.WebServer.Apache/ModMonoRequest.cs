@@ -208,8 +208,11 @@ namespace Mono.WebServer
 			
 			for (int i = 0; i < nheaders; i++) {
 				string key = ReadString ();
+				if (String.IsNullOrEmpty (key))
+					continue;
+				
 				if (headers.ContainsKey (key)) {
-					Console.WriteLine ("WARNING: duplicate header found! Overwriting old value with the new one.");
+					Console.WriteLine ("WARNING: duplicate header '{0}' found! Overwriting old value with the new one.", key);
 					headers [key] = ReadString ();
 				} else
 					headers.Add (key, ReadString ());
@@ -407,13 +410,15 @@ namespace Mono.WebServer
 			int nvars = reader.ReadInt32 ();
 			while (nvars > 0) {
 				string key = ReadString ();
+				nvars--;
+				if (String.IsNullOrEmpty (key))
+					continue;
+				
 				if (serverVariables.ContainsKey (key)) {
-					Console.WriteLine ("WARNING! Duplicate server variable found. Overwriting old value with the new one.");
+					Console.WriteLine ("WARNING! Duplicate server variable '{0}' found. Overwriting old value with the new one.", key);
 					serverVariables [key] = ReadString ();
 				} else
 					serverVariables.Add (key, ReadString ());
-				
-				nvars--;
 			}
 
 			got_server_vars = true;

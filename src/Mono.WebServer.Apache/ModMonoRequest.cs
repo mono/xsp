@@ -167,17 +167,18 @@ namespace Mono.WebServer
 
 		void FillBuffer (int count)
 		{
-			if (reader_ms.Capacity < count)
-				reader_ms.SetLength (count);
-
 			// This will "reset" the stream
-			reader_ms.SetLength (0);
-			reader_ms.Seek (0, SeekOrigin.Begin);
+			int capacity = reader_ms.Capacity;
+			if (capacity > count)
+				reader_ms.Capacity = capacity;
+			else
+				reader_ms.Capacity = count;
 			
+			reader_ms.Seek (0, SeekOrigin.Begin);
 			byte[] buffer = reader_ms.GetBuffer ();
 			int received = client.Receive (buffer, count, SocketFlags.None);
 			reader_ms.SetLength (received);
-		}		
+		}
 
 		void Send ()
 		{

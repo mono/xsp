@@ -1,3 +1,9 @@
+2010-02-16  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/ModMonoRequest.cs: FillBuffer makes
+	sure that the MemoryStream is properly reset before filling it
+	from the network. Fixes bug #580086
+
 2010-01-18  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.XSP/AssemblyInfo.cs.in: updated copyright

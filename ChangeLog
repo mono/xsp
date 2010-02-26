@@ -1,3 +1,8 @@
+2010-02-26  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/InitialWorkerRequest.cs: do not decode paths
+	before passing them to GetSafePath. Fixes bug #581594
+
 2010-02-16  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/ModMonoRequest.cs: FillBuffer makes

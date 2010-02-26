@@ -242,7 +242,6 @@ namespace Mono.WebServer
 				path = path.Substring (0, qmark);
 			}
 
-			path = HttpUtility.UrlDecode (path);
 			path = GetSafePath (path);
 			if (path.StartsWith ("/~/")) {
 				// Not sure about this. It makes request such us /~/dir/file work

@@ -1,3 +1,11 @@
+2010-02-26  Marek Habersack  <mhabersack@novell.com>
+
+	* tools/asp_state/asp-state4.exe.config: modifed to load types
+	from System.Web 4.0.0
+
+	* src/Mono.WebServer/InitialWorkerRequest.cs: do not decode paths
+	before passing them to GetSafePath. Fixes bug #581594
+
 2010-02-16  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.Apache/ModMonoRequest.cs: FillBuffer makes

@@ -35,6 +35,7 @@ using System.Xml;
 using System.Web;
 using System.Web.Hosting;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.IO;
@@ -83,16 +84,21 @@ namespace Mono.WebServer
 	
 	public class ApplicationServer : MarshalByRefObject
 	{
+		static readonly object registeredSocketsLock = new object ();
+
 		WebSource webSource;
 		bool started;
 		bool stop;
 		bool verbose;
+		bool shuttingDown;
 		Socket listen_socket;
 		bool single_app;
 		Exception initialException;
 		
 		Thread runner;
 
+		Dictionary <Socket, bool> registeredSockets;
+		
 		// This is much faster than hashtable for typical cases.
 		ArrayList vpathToHost = new ArrayList ();
 
@@ -300,6 +306,7 @@ namespace Mono.WebServer
 				v.RequestBroker = webSource.CreateRequestBroker ();
 				AppHost.RequestBroker = v.RequestBroker;
 			}
+
 			listen_socket = webSource.CreateSocket ();
 			listen_socket.Listen (500);
 			listen_socket.Blocking = false;
@@ -326,11 +333,40 @@ namespace Mono.WebServer
 			stopThread.Start ();
 		}
 
+		public void ShutdownSockets ()
+		{
+			if (listen_socket != null && !listen_socket.IsBound) {
+				if (listen_socket.Connected)
+					listen_socket.Shutdown (SocketShutdown.Receive);
+				listen_socket.Close ();
+			}
+			
+			lock (registeredSockets) {
+				if (registeredSockets == null)
+					return;
+
+				shuttingDown = true;
+				foreach (Socket s in registeredSockets.Keys) {
+					if (s == null)
+						continue;
+
+					try {
+						if (s.Connected)
+							s.Shutdown (SocketShutdown.Both);
+
+						s.Close ();
+					} catch {
+						// ignore
+					}
+				}
+			}
+		}
+
 		void RealStop ()
 		{
 			started = false;
 			runner.Abort ();
-			listen_socket.Close ();
+			ShutdownSockets ();
 			UnloadAll ();
 			Thread.Sleep (1000);
 		}
@@ -344,16 +380,46 @@ namespace Mono.WebServer
 			}
 		}
 
+		public void RegisterSocket (Socket socket)
+		{
+			lock (registeredSocketsLock) {
+				if (registeredSockets == null) {
+					registeredSockets = new Dictionary <Socket, bool> ();
+					registeredSockets.Add (socket, true);
+
+					return;
+				}
+
+				if (registeredSockets.ContainsKey (socket))
+					return;
+
+				registeredSockets.Add (socket, true);
+			}
+		}
+
+		public void UnregisterSocket (Socket socket)
+		{
+			lock (registeredSocketsLock) {
+				if (registeredSockets == null || shuttingDown)
+					return;
+
+				if (registeredSockets.ContainsKey (socket))
+					registeredSockets.Remove (socket);
+			}
+		}
+		
 		void SetSocketOptions (Socket sock)
 		{
-#if !MOD_MONO_SERVER
+
 			try {
+				sock.LingerState = new LingerOption (true, 15);
+#if !MOD_MONO_SERVER
 				sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 15000); // 15s
 				sock.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 15000); // 15s
+#endif
 			} catch {
 				// Ignore exceptions here for systems that do not support these options.
 			}
-#endif
 		}
 
 
@@ -385,6 +451,7 @@ namespace Mono.WebServer
 				return;
 			accepted.Blocking = true;
 			SetSocketOptions (accepted);
+			RegisterSocket (accepted);
 			StartRequest (accepted, 0);
 		}
 
@@ -437,8 +504,14 @@ namespace Mono.WebServer
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 				else
 					worker.Run (null);
-			} catch (Exception) {
-				try { accepted.Close (); } catch {}
+			} catch (Exception e) {
+				try {
+					if (accepted != null) {
+						if (accepted.Connected)
+							accepted.Shutdown (SocketShutdown.Both);
+						accepted.Close ();
+					}
+				} catch {}
 			}
 		}
 
@@ -456,8 +529,6 @@ namespace Mono.WebServer
 			VPathToHost bestMatch = null;
 			int bestMatchLength = 0;
 
-			// Console.WriteLine("GetApplicationForPath({0},{1},{2},{3})", vhost, port,
-			//			path, defaultToRoot);
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
 				VPathToHost v = (VPathToHost) vpathToHost [i];
 				int matchLength = v.vpath.Length;

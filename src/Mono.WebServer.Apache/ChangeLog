@@ -1,0 +1,9 @@
+2010-03-01  Marek Habersack  <mhabersack@novell.com>
+
+	* main.cs: added some documentation on RealMain.
+	Added code to make sure single app mode is not used when running a
+	non-stop server.
+	In single app mode, when ThreadAbortException is thrown, make sure
+	to shutdown up all the accepted sockets, or we'll end up with
+	sockets with filled receive/send queues.
+

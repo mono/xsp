@@ -265,6 +265,15 @@ namespace Mono.WebServer.XSP
 			}
 		}
 
+		//
+		// Parameters:
+		//
+		//   args - original args passed to the program
+		//   root - true means caller is in the root domain
+		//   ext_apphost - used when single app mode is used, in a recursive call to
+		//        RealMain from the single app domain
+		//   quiet - don't show messages. Used to avoid double printing of the banner
+		//
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			SecurityConfiguration security = new SecurityConfiguration ();
@@ -419,7 +428,7 @@ namespace Mono.WebServer.XSP
 
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = settings.Verbose;
-			server.SingleApplication = !root;
+			server.SingleApplication = !root && !settings.NonStop;
 
 			if (settings.Apps != null)
 				server.AddApplicationsFromCommandLine (settings.Apps);
@@ -487,6 +496,8 @@ namespace Mono.WebServer.XSP
 			} catch (Exception e) {
 				if (!(e is ThreadAbortException))
 					Console.WriteLine ("Error: {0}", e);
+				else
+					server.ShutdownSockets ();
 				return 1;
 			}
 

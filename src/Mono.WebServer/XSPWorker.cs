@@ -233,7 +233,12 @@ namespace Mono.WebServer
 				if (stream != netStream) {
 					netStream.Close ();
 				} else if (false == netStream.OwnsSocket) {
-					try { sock.Close (); } catch {}
+					try {
+						if (sock.Connected)
+							sock.Shutdown (SocketShutdown.Both);
+						sock.Close ();
+						server.UnregisterSocket (sock);
+					} catch {}
 				}
 
 				return;

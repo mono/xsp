@@ -197,6 +197,15 @@ namespace Mono.WebServer.Apache
 			}
 		}
 
+		//
+		// Parameters:
+		//
+		//   args - original args passed to the program
+		//   root - true means caller is in the root domain
+		//   ext_apphost - used when single app mode is used, in a recursive call to
+		//        RealMain from the single app domain
+		//   quiet - don't show messages. Used to avoid double printing of the banner
+		//
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			bool nonstop = false;
@@ -349,7 +358,7 @@ namespace Mono.WebServer.Apache
 
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = verbose;
-			server.SingleApplication = !root;
+			server.SingleApplication = !root && !nonstop;
 
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
 			if (apps != null)
@@ -406,6 +415,8 @@ namespace Mono.WebServer.Apache
 			} catch (Exception e) {
 				if (!(e is ThreadAbortException))
 					Console.WriteLine ("Error: {0}", e.Message);
+				else
+					server.ShutdownSockets ();
 				return 1;
 			}
 

@@ -1,0 +1,12 @@
+2010-03-01  Marek Habersack  <mhabersack@novell.com>
+
+	* XSPWorker.cs: close makes sure to unregister socket, so that
+	there's no reference to it held by ApplicationServer.
+
+	* ApplicationServer.cs: added a new public method,
+	ShutdownSockets, to be called in single app mode to properly close
+	all the listening and the accepted sockets.
+	Added a pair of methods, {Register,Unregister}Socket to keep track
+	of all the sockets to clean up in ShutdownSockets above.
+	All sockets have SO_LINGER on.
+

@@ -31,7 +31,7 @@ using System.Runtime.Serialization;
 namespace System.Threading
 {
 	[Serializable]
-	public class LockRecursionException : Exception
+	class LockRecursionException : Exception
 	{
 		public LockRecursionException () 
 			: base ()

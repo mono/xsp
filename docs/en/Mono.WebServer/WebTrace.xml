@@ -1,0 +1,173 @@
+<Type Name="WebTrace" FullName="Mono.WebServer.WebTrace">
+  <TypeSignature Language="C#" Value="public sealed class WebTrace" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public WebTrace ();" />
+      <MemberType>Constructor</MemberType>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Enter">
+      <MemberSignature Language="C#" Value="public static void Enter ();" />
+      <MemberType>Method</MemberType>
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Diagnostics.Conditional("WEBTRACE")</AttributeName>
+        </Attribute>
+      </Attributes>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Enter">
+      <MemberSignature Language="C#" Value="public static void Enter (string format, object[] parms);" />
+      <MemberType>Method</MemberType>
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Diagnostics.Conditional("WEBTRACE")</AttributeName>
+        </Attribute>
+      </Attributes>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="format" Type="System.String" />
+        <Parameter Name="parms" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="format">To be added.</param>
+        <param name="parms">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Leave">
+      <MemberSignature Language="C#" Value="public static void Leave ();" />
+      <MemberType>Method</MemberType>
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Diagnostics.Conditional("WEBTRACE")</AttributeName>
+        </Attribute>
+      </Attributes>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Leave">
+      <MemberSignature Language="C#" Value="public static void Leave (string format, object[] parms);" />
+      <MemberType>Method</MemberType>
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Diagnostics.Conditional("WEBTRACE")</AttributeName>
+        </Attribute>
+      </Attributes>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="format" Type="System.String" />
+        <Parameter Name="parms" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="format">To be added.</param>
+        <param name="parms">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="WriteLine">
+      <MemberSignature Language="C#" Value="public static void WriteLine (string format, object[] parms);" />
+      <MemberType>Method</MemberType>
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Diagnostics.Conditional("WEBTRACE")</AttributeName>
+        </Attribute>
+      </Attributes>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="format" Type="System.String" />
+        <Parameter Name="parms" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="format">To be added.</param>
+        <param name="parms">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="WriteLineIf">
+      <MemberSignature Language="C#" Value="public static void WriteLineIf (bool cond, string format, object[] parms);" />
+      <MemberType>Method</MemberType>
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Diagnostics.Conditional("WEBTRACE")</AttributeName>
+        </Attribute>
+      </Attributes>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="cond" Type="System.Boolean" />
+        <Parameter Name="format" Type="System.String" />
+        <Parameter Name="parms" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="cond">To be added.</param>
+        <param name="format">To be added.</param>
+        <param name="parms">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

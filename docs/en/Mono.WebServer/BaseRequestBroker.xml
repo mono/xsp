@@ -1,0 +1,214 @@
+<Type Name="BaseRequestBroker" FullName="Mono.WebServer.BaseRequestBroker">
+  <TypeSignature Language="C#" Value="public class BaseRequestBroker : MarshalByRefObject, Mono.WebServer.IRequestBroker" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.MarshalByRefObject</BaseTypeName>
+  </Base>
+  <Interfaces>
+    <Interface>
+      <InterfaceName>Mono.WebServer.IRequestBroker</InterfaceName>
+    </Interface>
+  </Interfaces>
+  <Docs>
+    <summary>This class provides a request broker covering the base functionality.</summary>
+    <remarks>A request broker serves as an intermediary between <see cref="T:Mono.WebServer.Worker" /> and <see cref="T:Mono.WebServer.MonoWorkerRequest" /> to handle the interaction between application domains.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public BaseRequestBroker ();" />
+      <MemberType>Constructor</MemberType>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Close">
+      <MemberSignature Language="C#" Value="public void Close (int requestId);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request to close.</param>
+        <summary>Closes the request with the specified ID.</summary>
+        <remarks>See <see cref="M:Mono.WebServer.Worker.Close" />.
+<para>If the request does not exist, no action is taken.</para>
+	</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Flush">
+      <MemberSignature Language="C#" Value="public void Flush (int requestId);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request to flush.</param>
+        <summary>Flushes a request with the specified ID.</summary>
+        <remarks>See <see cref="M:Mono.WebServer.Worker.Flush" />.
+<para>If the request does not exist, no action is taken.</para></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetWorker">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.Worker GetWorker (int requestId);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.Worker</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request</param>
+        <summary>Gets the request with a specified ID.</summary>
+        <returns>A <see cref="T:Mono.WebServer.Worker" /> object containing the request with the specified ID, or <see langword="null" /> if the request does not exist.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="InitializeLifetimeService">
+      <MemberSignature Language="C#" Value="public override object InitializeLifetimeService ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Object</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Obtains a lifetime service object for the current instance.</summary>
+        <returns>Always <see langword="null"/>.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="IsConnected">
+      <MemberSignature Language="C#" Value="public bool IsConnected (int requestId);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request</param>
+        <summary>Gets whether or not the request with a specified ID is connected.</summary>
+        <returns>A <see langword="bool" /> indicating whether or not the request is connected. If the request doesn't exist, <see lanword="false" /> will be returned.</returns>
+        <remarks>See <see cref="T:Mono.WebServer.Worker.IsConnected" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Read">
+      <MemberSignature Language="C#" Value="public int Read (int requestId, int size, out byte[] buffer);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+        <Parameter Name="size" Type="System.Int32" />
+        <Parameter Name="buffer" Type="System.Byte[]&amp;" RefType="out" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request.</param>
+        <param name="size">number of bytes to read.</param>
+        <param name="buffer">out parameter to contain read data on return.</param>
+        <summary>Reads a block of request data from the request with a specified ID.</summary>
+        <returns>Number of bytes actually read from the network.</returns>
+        <remarks>See <see cref="M:Mono.WebServer.Worker.Read" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RegisterRequest">
+      <MemberSignature Language="C#" Value="public int RegisterRequest (Mono.WebServer.Worker worker);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="worker" Type="Mono.WebServer.Worker" />
+      </Parameters>
+      <Docs>
+        <param name="worker">A <see cref="T:Mono.WebServer.Worker" /> object containing the request to register.</param>
+        <summary>Registers a request with the current instance.</summary>
+        <returns>ID of the request</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="UnregisterRequest">
+      <MemberSignature Language="C#" Value="public void UnregisterRequest (int id);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="id" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="id">ID of request to unregister</param>
+        <summary>Unregisters a request with the current instance.</summary>
+        <remarks>Before unregistering the request and freeing all of its data, the method invokes the <see cref="E:Mono.WebServer.UnregisterRequestEvent"/> handlers (if any).
+<note type="caution"><para>After the event handlers return the request ID is invalid and *MUST NOT* be used for any purpose other than referencing the event
+receiver's internal housekeeping records for that particular ID.</para></note>
+<note type="caution"><para>Make the event handler code as fast as possible, as until it returns no other request shall be allocated another id.</para></note>
+	</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="UnregisterRequestEvent">
+      <MemberSignature Language="C#" Value="public event Mono.WebServer.UnregisterRequestEventHandler UnregisterRequestEvent;" />
+      <MemberType>Event</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.UnregisterRequestEventHandler</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Notifies the subscribers that a request is about to be unregistered.</summary>
+        <remarks>This event is called just before the request is unregistered by the broker. This gives the chance to clean up any private data
+associated with the event. The event handlers are invoked with a lock held on the issuing object, so that the event receiver can do the cleanup 
+without the chance of another thread stepping in at the wrong time.
+</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ValidRequest">
+      <MemberSignature Language="C#" Value="protected bool ValidRequest (int requestId);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request</param>
+        <summary>Gets whether or not the request with a specified ID is valid.</summary>
+        <returns> A <see langword="bool" /> indicating whether or not the request is valid.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Write">
+      <MemberSignature Language="C#" Value="public void Write (int requestId, byte[] buffer, int position, int size);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+        <Parameter Name="buffer" Type="System.Byte[]" />
+        <Parameter Name="position" Type="System.Int32" />
+        <Parameter Name="size" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">ID of the request.</param>
+        <param name="buffer">data to write.</param>
+        <param name="position">position in <paramref name="buffer"/> to start reading from.</param>
+        <param name="size">number of bytes to read from <paramref name="buffer"/>.</param>
+        <summary>Writes a block of response data to the request with a specified ID.</summary>
+        <remarks>See <see cref="M:Mono.WebServer.Worker.Write" />.
+<para>If the request does not exist, no action is taken.</para></remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

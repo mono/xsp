@@ -1,0 +1,20 @@
+<Type Name="EndOfRequestHandler" FullName="Mono.WebServer.EndOfRequestHandler">
+  <TypeSignature Language="C#" Value="public delegate void EndOfRequestHandler(MonoWorkerRequest request);" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Delegate</BaseTypeName>
+  </Base>
+  <Parameters>
+    <Parameter Name="request" Type="Mono.WebServer.MonoWorkerRequest" />
+  </Parameters>
+  <ReturnValue>
+    <ReturnType>System.Void</ReturnType>
+  </ReturnValue>
+  <Docs>
+    <param name="request">The <see cref="T:Mono.WebServer.MonoWorkerRequest" /> that sent the event</param>
+    <summary>This delegate is used to handle <see cref="T:Mono.WebServer.MonoWorkerRequest.EndOfRequestEvent" />.</summary>
+    <remarks></remarks>
+  </Docs>
+</Type>

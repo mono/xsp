@@ -1,0 +1,133 @@
+<Type Name="InitialWorkerRequest" FullName="Mono.WebServer.InitialWorkerRequest">
+  <TypeSignature Language="C#" Value="public class InitialWorkerRequest" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public InitialWorkerRequest (System.IO.Stream ns);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="ns" Type="System.IO.Stream" />
+      </Parameters>
+      <Docs>
+        <param name="ns">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AllocateBuffer">
+      <MemberSignature Language="C#" Value="public static byte[] AllocateBuffer ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="FreeBuffer">
+      <MemberSignature Language="C#" Value="public void FreeBuffer ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="FreeBuffer">
+      <MemberSignature Language="C#" Value="public static void FreeBuffer (byte[] buf);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="buf" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="buf">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GotSomeInput">
+      <MemberSignature Language="C#" Value="public bool GotSomeInput { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="InputBuffer">
+      <MemberSignature Language="C#" Value="public byte[] InputBuffer { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ReadRequestData">
+      <MemberSignature Language="C#" Value="public void ReadRequestData ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestData">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.RequestData RequestData { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.RequestData</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetBuffer">
+      <MemberSignature Language="C#" Value="public void SetBuffer (byte[] buffer, int length);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="buffer" Type="System.Byte[]" />
+        <Parameter Name="length" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="buffer">To be added.</param>
+        <param name="length">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

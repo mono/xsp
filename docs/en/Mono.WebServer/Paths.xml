@@ -1,0 +1,39 @@
+<Type Name="Paths" FullName="Mono.WebServer.Paths">
+  <TypeSignature Language="C#" Value="public static class Paths" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="GetPathsFromUri">
+      <MemberSignature Language="C#" Value="public static void GetPathsFromUri (Mono.WebServer.IApplicationHost appHost, string verb, string uri, out string realUri, out string pathInfo);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="appHost" Type="Mono.WebServer.IApplicationHost" />
+        <Parameter Name="verb" Type="System.String" />
+        <Parameter Name="uri" Type="System.String" />
+        <Parameter Name="realUri" Type="System.String&amp;" RefType="out" />
+        <Parameter Name="pathInfo" Type="System.String&amp;" RefType="out" />
+      </Parameters>
+      <Docs>
+        <param name="appHost">To be added.</param>
+        <param name="verb">To be added.</param>
+        <param name="uri">To be added.</param>
+        <param name="realUri">To be added.</param>
+        <param name="pathInfo">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

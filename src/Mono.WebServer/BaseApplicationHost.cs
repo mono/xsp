@@ -47,31 +47,19 @@ namespace Mono.WebServer
 		IRequestBroker requestBroker;
 		EndOfRequestHandler endOfRequest;
 		ApplicationServer appserver;
-		Dictionary <string, bool> handlersCache;
-		
-		/// <summary>
-		///   Creates the <see cref="EndOfRequest"/> event handler and registers
-		///   a handler (<see cref="OnUnload"/>) with the <see cref="AppDomain.DomainUnload"/> event.
-		/// </summary>
+		Dictionary <string, bool> handlersCache;		
+
 		public BaseApplicationHost ()
 		{
 			endOfRequest = new EndOfRequestHandler (EndOfRequest);
 			AppDomain.CurrentDomain.DomainUnload += new EventHandler (OnUnload);
 		}
 
-		/// <summary>
-		///   Unloads the current application domain by calling <see cref="HttpRuntime.UnloadAppDomain"/>
-		/// </summary>
 		public void Unload ()
 		{
 			HttpRuntime.UnloadAppDomain ();
 		}
 
-		/// <summary>
-		///   Event handler for the <see cref="System.AppDomain.DomainUnload"/>
-		///   event. Calls <see cref="ApplicationServer.DestroyHost"/>
-		///   to shut the host down.
-		/// </summary>
 		public void OnUnload (object o, EventArgs args)
 		{
 			if (appserver != null)
@@ -83,17 +71,11 @@ namespace Mono.WebServer
 			return null; // who wants to live forever?
 		}
 
-		/// <summary>
-		///   Reference to the associated <see cref="ApplicationServer"/>
-		/// </summary>
 		public ApplicationServer Server {
 			get { return appserver; }
 			set { appserver = value; }
 		}
 
-		/// <summary>
-		///   Physical path to the application root directory.
-		/// </summary>
 		public string Path {
 			get {
 				if (path == null)
@@ -103,9 +85,6 @@ namespace Mono.WebServer
 			}
 		}
 
-		/// <summary>
-		///   Virtual path to the application root.
-		/// </summary>
 		public string VPath {
 			get {
 				if (vpath == null)
@@ -115,34 +94,16 @@ namespace Mono.WebServer
 			}
 		}
 
-		/// <summary>
-		///   Returns the current application domain.
-		/// </summary>
 		public AppDomain Domain {
 			get { return AppDomain.CurrentDomain; }
 		}
 
-		/// <summary>
-		///   Reference to the associated request broker
-		/// </summary>
 		public IRequestBroker RequestBroker
 		{
 			get { return requestBroker; }
 			set { requestBroker = value; }
 		}
 
-		/// <summary>
-		///   Process a request.
-		/// </summary>
-		/// <param name="mwr">A worker object to actually process the request</param>
-		/// <remarks>
-		///   If the mwr parameter is null or no request data can be read, the request will be ended
-		///   immediately. Otherwise, registers an event handler for the worker's <see
-		///   cref="MonoWorkerRequest.EndOfRequest"/> event and calls the worker's <see
-		///   cref="MonoWorkerRequest.ProcessRequest"/> method to actually process the request. If an unhandled exception
-		///   occurs during that phase, it is printed to the console and <see cref="EndOfRequest"/> is called
-		///   immediately.
-		/// </remarks>
 		protected void ProcessRequest (MonoWorkerRequest mwr)
 		{
 			if (mwr == null) {
@@ -181,9 +142,6 @@ namespace Mono.WebServer
 			}
 		}
 
-		/// <summary>
-		///    Checks if the passed URI maps to a HTTP handler
-		/// </summary>
 		public virtual bool IsHttpHandler (string verb, string uri)
 		{
 			string cacheKey = verb + "_" + uri;

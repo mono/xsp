@@ -1,0 +1,334 @@
+<Type Name="ApplicationServer" FullName="Mono.WebServer.ApplicationServer">
+  <TypeSignature Language="C#" Value="public class ApplicationServer : MarshalByRefObject" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.MarshalByRefObject</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public ApplicationServer (Mono.WebServer.WebSource source);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="source" Type="Mono.WebServer.WebSource" />
+      </Parameters>
+      <Docs>
+        <param name="source">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddApplication">
+      <MemberSignature Language="C#" Value="public void AddApplication (string vhost, int vport, string vpath, string fullPath);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="vhost" Type="System.String" />
+        <Parameter Name="vport" Type="System.Int32" />
+        <Parameter Name="vpath" Type="System.String" />
+        <Parameter Name="fullPath" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="vhost">To be added.</param>
+        <param name="vport">To be added.</param>
+        <param name="vpath">To be added.</param>
+        <param name="fullPath">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddApplicationsFromCommandLine">
+      <MemberSignature Language="C#" Value="public void AddApplicationsFromCommandLine (string applications);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="applications" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="applications">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddApplicationsFromConfigDirectory">
+      <MemberSignature Language="C#" Value="public void AddApplicationsFromConfigDirectory (string directoryName);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="directoryName" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="directoryName">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddApplicationsFromConfigFile">
+      <MemberSignature Language="C#" Value="public void AddApplicationsFromConfigFile (string fileName);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="fileName" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="fileName">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AppHost">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.IApplicationHost AppHost { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.IApplicationHost</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Broker">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.IRequestBroker Broker { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.IRequestBroker</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="DestroyHost">
+      <MemberSignature Language="C#" Value="public void DestroyHost (Mono.WebServer.IApplicationHost host);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="host" Type="Mono.WebServer.IApplicationHost" />
+      </Parameters>
+      <Docs>
+        <param name="host">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetApplicationForPath">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.VPathToHost GetApplicationForPath (string vhost, int port, string path, bool defaultToRoot);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.VPathToHost</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="vhost" Type="System.String" />
+        <Parameter Name="port" Type="System.Int32" />
+        <Parameter Name="path" Type="System.String" />
+        <Parameter Name="defaultToRoot" Type="System.Boolean" />
+      </Parameters>
+      <Docs>
+        <param name="vhost">To be added.</param>
+        <param name="port">To be added.</param>
+        <param name="path">To be added.</param>
+        <param name="defaultToRoot">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetSingleApp">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.VPathToHost GetSingleApp ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.VPathToHost</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="InitializeLifetimeService">
+      <MemberSignature Language="C#" Value="public override object InitializeLifetimeService ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Object</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Port">
+      <MemberSignature Language="C#" Value="public int Port { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RegisterSocket">
+      <MemberSignature Language="C#" Value="public void RegisterSocket (System.Net.Sockets.Socket socket);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="socket" Type="System.Net.Sockets.Socket" />
+      </Parameters>
+      <Docs>
+        <param name="socket">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ReuseSocket">
+      <MemberSignature Language="C#" Value="public void ReuseSocket (System.Net.Sockets.Socket sock, int reuses);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="sock" Type="System.Net.Sockets.Socket" />
+        <Parameter Name="reuses" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="sock">To be added.</param>
+        <param name="reuses">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ShutdownSockets">
+      <MemberSignature Language="C#" Value="public void ShutdownSockets ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SingleApplication">
+      <MemberSignature Language="C#" Value="public bool SingleApplication { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Start">
+      <MemberSignature Language="C#" Value="public bool Start (bool bgThread);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="bgThread" Type="System.Boolean" />
+      </Parameters>
+      <Docs>
+        <param name="bgThread">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Start">
+      <MemberSignature Language="C#" Value="public bool Start (bool bgThread, Exception initialException);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="bgThread" Type="System.Boolean" />
+        <Parameter Name="initialException" Type="System.Exception" />
+      </Parameters>
+      <Docs>
+        <param name="bgThread">To be added.</param>
+        <param name="initialException">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Stop">
+      <MemberSignature Language="C#" Value="public void Stop ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="UnloadAll">
+      <MemberSignature Language="C#" Value="public void UnloadAll ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="UnregisterSocket">
+      <MemberSignature Language="C#" Value="public void UnregisterSocket (System.Net.Sockets.Socket socket);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="socket" Type="System.Net.Sockets.Socket" />
+      </Parameters>
+      <Docs>
+        <param name="socket">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Verbose">
+      <MemberSignature Language="C#" Value="public bool Verbose { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

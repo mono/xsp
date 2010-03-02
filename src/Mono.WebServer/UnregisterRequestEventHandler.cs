@@ -1,17 +1,11 @@
 //
-// Mono.WebServer.MapPathEventArgs
+// Mono.WebServer.UnregisterRequestEventHandler
 //
 // Authors:
-//	Daniel Lopez Ridruejo
-// 	Gonzalo Paniagua Javier
+//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+// 	Lluis Sanchez Gual (lluis@ximian.com)
 //
-// Documentation:
-//	Brian Nickel
-//
-// Copyright (c) 2002 Daniel Lopez Ridruejo.
-//           (c) 2002,2003 Ximian, Inc.
-//           All rights reserved.
-// (C) Copyright 2004-2010 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2010 Novell, Inc
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,40 +28,14 @@
 //
 
 using System;
+using System.Collections;
 
 namespace Mono.WebServer
 {
-	public class MapPathEventArgs : EventArgs
-	{
-		// Contains the virtual path, as used in the request.
-		string path;
-		
-		// Contains the physical "mapped" path.
-		string mapped;
-		
-		// Indicates whether or not the path has been mapped.
-		bool isMapped;		
-
-		public MapPathEventArgs (string path)
-		{
-			this.path = path;
-			isMapped = false;
-		}
-
-		public string Path {
-			get { return path; }
-		}
-		
-		public bool IsMapped {
-			get { return isMapped; }
-		}
-
-		public string MappedPath {
-			get { return mapped; }
-			set {
-				mapped = value;
-				isMapped = (value != null && value != "");
-			}
-		}
-	}
+	/// <summary>
+	///   This delegate is used to handle <see cref="UnregisterRequestEvent"/>
+	/// </summary>
+	/// <param name="sender">Origin of the event</param>
+	/// <param name="args">An <see cref="UnregisterRequestEventArgs"/> object with the event-specific arguments</param>
+	public delegate void UnregisterRequestEventHandler (object sender, UnregisterRequestEventArgs args);
 }

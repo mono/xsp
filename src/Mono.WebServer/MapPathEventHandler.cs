@@ -37,31 +37,5 @@ using System;
 
 namespace Mono.WebServer
 {
-	/// <summary>
-	///    This delegate is used to handle <see
-	///    cref="MonoWorkerRequest.MapPathEvent" /> and performs custom path
-	///    mapping.
-	/// </summary>
-	/// <param name="sender">
-	///    The <see cref="object" /> that sent the event.
-	/// </param>
-	/// <param name="args">
-	///    A <see cref="MapPathEventArgs" /> object containing the arguments
-	///    for the event.
-	/// </param>
-	/// <remarks>
-	///    This method is used for custom path mapping within <see
-	///    cref="MonoWorkerRequest.MapPath" />.
-	/// </remarks>
-	/// <example>
-	///    An example <see cref="MapPathEventHandler" />
-	///    <code language="C#">
-	///        void OnMapPathEvent (object sender, MapPathEventArgs args)
-	///        {
-	///            if (args.Path.StartsWith ("/blog"))
-	///                args.MappedPath = @"C:\Documents and Settings\John Doe\My Documents\Visual Studio 2005\WebSites\blog";
-	///        }
-	///    </code>
-	/// </example>
 	public delegate void MapPathEventHandler (object sender, MapPathEventArgs args);
 }

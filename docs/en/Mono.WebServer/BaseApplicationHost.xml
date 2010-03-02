@@ -1,0 +1,192 @@
+<Type Name="BaseApplicationHost" FullName="Mono.WebServer.BaseApplicationHost">
+  <TypeSignature Language="C#" Value="public class BaseApplicationHost : MarshalByRefObject, Mono.WebServer.IApplicationHost" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.MarshalByRefObject</BaseTypeName>
+  </Base>
+  <Interfaces>
+    <Interface>
+      <InterfaceName>Mono.WebServer.IApplicationHost</InterfaceName>
+    </Interface>
+  </Interfaces>
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public BaseApplicationHost ();" />
+      <MemberType>Constructor</MemberType>
+      <Parameters />
+      <Docs>
+        <summary>Creates the <see cref="M:Mono.WebServer.BaseApplicationHost.EndOfRequest" /> event handler and registers a handler (<see cref="M:Mono.WebServer.BaseApplicationHost.OnUnload" />) with the <see cref="E:System.AppDomain.DomainUnload" /> event.</summary>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Domain">
+      <MemberSignature Language="C#" Value="public AppDomain Domain { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.AppDomain</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Returns the current application domain.</summary>
+        <value>Current application domain</value>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="EndOfRequest">
+      <MemberSignature Language="C#" Value="public void EndOfRequest (Mono.WebServer.MonoWorkerRequest mwr);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="mwr" Type="Mono.WebServer.MonoWorkerRequest" />
+      </Parameters>
+      <Docs>
+        <param name="mwr">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="InitializeLifetimeService">
+      <MemberSignature Language="C#" Value="public override object InitializeLifetimeService ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Object</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="IsHttpHandler">
+      <MemberSignature Language="C#" Value="public virtual bool IsHttpHandler (string verb, string uri);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="verb" Type="System.String" />
+        <Parameter Name="uri" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="verb">A HTTP verb (GET, PUT etc)</param>
+        <param name="uri">A request URI to check</param>
+        <summary>Checks if the passed URI maps to a HTTP handler</summary>
+        <returns>
+          <see langword="true" /> if the passed URI refers to a HTTP handler, <see langword="false" /> otherwise.</returns>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="OnUnload">
+      <MemberSignature Language="C#" Value="public void OnUnload (object o, EventArgs args);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="o" Type="System.Object" />
+        <Parameter Name="args" Type="System.EventArgs" />
+      </Parameters>
+      <Docs>
+        <param name="o">Calling object</param>
+        <param name="args">Event arguments</param>
+        <summary>Event handler for the <see cref="E:System.AppDomain.DomainUnload" /> event.</summary>
+        <remarks>Calls <see cref="M:ApplicationServer.DestroyHost" /> to shut the host down.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Path">
+      <MemberSignature Language="C#" Value="public string Path { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Physical path to the application root directory.</summary>
+        <value>Physical path to the application root directory.</value>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ProcessRequest">
+      <MemberSignature Language="C#" Value="protected void ProcessRequest (Mono.WebServer.MonoWorkerRequest mwr);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="mwr" Type="Mono.WebServer.MonoWorkerRequest" />
+      </Parameters>
+      <Docs>
+        <param name="mwr">A worker object to actually process the request</param>
+        <summary>Process a request.</summary>
+        <remarks>If the mwr parameter is null or no request data can be read, the request will be ended immediately. Otherwise, registers an event
+handler for the worker's <see cref="M:Mono.WebServer.MonoWorkerRequest.EndOfRequest" /> event and calls the worker's <see cref="M:Mono.WebServer.MonoWorkerRequest.ProcessRequest" /> 
+method to actually process the request. If an unhandled exception occurs during that phase, it is printed to the console and <see cref="M:Mono.WebServer.BaseApplicationHost.EndOfRequest" /> 
+is called immediately.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestBroker">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.IRequestBroker RequestBroker { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.IRequestBroker</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Reference to the associated request broker</summary>
+        <value>Associated request broker.</value>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Server">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.ApplicationServer Server { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.ApplicationServer</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Reference to the associated <see cref="T:Mono.WebServer.ApplicationServer" /></summary>
+        <value>
+          <see cref="T:Mono.WebServer.ApplicationServer" /> associated with this instance.</value>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Unload">
+      <MemberSignature Language="C#" Value="public void Unload ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Unloads the current application domain by calling <see cref="M:System.Web.HttpRuntime.UnloadAppDomain" /></summary>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="VPath">
+      <MemberSignature Language="C#" Value="public string VPath { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Virtual path to the application root.</summary>
+        <value>Virtual path to the application root.</value>
+        <remarks>
+        </remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

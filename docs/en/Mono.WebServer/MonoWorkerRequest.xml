@@ -1,0 +1,553 @@
+<Type Name="MonoWorkerRequest" FullName="Mono.WebServer.MonoWorkerRequest">
+  <TypeSignature Language="C#" Value="public abstract class MonoWorkerRequest : System.Web.Hosting.SimpleWorkerRequest" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Web.Hosting.SimpleWorkerRequest</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>This abstract class extends <see cref="T:System.Web.Hosting.SimpleWorkerRequest" />, adding support for security certificates and implementing methods
+for use with a web server.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public MonoWorkerRequest (Mono.WebServer.IApplicationHost appHost);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="appHost" Type="Mono.WebServer.IApplicationHost" />
+      </Parameters>
+      <Docs>
+        <param name="appHost">A <see cref="T:Mono.WebServer.IApplicationHost" /> object containing the application host that created the new instance.</param>
+        <summary>Constructs and initializes a new instance of <see cref="T:Mono.WebServer.MonoWorkerRequest" /> for a specified application host.</summary>
+        <remarks><paramref name="appHost" /> <B>MUST</B> be the <see cref="T:Mono.WebServer.IApplicationHost" /> that created the new instance so they will be in the 
+same <see cref="T:System.AppDomain" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddServerVariable">
+      <MemberSignature Language="C#" Value="public void AddServerVariable (string name, string value);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="name" Type="System.String" />
+        <Parameter Name="value" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="name">name of the server variable to add.</param>
+        <param name="value">value of the server variable to add.</param>
+        <summary>Adds a server variable to the current instance.</summary>
+        <remarks>Server variables are like environment variables and contain name/value pairs of information.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CheckFileAccess">
+      <MemberSignature Language="C#" Value="public static bool CheckFileAccess { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="client_raw">
+      <MemberSignature Language="C#" Value="protected byte[] client_raw;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Contains the raw client certificate used for authenticating the current instance, if secure.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ClientCertificate">
+      <MemberSignature Language="C#" Value="public System.Security.Cryptography.X509Certificates.X509Certificate ClientCertificate { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Security.Cryptography.X509Certificates.X509Certificate</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the X509 client certificate used by the current instance.</summary>
+        <value>client certificate used by the current instance.</value>
+        <remarks>This property should only be used if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Encoding">
+      <MemberSignature Language="C#" Value="protected virtual System.Text.Encoding Encoding { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Text.Encoding</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the content encoding used by the current instance.</summary>
+        <value>content encoding used by the current instance.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="EndOfRequest">
+      <MemberSignature Language="C#" Value="public override void EndOfRequest ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Does final processing after the request has been completed.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="EndOfRequestEvent">
+      <MemberSignature Language="C#" Value="public event Mono.WebServer.EndOfRequestHandler EndOfRequestEvent;" />
+      <MemberType>Event</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.EndOfRequestHandler</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>This event is called after the request has been completed and should be used by request brokers to perform final operations.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetAppPath">
+      <MemberSignature Language="C#" Value="public override string GetAppPath ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the virtual host path of the file used by of the current instance.</summary>
+        <returns>A <see cref="T:System.String" /> containing the virtual host path of the file used by the current instance.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetAppPathTranslated">
+      <MemberSignature Language="C#" Value="public override string GetAppPathTranslated ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the physical host path of the file used by of the current instance.</summary>
+        <returns>Physical host path of the file used by the current instance.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetClientCertificate">
+      <MemberSignature Language="C#" Value="public override byte[] GetClientCertificate ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the raw client certificate used by the current instance.</summary>
+        <returns>raw client certificate used by the current instance.</returns>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetClientCertificateBinaryIssuer">
+      <MemberSignature Language="C#" Value="public override byte[] GetClientCertificateBinaryIssuer ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the binary issuer of the client certificate used by the current instance.</summary>
+        <returns>binary issuer of the client certificate used by the current instance.</returns>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetClientCertificateEncoding">
+      <MemberSignature Language="C#" Value="public override int GetClientCertificateEncoding ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the encoding of the client certificate used by the current instance.</summary>
+        <returns>encoding of the client certificate used by the current instance.</returns>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetClientCertificatePublicKey">
+      <MemberSignature Language="C#" Value="public override byte[] GetClientCertificatePublicKey ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the public key of the client certificate used by the current instance.</summary>
+        <returns>public key of the client certificate used by the current instance.</returns>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetClientCertificateValidFrom">
+      <MemberSignature Language="C#" Value="public override DateTime GetClientCertificateValidFrom ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.DateTime</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the date and time the client certificate used by the current instance is valid from.</summary>
+        <returns>date and time the client certificate used by the current instance is valid from.</returns>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetClientCertificateValidUntil">
+      <MemberSignature Language="C#" Value="public override DateTime GetClientCertificateValidUntil ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.DateTime</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the date and time the client certificate used by the current instance is valid until.</summary>
+        <returns>date and time the client certificate used by the current instance is valid until.</returns>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetFilePathTranslated">
+      <MemberSignature Language="C#" Value="public override string GetFilePathTranslated ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the mapped path of the file used by of the current instance.</summary>
+        <returns>Mapped path of the file used by the current instance.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetLocalAddress">
+      <MemberSignature Language="C#" Value="public override string GetLocalAddress ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the local address of the current instance.</summary>
+        <returns>Local address of the current instance.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetLocalPort">
+      <MemberSignature Language="C#" Value="public override int GetLocalPort ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the local port of the current instance.</summary>
+        <returns>Port number of the current instance.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetPreloadedEntityBody">
+      <MemberSignature Language="C#" Value="public override byte[] GetPreloadedEntityBody ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the preloaded entity data for the current instance.</summary>
+        <returns>Preloaded entity data read from the request.</returns>
+        <remarks>If the request was receiving data before being processed, entity (form) data may have been accumulated. This method allows that data to be read directly.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetQueryStringRawBytes">
+      <MemberSignature Language="C#" Value="public override byte[] GetQueryStringRawBytes ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the bytes representing the query string of the current instance.</summary>
+        <returns>Bytes representing the query string.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetRequestData">
+      <MemberSignature Language="C#" Value="protected abstract bool GetRequestData ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the request data.</summary>
+        <returns>A <see langword="bool" /> indicating whether or not the data was received successfully.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetServerName">
+      <MemberSignature Language="C#" Value="public override string GetServerName ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Gets the server name of the current instance.</summary>
+        <returns>Server name of the current instance.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetServerVariable">
+      <MemberSignature Language="C#" Value="public override string GetServerVariable (string name);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="name" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="name">name of the variable to get.</param>
+        <summary>Gets a server variable with a specified name from the current instance.</summary>
+        <returns>value of the server variable, or <see cref="P:System.String.Empty" /> if the variable was not found.</returns>
+        <remarks>Server variables are like environment variables and contain name/value pairs of information.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="HeaderEncoding">
+      <MemberSignature Language="C#" Value="protected virtual System.Text.Encoding HeaderEncoding { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Text.Encoding</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the header encoding used by the current instance.</summary>
+        <value>header encoding used by the current instance.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="MapPath">
+      <MemberSignature Language="C#" Value="public override string MapPath (string path);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="path" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="path">virutal path of the request.</param>
+        <summary>Maps the virtual path of the request to a physical path.</summary>
+        <returns>mapped physical path of the request.</returns>
+        <remarks>By default, the path will be mapped using the virtual and physical paths of the <see cref="T:Mono.WebServer.IApplicationHost" />
+used to create the current instance. To override this, register a <see cref="T:Mono.WebServer.MapPathEventHandler" /> with <see cref="E:Mono.WebServer.MonoWorkerRequest.MapPathEvent" />.
+	</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="MapPathEvent">
+      <MemberSignature Language="C#" Value="public event Mono.WebServer.MapPathEventHandler MapPathEvent;" />
+      <MemberType>Event</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.MapPathEventHandler</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>This event is called by <see cref="M:Mono.WebServer.MonoWorkerRequest.MapPath" /> and is used for custom path mapping.</summary>
+        <remarks><para>See <see cref="T:Mono.WebServer.MapPathEventHandler" /> for an example.</para>
+<note type="caution"><para>Handlers added to are not guaranteed to be called. The class will evoke the handlers in order until the path is mapped, and then stop.</para></note>
+      </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ProcessRequest">
+      <MemberSignature Language="C#" Value="public void ProcessRequest ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Processes the request contained in the current instance.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ReadRequestData">
+      <MemberSignature Language="C#" Value="public bool ReadRequestData ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Reads the request data.</summary>
+        <returns>A <see langword="bool" /> indicating whether or not the data was read successfully.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestId">
+      <MemberSignature Language="C#" Value="public abstract int RequestId { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the request ID as used by the <see cref="T:Mono.WebServer.IApplicationHost" />'s request broker.</summary>
+        <value>The request ID.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RunningOnWindows">
+      <MemberSignature Language="C#" Value="protected static bool RunningOnWindows { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendCalculatedContentLength">
+      <MemberSignature Language="C#" Value="public override void SendCalculatedContentLength (int contentLength);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="contentLength" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="contentLength">content length of the response.</param>
+        <summary>Sends the calculated content length of the response.</summary>
+        <remarks>Including the content length in the header allows the client to show download progress.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendFromStream">
+      <MemberSignature Language="C#" Value="protected void SendFromStream (System.IO.Stream stream, long offset, long length);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="stream" Type="System.IO.Stream" />
+        <Parameter Name="offset" Type="System.Int64" />
+        <Parameter Name="length" Type="System.Int64" />
+      </Parameters>
+      <Docs>
+        <param name="stream">stream to send from</param>
+        <param name="offset">position to start sending from.</param>
+        <param name="length">number of bytes to send.</param>
+        <summary>Sends a response directly from stream at a specified offset with a specified length.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendKnownResponseHeader">
+      <MemberSignature Language="C#" Value="public override void SendKnownResponseHeader (int index, string value);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="index" Type="System.Int32" />
+        <Parameter Name="value" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="index">known response header index.</param>
+        <param name="value">the response value.</param>
+        <summary>Sends a known response header with a specified index and value.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendResponseFromFile">
+      <MemberSignature Language="C#" Value="public override void SendResponseFromFile (IntPtr handle, long offset, long length);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="handle" Type="System.IntPtr" />
+        <Parameter Name="offset" Type="System.Int64" />
+        <Parameter Name="length" Type="System.Int64" />
+      </Parameters>
+      <Docs>
+        <param name="handle">raw file descriptor.</param>
+        <param name="offset">position to start sending from.</param>
+        <param name="length">number of bytes to send.</param>
+        <summary>Sends a response directly from a raw file descriptor at a specified offset with a specified length.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendResponseFromFile">
+      <MemberSignature Language="C#" Value="public override void SendResponseFromFile (string filename, long offset, long length);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="filename" Type="System.String" />
+        <Parameter Name="offset" Type="System.Int64" />
+        <Parameter Name="length" Type="System.Int64" />
+      </Parameters>
+      <Docs>
+        <param name="filename">name of the file to send from.</param>
+        <param name="offset">position to start sending from.</param>
+        <param name="length">number of bytes to send.</param>
+        <summary>Sends a response directly from file at a specified offset with a specified length.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="server_raw">
+      <MemberSignature Language="C#" Value="protected byte[] server_raw;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Contains the raw server certificate used for authenticating the current instance, if secure.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetClientCertificate">
+      <MemberSignature Language="C#" Value="public void SetClientCertificate (byte[] rawcert);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="rawcert" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="rawcert">raw client certificate used by the current instance.</param>
+        <summary>Sets the raw client certificate used by the current instance.</summary>
+        <remarks>This method should only be called if <see cref="T:System.Web.HttpWorkerRequest.IsSecure" /> is <see langword="true" />.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetEndOfSendNotification">
+      <MemberSignature Language="C#" Value="public override void SetEndOfSendNotification (System.Web.HttpWorkerRequest.EndOfSendNotification callback, object extraData);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="callback" Type="System.Web.HttpWorkerRequest+EndOfSendNotification" />
+        <Parameter Name="extraData" Type="System.Object" />
+      </Parameters>
+      <Docs>
+        <param name="callback">A <see cref="T:System.Web.HttpWorkerRequest+EndOfSendNotification" /> delegate to be called when the current instance 
+is finished sending data to the response.</param>
+        <param name="extraData">data to be sent to <paramref name="callback" /> when it is called.</param>
+        <summary>Sets the end-of-status notification callback and its complementary data.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

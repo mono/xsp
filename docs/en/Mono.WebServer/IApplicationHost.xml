@@ -1,0 +1,103 @@
+<Type Name="IApplicationHost" FullName="Mono.WebServer.IApplicationHost">
+  <TypeSignature Language="C#" Value="public interface IApplicationHost" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Interfaces />
+  <Docs>
+    <summary>This interface is used for classes that serve as application hosts.</summary>
+    <remarks>An application, as created through a <see cref="T:Mono.WebServer.ApplicationServer" />, exists in its own <see cref="T:System.AppDomain" />.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="Domain">
+      <MemberSignature Language="C#" Value="public AppDomain Domain { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.AppDomain</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the application domain the application host exists in.</summary>
+        <value>A <see cref="T:System.AppDomain" /> object containing the application domain the application host exists in.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="IsHttpHandler">
+      <MemberSignature Language="C#" Value="public bool IsHttpHandler (string verb, string uri);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="verb" Type="System.String" />
+        <Parameter Name="uri" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="verb">A HTTP verb (GET, PUT etc)</param>
+        <param name="uri">A request URI to check</param>
+        <summary>Checks if the passed URI maps to a HTTP handler</summary>
+        <returns><see langword="true" /> if the passed URI refers to a HTTP handler, <see langword="false" /> otherwise.</returns>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Path">
+      <MemberSignature Language="C#" Value="public string Path { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the physical path of the hosted application.</summary>
+        <value>physical path of the hosted application.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestBroker">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.IRequestBroker RequestBroker { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.IRequestBroker</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets and sets the request broker that manages the hosted requests.</summary>
+        <value>A <see cref="T:Mono.WebServer.IRequestBroker" /> object containing the request broker that manages the hosted requests.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Server">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.ApplicationServer Server { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.ApplicationServer</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the application server that created the application host.</summary>
+        <value>A <see cref="T:Mono.WebServer.ApplicationServer" /> object containing the application server that created the application host.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Unload">
+      <MemberSignature Language="C#" Value="public void Unload ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>Unloads the application host.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="VPath">
+      <MemberSignature Language="C#" Value="public string VPath { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the virtual path of the hosted application.</summary>
+        <value>virtual path of the hosted application.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

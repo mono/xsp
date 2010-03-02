@@ -1,0 +1,14 @@
+<Type Name="IRequestBroker" FullName="Mono.WebServer.IRequestBroker">
+  <TypeSignature Language="C#" Value="public interface IRequestBroker" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Interfaces />
+  <Docs>
+    <summary>This interface is used for classes that manage requests.</summary>
+    <remarks>A request broker serves as an intermediary between <see  cref="T:Mono.WebServer.Worker" /> and
+      <see cref="T:Mono.WebServer.MonoWorkerRequest" /> to handle
+the interaction between app-domains. In addition it should inherit <see cref="T:System.MarshalByRefObject" />.</remarks>
+  </Docs>
+  <Members />
+</Type>

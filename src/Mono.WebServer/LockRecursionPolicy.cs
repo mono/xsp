@@ -28,7 +28,7 @@
 namespace System.Threading
 {
 	[Serializable]
-	public enum LockRecursionPolicy
+	enum LockRecursionPolicy
 	{
 		NoRecursion,
 		SupportsRecursion

@@ -1,0 +1,40 @@
+<Type Name="UnregisterRequestEventArgs" FullName="Mono.WebServer.UnregisterRequestEventArgs">
+  <TypeSignature Language="C#" Value="public class UnregisterRequestEventArgs : EventArgs" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.EventArgs</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public UnregisterRequestEventArgs (int requestId);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="requestId" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="requestId">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestId">
+      <MemberSignature Language="C#" Value="public int RequestId { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

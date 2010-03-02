@@ -1,0 +1,50 @@
+<Overview>
+  <Assemblies>
+    <Assembly Name="Mono.WebServer2" Version="0.2.0.0">
+      <Attributes>
+        <Attribute>
+          <AttributeName>System.Reflection.AssemblyCompany("Novell, Inc.")</AttributeName>
+        </Attribute>
+        <Attribute>
+          <AttributeName>System.Reflection.AssemblyCopyright("(c) 2002-2005 Novell, Inc.")</AttributeName>
+        </Attribute>
+        <Attribute>
+          <AttributeName>System.Reflection.AssemblyDescription("Classes for embedding an ASP.NET server in your application .NET 2.0.")</AttributeName>
+        </Attribute>
+        <Attribute>
+          <AttributeName>System.Reflection.AssemblyTitle("Mono.WebServer2")</AttributeName>
+        </Attribute>
+        <Attribute>
+          <AttributeName>System.Runtime.CompilerServices.RuntimeCompatibility(WrapNonExceptionThrows=true)</AttributeName>
+        </Attribute>
+      </Attributes>
+    </Assembly>
+  </Assemblies>
+  <Remarks>To be added.</Remarks>
+  <Copyright>To be added.</Copyright>
+  <Types>
+    <Namespace Name="Mono.WebServer">
+      <Type Name="ApplicationServer" Kind="Class" />
+      <Type Name="BaseApplicationHost" Kind="Class" />
+      <Type Name="BaseRequestBroker" Kind="Class" />
+      <Type Name="EndOfRequestHandler" Kind="Delegate" />
+      <Type Name="HttpErrors" Kind="Class" />
+      <Type Name="IApplicationHost" Kind="Interface" />
+      <Type Name="InitialWorkerRequest" Kind="Class" />
+      <Type Name="IRequestBroker" Kind="Interface" />
+      <Type Name="LingeringNetworkStream" Kind="Class" />
+      <Type Name="MapPathEventArgs" Kind="Class" />
+      <Type Name="MapPathEventHandler" Kind="Delegate" />
+      <Type Name="MonoWorkerRequest" Kind="Class" />
+      <Type Name="Paths" Kind="Class" />
+      <Type Name="RequestData" Kind="Class" />
+      <Type Name="UnregisterRequestEventArgs" Kind="Class" />
+      <Type Name="UnregisterRequestEventHandler" Kind="Delegate" />
+      <Type Name="VPathToHost" Kind="Class" />
+      <Type Name="WebSource" Kind="Class" />
+      <Type Name="WebTrace" Kind="Class" />
+      <Type Name="Worker" Kind="Class" />
+    </Namespace>
+  </Types>
+  <Title>Mono.WebServer2</Title>
+</Overview>

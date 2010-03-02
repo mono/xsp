@@ -1,0 +1,194 @@
+<Type Name="VPathToHost" FullName="Mono.WebServer.VPathToHost">
+  <TypeSignature Language="C#" Value="public class VPathToHost" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public VPathToHost (string vhost, int vport, string vpath, string realPath);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="vhost" Type="System.String" />
+        <Parameter Name="vport" Type="System.Int32" />
+        <Parameter Name="vpath" Type="System.String" />
+        <Parameter Name="realPath" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="vhost">To be added.</param>
+        <param name="vport">To be added.</param>
+        <param name="vpath">To be added.</param>
+        <param name="realPath">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AppHost">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.IApplicationHost AppHost;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.IApplicationHost</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CreateHost">
+      <MemberSignature Language="C#" Value="public void CreateHost (Mono.WebServer.ApplicationServer server, Mono.WebServer.WebSource webSource);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="server" Type="Mono.WebServer.ApplicationServer" />
+        <Parameter Name="webSource" Type="Mono.WebServer.WebSource" />
+      </Parameters>
+      <Docs>
+        <param name="server">To be added.</param>
+        <param name="webSource">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="haveWildcard">
+      <MemberSignature Language="C#" Value="public readonly bool haveWildcard;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Match">
+      <MemberSignature Language="C#" Value="public bool Match (string vhost, int vport, string vpath);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="vhost" Type="System.String" />
+        <Parameter Name="vport" Type="System.Int32" />
+        <Parameter Name="vpath" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="vhost">To be added.</param>
+        <param name="vport">To be added.</param>
+        <param name="vpath">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="realPath">
+      <MemberSignature Language="C#" Value="public string realPath;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Redirect">
+      <MemberSignature Language="C#" Value="public bool Redirect (string path, out string redirect);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="path" Type="System.String" />
+        <Parameter Name="redirect" Type="System.String&amp;" RefType="out" />
+      </Parameters>
+      <Docs>
+        <param name="path">To be added.</param>
+        <param name="redirect">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestBroker">
+      <MemberSignature Language="C#" Value="public Mono.WebServer.IRequestBroker RequestBroker;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.IRequestBroker</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="TryClearHost">
+      <MemberSignature Language="C#" Value="public bool TryClearHost (Mono.WebServer.IApplicationHost host);" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="host" Type="Mono.WebServer.IApplicationHost" />
+      </Parameters>
+      <Docs>
+        <param name="host">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="UnloadHost">
+      <MemberSignature Language="C#" Value="public void UnloadHost ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="vhost">
+      <MemberSignature Language="C#" Value="public readonly string vhost;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="vpath">
+      <MemberSignature Language="C#" Value="public readonly string vpath;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="vport">
+      <MemberSignature Language="C#" Value="public readonly int vport;" />
+      <MemberType>Field</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

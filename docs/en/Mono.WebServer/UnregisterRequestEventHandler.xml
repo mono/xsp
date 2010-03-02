@@ -1,0 +1,22 @@
+<Type Name="UnregisterRequestEventHandler" FullName="Mono.WebServer.UnregisterRequestEventHandler">
+  <TypeSignature Language="C#" Value="public delegate void UnregisterRequestEventHandler(object sender, UnregisterRequestEventArgs args);" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Delegate</BaseTypeName>
+  </Base>
+  <Parameters>
+    <Parameter Name="sender" Type="System.Object" />
+    <Parameter Name="args" Type="Mono.WebServer.UnregisterRequestEventArgs" />
+  </Parameters>
+  <ReturnValue>
+    <ReturnType>System.Void</ReturnType>
+  </ReturnValue>
+  <Docs>
+    <param name="sender">To be added.</param>
+    <param name="args">To be added.</param>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+</Type>

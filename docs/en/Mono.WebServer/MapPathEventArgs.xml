@@ -1,0 +1,65 @@
+<Type Name="MapPathEventArgs" FullName="Mono.WebServer.MapPathEventArgs">
+  <TypeSignature Language="C#" Value="public class MapPathEventArgs : EventArgs" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.EventArgs</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>This class extends <see cref="T:System.EventArgs" /> to provide arguments for <see cref="T:Mono.WebServer.MapPathEventHandler" />.</summary>
+    <remarks>When <see cref="E:Mono.WebServer.MonoWorkerRequest.MapPathEvent" /> is called, the handler has an option of setting 
+<see cref="P:Mono.WebServer.MapPathEventArgs.MappedPath" /> to a mapped path.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public MapPathEventArgs (string path);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="path" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="path">virtual path, as contained in the request.</param>
+        <summary>Constructs and initializes a new instance of <see cref="T:Mono.WebServer.MapPathEventArgs" /> for a specified virtual path.</summary>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="IsMapped">
+      <MemberSignature Language="C#" Value="public bool IsMapped { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets whether or not the path is mapped.</summary>
+        <value>A <see langword="bool" /> indicating whether or not the path has been mapped.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="MappedPath">
+      <MemberSignature Language="C#" Value="public string MappedPath { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets and sets the physical "mapped" path for the current instance.</summary>
+        <value>Physical mapped path of the current instance.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Path">
+      <MemberSignature Language="C#" Value="public string Path { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>Gets the virtual path of the current instance.</summary>
+        <value>Virtual path of the current instance.</value>
+        <remarks></remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

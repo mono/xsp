@@ -50,12 +50,5 @@ using System.Web.Hosting;
 
 namespace Mono.WebServer
 {
-	/// <summary>
-	///    This delegate is used to handle <see
-	///    cref="MonoWorkerRequest.EndOfRequestEvent" />.
-	/// </summary>
-	/// <param name="request">
-	///    The <see cref="MonoWorkerRequest" /> that sent the event.
-	/// </param>
 	public delegate void EndOfRequestHandler (MonoWorkerRequest request);
 }

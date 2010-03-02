@@ -1,0 +1,78 @@
+<Type Name="LingeringNetworkStream" FullName="Mono.WebServer.LingeringNetworkStream">
+  <TypeSignature Language="C#" Value="public class LingeringNetworkStream : System.Net.Sockets.NetworkStream" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Net.Sockets.NetworkStream</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public LingeringNetworkStream (System.Net.Sockets.Socket sock, bool owns);" />
+      <MemberType>Constructor</MemberType>
+      <Parameters>
+        <Parameter Name="sock" Type="System.Net.Sockets.Socket" />
+        <Parameter Name="owns" Type="System.Boolean" />
+      </Parameters>
+      <Docs>
+        <param name="sock">To be added.</param>
+        <param name="owns">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Close">
+      <MemberSignature Language="C#" Value="public override void Close ();" />
+      <MemberType>Method</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Connected">
+      <MemberSignature Language="C#" Value="public bool Connected { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="EnableLingering">
+      <MemberSignature Language="C#" Value="public bool EnableLingering { set; get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="OwnsSocket">
+      <MemberSignature Language="C#" Value="public bool OwnsSocket { get; }" />
+      <MemberType>Property</MemberType>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>To be added.</summary>
+        <value>To be added.</value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

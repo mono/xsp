@@ -1,0 +1,34 @@
+<Type Name="MapPathEventHandler" FullName="Mono.WebServer.MapPathEventHandler">
+  <TypeSignature Language="C#" Value="public delegate void MapPathEventHandler(object sender, MapPathEventArgs args);" />
+  <AssemblyInfo>
+    <AssemblyName>Mono.WebServer2</AssemblyName>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Delegate</BaseTypeName>
+  </Base>
+  <Parameters>
+    <Parameter Name="sender" Type="System.Object" />
+    <Parameter Name="args" Type="Mono.WebServer.MapPathEventArgs" />
+  </Parameters>
+  <ReturnValue>
+    <ReturnType>System.Void</ReturnType>
+  </ReturnValue>
+  <Docs>
+    <param name="sender">The <see cref="T:System.Object" /> that sent the event.</param>
+    <param name="args">A <see cref="T:Mono.WebServer.MapPathEventArgs" /> object containing the arguments for the event.</param>
+    <summary>This delegate is used to handle <see cref="T:Mono.WebServer.MonoWorkerRequest.MapPathEvent" /> and performs custom path mapping.</summary>
+    <remarks>This method is used for custom path mapping within <see cref="T:Mono.WebServer.MonoWorkerRequest.MapPath" />.
+<example>
+An example <see cref="MapPathEventHandler" />
+<code lang="C#">
+void OnMapPathEvent (object sender, MapPathEventArgs args)
+{
+	if (args.Path.StartsWith ("/blog"))
+		args.MappedPath = @"C:\Documents and Settings\John Doe\My Documents\Visual Studio 2005\WebSites\blog";
+	}
+}
+</code>
+</example>
+    </remarks>
+  </Docs>
+</Type>

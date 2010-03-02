@@ -204,7 +204,7 @@ namespace Mono.WebServer
 			
 			if (!server.SingleApplication) {
 				broker = (ModMonoRequestBroker) vapp.RequestBroker;
-				broker.UnregisterRequestEvent += new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
+				broker.UnregisterRequestEvent += new UnregisterRequestEventHandler (OnUnregisterRequest);
 				requestId = broker.RegisterRequest (this);
 			}
 			
@@ -227,7 +227,7 @@ namespace Mono.WebServer
 		{
 			BaseRequestBroker broker = sender as BaseRequestBroker;
 			if (broker != null)
-				broker.UnregisterRequestEvent -= new BaseRequestBroker.UnregisterRequestEventHandler (OnUnregisterRequest);
+				broker.UnregisterRequestEvent -= new UnregisterRequestEventHandler (OnUnregisterRequest);
 
 			if (requestId == -1 || requestId != args.RequestId)
 				return;

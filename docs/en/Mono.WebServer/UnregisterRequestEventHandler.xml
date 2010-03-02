@@ -14,9 +14,9 @@
     <ReturnType>System.Void</ReturnType>
   </ReturnValue>
   <Docs>
-    <param name="sender">To be added.</param>
-    <param name="args">To be added.</param>
-    <summary>To be added.</summary>
-    <remarks>To be added.</remarks>
+    <param name="sender">Origin of the event</param>
+    <param name="args">An <see cref="T:Mono.WebServer.UnregisterRequestEventArgs"/> object with the event-specific arguments</param>
+    <summary>This delegate is used to handle <see cref="T:Mono.WebServer.BaseRequestBroker.UnregisterRequestEvent"/></summary>
+    <remarks></remarks>
   </Docs>
 </Type>

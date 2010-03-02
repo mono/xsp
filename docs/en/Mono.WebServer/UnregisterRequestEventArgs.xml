@@ -8,8 +8,8 @@
   </Base>
   <Interfaces />
   <Docs>
-    <summary>To be added.</summary>
-    <remarks>To be added.</remarks>
+    <summary>This class extends <see cref="T:System.EventArgs"/> to provide arguments for <see cref="T:Mono.WebServer.BaseRequestBroker.UnregisterRequestEventHandler"/>.</summary>
+    <remarks></remarks>
   </Docs>
   <Members>
     <Member MemberName=".ctor">
@@ -19,9 +19,9 @@
         <Parameter Name="requestId" Type="System.Int32" />
       </Parameters>
       <Docs>
-        <param name="requestId">To be added.</param>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <param name="requestId">Request of the ID that has just been unregistered.</param>
+        <summary>Constructs an instance of the class for the specified request ID</summary>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="RequestId">
@@ -31,9 +31,9 @@
         <ReturnType>System.Int32</ReturnType>
       </ReturnValue>
       <Docs>
-        <summary>To be added.</summary>
-        <value>To be added.</value>
-        <remarks>To be added.</remarks>
+        <summary>Contains the id of a request that is about to be unregistered.</summary>
+        <value>the request ID</value>
+        <remarks></remarks>
       </Docs>
     </Member>
   </Members>

@@ -12,8 +12,8 @@
     </Interface>
   </Interfaces>
   <Docs>
-    <summary>To be added.</summary>
-    <remarks>To be added.</remarks>
+    <summary>This abstract class produces the implementation specific components needed to run the <see cref="T:Mono.WebServer.ApplicationServer" />.</summary>
+    <remarks></remarks>
   </Docs>
   <Members>
     <Member MemberName=".ctor">
@@ -33,9 +33,9 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <summary>Creates a request broker for managing requests.</summary>
+        <returns>A <see cref="T:Mono.WebServer.IRequestBroker" /> containing a request broker for managing requests.</returns>
+        <remarks>Each application host receives its own request broker.</remarks>
       </Docs>
     </Member>
     <Member MemberName="CreateSocket">
@@ -46,9 +46,9 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <summary>Creates a bound socket to be used for listening for new connections.</summary>
+        <returns>A <see cref="T:System.Net.Sockets.Socket" /> object containing a socket to be used for listening for new connections.</returns>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="CreateWorker">
@@ -62,11 +62,12 @@
         <Parameter Name="server" Type="Mono.WebServer.ApplicationServer" />
       </Parameters>
       <Docs>
-        <param name="client">To be added.</param>
-        <param name="server">To be added.</param>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <param name="client">A <see cref="T:System.Net.Sockets.Socket" /> object containing a client socket accepted from the listen socket 
+created by <see cref="M:Mono.WebServer.WebSource.CreateSocket" />.</param>
+        <param name="server">A <see cref="T:Mono.WebServer.ApplicationServer" /> object containing the server that created the current instance.</param>
+        <summary>Creates a worker to use to run a request on a client socket.</summary>
+        <returns>A <see cref="T:Mono.WebServer.Worker" /> to use to run a request.</returns>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="Dispose">
@@ -77,8 +78,8 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <summary>Disposes of the the resources contained in the current instance.</summary>
+        <remarks>Implemented for <see cref="T:System.IDisposable" />.</remarks>
       </Docs>
     </Member>
     <Member MemberName="Dispose">
@@ -91,9 +92,10 @@
         <Parameter Name="disposing" Type="System.Boolean" />
       </Parameters>
       <Docs>
-        <param name="disposing">To be added.</param>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <param name="disposing">A <see langword="bool" /> indicating whether or not the current instance is disposing. If <see langword="false"/>, 
+the method was called by the class and not the garbage collector.</param>
+        <summary>Disposes of the the resources contained in the current instance.</summary>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="GetApplicationHostType">
@@ -104,9 +106,12 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <summary>Gets the type of application host to use with the current instance.</summary>
+        <returns>A <see cref="T:System.Type" /> containing the type of application host to use with the current instance.</returns>
+        <remarks><para>The type of class returned must implement <see cref="T:Mono.WebServer.IApplicationHost" />.</para>
+<para>This type is used internally to create a <see cref="T:Mono.WebServer.IApplicationHost" /> in a specified <see cref="T:System.AppDomain" /> 
+via <see cref="M:System.Web.Hosting.ApplicationHost.CreateApplicationHost"/>.</para>
+	</remarks>
       </Docs>
     </Member>
   </Members>

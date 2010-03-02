@@ -32,10 +32,5 @@ using System.Collections;
 
 namespace Mono.WebServer
 {
-	/// <summary>
-	///   This delegate is used to handle <see cref="UnregisterRequestEvent"/>
-	/// </summary>
-	/// <param name="sender">Origin of the event</param>
-	/// <param name="args">An <see cref="UnregisterRequestEventArgs"/> object with the event-specific arguments</param>
 	public delegate void UnregisterRequestEventHandler (object sender, UnregisterRequestEventArgs args);
 }

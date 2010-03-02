@@ -33,25 +33,14 @@ using System.Collections;
 
 namespace Mono.WebServer
 {
-	/// <summary>
-	///   This class extends <see cref="EventArgs"/> to provide arguments for
-	///   <see cref="BaseRequestBroker.UnregisterRequestEventHandler"/>.
-	/// </summary>
 	public class UnregisterRequestEventArgs : EventArgs
 	{
 		int _requestId;
 
-		/// <summary>
-		///   Contains the id of a request that is about to be unregistered.
-		/// </summary>
 		public int RequestId {
 			get { return _requestId; }
 		}
 
-		/// <summary>
-		///   Constructs an instance of the class for the specified request ID
-		/// </summary>
-		/// <param name="requestId">Request of the ID that has just been unregistered</param>
 		public UnregisterRequestEventArgs (int requestId)
 		{
 			_requestId = requestId;

@@ -8,8 +8,8 @@
   </Base>
   <Interfaces />
   <Docs>
-    <summary>To be added.</summary>
-    <remarks>To be added.</remarks>
+    <summary>This abstract is used for running implementation specific requests.</summary>
+    <remarks></remarks>
   </Docs>
   <Members>
     <Member MemberName=".ctor">
@@ -29,8 +29,8 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <summary>Closes the current instance and releases the resources associated with the data transfer.</summary>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="Flush">
@@ -41,8 +41,8 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <summary>Causes all response data to be written.</summary>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="GetRemainingReuses">
@@ -53,9 +53,9 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <summary>Gets the number of times the current instance can be reused by the server.</summary>
+        <returns>number of times the current instance can be reused by the server.</returns>
+        <remarks>If less than or equal to zero, the current instance should not be reused and the resources associated with it should be freed.</remarks>
       </Docs>
     </Member>
     <Member MemberName="IsAsync">
@@ -65,9 +65,12 @@
         <ReturnType>System.Boolean</ReturnType>
       </ReturnValue>
       <Docs>
-        <summary>To be added.</summary>
-        <value>To be added.</value>
-        <remarks>To be added.</remarks>
+        <summary>Gets whether or not the current instance is asynchronous.</summary>
+        <value>A <see langword="bool" /> indicating whether or not the current instance is asynchronous.</value>
+        <remarks>This property indicates whether or not a call to <see cref="M:Mono.WebServer.Worker.Run" /> will spawn its own worker thread. 
+<see langword="false" /> indicates that the entire process will be completed in a single thread during the duration of
+<see cref="M:Mono.WebServer.Worker.Run" />.
+	</remarks>
       </Docs>
     </Member>
     <Member MemberName="IsConnected">
@@ -78,9 +81,9 @@
       </ReturnValue>
       <Parameters />
       <Docs>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <summary>Gets whether or not the current instance is connected.</summary>
+        <returns>A <see langword="bool" /> indicating whether or not the current instance is connected.</returns>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="Read">
@@ -95,12 +98,12 @@
         <Parameter Name="size" Type="System.Int32" />
       </Parameters>
       <Docs>
-        <param name="buffer">To be added.</param>
-        <param name="position">To be added.</param>
-        <param name="size">To be added.</param>
-        <summary>To be added.</summary>
-        <returns>To be added.</returns>
-        <remarks>To be added.</remarks>
+        <param name="buffer">An array to be populated with the read data.</param>
+        <param name="position">position in <paramref name="buffer" /> at which to start storing the read data.</param>
+        <param name="size">number of bytes to read.</param>
+        <summary>Reads a block of request data from the current implementation.</summary>
+        <returns>number of bytes that were actually read.</returns>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="Run">
@@ -113,9 +116,12 @@
         <Parameter Name="state" Type="System.Object" />
       </Parameters>
       <Docs>
-        <param name="state">To be added.</param>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <param name="state">state information from the worker that evoked the method. Always <see langref="null" />.</param>
+        <summary>Runs the current instance.</summary>
+        <remarks>If the entire process of running the request is done in the method, <see cref="M:Mono.WebServer.Worker.IsAsync" /> should be set to 
+<see langword="false" />. If, however, the method invokes an asynchronous or threaded call, like <see cref="M:System.Net.Sockets.Socket.BeginReceive"/>, 
+<see cref="P:Mono.WebServer.Worker.IsAsync" /> should be set to <see langword="true" />.
+	</remarks>
       </Docs>
     </Member>
     <Member MemberName="SetReuseCount">
@@ -128,9 +134,9 @@
         <Parameter Name="reuses" Type="System.Int32" />
       </Parameters>
       <Docs>
-        <param name="reuses">To be added.</param>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <param name="reuses">number of times the current instance has been reused.</param>
+        <summary>Sets the number of times the current instance has been reused by the server.</summary>
+        <remarks></remarks>
       </Docs>
     </Member>
     <Member MemberName="Write">
@@ -145,11 +151,11 @@
         <Parameter Name="size" Type="System.Int32" />
       </Parameters>
       <Docs>
-        <param name="buffer">To be added.</param>
-        <param name="position">To be added.</param>
-        <param name="size">To be added.</param>
-        <summary>To be added.</summary>
-        <remarks>To be added.</remarks>
+        <param name="buffer">data to write</param>
+        <param name="position">position in <paramref name="buffer" /> from which to start writing.</param>
+        <param name="size">number of bytes to write.</param>
+        <summary>Writes a block of response data from the current implementation.</summary>
+        <remarks></remarks>
       </Docs>
     </Member>
   </Members>

@@ -1,6 +1,7 @@
 builddir=$(top_builddir)/src/Mono.WebServer.XSP
+pkgconfigdir=$(libdir)/pkgconfig
 
-MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 -unsafe $(WEBTRACING)
 
 XSP2_EXE = xsp2.exe
 GACUTIL2=$(GACUTIL) -package 2.0
@@ -21,7 +22,20 @@ if NET_4_0
 references4 = $(references_common) -r:../Mono.WebServer/4.0/Mono.WebServer2.dll
 endif
 
-sources = main.cs SecurityConfiguration.cs
+pkgconfig_DATA = xsp-2.pc
+if NET_4_0
+pkgconfig_DATA += xsp-4.pc
+endif
+
+sources = \
+	main.cs \
+	SecurityConfiguration.cs \
+	XSPApplicationHost.cs \
+	XSPWorkerRequest.cs \
+	XSPRequestBroker.cs \
+	XSPWebSource.cs \
+	XSPWorker.cs \
+	SslInformation.cs
 
 build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 

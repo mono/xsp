@@ -55,7 +55,7 @@ namespace Mono.WebServer
 		IPEndPoint remoteEP;
 		IPEndPoint localEP;
 		Socket sock;
-		SslInformations ssl;
+		SslInformation ssl;
 		InitialWorkerRequest initial;
 		int requestId = -1;
 		XSPRequestBroker broker = null;
@@ -70,7 +70,7 @@ namespace Mono.WebServer
 			bool requireClientCert) 
 		{
 			if (secureConnection) {
-				ssl = new SslInformations ();
+				ssl = new SslInformation ();
 				ssl.AllowClientCertificate = allowClientCert;
 				ssl.RequireClientCertificate = requireClientCert;
 				ssl.RawServerCertificate = cert.GetRawCertData ();

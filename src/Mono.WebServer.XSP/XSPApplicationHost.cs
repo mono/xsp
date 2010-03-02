@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Lluis Sanchez Gual (lluis@ximian.com)
 //
-// (C) Copyright 2004-2007 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2010 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -52,7 +52,7 @@ namespace Mono.WebServer
 		public void ProcessRequest(int reqId, long localEPAddr, int localEPPort, long remoteEPAdds,
 					   int remoteEPPort, string verb, string path,
 					   string queryString, string protocol, byte[] inputBuffer, string redirect,
-					   IntPtr socket, SslInformations ssl)
+					   IntPtr socket, SslInformation ssl)
 		{
 			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
 			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
@@ -62,7 +62,7 @@ namespace Mono.WebServer
 		public void ProcessRequest(int reqId, IPEndPoint localEP, IPEndPoint remoteEP,
 					   string verb, string path,
 					   string queryString, string protocol, byte [] inputBuffer, string redirect,
-					   IntPtr socket, SslInformations ssl)
+					   IntPtr socket, SslInformation ssl)
 		{
 			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
 			bool secure = (ssl != null);
@@ -135,60 +135,6 @@ namespace Mono.WebServer
 			wr.SendResponseFromMemory (contentBytes, contentBytes.Length);
 			wr.FlushResponse (true);
 			wr.CloseConnection ();
-		}
-	}
-
-	[Serializable]
-	public class SslInformations {
-		bool client_cert_allowed;
-		bool client_cert_required;
-		bool client_cert_valid;
-		byte[] raw_client_cert;
-		byte[] raw_server_cert;
-		int key_size;
-		int secret_key_size;
-
-		public bool AllowClientCertificate {
-			get { return client_cert_allowed; }
-			set { client_cert_allowed = value; }
-		}
-
-		public bool RequireClientCertificate {
-			get { return client_cert_required; }
-			set { client_cert_required = value; }
-		}
-
-		public bool ClientCertificateValid {
-			get { return client_cert_valid; }
-			set { client_cert_valid = value; }
-		}
-
-		public int KeySize {
-			get { return key_size; }
-			set { key_size = value; }
-		}			
-
-		public byte[] RawClientCertificate {
-			get { return raw_client_cert; }
-			set { raw_client_cert = value; }
-		}
-
-		public byte[] RawServerCertificate {
-			get { return raw_server_cert; }
-			set { raw_server_cert = value; }
-		}
-
-		public int SecretKeySize {
-			get { return secret_key_size; }
-			set { secret_key_size = value; }
-		}
-
-		public X509Certificate GetServerCertificate ()
-		{
-			if (raw_server_cert == null)
-				return null;
-
-			return new X509Certificate (raw_server_cert);
 		}
 	}
 }

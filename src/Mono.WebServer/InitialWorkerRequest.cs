@@ -5,7 +5,7 @@
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
 // (C) 2003 Ximian, Inc (http://www.ximian.com)
-// (C) Copyright 2004 Novell, Inc
+// (C) Copyright 2004-2010 Novell, Inc
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -37,40 +37,6 @@ using System.Web;
 
 namespace Mono.WebServer
 {
-	public class RequestData
-	{
-		public string Verb;
-		public string Path;
-		public string PathInfo;
-		public string QueryString;
-		public string Protocol;
-		public byte [] InputBuffer;
-
-		public RequestData (string verb, string path, string queryString, string protocol)
-		{
-			this.Verb = verb;
-			this.Path = path;
-			this.QueryString = queryString;
-			this.Protocol = protocol;
-		}
-
-		public override string ToString ()
-		{
-			StringBuilder sb = new StringBuilder ();
-			sb.AppendFormat ("Verb: {0}\n", Verb);
-			sb.AppendFormat ("Path: {0}\n", Path);
-			sb.AppendFormat ("PathInfo: {0}\n", PathInfo);
-			sb.AppendFormat ("QueryString: {0}\n", QueryString);
-			return sb.ToString ();
-		}
-	}
-
-	class RequestLineException : ApplicationException {
-		public RequestLineException () : base ("Error reading request line")
-		{
-		}
-	}
-
 	public class InitialWorkerRequest
 	{
 		string verb;

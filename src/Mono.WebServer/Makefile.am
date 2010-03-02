@@ -1,6 +1,6 @@
 pkgconfigdir=$(libdir)/pkgconfig
 builddir=$(top_builddir)/src/Mono.WebServer
-MCSFLAGS= -debug+ -debug:full -nologo -unsafe -nowarn:618 $(WEBTRACING) -doc:$(top_builddir)/docs/Mono.WebServer.xml
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING) -doc:$(top_builddir)/docs/Mono.WebServer.xml
 SYSTEMCORE_DEP=@SYSTEMCORE_DEP@
 
 monowebserver2dir = $(prefix)/lib/xsp/2.0
@@ -15,15 +15,10 @@ monowebserver4_references = $(monowebserver2_references)
 GACUTIL4=$(GACUTIL) -package 4.0
 endif
 
-pkgconfig_DATA = xsp-2.pc
-if NET_4_0
-pkgconfig_DATA += xsp-4.pc
-endif
-
 noinst_SCRIPTS= $(monowebserver2_install) $(monowebserver4_install)
 
 CLEANFILES = 2.0/Mono.WebServer2.dll* 4.0/Mono.WebServer2.dll*
-EXTRA_DIST = $(monowebserver_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in AssemblyInfo4.cs.in
+EXTRA_DIST = $(monowebserver2_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in AssemblyInfo4.cs.in
 
 monowebserver2_sources  = \
 			ApplicationServer.cs \
@@ -31,22 +26,25 @@ monowebserver2_sources  = \
 			BaseRequestBroker.cs \
 			IApplicationHost.cs \
 			InitialWorkerRequest.cs \
-			IWebSource.cs \
+			WebSource.cs \
+			Worker.cs \
 			LingeringNetworkStream.cs \
 			MonoWorkerRequest.cs \
-			XSPApplicationHost.cs \
-			XSPWorkerRequest.cs \
-			XSPRequestBroker.cs \
-			XSPWebSource.cs \
-			XSPWorker.cs \
 			HttpErrors.cs \
 			Paths.cs \
 			VPathToHost.cs \
-			Tracing.cs \
+			WebTrace.cs \
 			SearchPattern.cs \
 			ReaderWriterLockSlim.cs \
 			LockRecursionException.cs \
-			LockRecursionPolicy.cs
+			LockRecursionPolicy.cs \
+			UnregisterRequestEventArgs.cs \
+			IRequestBroker.cs \
+			RequestData.cs \
+			RequestLineException.cs \
+			MapPathEventArgs.cs \
+			MapPathEventHandler.cs \
+			EndOfRequestHandler.cs
 
 monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 

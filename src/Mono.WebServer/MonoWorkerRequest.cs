@@ -1,5 +1,5 @@
 //
-// MonoWorkerRequest.cs
+// Mono.WebServer.MonoWorkerRequest
 //
 // Authors:
 //	Daniel Lopez Ridruejo
@@ -11,7 +11,7 @@
 // Copyright (c) 2002 Daniel Lopez Ridruejo.
 //           (c) 2002,2003 Ximian, Inc.
 //           All rights reserved.
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
+// (C) Copyright 2004-2010 Novell, Inc. (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -33,7 +33,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
 using System.Collections;
 using System.Collections.Specialized;
@@ -50,124 +49,7 @@ using System.Web;
 using System.Web.Hosting;
 
 namespace Mono.WebServer
-{
-	/// <summary>
-	///    This class extends <see cref="EventArgs" /> to provide arguments
-	///    for <see cref="MapPathEventHandler" />.
-	/// </summary>
-	/// <remarks>
-	///    When <see cref="MonoWorkerRequest.MapPathEvent" /> is called, the
-	///    handler has an option of setting <see
-	///    cref="MapPathEventArgs.MappedPath" /> to a mapped path.
-	/// </remarks>
-	public class MapPathEventArgs : EventArgs
-	{
-		/// <summary>
-		///    Contains the virtual path, as used in the request.
-		/// </summary>
-		string path;
-		
-		/// <summary>
-		///    Contains the physical "mapped" path.
-		/// </summary>
-		string mapped;
-		
-		/// <summary>
-		///    Indicates whether or not the path has been mapped.
-		/// </summary>
-		bool isMapped;
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="MapPathEventArgs" /> for a specified virtual path.
-		/// </summary>
-		/// <param name="path">
-		///    A <see cref="string" /> containing the virtual path, as
-		///    contained in the request.
-		/// </param>
-		public MapPathEventArgs (string path)
-		{
-			this.path = path;
-			isMapped = false;
-		}
-
-		/// <summary>
-		///    Gets the virtual path of the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the virtual path of
-		///    the current instance.
-		/// </value>
-		public string Path {
-			get { return path; }
-		}
-		
-		/// <summary>
-		///    Gets whether or not the path is mapped.
-		/// </summary>
-		/// <value>
-		///    A <see cref="bool" /> indicating whether or not the path
-		///    has been mapped.
-		/// </value>
-		public bool IsMapped {
-			get { return isMapped; }
-		}
-
-		/// <summary>
-		///    Gets and sets the physical "mapped" path for the current
-		///    instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the physical "mapped"
-		///    path of the current instance.
-		/// </value>
-		public string MappedPath {
-			get { return mapped; }
-			set {
-				mapped = value;
-				isMapped = (value != null && value != "");
-			}
-		}
-	}
-
-	
-	/// <summary>
-	///    This delegate is used to handle <see
-	///    cref="MonoWorkerRequest.MapPathEvent" /> and performs custom path
-	///    mapping.
-	/// </summary>
-	/// <param name="sender">
-	///    The <see cref="object" /> that sent the event.
-	/// </param>
-	/// <param name="args">
-	///    A <see cref="MapPathEventArgs" /> object containing the arguments
-	///    for the event.
-	/// </param>
-	/// <remarks>
-	///    This method is used for custom path mapping within <see
-	///    cref="MonoWorkerRequest.MapPath" />.
-	/// </remarks>
-	/// <example>
-	///    An example <see cref="MapPathEventHandler" />
-	///    <code language="C#">
-	///        void OnMapPathEvent (object sender, MapPathEventArgs args)
-	///        {
-	///            if (args.Path.StartsWith ("/blog"))
-	///                args.MappedPath = @"C:\Documents and Settings\John Doe\My Documents\Visual Studio 2005\WebSites\blog";
-	///        }
-	///    </code>
-	/// </example>
-	public delegate void MapPathEventHandler (object sender, MapPathEventArgs args);
-	
-	/// <summary>
-	///    This delegate is used to handle <see
-	///    cref="MonoWorkerRequest.EndOfRequestEvent" />.
-	/// </summary>
-	/// <param name="request">
-	///    The <see cref="MonoWorkerRequest" /> that sent the event.
-	/// </param>
-	public delegate void EndOfRequestHandler (MonoWorkerRequest request);
-	
+{	
 	/// <summary>
 	///    This abstract class extends <see cref="SimpleWorkerRequest" />,
 	///    adding support for security certificates and implementing methods

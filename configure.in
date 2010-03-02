@@ -118,15 +118,15 @@ AC_OUTPUT([
 	src/Mono.WebServer/AssemblyInfo2.cs
 	src/Mono.WebServer/AssemblyInfo4.cs
 	src/Mono.WebServer/Makefile
-	src/Mono.WebServer/xsp.pc
-	src/Mono.WebServer/xsp-2.pc
-	src/Mono.WebServer/xsp-4.pc
 	src/Mono.WebServer.Apache/Makefile
 	src/Mono.WebServer.Apache/AssemblyInfo.cs
 	src/Mono.WebServer.FastCgi/Makefile
 	src/Mono.WebServer.FastCgi/AssemblyInfo.cs
 	src/Mono.WebServer.XSP/Makefile
 	src/Mono.WebServer.XSP/AssemblyInfo.cs
+	src/Mono.WebServer.XSP/xsp.pc
+	src/Mono.WebServer.XSP/xsp-2.pc
+	src/Mono.WebServer.XSP/xsp-4.pc
 	test/Makefile
 	test/controls/Makefile
 	test/App_Code/Makefile

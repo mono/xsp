@@ -104,18 +104,5 @@ namespace Mono.WebServer
 		/// </summary>
 		bool IsHttpHandler (string verb, string uri);
 	}
-	
-	/// <summary>
-	///    This interface is used for classes that manage requests.
-	/// </summary>
-	/// <remarks>
-	///    A request broker serves as an intermediary between <see
-	///    cref="Worker" /> and <see cref="MonoWorkerRequest" /> to handle
-	///    the interaction between app-domains. In addition it should
-	///    inherit <see cref="MarshalByRefObject" />.
-	/// </remarks>
-	public interface IRequestBroker
-	{
-	}
 }
 

@@ -3,7 +3,6 @@ SUBDIRS = controls 1.1 2.0 App_Code
 testfiles = \
 		mod-mono-server.exe.config \
 		index.aspx \
-		index2.aspx \
 		xsp.exe.config \
 		web.config \
 		global.asax \

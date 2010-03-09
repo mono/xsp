@@ -94,6 +94,7 @@ namespace Mono.WebServer
 		BinaryWriter writer;
 		MemoryStream reader_ms;
 		MemoryStream writer_ms;
+		byte[] fill_buffer;
 		bool got_server_vars;
 #if NET_2_0
 		Dictionary <string, string> serverVariables;
@@ -168,16 +169,15 @@ namespace Mono.WebServer
 		void FillBuffer (int count)
 		{
 			// This will "reset" the stream
-			int capacity = reader_ms.Capacity;
-			if (capacity > count)
-				reader_ms.Capacity = capacity;
-			else
-				reader_ms.Capacity = count;
+			reader_ms.SetLength (0);
+			reader_ms.Position = 0;
+
+			if (fill_buffer == null || fill_buffer.Length < count)
+				fill_buffer = new byte [count];
 			
+			int received = client.Receive (fill_buffer, count, SocketFlags.None);
+			reader_ms.Write (fill_buffer, 0, received);
 			reader_ms.Seek (0, SeekOrigin.Begin);
-			byte[] buffer = reader_ms.GetBuffer ();
-			int received = client.Receive (buffer, count, SocketFlags.None);
-			reader_ms.SetLength (received);
 		}
 
 		void Send ()

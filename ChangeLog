@@ -1,3 +1,8 @@
+2010-03-09  Marek Habersack  <mhabersack@novell.com>
+
+	* ModMonoRequest.cs: better fix for bug #580086. Patch from Asgeir
+	Halldorsson <asgeir.halldorsson@dempseyclark.is>, thanks!
+
 2010-02-26  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer/InitialWorkerRequest.cs: do not decode paths

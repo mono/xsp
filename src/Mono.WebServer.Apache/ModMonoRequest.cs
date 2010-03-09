@@ -117,8 +117,13 @@ namespace Mono.WebServer
 			reader_ms.SetLength (0);
 			reader_ms.Position = 0;
 
-			if (fill_buffer == null || fill_buffer.Length < count)
-				fill_buffer = new byte [count];
+			if (fill_buffer == null || fill_buffer.Length < count) {
+				if (fill_buffer == null)
+					// Use slightly more memory initially, but save on time.
+					fill_buffer = new byte [INITIAL_MEMORY_STREAM_SIZE];
+				else
+					fill_buffer = new byte [count];
+			}
 			
 			int received = client.Receive (fill_buffer, count, SocketFlags.None);
 			reader_ms.Write (fill_buffer, 0, received);

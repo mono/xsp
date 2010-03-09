@@ -358,7 +358,7 @@ namespace Mono.WebServer.Apache
 
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = verbose;
-			server.SingleApplication = !root && !nonstop;
+			server.SingleApplication = !root;
 
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
 			if (apps != null)

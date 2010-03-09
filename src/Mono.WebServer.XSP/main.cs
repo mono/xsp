@@ -428,7 +428,7 @@ namespace Mono.WebServer.XSP
 
 			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = settings.Verbose;
-			server.SingleApplication = !root && !settings.NonStop;
+			server.SingleApplication = !root;
 
 			if (settings.Apps != null)
 				server.AddApplicationsFromCommandLine (settings.Apps);

@@ -1,3 +1,8 @@
+2010-03-09  Marek Habersack  <mhabersack@novell.com>
+
+	* ModMonoRequest.cs: better fix for bug #580086. Patch from Asgeir
+	Halldorsson <asgeir.halldorsson@dempseyclark.is>, thanks!
+
 2010-03-01  Marek Habersack  <mhabersack@novell.com>
 
 	* main.cs: added some documentation on RealMain.

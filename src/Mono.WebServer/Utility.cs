@@ -32,7 +32,7 @@ namespace Mono.WebServer
 {
 	public static class Utility
 	{
-		static readonly byte[] dummyRequestBuffer = new byte[] {};
+		static readonly byte[] dummyRequestBuffer = new byte[] {0};
 		
 		public static bool SafeIsSocketConnected (Socket sock)
 		{
@@ -45,10 +45,10 @@ namespace Mono.WebServer
 					return false;
 
 				blocking = sock.Blocking;
-				sock.Blocking = true;
-				sock.Send (dummyRequestBuffer, 0, 0);
+				sock.Blocking = false;
+				sock.Receive (dummyRequestBuffer);
 
-				return true;
+				return sock.Connected;
 			} catch (SocketException ex) {
 				if (ex.NativeErrorCode == 10035)
 					return true;

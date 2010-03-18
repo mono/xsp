@@ -341,7 +341,7 @@ namespace Mono.WebServer
 				listen_socket.Close ();
 			}
 			
-			lock (registeredSockets) {
+			lock (registeredSocketsLock) {
 				if (registeredSockets == null)
 					return;
 

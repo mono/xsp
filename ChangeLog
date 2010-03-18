@@ -1,3 +1,8 @@
+2010-03-18  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.FastCgi/StandardSocket.cs: check in 
+	a safe manner if a socket is connected.
+
 2010-02-26  Marek Habersack  <mhabersack@novell.com>
 
 	* tools/asp_state/asp-state4.exe.config: modifed to load types

@@ -1,3 +1,8 @@
+2010-03-18  Marek Habersack  <mhabersack@novell.com>
+
+	* XSPWorker.cs: all the checks for whether socket is connected 
+	are performed in a safe manner.
+
 2010-03-01  Marek Habersack  <mhabersack@novell.com>
 
 	* main.cs: added some documentation on RealMain.

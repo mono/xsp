@@ -62,7 +62,6 @@ namespace Mono.WebServer
 			if (!Connected)
 				return;
 
-			Socket.Shutdown (SocketShutdown.Send);
 			DateTime start = DateTime.UtcNow;
 			while (waited < max_useconds_to_linger) {
 				int nread = 0;
@@ -97,7 +96,7 @@ namespace Mono.WebServer
 		}
 
 		public bool Connected {
-			get { return Socket.Connected; }
+			get { return Utility.SafeIsSocketConnected (Socket); }
 		}
 	}
 }

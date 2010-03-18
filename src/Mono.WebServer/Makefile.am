@@ -45,7 +45,8 @@ monowebserver2_sources  = \
 			MapPathEventArgs.cs \
 			MapPathEventHandler.cs \
 			EndOfRequestHandler.cs \
-			UnregisterRequestEventHandler.cs
+			UnregisterRequestEventHandler.cs \
+			Utility.cs
 
 monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 

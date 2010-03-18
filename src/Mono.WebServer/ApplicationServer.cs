@@ -336,7 +336,7 @@ namespace Mono.WebServer
 		public void ShutdownSockets ()
 		{
 			if (listen_socket != null && !listen_socket.IsBound) {
-				if (listen_socket.Connected)
+				if (Utility.SafeIsSocketConnected (listen_socket))
 					listen_socket.Shutdown (SocketShutdown.Receive);
 				listen_socket.Close ();
 			}
@@ -351,7 +351,7 @@ namespace Mono.WebServer
 						continue;
 
 					try {
-						if (s.Connected)
+						if (Utility.SafeIsSocketConnected (s))
 							s.Shutdown (SocketShutdown.Both);
 
 						s.Close ();
@@ -507,7 +507,7 @@ namespace Mono.WebServer
 			} catch (Exception e) {
 				try {
 					if (accepted != null) {
-						if (accepted.Connected)
+						if (Utility.SafeIsSocketConnected (accepted))
 							accepted.Shutdown (SocketShutdown.Both);
 						accepted.Close ();
 					}

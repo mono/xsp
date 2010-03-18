@@ -28,6 +28,7 @@
 //
 
 using System;
+using Mono.WebServer;
 
 namespace Mono.FastCgi {
 	internal class StandardSocket : Socket
@@ -100,7 +101,7 @@ namespace Mono.FastCgi {
 		}
 		
 		public override bool Connected {
-			get {return socket.Connected;}
+			get {return Utility.SafeIsSocketConnected (socket);}
 		}
 
 	}

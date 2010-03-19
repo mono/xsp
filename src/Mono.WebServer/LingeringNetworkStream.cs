@@ -62,23 +62,27 @@ namespace Mono.WebServer
 			if (!Connected)
 				return;
 
-			DateTime start = DateTime.UtcNow;
-			while (waited < max_useconds_to_linger) {
-				int nread = 0;
-				try {
-					if (!Socket.Poll (useconds_to_linger, SelectMode.SelectRead))
+			try {
+				DateTime start = DateTime.UtcNow;
+				while (waited < max_useconds_to_linger) {
+					int nread = 0;
+					try {
+						if (!Socket.Poll (useconds_to_linger, SelectMode.SelectRead))
+							break;
+
+						if (buffer == null)
+							buffer = new byte [512];
+
+						nread = Socket.Receive (buffer, 0, buffer.Length, 0);
+					} catch { }
+
+					if (nread == 0)
 						break;
 
-					if (buffer == null)
-						buffer = new byte [512];
-
-					nread = Socket.Receive (buffer, 0, buffer.Length, 0);
-				} catch { }
-
-				if (nread == 0)
-					break;
-
-				waited += (int) (DateTime.UtcNow - start).TotalMilliseconds * 1000;
+					waited += (int) (DateTime.UtcNow - start).TotalMilliseconds * 1000;
+				}
+			} catch {
+				// ignore - we don't care, we're closing anyway
 			}
 		}
 
@@ -96,7 +100,7 @@ namespace Mono.WebServer
 		}
 
 		public bool Connected {
-			get { return Utility.SafeIsSocketConnected (Socket); }
+			get { return Socket.Connected; }
 		}
 	}
 }

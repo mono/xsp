@@ -336,8 +336,12 @@ namespace Mono.WebServer
 		public void ShutdownSockets ()
 		{
 			if (listen_socket != null && !listen_socket.IsBound) {
-				if (Utility.SafeIsSocketConnected (listen_socket))
-					listen_socket.Shutdown (SocketShutdown.Receive);
+				try {
+					if (listen_socket.Connected)
+						listen_socket.Shutdown (SocketShutdown.Receive);
+				} catch {
+					// ignore - we don't care, we're closing anyway
+				}
 				listen_socket.Close ();
 			}
 			
@@ -351,9 +355,13 @@ namespace Mono.WebServer
 						continue;
 
 					try {
-						if (Utility.SafeIsSocketConnected (s))
+						if (s.Connected)
 							s.Shutdown (SocketShutdown.Both);
+					} catch {
+						// ignore - we don't care, we're closing anyway
+					}
 
+					try {
 						s.Close ();
 					} catch {
 						// ignore
@@ -507,11 +515,18 @@ namespace Mono.WebServer
 			} catch (Exception e) {
 				try {
 					if (accepted != null) {
-						if (Utility.SafeIsSocketConnected (accepted))
-							accepted.Shutdown (SocketShutdown.Both);
+						try {
+							if (accepted.Connected)
+								accepted.Shutdown (SocketShutdown.Both);
+						} catch {
+							// ignore
+						}
+						
 						accepted.Close ();
 					}
-				} catch {}
+				} catch {
+					// ignore
+				}
 			}
 		}
 

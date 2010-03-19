@@ -101,7 +101,7 @@ namespace Mono.FastCgi {
 		}
 		
 		public override bool Connected {
-			get {return Utility.SafeIsSocketConnected (socket);}
+			get {return socket.Connected;}
 		}
 
 	}

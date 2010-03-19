@@ -134,7 +134,7 @@ namespace Mono.WebServer
 			//	Console.WriteLine (e);
 
 			try {
-				if (initial != null && initial.GotSomeInput && Utility.SafeIsSocketConnected (sock)) {
+				if (initial != null && initial.GotSomeInput && sock.Connected) {
 					byte [] error = HttpErrors.ServerError ();
 					Write (error, 0, error.Length);
 				}
@@ -234,7 +234,7 @@ namespace Mono.WebServer
 					netStream.Close ();
 				} else if (false == netStream.OwnsSocket) {
 					try {
-						if (Utility.SafeIsSocketConnected (sock))
+						if (sock.Connected)
 							sock.Shutdown (SocketShutdown.Both);
 					} catch {
 						// ignore

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Mono.Data.SqliteClient;
+using Mono.Data.Sqlite;
 
 class App
 {

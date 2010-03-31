@@ -1,3 +1,8 @@
+2010-03-31  Marek Habersack  <mhabersack@novell.com>
+
+	* main.cs: added --pidfile argument, which puts mod-mono-server's
+	PID in the specified file.
+
 2010-03-09  Marek Habersack  <mhabersack@novell.com>
 
 	* ModMonoRequest.cs: better fix for bug #580086. Patch from Asgeir

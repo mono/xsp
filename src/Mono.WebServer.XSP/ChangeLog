@@ -1,3 +1,8 @@
+2010-03-31  Marek Habersack  <mhabersack@novell.com>
+
+	* main.cs: wrapped --pidfile option body in try/catch block, as
+	the failure to create the PID file is not critical.
+
 2010-03-18  Marek Habersack  <mhabersack@novell.com>
 
 	* XSPWorker.cs: all the checks for whether socket is connected 

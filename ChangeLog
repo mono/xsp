@@ -1,3 +1,11 @@
+2010-03-31  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer.Apache/main.cs: added --pidfile argument, which 
+	puts mod-mono-server's PID in the specified file.
+
+	* src/Mono.WebServer.XSP/main.cs: wrapped --pidfile option body in 
+	try/catch block, as the failure to create the PID file is not critical.
+
 2010-03-09  Marek Habersack  <mhabersack@novell.com>
 
 	* ModMonoRequest.cs: better fix for bug #580086. Patch from Asgeir

@@ -127,6 +127,7 @@ namespace Mono.WebServer.Apache
 			Console.WriteLine ();
 			Console.WriteLine ("    --version: displays version information and exits.");
 			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
+			Console.WriteLine ("    --pidfile file: write the process PID to the specified file.");
 
 			Console.WriteLine ();
 		}
@@ -277,6 +278,18 @@ namespace Mono.WebServer.Apache
 				case "--verbose":
 					verbose = true;
 					break;
+				case "--pidfile": {
+					string pidfile = args[++i];
+					if (pidfile != null && pidfile.Length > 0) {
+						try {
+							using (StreamWriter sw = File.CreateText (pidfile))
+								sw.Write (Process.GetCurrentProcess ().Id);
+						} catch (Exception ex) {
+							Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", pidfile, ex.Message);
+						}
+					}
+					break;
+				}
 				case "--no-hidden":
 					MonoWorkerRequest.CheckFileAccess = false;
 					break;

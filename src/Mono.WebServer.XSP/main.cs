@@ -361,10 +361,14 @@ namespace Mono.WebServer.XSP
 					settings.Verbose = true;
 					break;
 				case "--pidfile": {
-					string portfile = args[++i];
-					if (portfile != null && portfile.Length > 0) {
-						using (StreamWriter sw = File.CreateText (portfile))
-							sw.Write (Process.GetCurrentProcess ().Id);
+					string pidfile = args[++i];
+					if (pidfile != null && pidfile.Length > 0) {
+						try {
+							using (StreamWriter sw = File.CreateText (pidfile))
+								sw.Write (Process.GetCurrentProcess ().Id);
+						} catch (Exception ex) {
+							Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", pidfile, ex.Message);
+						}
 					}
 					break;
 				}

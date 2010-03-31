@@ -1,3 +1,8 @@
+2010-03-31  Marek Habersack  <mhabersack@novell.com>
+
+	* man/xsp.1.in: updated documentation of the --nonstop
+	option. Fixes bug #585295
+
 2010-03-18  Marek Habersack  <mhabersack@novell.com>
 
 	* src/Mono.WebServer.FastCgi/StandardSocket.cs: check in 

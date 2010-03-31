@@ -103,7 +103,7 @@ applications on demand. If this option is provided, there is no
 need to provide a list of applications to start.
 This applies only to mod-mono-server.exe.
 .I \-\-nonstop
-This applies only to xsp.exe: by default xsp will stop processing
+By default xsp/mod-mono-server will stop processing
 requests when the return key is pressed.  Use this to avoid this
 behavior. 
 .TP

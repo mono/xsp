@@ -1,5 +1,8 @@
 2010-03-31  Marek Habersack  <mhabersack@novell.com>
 
+	* man/xsp.1.in: updated documentation of the --nonstop
+	option. Fixes bug #585295
+
 	* src/Mono.WebServer.Apache/main.cs: added --pidfile argument, which 
 	puts mod-mono-server's PID in the specified file.
 

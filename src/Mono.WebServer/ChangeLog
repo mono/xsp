@@ -1,3 +1,8 @@
+2010-04-05 Gonzalo Paniagua Javier <gonzalo@novell.com>
+
+	* LingeringNetworkStream.cs: shutdown our side in LingeringClose,
+	otherwise it will take 50ms to close the socket.
+
 2010-03-18  Marek Habersack  <mhabersack@novell.com>
 
 	* Utility.cs: added

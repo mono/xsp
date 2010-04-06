@@ -63,6 +63,7 @@ namespace Mono.WebServer
 				return;
 
 			try {
+				Socket.Shutdown (SocketShutdown.Send);
 				DateTime start = DateTime.UtcNow;
 				while (waited < max_useconds_to_linger) {
 					int nread = 0;

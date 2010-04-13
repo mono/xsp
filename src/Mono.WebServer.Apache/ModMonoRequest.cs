@@ -322,6 +322,7 @@ namespace Mono.WebServer
 				byte [] buf = writer_ms.GetBuffer ();
 				Marshal.Copy (ptr, buf, 0, size);
 				length -= size;
+				unsafe { ptr = (IntPtr)((byte*)ptr.ToPointer () + size); }
 				client.Send (buf, size, SocketFlags.None);
 			}
 		}

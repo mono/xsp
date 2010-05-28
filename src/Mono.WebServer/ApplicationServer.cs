@@ -451,8 +451,17 @@ namespace Mono.WebServer
 				accepted = listen_socket.EndAccept (ares);
 			} catch {
 			} finally {
-				if (started)
-					listen_socket.BeginAccept (accept_cb, null);
+				if (started) {
+					try {
+						listen_socket.BeginAccept (accept_cb, null);
+					} catch (Exception ex) {
+						if (accepted != null) {
+							SendException (accepted, ex);
+							accepted.Close ();
+							throw;
+						}
+					}
+				}
 			}
 
 			if (accepted == null)

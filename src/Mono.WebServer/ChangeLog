@@ -1,3 +1,8 @@
+2010-05-28  Marek Habersack  <mhabersack@novell.com>
+
+	* ApplicationServer.cs: OnAccept sends BeginAccept exceptions back
+	to the client and then re-throws the exception. Fixes bug #609787
+
 2010-04-05 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* LingeringNetworkStream.cs: shutdown our side in LingeringClose,

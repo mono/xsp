@@ -1,3 +1,8 @@
+2010-05-28  Marek Habersack  <mhabersack@novell.com>
+
+	* src/Mono.WebServer/ApplicationServer.cs: OnAccept sends BeginAccept exceptions back
+	to the client and then re-throws the exception. Fixes bug #609787
+
 2010-04-13  Marek Habersack  <mhabersack@novell.com>
 
 	* ModMonoRequest.cs: SendResponseFromMemory must advance the

@@ -595,7 +595,14 @@ namespace Mono.WebServer
 			FileStream file = null;
 			try {
 				file = File.OpenRead (filename);
-				base.SendResponseFromFile (file.Handle, offset, length);
+				// We must not call the SendResponseFromFile overload which
+				// takes  IntPtr in this case since it will callthe base
+				// implementation of that overload which, in turn, will
+				// close the handle (as it uses FileStream to wrap the
+				// handle we pass). This will cause the handle to be closed
+				// twice (FileStream owns the handle). So we just take a
+				// shortcut to what the base overload does here.
+				SendFromStream (file, offset, length);
 			} finally {
 				if (file != null)
 					file.Close ();

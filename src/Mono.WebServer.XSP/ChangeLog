@@ -1,3 +1,8 @@
+2010-06-02  Marek Habersack  <mhabersack@novell.com>
+
+	* XSPWorkerRequest.cs: avoid double handle close when sending
+	response from a file in certain cases.
+
 2010-03-31  Marek Habersack  <mhabersack@novell.com>
 
 	* main.cs: wrapped --pidfile option body in try/catch block, as

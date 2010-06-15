@@ -12,7 +12,7 @@ MONO_WEBSERVER_ASSEMBLY_20=$(top_srcdir)/src/Mono.WebServer/2.0/Mono.WebServer2.
 
 INSTALL_FILES=$(DOCS_ARCHIVE_20) $(DOCS_TREE_20) $(DOCS_SOURCE_20)
 
-DOC_FILES=$(shell find en -path '*/.svn' -prune -o -type f -printf "'%p' ")
+DOC_FILES=$(shell find en -path '*/.svn' -prune -o -type f -printf "%p ")
 
 DISTFILES = \
 	$(DOCS_SOURCE_20) \

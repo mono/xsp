@@ -14,7 +14,7 @@ INSTALL_FILES=$(DOCS_ARCHIVE_20) $(DOCS_TREE_20) $(DOCS_SOURCE_20)
 
 DOC_FILES=$(shell find en -path '*/.svn' -prune -o -type f -printf "%p ")
 
-DISTFILES = \
+EXTRA_DIST = \
 	$(DOCS_SOURCE_20) \
 	$(DOC_FILES)
 

@@ -42,7 +42,44 @@ namespace Mono.WebServer.Apache
 {
 	public class Server : MarshalByRefObject
 	{
-		
+		sealed class ApplicationSettings
+		{
+			public string Apps;
+			public string AppConfigDir;
+			public string AppConfigFile;
+			public string RootDir;
+			public object Oport = 8080;
+			public string IP = "0.0.0.0";
+			public Exception Exception;
+			public bool NonStop;
+			public bool Verbose;
+			public bool Master;
+			public string FileName;
+			
+			public ApplicationSettings ()
+			{
+				this.Exception = null;
+				try {
+					this.Apps = AppSettings ["MonoApplications"];
+					this.AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
+					this.AppConfigFile = AppSettings ["MonoApplicationsConfigFile"];
+					this.RootDir = AppSettings ["MonoServerRootDir"];
+					this.IP = AppSettings ["MonoServerAddress"];
+					this.Oport = AppSettings ["MonoServerPort"];
+					this.FileName = AppSettings ["MonoUnixSocket"];
+
+					if (IP == null || IP.Length == 0)
+						IP = "0.0.0.0";
+					if (Oport == null)
+						Oport = 8080;
+				} catch (Exception ex) {
+					Console.Error.WriteLine ("Exception caught during reading the configuration file:");
+					Console.Error.WriteLine (ex);
+					this.Exception = ex;
+				}
+			}
+		}
+
 		static void ShowVersion ()
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -152,8 +189,8 @@ namespace Mono.WebServer.Apache
 		{
 			if ((options & value) != 0) {
 				ShowHelp ();
-				Console.WriteLine ();
-				Console.WriteLine ("ERROR: Option '{0}' duplicated.", name);
+				Console.Error.WriteLine ();
+				Console.Error.WriteLine ("ERROR: Option '{0}' duplicated.", name);
 				Environment.Exit (1);
 			}
 
@@ -161,8 +198,8 @@ namespace Mono.WebServer.Apache
 			if ((options & Options.FileName) != 0 &&
 			    ((options & Options.Port) != 0 || (options & Options.Address) != 0)) {
 				ShowHelp ();
-				Console.WriteLine ();
-				Console.WriteLine ("ERROR: --port/--address and --filename are mutually exclusive");
+				Console.Error.WriteLine ();
+				Console.Error.WriteLine ("ERROR: --port/--address and --filename are mutually exclusive");
 				Environment.Exit (1);
 			}
 		}
@@ -175,11 +212,11 @@ namespace Mono.WebServer.Apache
 		{
 			Exception ex = (Exception)e.ExceptionObject;
 
-			Console.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
-			Console.WriteLine ("Message is {0}", ex.Message);
-			Console.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
+			Console.Error.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
+			Console.Error.WriteLine ("Message is {0}", ex.Message);
+			Console.Error.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
 			if (e.IsTerminating)
-				Console.WriteLine (ex);
+				Console.Error.WriteLine (ex);
 		}
 
 		
@@ -209,23 +246,7 @@ namespace Mono.WebServer.Apache
 		//
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
-			bool nonstop = false;
-			bool verbose = false;
-			string apps = AppSettings ["MonoApplications"];
-			string appConfigDir = AppSettings ["MonoApplicationsConfigDir"];
-			string appConfigFile = AppSettings ["MonoApplicationsConfigFile"];
-			string rootDir = AppSettings ["MonoServerRootDir"];
-			object oport;
-			string ip = AppSettings ["MonoServerAddress"];
-			bool master = false;
-			string filename = AppSettings ["MonoUnixSocket"];
-			if (ip == "" || ip == null)
-				ip = "0.0.0.0";
-
-			oport = AppSettings ["MonoServerPort"];
-			if (oport == null)
-				oport = 8080;
-
+			ApplicationSettings settings = new ApplicationSettings ();
 			Options options = 0;
 			int hash = 0;
 			for (int i = 0; i < args.Length; i++){
@@ -236,41 +257,41 @@ namespace Mono.WebServer.Apache
 				switch (a){
 				case "--filename":
 					CheckAndSetOptions (a, Options.FileName, ref options);
-					filename = args [++i];
+					settings.FileName = args [++i];
 					break;
 				case "--terminate":
 					CheckAndSetOptions (a, Options.Terminate, ref options);
 					break;
 				case "--master":
 					CheckAndSetOptions (a, Options.Master, ref options);
-					master = true;
+					settings.Master = true;
 					break;
 				case "--port":
 					CheckAndSetOptions (a, Options.Port, ref options);
-					oport = args [++i];
+					settings.Oport = args [++i];
 					break;
 				case "--address":
 					CheckAndSetOptions (a, Options.Address, ref options);
-					ip = args [++i];
+					settings.IP = args [++i];
 					break;
 				case "--root":
 					CheckAndSetOptions (a, Options.Root, ref options);
-					rootDir = args [++i];
+					settings.RootDir = args [++i];
 					break;
 				case "--applications":
 					CheckAndSetOptions (a, Options.Applications, ref options);
-					apps = args [++i];
+					settings.Apps = args [++i];
 					break;
 				case "--appconfigfile":
 					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
-					appConfigFile = args [++i];
+					settings.AppConfigFile = args [++i];
 					break;
 				case "--appconfigdir":
 					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
-					appConfigDir = args [++i];
+					settings.AppConfigDir = args [++i];
 					break;
 				case "--nonstop":
-					nonstop = true;
+					settings.NonStop = true;
 					break;
 				case "--help":
 					ShowHelp ();
@@ -279,7 +300,7 @@ namespace Mono.WebServer.Apache
 					ShowVersion ();
 					return 0;
 				case "--verbose":
-					verbose = true;
+					settings.Verbose = true;
 					break;
 				case "--pidfile": {
 					string pidfile = args[++i];
@@ -297,7 +318,7 @@ namespace Mono.WebServer.Apache
 					MonoWorkerRequest.CheckFileAccess = false;
 					break;
 				default:
-					Console.WriteLine ("Unknown argument: {0}", a);
+					Console.Error.WriteLine ("Unknown argument: {0}", a);
 					ShowHelp ();
 					return 1;
 				}
@@ -309,15 +330,15 @@ namespace Mono.WebServer.Apache
 			string lockfile;
 			bool useTCP = ((options & Options.Port) != 0);
 			if (!useTCP) {
-				if (filename == null || filename == "")
-					filename = "/tmp/mod_mono_server";
+				if (settings.FileName == null || settings.FileName.Length == 0)
+					settings.FileName = "/tmp/mod_mono_server";
 
 				if ((options & Options.Address) != 0) {
 					ShowHelp ();
-					Console.WriteLine ();
-					Console.WriteLine ("ERROR: --address without --port");
+					Console.Error.WriteLine ();
+					Console.Error.WriteLine ("ERROR: --address without --port");
 					Environment.Exit (1);
-				} lockfile = Path.Combine (Path.GetTempPath (), Path.GetFileName (filename));
+				} lockfile = Path.Combine (Path.GetTempPath (), Path.GetFileName (settings.FileName));
 				lockfile = String.Format ("{0}_{1}", lockfile, hash);
 			} else {
 				lockfile = Path.Combine (Path.GetTempPath (), "mod_mono_TCP_");
@@ -327,63 +348,63 @@ namespace Mono.WebServer.Apache
 			IPAddress ipaddr = null;
 			ushort port;
 			try {
-				port = Convert.ToUInt16 (oport);
+				port = Convert.ToUInt16 (settings.Oport);
 			} catch (Exception) {
-				Console.WriteLine ("The value given for the listen port is not valid: " + oport);
+				Console.Error.WriteLine ("The value given for the listen port is not valid: " + settings.Oport);
 				return 1;
 			}
 
 			try {
-				ipaddr = IPAddress.Parse (ip);
+				ipaddr = IPAddress.Parse (settings.IP);
 			} catch (Exception) {
-				Console.WriteLine ("The value given for the address is not valid: " + ip);
+				Console.Error.WriteLine ("The value given for the address is not valid: " + settings.IP);
 				return 1;
 			}
 
-			if (rootDir != null && rootDir != "") {
+			if (settings.RootDir != null && settings.RootDir.Length > 0) {
 				try {
-					Environment.CurrentDirectory = rootDir;
+					Environment.CurrentDirectory = settings.RootDir;
 				} catch (Exception e) {
-					Console.WriteLine ("Error: {0}", e.Message);
+					Console.Error.WriteLine ("Error: {0}", e.Message);
 					return 1;
 				}
 			}
 
-			rootDir = Directory.GetCurrentDirectory ();
+			settings.RootDir = Directory.GetCurrentDirectory ();
 			
 			WebSource webSource;
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
-				webSource = new ModMonoWebSource (filename, lockfile);
+				webSource = new ModMonoWebSource (settings.FileName, lockfile);
 			}
 
 			if ((options & Options.Terminate) != 0) {
-				if (verbose)
-					Console.WriteLine ("Shutting down running mod-mono-server...");
+				if (settings.Verbose)
+					Console.Error.WriteLine ("Shutting down running mod-mono-server...");
 				
 				bool res = ((ModMonoWebSource) webSource).GracefulShutdown ();
-				if (verbose)
-					Console.WriteLine (res ? "Done." : "Failed");
+				if (settings.Verbose)
+					Console.Error.WriteLine (res ? "Done." : "Failed");
 
 				return (res) ? 0 : 1;
 			}
 
 			ApplicationServer server = new ApplicationServer (webSource);
-			server.Verbose = verbose;
+			server.Verbose = settings.Verbose;
 			server.SingleApplication = !root;
 
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
-			if (apps != null)
-				server.AddApplicationsFromCommandLine (apps);
+			if (settings.Apps != null)
+				server.AddApplicationsFromCommandLine (settings.Apps);
 
-			if (appConfigFile != null)
-				server.AddApplicationsFromConfigFile (appConfigFile);
+			if (settings.AppConfigFile != null)
+				server.AddApplicationsFromConfigFile (settings.AppConfigFile);
 
-			if (appConfigDir != null)
-				server.AddApplicationsFromConfigDirectory (appConfigDir);
+			if (settings.AppConfigDir != null)
+				server.AddApplicationsFromConfigDirectory (settings.AppConfigDir);
 
-			if (!master && apps == null && appConfigDir == null && appConfigFile == null)
+			if (!settings.Master && settings.Apps == null && settings.AppConfigDir == null && settings.AppConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 
 			VPathToHost vh = server.GetSingleApp ();
@@ -398,21 +419,21 @@ namespace Mono.WebServer.Apache
 				server.AppHost = ext_apphost;
 
 			if (!useTCP && !quiet) {
-				Console.WriteLine ("Listening on: {0}", filename);
+				Console.Error.WriteLine ("Listening on: {0}", settings.FileName);
 			} else if (!quiet) {
-				Console.WriteLine ("Listening on port: {0}", port);
-				Console.WriteLine ("Listening on address: {0}", ip);
+				Console.Error.WriteLine ("Listening on port: {0}", port);
+				Console.Error.WriteLine ("Listening on address: {0}", settings.IP);
 			}
 
 			if (!quiet)
-				Console.WriteLine ("Root directory: {0}", rootDir);
+				Console.Error.WriteLine ("Root directory: {0}", settings.RootDir);
 
 			try {
-				if (server.Start (!nonstop) == false)
+				if (server.Start (!settings.NonStop) == false)
 					return 2;
 
-				if (!nonstop) {
-					Console.WriteLine ("Hit Return to stop the server.");
+				if (!settings.NonStop) {
+					Console.Error.WriteLine ("Hit Return to stop the server.");
 					while (true) {
 						try {
 							Console.ReadLine ();
@@ -427,7 +448,7 @@ namespace Mono.WebServer.Apache
 				}
 			} catch (Exception e) {
 				if (!(e is ThreadAbortException))
-					Console.WriteLine ("Error: {0}", e.Message);
+					Console.Error.WriteLine ("Error: {0}", e.Message);
 				else
 					server.ShutdownSockets ();
 				return 1;

@@ -430,7 +430,7 @@ namespace Mono.WebServer.XSP
 				webSource = new XSPWebSource (ipaddr, port, !root);
 			}
 
-			ApplicationServer server = new ApplicationServer (webSource);
+			ApplicationServer server = new ApplicationServer (webSource, settings.RootDir);
 			server.Verbose = settings.Verbose;
 			server.SingleApplication = !root;
 

@@ -366,7 +366,7 @@ namespace Mono.WebServer.Apache
 				return (res) ? 0 : 1;
 			}
 
-			ApplicationServer server = new ApplicationServer (webSource);
+			ApplicationServer server = new ApplicationServer (webSource, rootDir);
 			server.Verbose = verbose;
 			server.SingleApplication = !root;
 

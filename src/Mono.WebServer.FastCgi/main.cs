@@ -288,7 +288,7 @@ namespace Mono.WebServer.FastCgi
 			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
                         WebSource webSource = new WebSource ();
-			appserver = new ApplicationServer (webSource, root_dir);
+			appserver = new ApplicationServer (webSource);
 			appserver.Verbose = (bool) configmanager ["verbose"];
 			
 			string applications = (string)

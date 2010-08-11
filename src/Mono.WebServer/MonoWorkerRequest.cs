@@ -53,9 +53,12 @@ namespace Mono.WebServer
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
 		static readonly string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
-
+		static readonly char[] mapPathTrimStartChars = { '/' };
+		
 		static bool runningOnWindows;
 		static bool checkFileAccess = true;
+		static bool needToReplacePathSeparator;
+		static char pathSeparatorChar;
 		
 		IApplicationHost appHostBase;
 		Encoding encoding;
@@ -63,6 +66,7 @@ namespace Mono.WebServer
 		byte [] queryStringBytes;
 		string hostVPath;
 		string hostPath;
+		string hostPhysicalRoot;
 		EndOfSendNotification end_send;
 		object end_send_data;
 		X509Certificate client_cert;		
@@ -115,6 +119,15 @@ namespace Mono.WebServer
 			}
 		}
 
+		string HostPhysicalRoot {
+			get {
+				if (hostPhysicalRoot == null)
+					hostPhysicalRoot = appHostBase.Server.PhysicalRoot;
+
+				return hostPhysicalRoot;
+			}
+		}
+		
 		protected virtual Encoding Encoding {
 			get {
 				if (encoding == null)
@@ -147,6 +160,11 @@ namespace Mono.WebServer
 			PlatformID pid = Environment.OSVersion.Platform;
                         runningOnWindows = ((int) pid != 128 && pid != PlatformID.Unix && pid != PlatformID.MacOSX);
 
+			if (Path.DirectorySeparatorChar != '/') {
+				needToReplacePathSeparator = true;
+				pathSeparatorChar = Path.DirectorySeparatorChar;
+			}
+			
 			try {
 				string v = ConfigurationManager.AppSettings ["MonoServerCheckHiddenFiles"];
 				if (v != null && v.Length > 0) {
@@ -247,30 +265,66 @@ namespace Mono.WebServer
 			return null;
 		}		
 
+		// The logic here is as follows:
+		//
+		// If path is equal to the host's virtual path (including trailing slash),
+		// return the host virtual path.
+		//
+		// If path is absolute (starts with '/') then check if it's under our host vpath. If
+		// it is, base the mapping under the virtual application's physical path. If it
+		// isn't use the physical root of the application server to return the mapped
+		// path. If you have just one application configured, then the values computed in
+		// both of the above cases will be the same. If you have several applications
+		// configured for this xsp/mod-mono-server instance, then virtual paths outside our
+		// application virtual path will return physical paths relative to the server's
+		// physical root, not application's. This is consistent with the way IIS worker
+		// request works. See bug #575600
+		//
 		public override string MapPath (string path)
 		{
 			string eventResult = DoMapPathEvent (path);
 			if (eventResult != null)
 				return eventResult;
 
-			if (path == null || path.Length == 0 || path == HostVPath)
-				return HostPath.Replace ('/', Path.DirectorySeparatorChar);
-
-			if (path [0] == '~' && path.Length > 2 && path [1] == '/')
-				path = path.Substring (1);
-
-			int len = HostVPath.Length;
-			if (path.StartsWith (HostVPath) && (path.Length == len || path [len] == '/'))
-				path = path.Substring (len + 1);
-
-			while (path.Length > 0 && path [0] == '/') {
-				path = path.Substring (1);
+			string hostVPath = HostVPath;
+			int hostVPathLen = HostVPath.Length;
+			int pathLen = path != null ? path.Length : 0;
+			bool inThisApp;
+#if NET_2_0
+			inThisApp = path.StartsWith (hostVPath, StringComparison.Ordinal);
+#else
+			inThisApp = path.StartsWith (hostVPath);
+#endif
+			if (pathLen == 0 || (inThisApp && (pathLen == hostVPathLen || (pathLen == hostVPathLen + 1 && path [pathLen - 1] == '/')))) {
+				if (needToReplacePathSeparator)
+					return HostPath.Replace ('/', pathSeparatorChar);
+				return HostPath;
 			}
 
-			if (Path.DirectorySeparatorChar != '/')
-				path = path.Replace ('/', Path.DirectorySeparatorChar);
+			string basePath = null;
+			switch (path [0]) {
+				case '~':
+					if (path.Length >= 2 && path [1] == '/')
+						path = path.Substring (1);
+					break;
 
-			return Path.Combine (HostPath, path);
+				case '/':
+					if (!inThisApp)
+						basePath = HostPhysicalRoot;
+					break;
+			}
+
+			if (basePath == null)
+				basePath = HostPath;
+			
+			if (inThisApp && (path.Length == hostVPathLen || path [hostVPathLen] == '/'))
+				path = path.Substring (hostVPathLen + 1);
+			
+			path = path.TrimStart (mapPathTrimStartChars);
+			if (needToReplacePathSeparator)
+				path = path.Replace ('/', pathSeparatorChar);
+			
+			return Path.Combine (basePath, path);
 		}
 
 		protected abstract bool GetRequestData ();		

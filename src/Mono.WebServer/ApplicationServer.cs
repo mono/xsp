@@ -94,7 +94,6 @@ namespace Mono.WebServer
 		Socket listen_socket;
 		bool single_app;
 		Exception initialException;
-		string physicalRoot;
 		
 		Thread runner;
 
@@ -130,20 +129,10 @@ namespace Mono.WebServer
 				return iep.Port;
 			}
 		}
-
-		public string PhysicalRoot {
-			get { return physicalRoot; }
-		}
 		
-		public ApplicationServer (WebSource source, string physicalRoot)
+		public ApplicationServer (WebSource source)
 		{
-			if (source == null)
-				throw new ArgumentNullException ("source");
-			if (physicalRoot == null || physicalRoot.Length == 0)
-				throw new ArgumentNullException ("physicalRoot");
-			
-			this.webSource = source;
-			this.physicalRoot = physicalRoot;
+			webSource = source;
 		} 
 
 		public bool Verbose {

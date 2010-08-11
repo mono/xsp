@@ -390,7 +390,7 @@ namespace Mono.WebServer.Apache
 				return (res) ? 0 : 1;
 			}
 
-			ApplicationServer server = new ApplicationServer (webSource, settings.RootDir);
+			ApplicationServer server = new ApplicationServer (webSource);
 			server.Verbose = settings.Verbose;
 			server.SingleApplication = !root;
 

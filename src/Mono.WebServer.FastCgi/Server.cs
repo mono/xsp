@@ -265,7 +265,10 @@ namespace Mono.FastCgi {
 		///    open connections managed by the current instance.
 		/// </value>
 		public int ConnectionCount {
-			get {return connections.Count;}
+			get {
+				lock (connections)
+					return connections.Count;
+			}
 		}
 		
 		/// <summary>
@@ -279,8 +282,10 @@ namespace Mono.FastCgi {
 		public int RequestCount {
 			get {
 				int requests = 0;
-				foreach (Connection c in connections)
-					requests += c.RequestCount;
+				lock (connections) {
+					foreach (Connection c in connections)
+						requests += c.RequestCount;
+				}
 				
 				return requests;
 			}
@@ -342,8 +347,10 @@ namespace Mono.FastCgi {
 
 			started = false;
 			listen_socket.Close ();
-			foreach (Connection c in new List<Connection> (connections)) {
-				EndConnection (c);
+			lock (connections) {
+				foreach (Connection c in new List<Connection> (connections)) {
+					EndConnection (c);
+				}
 			}
 			
 			runner.Abort ();
@@ -374,9 +381,11 @@ namespace Mono.FastCgi {
 				throw new ArgumentNullException ("connection");
 			
 			connection.Stop ();
-			
-			if (connections.Contains (connection))
-				connections.Remove (connection);
+
+			lock (connections) {
+				if (connections.Contains (connection))
+					connections.Remove (connection);
+			}
 			
 			if (!accepting && CanAccept)
 				BeginAccept ();
@@ -611,7 +620,8 @@ namespace Mono.FastCgi {
 				try {
 					Socket accepted = listen_socket.EndAccept (ares);
 					connection = new Connection (accepted, this);
-					connections.Add (connection);
+					lock (connections)
+						connections.Add (connection);
 				} catch (System.Net.Sockets.SocketException e) {
 					Logger.Write (LogLevel.Error,
 						Strings.Server_AcceptFailed, e.Message);

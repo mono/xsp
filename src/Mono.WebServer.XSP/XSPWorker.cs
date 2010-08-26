@@ -241,13 +241,13 @@ namespace Mono.WebServer
 					}
 					
 					try {
-						sock.Close ();
+						server.UnregisterSocket (sock);
 					} catch {
 						// ignore
 					}
-					
+
 					try {
-						server.UnregisterSocket (sock);
+						sock.Close ();
 					} catch {
 						// ignore
 					}

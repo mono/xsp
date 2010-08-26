@@ -234,7 +234,7 @@ namespace Mono.WebServer
 					netStream.Close ();
 				} else if (false == netStream.OwnsSocket) {
 					try {
-						if (sock.Connected)
+						if (sock.Connected && !(sock.Poll (0, SelectMode.SelectRead) && sock.Available == 0))
 							sock.Shutdown (SocketShutdown.Both);
 					} catch {
 						// ignore

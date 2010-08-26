@@ -242,6 +242,11 @@ namespace Mono.WebServer
 					
 					try {
 						sock.Close ();
+					} catch {
+						// ignore
+					}
+					
+					try {
 						server.UnregisterSocket (sock);
 					} catch {
 						// ignore

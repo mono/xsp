@@ -134,7 +134,12 @@ namespace Mono.WebServer
 		public string PhysicalRoot {
 			get { return physicalRoot; }
 		}
-		
+
+		[Obsolete ("Use the .ctor that takes a 'physicalRoot' argument instead")]
+		public ApplicationServer (WebSource source) : this (source, Environment.CurrentDirectory)
+		{
+		}
+
 		public ApplicationServer (WebSource source, string physicalRoot)
 		{
 			if (source == null)

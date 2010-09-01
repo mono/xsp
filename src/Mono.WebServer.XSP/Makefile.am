@@ -30,12 +30,7 @@ endif
 sources = \
 	main.cs \
 	SecurityConfiguration.cs \
-	XSPApplicationHost.cs \
-	XSPWorkerRequest.cs \
-	XSPRequestBroker.cs \
-	XSPWebSource.cs \
-	XSPWorker.cs \
-	SslInformation.cs
+	XSPWorker.cs
 
 build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 

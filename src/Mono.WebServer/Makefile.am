@@ -1,6 +1,6 @@
 pkgconfigdir=$(libdir)/pkgconfig
 builddir=$(top_builddir)/src/Mono.WebServer
-MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING) -unsafe
 SYSTEMCORE_DEP=@SYSTEMCORE_DEP@
 
 monowebserver2dir = $(prefix)/lib/xsp/2.0
@@ -45,7 +45,13 @@ monowebserver2_sources  = \
 			MapPathEventArgs.cs \
 			MapPathEventHandler.cs \
 			EndOfRequestHandler.cs \
-			UnregisterRequestEventHandler.cs
+			UnregisterRequestEventHandler.cs \
+			../Mono.WebServer.XSP/XSPApplicationHost.cs \
+			../Mono.WebServer.XSP/XSPWorkerRequest.cs \
+			../Mono.WebServer.XSP/XSPRequestBroker.cs \
+			../Mono.WebServer.XSP/XSPWebSource.cs \
+			../Mono.WebServer.XSP/XSPWorker.cs \
+			../Mono.WebServer.XSP/SslInformation.cs
 
 monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 

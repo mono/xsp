@@ -46,6 +46,7 @@ namespace Mono.WebServer
 	//
 	// XSPApplicationHost: The application host for XSP.
 	//
+	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPApplicationHost : BaseApplicationHost
 	{
 		// This method is only compatible with IPv4, please use IPEndPoint based overload.

@@ -46,6 +46,7 @@ using System.Runtime.InteropServices;
 
 namespace Mono.WebServer
 {
+	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
 		string verb;

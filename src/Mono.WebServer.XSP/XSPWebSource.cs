@@ -47,6 +47,7 @@ namespace Mono.WebServer
 	// XSPWebSource: Provides methods to get objects and types specific
 	// to XSP.
 	//
+	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPWebSource: WebSource
 	{
 		IPEndPoint bindAddress;

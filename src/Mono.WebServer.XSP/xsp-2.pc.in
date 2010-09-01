@@ -6,4 +6,4 @@ Executable=${assemblies_dir}/xsp2.exe
 Name: xsp2
 Description: Mono.WebServer2.dll - ASP.NET hosting support classes for .NET 2.0
 Version: @VERSION@
-Libs: -r:${assemblies_dir}/Mono.WebServer2.dll -r:${assemblies_dir}/xsp2.exe
+Libs: -r:${assemblies_dir}/Mono.WebServer2.dll

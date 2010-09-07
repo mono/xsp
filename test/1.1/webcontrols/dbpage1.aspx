@@ -29,13 +29,15 @@
 
 	        Version ver = Environment.Version;
 		if (providerAssembly == null || providerAssembly == "")
-	                if (ver.Major == 1)
-			         providerAssembly = "Mono.Data.SqliteClient, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
-	                else if (ver.Major == 2)
-	                         providerAssembly = "Mono.Data.SqliteClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+			if (ver.Major == 2)
+	                         providerAssembly = "Mono.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+	                else if (ver.Major == 4)
+	            		 providerAssembly = "Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756";
+			else
+				throw new InvalidOperationException (String.Format ("Framework version {0} is not supported by this demo.", ver));
 
 		if (cncTypeName == null || cncTypeName == "")
-			cncTypeName = "Mono.Data.SqliteClient.SqliteConnection";
+			cncTypeName = "Mono.Data.Sqlite.SqliteConnection";
 		
 		if (cncString == null || cncString == "") {
 	                string dbPath = Path.Combine (Path.GetDirectoryName (Request.MapPath (Request.FilePath)), "dbpage1.sqlite");
@@ -182,4 +184,3 @@ CellPadding="5" runat="server"/>
 </form>
 </body>
 </html>
-

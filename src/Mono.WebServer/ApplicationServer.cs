@@ -451,8 +451,9 @@ namespace Mono.WebServer
 		void RunServer ()
 		{
 			started = true;
-			accept_cb = new AsyncCallback (OnAccept);
-			listen_socket.BeginAccept (accept_cb, null);
+			SocketAsyncEventArgs args = new SocketAsyncEventArgs ();
+			args.Completed += OnAccept;
+			listen_socket.AcceptAsync (args);
 			if (runner.IsBackground)
 				return;
 
@@ -460,28 +461,29 @@ namespace Mono.WebServer
 				Thread.Sleep (1000000);
 		}
 
-		void OnAccept (IAsyncResult ares)
+		void OnAccept (object sender, EventArgs e)
 		{
 			Socket accepted = null;
+			SocketAsyncEventArgs args = (SocketAsyncEventArgs) e;
+			if (args.SocketError == SocketError.Success) {
+				accepted = args.AcceptSocket;
+				args.AcceptSocket = null;
+			}
+
 			try {
-				accepted = listen_socket.EndAccept (ares);
-			} catch {
-			} finally {
-				if (started) {
-					try {
-						listen_socket.BeginAccept (accept_cb, null);
-					} catch (Exception ex) {
-						if (accepted != null) {
-							SendException (accepted, ex);
-							accepted.Close ();
-							throw;
-						}
-					}
+				if (started)
+					listen_socket.AcceptAsync (args);
+			} catch (Exception ex) {
+				if (accepted != null) {
+					SendException (accepted, ex);
+					accepted.Close ();
+					throw;
 				}
 			}
 
 			if (accepted == null)
 				return;
+
 			accepted.Blocking = true;
 			SetSocketOptions (accepted);
 			RegisterSocket (accepted);

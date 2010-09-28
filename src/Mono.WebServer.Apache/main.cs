@@ -247,6 +247,9 @@ namespace Mono.WebServer.Apache
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			ApplicationSettings settings = new ApplicationSettings ();
+			if (ext_apphost != null)
+				settings.RootDir = ext_apphost.Path;
+
 			Options options = 0;
 			int hash = 0;
 			for (int i = 0; i < args.Length; i++){
@@ -415,9 +418,10 @@ namespace Mono.WebServer.Apache
 				webSource.Dispose ();
 				return svr.RealMain (args, false, vh.AppHost, quiet);
 			}
-			if (ext_apphost != null)
+			if (ext_apphost != null) {
+				ext_apphost.Server = server;
 				server.AppHost = ext_apphost;
-
+			}
 			if (!useTCP && !quiet) {
 				Console.Error.WriteLine ("Listening on: {0}", settings.FileName);
 			} else if (!quiet) {

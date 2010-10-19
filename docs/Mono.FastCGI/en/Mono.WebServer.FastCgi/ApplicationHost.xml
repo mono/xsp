@@ -1,0 +1,157 @@
+<Type Name="ApplicationHost" FullName="Mono.WebServer.FastCgi.ApplicationHost">
+  <TypeSignature Language="C#" Value="public class ApplicationHost : Mono.WebServer.BaseApplicationHost" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit ApplicationHost extends Mono.WebServer.BaseApplicationHost" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>Mono.WebServer.BaseApplicationHost</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public ApplicationHost ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor() cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetPathsFromUri">
+      <MemberSignature Language="C#" Value="public void GetPathsFromUri (string verb, string uri, out string realUri, out string pathInfo);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void GetPathsFromUri(string verb, string uri, string realUri, string pathInfo) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="verb" Type="System.String" />
+        <Parameter Name="uri" Type="System.String" />
+        <Parameter Name="realUri" Type="System.String&amp;" RefType="out" />
+        <Parameter Name="pathInfo" Type="System.String&amp;" RefType="out" />
+      </Parameters>
+      <Docs>
+        <param name="verb">
+            The HTTP verb of the request.
+            </param>
+        <param name="uri">
+            the virtual URI, including any path-info, which need to be split.
+            </param>
+        <param name="realUri">
+            Returns the path part of the URI.
+            </param>
+        <param name="pathInfo">
+            Returns the trailing path-info part of the URI, if any.
+            </param>
+        <summary>
+            Splits a virtual URI into its virtual path and virtual
+            path-info parts as identified by the web-application
+            host in the current <see cref="T:System.AppDomain" />.
+            </summary>
+        <remarks>
+            This method wraps the <see cref="!:Mono.WebServer.Paths.GetPathsFromUri" />
+            method so that it can easily be called
+            from a remote <see cref="T:System.AppDomain" />.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="MapPath">
+      <MemberSignature Language="C#" Value="public string MapPath (string virtualPath);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance string MapPath(string virtualPath) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="virtualPath" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="virtualPath">
+            The virtual path to be mapped.
+            </param>
+        <summary>
+            Maps the specified virtual path to a physical path on
+            the server as defined in the <see cref="T:System.AppDomain" />
+            of the current <see cref="T:Mono.WebServer.FastCgi.ApplicationHost" />.
+            </summary>
+        <returns>
+            The physical path of the specified virtual path.
+            </returns>
+        <remarks>
+            As a method that is available on this <see cref="T:Mono.WebServer.FastCgi.ApplicationHost" />, which derives
+            from <see cref="T:System.MarshalByRefObject" />, it
+            enables path mapping to be queried from a
+            remote <see cref="T:System.AppDomain" />.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ProcessRequest">
+      <MemberSignature Language="C#" Value="public void ProcessRequest (Mono.WebServer.FastCgi.Responder responder);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void ProcessRequest(class Mono.WebServer.FastCgi.Responder responder) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="responder" Type="Mono.WebServer.FastCgi.Responder" />
+      </Parameters>
+      <Docs>
+        <param name="responder">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="VirtualFileExists">
+      <MemberSignature Language="C#" Value="public bool VirtualFileExists (string virtualPath);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance bool VirtualFileExists(string virtualPath) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="virtualPath" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="virtualPath">
+            The virtual path to be checked.
+            </param>
+        <summary>
+            Determines if a virtual path specifies a file on
+            the server as defined in the <see cref="T:System.AppDomain" />
+            of the current <see cref="T:Mono.WebServer.FastCgi.ApplicationHost" />.
+            </summary>
+        <returns>
+            True if the virtual path is that of a file, otherwise false.
+            </returns>
+        <remarks>
+            As a method that is available on this <see cref="T:Mono.WebServer.FastCgi.ApplicationHost" />, which derives
+            from <see cref="T:System.MarshalByRefObject" />, it
+            enables virtual file checks to be performed
+            from a remote <see cref="T:System.AppDomain" />.
+            </remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

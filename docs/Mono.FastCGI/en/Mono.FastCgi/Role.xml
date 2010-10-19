@@ -1,0 +1,67 @@
+<Type Name="Role" FullName="Mono.FastCgi.Role">
+  <TypeSignature Language="C#" Value="public enum Role" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed Role extends System.Enum" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Enum</BaseTypeName>
+  </Base>
+  <Docs>
+    <summary>
+            Specifies the role to use for a request.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="Authorizer">
+      <MemberSignature Language="C#" Value="Authorizer" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.Role Authorizer = unsigned int16(2)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Role</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request is for the role of "Authorizer".
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Filter">
+      <MemberSignature Language="C#" Value="Filter" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.Role Filter = unsigned int16(3)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Role</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request is for the role of "Filter".
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Responder">
+      <MemberSignature Language="C#" Value="Responder" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.Role Responder = unsigned int16(1)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Role</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request is for the role of "Responder".
+            </summary>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

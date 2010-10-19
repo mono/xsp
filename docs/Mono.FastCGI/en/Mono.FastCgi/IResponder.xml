@@ -1,0 +1,101 @@
+<Type Name="IResponder" FullName="Mono.FastCgi.IResponder">
+  <TypeSignature Language="C#" Value="public interface IResponder" />
+  <TypeSignature Language="ILAsm" Value=".class public interface auto ansi abstract IResponder" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This interface is used for classes that will serve as responders.
+            </summary>
+    <remarks>
+      <para>In addition to implementing this interface, a potential
+            responder must contain a constructor accepting a single parameter
+            of type <see cref="T:Mono.FastCgi.ResponderRequest" />.</para>
+      <para>To register a responder with a server, use <see cref="M:Mono.FastCgi.Server.SetResponder(System.Type)" />.</para>
+    </remarks>
+    <example>
+            A very basic responder:
+            <code lang="C#">
+            class MyResponder : IResponder
+            {
+            ResponderRequest req;
+            public MyResponder (ResponderRequest request)
+            {
+            req = request;
+            }
+            public int Process ()
+            {
+            req.SendOutput ("Content-Type: text/html\r\n\r\n");
+            req.SendOutput ("&lt;html&gt;\n &lt;head&gt;&lt;title&gt;Test&lt;/title&gt;&lt;/head&gt;\n");
+            req.SendOutput (" &lt;body&gt;\n  Server name: ");
+            req.SendOutput (GetParameter ("SERVER_NAME"));
+            req.SendOutput ("\n &lt;/body&gt;\n&lt;/html&gt;");
+            return 0;
+            }
+            public ResponderRequest Request {
+            get {return req;}
+            }
+            }
+            ...
+            server.SetResponder (typeof (MyRequest));
+            </code></example>
+  </Docs>
+  <Members>
+    <Member MemberName="Process">
+      <MemberSignature Language="C#" Value="public int Process ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig newslot virtual instance int32 Process() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Processes the request and performs the response.
+            </summary>
+        <returns>
+          <para>A <see cref="T:System.Int32" /> containing the application
+            status the request ended with.</para>
+          <para>This is the same value as would be returned by a
+            program on termination. On successful termination, this
+            would be zero.</para>
+        </returns>
+        <remarks>
+          <para>In the event that the method spawns its own
+            thread for responding to the request, a value of <see cref="F:System.Int32.MinValue" /> will prevent the calling method
+            from completing the request. In that case, the thread
+            will be responsible for calling <see cref="M:Mono.FastCgi.Request.CompleteRequest(System.Int32,Mono.FastCgi.ProtocolStatus)" /> with the appropriate
+            application status and <see cref="F:Mono.FastCgi.ProtocolStatus.RequestComplete" />.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Request">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.ResponderRequest Request { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance class Mono.FastCgi.ResponderRequest Request" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.ResponderRequest</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the request that the current instance is to respond
+            to.
+            </summary>
+        <value>
+            A <see cref="T:Mono.FastCgi.ResponderRequest" /> object containing the
+            request that the current instance is to respond to.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

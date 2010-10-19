@@ -154,6 +154,8 @@ AC_OUTPUT([
 	unittests/Tests.XSP.Security/Makefile
 	unittests/webroot/Makefile
 	docs/Makefile
+	docs/Mono.WebServer/Makefile
+	docs/Mono.FastCGI/Makefile
 ])
 
 echo

@@ -1,0 +1,57 @@
+<Type Name="BeginRequestFlags" FullName="Mono.FastCgi.BeginRequestFlags">
+  <TypeSignature Language="C#" Value="public enum BeginRequestFlags" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed BeginRequestFlags extends System.Enum" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Enum</BaseTypeName>
+  </Base>
+  <Attributes>
+    <Attribute>
+      <AttributeName>System.Flags</AttributeName>
+    </Attribute>
+  </Attributes>
+  <Docs>
+    <summary>
+            Specifies flags to use for a request.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="KeepAlive">
+      <MemberSignature Language="C#" Value="KeepAlive" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.BeginRequestFlags KeepAlive = unsigned int8(1)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.BeginRequestFlags</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The connection is to be kept alive after the request is
+            complete.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="None">
+      <MemberSignature Language="C#" Value="None" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.BeginRequestFlags None = unsigned int8(0)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.BeginRequestFlags</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request has no flags.
+            </summary>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

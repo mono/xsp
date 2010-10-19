@@ -1,0 +1,72 @@
+<Type Name="ResponderRequest" FullName="Mono.FastCgi.ResponderRequest">
+  <TypeSignature Language="C#" Value="public class ResponderRequest : Mono.FastCgi.Request" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit ResponderRequest extends Mono.FastCgi.Request" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>Mono.FastCgi.Request</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This class extends <see cref="T:Mono.FastCgi.Request" /> adding on processing
+            features for the role of Responder.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public ResponderRequest (ushort requestID, Mono.FastCgi.Connection connection);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(unsigned int16 requestID, class Mono.FastCgi.Connection connection) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="connection" Type="Mono.FastCgi.Connection" />
+      </Parameters>
+      <Docs>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the request ID of the
+            new instance.
+            </param>
+        <param name="connection">
+            A <see cref="T:Mono.FastCgi.Connection" /> object from which data is
+            received and to which data will be sent.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.ResponderRequest" /> with the specified request ID
+            and connection.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="InputData">
+      <MemberSignature Language="C#" Value="public byte[] InputData { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance unsigned int8[] InputData" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the standard input data sent to the current
+            instance.
+            </summary>
+        <value>To be added.</value>
+        <remarks>
+            The size of this input will be equal to the value of
+            the CONTENT_LENGTH parameter but will contain zeroed
+            values at the end before the data is completely read and
+            <see cref="M:Mono.FastCgi.IResponder.Process" /> is called.
+            </remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

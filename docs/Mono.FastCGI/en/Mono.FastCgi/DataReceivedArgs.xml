@@ -1,0 +1,146 @@
+<Type Name="DataReceivedArgs" FullName="Mono.FastCgi.DataReceivedArgs">
+  <TypeSignature Language="C#" Value="public class DataReceivedArgs : EventArgs" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit DataReceivedArgs extends System.EventArgs" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.EventArgs</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This class extends <see cref="T:System.EventArgs" /> and provides
+            arguments for the event that data is received.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public DataReceivedArgs (Mono.FastCgi.Record record);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(valuetype Mono.FastCgi.Record record) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="record" Type="Mono.FastCgi.Record" />
+      </Parameters>
+      <Docs>
+        <param name="record">
+            A <see cref="T:Mono.FastCgi.Record" /> containing the data that was
+            received.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.DataReceivedArgs" /> with the specified data.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CopyTo">
+      <MemberSignature Language="C#" Value="public void CopyTo (byte[] dest, int destIndex);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void CopyTo(unsigned int8[] dest, int32 destIndex) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="dest" Type="System.Byte[]" />
+        <Parameter Name="destIndex" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="dest">
+            A <see cref="T:System.Byte[]" /> to copy the body to.
+            </param>
+        <param name="destIndex">
+            A <see cref="T:System.Int32" /> specifying at what index to start
+            copying.
+            </param>
+        <summary>
+            Copies the data to another array.
+            </summary>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="dest" /> is <see langref="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+          <paramref name="destIndex" /> is less than zero or does
+            not provide enough space to copy the body.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="DataCompleted">
+      <MemberSignature Language="C#" Value="public bool DataCompleted { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool DataCompleted" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets whether or not the data has been completed.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not the data
+            has been completed.
+            </value>
+        <remarks>
+            Data completeness means that this is that last event
+            of this type coming from the sender. It is the standard
+            FastCGI test equivalent to <c><I>args</I>.Data.Length ==
+            0</c>.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="DataLength">
+      <MemberSignature Language="C#" Value="public int DataLength { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 DataLength" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the length of the data in the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.UInt16" /> containing the length of the data
+            in the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetData">
+      <MemberSignature Language="C#" Value="public byte[] GetData ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance unsigned int8[] GetData() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Gets the data that was received.
+            </summary>
+        <returns>
+            A <see cref="T:System.Byte[]" /> containing the data that was
+            received.
+            </returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

@@ -1,0 +1,72 @@
+<Type Name="EndRequestBody" FullName="Mono.FastCgi.EndRequestBody">
+  <TypeSignature Language="C#" Value="public struct EndRequestBody" />
+  <TypeSignature Language="ILAsm" Value=".class public sequential ansi sealed beforefieldinit EndRequestBody extends System.ValueType" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.ValueType</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This struct contains the body data for an EndRequest record.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public EndRequestBody (int appStatus, Mono.FastCgi.ProtocolStatus protocolStatus);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(int32 appStatus, valuetype Mono.FastCgi.ProtocolStatus protocolStatus) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="appStatus" Type="System.Int32" />
+        <Parameter Name="protocolStatus" Type="Mono.FastCgi.ProtocolStatus" />
+      </Parameters>
+      <Docs>
+        <param name="appStatus">
+          <para>A <see cref="T:System.Int32" /> containing the application
+            status the request ended with.</para>
+          <para>This is the same value as would be returned by a
+            program on termination. On successful termination, this
+            would be zero.</para>
+        </param>
+        <param name="protocolStatus">
+            A <see cref="T:Mono.FastCgi.ProtocolStatus" /> containing the FastCGI
+            protocol status with which the request is being ended.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.EndRequestBody" /> with a specified application
+            status and protocol status.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetData">
+      <MemberSignature Language="C#" Value="public byte[] GetData ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance unsigned int8[] GetData() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Gets the data contained in the current instance.
+            </summary>
+        <returns>
+            A <see cref="T:System.Byte[]" /> containing the data contained in
+            the current instance.
+            </returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

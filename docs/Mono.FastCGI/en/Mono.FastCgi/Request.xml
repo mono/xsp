@@ -1,0 +1,791 @@
+<Type Name="Request" FullName="Mono.FastCgi.Request">
+  <TypeSignature Language="C#" Value="public class Request" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit Request extends System.Object" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Request (ushort requestID, Mono.FastCgi.Connection connection);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(unsigned int16 requestID, class Mono.FastCgi.Connection connection) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="connection" Type="Mono.FastCgi.Connection" />
+      </Parameters>
+      <Docs>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the request ID of the
+            new instance.
+            </param>
+        <param name="connection">
+            A <see cref="T:Mono.FastCgi.Connection" /> object from which data is
+            received and to which data will be sent.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.Request" /> with the specified request ID and
+            connection.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Abort">
+      <MemberSignature Language="C#" Value="public void Abort (string message, object[] args);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Abort(string message, object[] args) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="message" Type="System.String" />
+        <Parameter Name="args" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="message">
+            A <see cref="T:System.String" /> containing the error message.
+            </param>
+        <param name="args">
+            A <see cref="T:System.Object[]" /> containing argument to insert
+            into the message.
+            </param>
+        <summary>
+            Aborts the request by sending a message on the error
+            stream, logging it, and completing the request with an
+            application status of -1.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddFileData">
+      <MemberSignature Language="C#" Value="public void AddFileData (Mono.FastCgi.Record record);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void AddFileData(valuetype Mono.FastCgi.Record record) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="record" Type="Mono.FastCgi.Record" />
+      </Parameters>
+      <Docs>
+        <param name="record">
+            A <see cref="T:Mono.FastCgi.Record" /> containing a block of file
+            data.
+            </param>
+        <summary>
+            Adds a block of file data to the current instance.
+            </summary>
+        <remarks>
+          <para>File data send for the FastCGI filter role and
+            contains the contents of the requested file to be
+            filtered.</para>
+          <para>When data is received, <see cref="E:Mono.FastCgi.Request.FileDataReceived" /> is called.</para>
+        </remarks>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="record" /> does not have the type <see cref="F:Mono.FastCgi.RecordType.Data" />.
+            </exception>
+        <exception cref="T:System.InvalidOperationException">
+            The file data has already been completed.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="AddInputData">
+      <MemberSignature Language="C#" Value="public void AddInputData (Mono.FastCgi.Record record);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void AddInputData(valuetype Mono.FastCgi.Record record) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="record" Type="Mono.FastCgi.Record" />
+      </Parameters>
+      <Docs>
+        <param name="record">
+            A <see cref="T:Mono.FastCgi.Record" /> containing a block of input
+            data.
+            </param>
+        <summary>
+            Adds a block of standard input data to the current
+            instance.
+            </summary>
+        <remarks>
+          <para>Input data is analogous to standard input in
+            CGI/1.1 programs and contains post data from the HTTP
+            request.</para>
+          <para>When data is received, <see cref="E:Mono.FastCgi.Request.InputDataReceived" /> is called.</para>
+        </remarks>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="record" /> does not have the type <see cref="F:Mono.FastCgi.RecordType.StandardInput" />.
+            </exception>
+        <exception cref="T:System.InvalidOperationException">
+            The input data has already been completed.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="AddParameterData">
+      <MemberSignature Language="C#" Value="public void AddParameterData (byte[] data);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void AddParameterData(unsigned int8[] data) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing a chunk of parameter
+            data.
+            </param>
+        <summary>
+            Adds a block of FastCGI parameter data to the current
+            instance.
+            </summary>
+        <remarks>
+          <para>In the standard FastCGI method, if the data
+            received has a length of zero, the parameter data has
+            been completed and the the data will be parsed. At that
+            point <see cref="E:Mono.FastCgi.Request.ParameterDataCompleted" /> will be
+            called.</para>
+          <para>If an exception is encountered while parsing the
+            parameters, the request will be aborted.</para>
+        </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="data" /> is <see langref="null" />.
+            </exception>
+        <exception cref="T:System.InvalidOperationException">
+            The parameter data has already been completed and parsed.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="ApplicationHost">
+      <MemberSignature Language="C#" Value="protected Mono.WebServer.FastCgi.ApplicationHost ApplicationHost { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance class Mono.WebServer.FastCgi.ApplicationHost ApplicationHost" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.FastCgi.ApplicationHost</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the application host mapped to the current instance.
+            </summary>
+        <value>
+            A <see cref="!:Mono.WebServer.FastCgi.ApplicationHost" />
+            containing the application host mapped to current instance.
+            </value>
+        <remarks>
+            This is a marshalled object from the hosting <see cref="T:System.AppDomain" />.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CompleteRequest">
+      <MemberSignature Language="C#" Value="public void CompleteRequest (int appStatus, Mono.FastCgi.ProtocolStatus protocolStatus);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void CompleteRequest(int32 appStatus, valuetype Mono.FastCgi.ProtocolStatus protocolStatus) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="appStatus" Type="System.Int32" />
+        <Parameter Name="protocolStatus" Type="Mono.FastCgi.ProtocolStatus" />
+      </Parameters>
+      <Docs>
+        <param name="appStatus">
+          <para>A <see cref="T:System.Int32" /> containing the application
+            status the request ended with.</para>
+          <para>This is the same value as would be returned by a
+            program on termination. On successful termination, this
+            would be zero.</para>
+        </param>
+        <param name="protocolStatus">
+            A <see cref="T:Mono.FastCgi.ProtocolStatus" /> containing the FastCGI
+            protocol status with which the request is being ended.
+            </param>
+        <summary>
+            Completes the request by closing any opened response and
+            error streams and sending the EndRequest record to the
+            client.
+            </summary>
+        <remarks>
+            To close the request, this method calls <see cref="M:Mono.FastCgi.Connection.EndRequest(System.UInt16,System.Int32,Mono.FastCgi.ProtocolStatus)" />, which additionally
+            releases the resources so they can be garbage collected.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="DataNeeded">
+      <MemberSignature Language="C#" Value="public bool DataNeeded { protected set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool DataNeeded" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets whether or not data is still needed by the
+            current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not data is
+            still needed by the current instance.
+            </value>
+        <remarks>
+            This value is used by the connection to determine whether
+            or not it still needs to receive data for the request
+            from the socket. As soon as a request has received all
+            the necessary data, it should set the value to <see langword="false" /> so the connection can continue on
+            with its next task.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="FileDataReceived">
+      <MemberSignature Language="C#" Value="protected event Mono.FastCgi.DataReceivedHandler FileDataReceived;" />
+      <MemberSignature Language="ILAsm" Value=".event class Mono.FastCgi.DataReceivedHandler FileDataReceived" />
+      <MemberType>Event</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.DataReceivedHandler</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            This event is called when file data has been received by
+            the current instance.
+            </summary>
+        <remarks>
+            File data send for the FastCGI filter role and contains
+            the contents of the requested file to be filtered.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetParameter">
+      <MemberSignature Language="C#" Value="public string GetParameter (string parameter);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance string GetParameter(string parameter) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="parameter" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="parameter">
+            A <see cref="T:System.String" /> containing a parameter namte to
+            find in current instance.
+            </param>
+        <summary>
+            Gets a parameter with a specified name.
+            </summary>
+        <returns>
+            A <see cref="T:System.String" /> containing the parameter with the
+            specified name, or <see langref="null" /> if it was not
+            found.
+            </returns>
+        <remarks>
+            This method is analogous to <see cref="!:System.Environment.GetEnvironmentVariable" /> as FastCGI parameters represent environment variables
+            that would be passed to a CGI/1.1 program.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetParameters">
+      <MemberSignature Language="C#" Value="public System.Collections.Generic.IDictionary&lt;string,string&gt; GetParameters ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class System.Collections.Generic.IDictionary`2&lt;string, string&gt; GetParameters() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Collections.Generic.IDictionary&lt;System.String,System.String&gt;</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Gets all parameter contained in the current instance.
+            </summary>
+        <returns>
+            A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
+            containing all the parameters contained in the current
+            instance.
+            </returns>
+        <remarks>
+            This method is analogous to <see cref="!:System.Environment.GetEnvironmentVariables" /> as
+            FastCGI parameters represent environment variables that
+            would be passed to a CGI/1.1 program.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="HostName">
+      <MemberSignature Language="C#" Value="public string HostName { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance string HostName" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the host name used to make the request handled by
+            the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.String" /> containing the host name used to
+            make the request handled by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="InputDataReceived">
+      <MemberSignature Language="C#" Value="protected event Mono.FastCgi.DataReceivedHandler InputDataReceived;" />
+      <MemberSignature Language="ILAsm" Value=".event class Mono.FastCgi.DataReceivedHandler InputDataReceived" />
+      <MemberType>Event</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.DataReceivedHandler</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            This event is called when standard input data has been
+            received by the current instance.
+            </summary>
+        <remarks>
+            Input data is analogous to standard input in CGI/1.1
+            programs and contains post data from the HTTP request.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="IsConnected">
+      <MemberSignature Language="C#" Value="public bool IsConnected { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool IsConnected" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets whether or not the connection used by the current
+            instance is connected.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not the
+            connection used by the current instance is connected.
+            </value>
+        <remarks>
+            If the connection is not connected, any response data is
+            disregarded. As such, before any intense operation, this
+            value should be checked as to avoid any unneccessary
+            work.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ParameterDataCompleted">
+      <MemberSignature Language="C#" Value="protected event EventHandler ParameterDataCompleted;" />
+      <MemberSignature Language="ILAsm" Value=".event class System.EventHandler ParameterDataCompleted" />
+      <MemberType>Event</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.EventHandler</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            This event is called when the parameter data has been
+            completely read and parsed by the current instance.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Path">
+      <MemberSignature Language="C#" Value="public string Path { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance string Path" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the virtual path used to make the request handled by
+            the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.String" /> containing the virtual path used
+            to make the request handled by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="PhysicalPath">
+      <MemberSignature Language="C#" Value="public string PhysicalPath { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance string PhysicalPath" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the physical path mapped to by the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.String" /> containing the physical path
+            mapped to by current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="PortNumber">
+      <MemberSignature Language="C#" Value="public int PortNumber { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 PortNumber" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the port number used to make the request handled by
+            the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Int32" /> containing the port number used to
+            make the request handled by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestID">
+      <MemberSignature Language="C#" Value="public ushort RequestID { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance unsigned int16 RequestID" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.UInt16</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the request ID of the current instance as used by
+            the connection.
+            </summary>
+        <value>
+            A <see cref="T:System.UInt16" /> containing the request ID of the
+            current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendError">
+      <MemberSignature Language="C#" Value="public void SendError (byte[] data);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendError(unsigned int8[] data) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing error data to send.
+            </param>
+        <summary>
+            Sends standard error data.
+            </summary>
+        <remarks>
+          <para>FastCGI error data is analogous to CGI/1.1 standard
+            error data.</para>
+          <para>To send text, use <see cref="SendError(string,System.Text.Encoding)" />.</para>
+          <para>To send only the beginning of a <see cref="T:System.Byte[]" /> (as in the case of buffers), use <see cref="M:Mono.FastCgi.Request.SendError(System.Byte[],System.Int32)" />.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendError">
+      <MemberSignature Language="C#" Value="public void SendError (string text);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendError(string text) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="text" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="text">
+            A <see cref="T:System.String" /> containing text to send.
+            </param>
+        <summary>
+            Sends standard error text in UTF-8 encoding.
+            </summary>
+        <remarks>
+          <para>FastCGI error data is analogous to CGI/1.1 standard
+            error data.</para>
+          <para>To specify the text encoding, use <see cref="SendError(string,System.Text.Encoding)" />.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendError">
+      <MemberSignature Language="C#" Value="public void SendError (byte[] data, int length);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendError(unsigned int8[] data, int32 length) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+        <Parameter Name="length" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing error data to send.
+            </param>
+        <param name="length">
+            A <see cref="T:System.Int32" /> containing the number of bytes of
+            <paramref name="data" /> to send.
+            </param>
+        <summary>
+            Sends a specified number of bytes of standard error data.
+            </summary>
+        <remarks>
+          <para>FastCGI error data is analogous to CGI/1.1 standard
+            error data.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendError">
+      <MemberSignature Language="C#" Value="public void SendError (string text, System.Text.Encoding encoding);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendError(string text, class System.Text.Encoding encoding) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="text" Type="System.String" />
+        <Parameter Name="encoding" Type="System.Text.Encoding" />
+      </Parameters>
+      <Docs>
+        <param name="text">
+            A <see cref="T:System.String" /> containing text to send.
+            </param>
+        <param name="encoding">
+            A <see cref="!:System.Text.Encoding" /> containing a
+            encoding to use when converting the text.
+            </param>
+        <summary>
+            Sends standard error text in a specified encoding.
+            </summary>
+        <remarks>
+          <para>FastCGI error data is analogous to CGI/1.1 standard
+            error data.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendOutput">
+      <MemberSignature Language="C#" Value="public void SendOutput (byte[] data);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendOutput(unsigned int8[] data) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing output data to send.
+            </param>
+        <summary>
+            Sends standard output data.
+            </summary>
+        <remarks>
+          <para>FastCGI output data is analogous to CGI/1.1
+            standard output data.</para>
+          <para>To send text, use <see cref="SendOutput(string,System.Text.Encoding)" />.</para>
+          <para>To send only the beginning of a <see cref="T:System.Byte[]" /> (as in the case of buffers), use <see cref="M:Mono.FastCgi.Request.SendOutput(System.Byte[],System.Int32)" />.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendOutput">
+      <MemberSignature Language="C#" Value="public void SendOutput (byte[] data, int length);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendOutput(unsigned int8[] data, int32 length) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+        <Parameter Name="length" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing output data to send.
+            </param>
+        <param name="length">
+            A <see cref="T:System.Int32" /> containing the number of bytes of
+            <paramref name="data" /> to send.
+            </param>
+        <summary>
+            Sends a specified number of bytes of standard output
+            data.
+            </summary>
+        <remarks>
+          <para>FastCGI output data is analogous to CGI/1.1
+            standard output data.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendOutput">
+      <MemberSignature Language="C#" Value="public void SendOutput (string text, System.Text.Encoding encoding);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendOutput(string text, class System.Text.Encoding encoding) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="text" Type="System.String" />
+        <Parameter Name="encoding" Type="System.Text.Encoding" />
+      </Parameters>
+      <Docs>
+        <param name="text">
+            A <see cref="T:System.String" /> containing text to send.
+            </param>
+        <param name="encoding">
+            A <see cref="!:System.Text.Encoding" /> containing a
+            encoding to use when converting the text.
+            </param>
+        <summary>
+            Sends standard output text in a specified encoding.
+            </summary>
+        <remarks>
+          <para>FastCGI output data is analogous to CGI/1.1
+            standard output data.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendOutputText">
+      <MemberSignature Language="C#" Value="public void SendOutputText (string text);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendOutputText(string text) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="text" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="text">
+            A <see cref="T:System.String" /> containing text to send.
+            </param>
+        <summary>
+            Sends standard outpu text in UTF-8 encoding.
+            </summary>
+        <remarks>
+          <para>FastCGI output data is analogous to CGI/1.1
+            standard output data.</para>
+          <para>To specify the text encoding, use <see cref="SendOutput(string,System.Text.Encoding)" />.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Server">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.Server Server { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance class Mono.FastCgi.Server Server" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Server</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the server that spawned the connection used by the
+            current instance.
+            </summary>
+        <value>
+            A <see cref="!:FastCgi.Server" /> containing the server
+            that spawned the connection used by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

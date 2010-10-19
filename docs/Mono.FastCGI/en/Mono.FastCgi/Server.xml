@@ -1,0 +1,506 @@
+<Type Name="Server" FullName="Mono.FastCgi.Server">
+  <TypeSignature Language="C#" Value="public class Server" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit Server extends System.Object" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This class runs a FastCGI server and registers responder types.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Server (Mono.FastCgi.Socket socket);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(class Mono.FastCgi.Socket socket) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="socket" Type="Mono.FastCgi.Socket" />
+      </Parameters>
+      <Docs>
+        <param name="socket">
+            A <see cref="T:Mono.FastCgi.Socket" /> object to listen on.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of
+            <see cref="T:Mono.FastCgi.Server" /> with a given socket.
+            </summary>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="socket" /> is <see langword="null" />.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="AllocateBuffers">
+      <MemberSignature Language="C#" Value="public void AllocateBuffers (out byte[] buffer1, out byte[] buffer2);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void AllocateBuffers(unsigned int8[] buffer1, unsigned int8[] buffer2) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="buffer1" Type="System.Byte[]&amp;" RefType="out" />
+        <Parameter Name="buffer2" Type="System.Byte[]&amp;" RefType="out" />
+      </Parameters>
+      <Docs>
+        <param name="buffer1">
+            A <see cref="T:System.Byte[]" /> of size <see cref="F:Mono.FastCgi.Record.SuggestedBufferSize" />.
+            </param>
+        <param name="buffer2">
+            A <see cref="T:System.Byte[]" /> of size <see cref="F:Mono.FastCgi.Record.SuggestedBufferSize" />.
+            </param>
+        <summary>
+            Allocates two buffers from the current instance for use
+            in sending and receiving records.
+            </summary>
+        <remarks>
+            The current instance manages buffers to improve
+            performance. To release buffers back to the current
+            instance, use <see cref="M:Mono.FastCgi.Server.ReleaseBuffers(System.Byte[],System.Byte[])" />.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CanAccept">
+      <MemberSignature Language="C#" Value="public bool CanAccept { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool CanAccept" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets whether or not the current instance can accept
+            another connection.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not
+            the current instance will permit another connection.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CanRequest">
+      <MemberSignature Language="C#" Value="public bool CanRequest { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool CanRequest" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets whether or not the current instance can accept
+            another request.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not
+            the current instance will permit another request.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ConnectionCount">
+      <MemberSignature Language="C#" Value="public int ConnectionCount { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 ConnectionCount" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the total number of open connections managed by the
+            current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Int32" /> containing the total number of
+            open connections managed by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CreateResponder">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.IResponder CreateResponder (Mono.FastCgi.ResponderRequest request);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class Mono.FastCgi.IResponder CreateResponder(class Mono.FastCgi.ResponderRequest request) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.IResponder</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="request" Type="Mono.FastCgi.ResponderRequest" />
+      </Parameters>
+      <Docs>
+        <param name="request">
+            A <see cref="T:Mono.FastCgi.ResponderRequest" /> object to create a
+            responder for.
+            </param>
+        <summary>
+            Creates a new <see cref="T:Mono.FastCgi.IResponder" /> object for a
+            specified request.
+            </summary>
+        <returns>
+            A <see cref="T:Mono.FastCgi.IResponder" /> object for the provided
+            request.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.InvalidOperationException">
+            The responder role is not supported.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="EndConnection">
+      <MemberSignature Language="C#" Value="public void EndConnection (Mono.FastCgi.Connection connection);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void EndConnection(class Mono.FastCgi.Connection connection) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="connection" Type="Mono.FastCgi.Connection" />
+      </Parameters>
+      <Docs>
+        <param name="connection">
+            A <see cref="T:Mono.FastCgi.Connection" /> object to terminate.
+            </param>
+        <summary>
+            Ends a specified connection.
+            </summary>
+        <remarks>
+          <para>This method stops a connection by closing its
+            requests and listening sockets, permitting its thread to
+            terminate.</para>
+          <para>Once the connection is stopped, it is removed from
+            the list of managed connections, and if the server is not
+            accepting, begins the connection process.</para>
+        </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="connection" /> is
+            <see langword="null" />.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="GetValues">
+      <MemberSignature Language="C#" Value="public System.Collections.Generic.IDictionary&lt;string,string&gt; GetValues (System.Collections.Generic.IEnumerable&lt;string&gt; names);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class System.Collections.Generic.IDictionary`2&lt;string, string&gt; GetValues(class System.Collections.Generic.IEnumerable`1&lt;string&gt; names) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Collections.Generic.IDictionary&lt;System.String,System.String&gt;</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="names" Type="System.Collections.Generic.IEnumerable&lt;System.String&gt;" />
+      </Parameters>
+      <Docs>
+        <param name="names">
+            A <see cref="T:System.Collections.Generic.IEnumerable&lt;string&gt;" />
+            object containing FastCGI server variable names.
+            </param>
+        <summary>
+            Gets name/value pairs for server variables.
+            </summary>
+        <returns>
+            A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
+            object containing the server variables used by the
+            current instance.
+            </returns>
+        <remarks>
+          <para>A FastCGI client can at any time request
+            information on a collection of server variables. It
+            provides a list of variable names to which the server
+            responds with name/value pairs containing their
+            content.</para>
+        </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="names" /> is
+            <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="names" /> contains a non-string value.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="MaxConnections">
+      <MemberSignature Language="C#" Value="public int MaxConnections { set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 MaxConnections" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets the maximum number of concurrent
+            connections the current instance will allow before it
+            stops accepting new ones.
+            </summary>
+        <value>
+            A <see cref="T:System.Int32" /> containing the number of
+            concurrent connections allowed by the current instance.
+            </value>
+        <remarks>
+            When the maximum number of connections has been reached,
+            the server will stop accepting connections until one of
+            the existing connection is terminated.
+            </remarks>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+            The value is less than 1.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="MaxRequests">
+      <MemberSignature Language="C#" Value="public int MaxRequests { set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 MaxRequests" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets the maximum number of concurrent requests
+            the current instance will allow before it starts
+            rejecting new ones.
+            </summary>
+        <value>
+            A <see cref="T:System.Int32" /> containing the number of
+            concurrent requests allowed by the current instance.
+            </value>
+        <remarks>
+          <para>When the maximum number of requests has been
+            reached, the server will respond to requests with the
+            FastCGI "Overloaded" end-of-request record.</para>
+          <para>In the case the connection multiplexing is
+            disabled, this property is redundant to
+            <see cref="P:Mono.FastCgi.Server.MaxConnections" />, as only one request is
+            permitted per connection. In such a case, this property
+            should be no less than <see cref="P:Mono.FastCgi.Server.MaxConnections" /> to
+            avoid unnecessary connections.</para>
+        </remarks>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+            The value is less than 1.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="MultiplexConnections">
+      <MemberSignature Language="C#" Value="public bool MultiplexConnections { set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool MultiplexConnections" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets whether or not the multiplexing of
+            requests is permitted in the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not
+            multiplexing is permitted in the current instance.
+            </value>
+        <remarks>
+            Multiplexing of connections allows multiple requests and
+            responses to be sent simultaneously. This allows for
+            improved response times for multiple requests send over a
+            single connection.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ReleaseBuffers">
+      <MemberSignature Language="C#" Value="public void ReleaseBuffers (byte[] buffer1, byte[] buffer2);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void ReleaseBuffers(unsigned int8[] buffer1, unsigned int8[] buffer2) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="buffer1" Type="System.Byte[]" />
+        <Parameter Name="buffer2" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="buffer1">
+            A <see cref="T:System.Byte[]" /> allocated by <see cref="M:Mono.FastCgi.Server.AllocateBuffers(System.Byte[],System.Byte[])" />.
+            </param>
+        <param name="buffer2">
+            A <see cref="T:System.Byte[]" /> allocated by <see cref="M:Mono.FastCgi.Server.AllocateBuffers(System.Byte[],System.Byte[])" />.
+            </param>
+        <summary>
+            Releases two buffers back to the current instance.
+            </summary>
+        <remarks>
+            The current instance manages buffers to improve
+            performance. To allocate buffers, use <see cref="M:Mono.FastCgi.Server.AllocateBuffers(System.Byte[],System.Byte[])" />.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestCount">
+      <MemberSignature Language="C#" Value="public int RequestCount { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 RequestCount" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the total number of open requests managed by the
+            current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Int32" /> containing the total number of
+            open requests managed by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetResponder">
+      <MemberSignature Language="C#" Value="public void SetResponder (Type responder);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SetResponder(class System.Type responder) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="responder" Type="System.Type" />
+      </Parameters>
+      <Docs>
+        <param name="responder">
+            A <see cref="T:System.Type" /> for a class implementing the
+            <see cref="T:Mono.FastCgi.IResponder" /> interface.
+            </param>
+        <summary>
+            Sets the <see cref="T:Mono.FastCgi.IResponder" /> type to use for the
+            FastCGI responder role.
+            </summary>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="responder" /> does not implement the
+            <see cref="T:Mono.FastCgi.IResponder" /> interface or does not provide
+            the proper constructor.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="Start">
+      <MemberSignature Language="C#" Value="public void Start (bool background);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Start(bool background) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="background" Type="System.Boolean" />
+      </Parameters>
+      <Docs>
+        <param name="background">
+            A <see cref="T:System.Boolean" /> specifying whether or not the
+            server thread should be run as a background thread.
+            </param>
+        <summary>
+            Starts the server in a different thread.
+            </summary>
+        <remarks>
+          <para>The behavior of background and foreground threads
+            are identical except in that fact that the application
+            will not terminate while foreground threads are
+            running.</para>
+          <para>See <see cref="P:System.Threading.Thread.IsBackground" /> for more
+            details.</para>
+        </remarks>
+        <exception cref="T:System.InvalidOperationException">
+            The server is already started.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="Stop">
+      <MemberSignature Language="C#" Value="public void Stop ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Stop() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Stops the server.
+            </summary>
+        <remarks>
+            This closes all connections and aborts the thread. If
+            the thread is a foreground thread, this will allow the
+            program to terminate.
+            </remarks>
+        <exception cref="T:System.InvalidOperationException">
+            The server is not started.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="SupportsResponder">
+      <MemberSignature Language="C#" Value="public bool SupportsResponder { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool SupportsResponder" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets whether or not the current instance supports
+            the role of FastCGI responder.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not the
+            responder role is supported by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

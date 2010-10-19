@@ -1,0 +1,291 @@
+<Type Name="Connection" FullName="Mono.FastCgi.Connection">
+  <TypeSignature Language="C#" Value="public class Connection" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit Connection extends System.Object" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This class handles a FastCGI connection by processing records and
+            calling responders.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Connection (Mono.FastCgi.Socket socket, Mono.FastCgi.Server server);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(class Mono.FastCgi.Socket socket, class Mono.FastCgi.Server server) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="socket" Type="Mono.FastCgi.Socket" />
+        <Parameter Name="server" Type="Mono.FastCgi.Server" />
+      </Parameters>
+      <Docs>
+        <param name="socket">
+            A <see cref="T:Mono.FastCgi.Socket" /> object to communicate over.
+            </param>
+        <param name="server">
+            A <see cref="T:Mono.FastCgi.Server" /> object containing the server that
+            created the new instance.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.Connection" /> to handle a specified socket created
+            by a specified server.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="EndRequest">
+      <MemberSignature Language="C#" Value="public void EndRequest (ushort requestID, int appStatus, Mono.FastCgi.ProtocolStatus protocolStatus);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void EndRequest(unsigned int16 requestID, int32 appStatus, valuetype Mono.FastCgi.ProtocolStatus protocolStatus) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="appStatus" Type="System.Int32" />
+        <Parameter Name="protocolStatus" Type="Mono.FastCgi.ProtocolStatus" />
+      </Parameters>
+      <Docs>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the ID of the request
+            to end.
+            </param>
+        <param name="appStatus">
+          <para>A <see cref="T:System.Int32" /> containing the application
+            status the request ended with.</para>
+          <para>This is the same value as would be returned by a
+            program on termination. On successful termination, this
+            would be zero.</para>
+        </param>
+        <param name="protocolStatus">
+            A <see cref="T:Mono.FastCgi.ProtocolStatus" /> containing the FastCGI
+            protocol status with which the request is being ended.
+            </param>
+        <summary>
+            Sends an EndRequest record with a specified request ID,
+            application status, and protocol status, and releases the
+            associated resources.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="IsConnected">
+      <MemberSignature Language="C#" Value="public bool IsConnected { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance bool IsConnected" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets whether or not the current instance is connected.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not the
+            current instance is connected.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestCount">
+      <MemberSignature Language="C#" Value="public int RequestCount { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance int32 RequestCount" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the number of active requests being managed by the
+            current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Int32" /> containing the number of active
+            requests being managed by the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Run">
+      <MemberSignature Language="C#" Value="public void Run ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Run() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Receives and responds to records until all requests have
+            been completed.
+            </summary>
+        <remarks>
+            If the last received BeginRequest record is flagged
+            with keep-alive, the connection will be kept alive event
+            after all open requests have been completed.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SendRecord">
+      <MemberSignature Language="C#" Value="public void SendRecord (Mono.FastCgi.RecordType type, ushort requestID, byte[] bodyData);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendRecord(valuetype Mono.FastCgi.RecordType type, unsigned int16 requestID, unsigned int8[] bodyData) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="type" Type="Mono.FastCgi.RecordType" />
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="bodyData" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="type">
+            A <see cref="T:Mono.FastCgi.RecordType" /> specifying the type of record
+            to send.
+            </param>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the ID of the request
+            the record is associated with.
+            </param>
+        <param name="bodyData">
+            A <see cref="T:System.Byte[]" /> containing the body data for the
+            request.
+            </param>
+        <summary>
+            Sends a record to the client.
+            </summary>
+        <remarks>
+            If the socket is not connected, the record will not be
+            sent.
+            </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="bodyData" /> is <see langword="null" />.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="SendRecord">
+      <MemberSignature Language="C#" Value="public void SendRecord (Mono.FastCgi.RecordType type, ushort requestID, byte[] bodyData, int bodyIndex, int bodyLength);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SendRecord(valuetype Mono.FastCgi.RecordType type, unsigned int16 requestID, unsigned int8[] bodyData, int32 bodyIndex, int32 bodyLength) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="type" Type="Mono.FastCgi.RecordType" />
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="bodyData" Type="System.Byte[]" />
+        <Parameter Name="bodyIndex" Type="System.Int32" />
+        <Parameter Name="bodyLength" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="type">
+            A <see cref="T:Mono.FastCgi.RecordType" /> specifying the type of record
+            to send.
+            </param>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the ID of the request
+            the record is associated with.
+            </param>
+        <param name="bodyData">
+            A <see cref="T:System.Byte[]" /> containing the body data for the
+            request.
+            </param>
+        <param name="bodyIndex">
+            A <see cref="T:System.Int32" /> specifying the index in <paramref name="bodyData" /> at which the body begins.
+            </param>
+        <param name="bodyLength">
+            A <see cref="T:System.Int32" /> specifying the length of the body in
+            <paramref name="bodyData" /> or -1 if all remaining data
+            (<c><paramref name="bodyData" />.Length - <paramref name="bodyIndex" /></c>) is used.
+            </param>
+        <summary>
+            Sends a record to the client.
+            </summary>
+        <remarks>
+            If the socket is not connected, the record will not be
+            sent.
+            </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="bodyData" /> is <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+          <paramref name="bodyIndex" /> is outside of the range
+            of <paramref name="bodyData" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="bodyLength" /> contains more than 65535
+            bytes or is set to -1 and calculated to be greater than
+            65535 bytes.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="Server">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.Server Server { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance class Mono.FastCgi.Server Server" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Server</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the server used to create the current instance.
+            </summary>
+        <value>
+            A <see cref="T:Mono.FastCgi.Server" /> object containing the server used
+            to create the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Stop">
+      <MemberSignature Language="C#" Value="public void Stop ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Stop() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Stops the current instance by ending all the open
+            requests and closing the socket.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

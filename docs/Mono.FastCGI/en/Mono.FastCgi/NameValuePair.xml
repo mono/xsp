@@ -1,0 +1,237 @@
+<Type Name="NameValuePair" FullName="Mono.FastCgi.NameValuePair">
+  <TypeSignature Language="C#" Value="public struct NameValuePair" />
+  <TypeSignature Language="ILAsm" Value=".class public sequential ansi sealed beforefieldinit NameValuePair extends System.ValueType" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.ValueType</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This struct reads and writes FastCGI name/value pairs.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public NameValuePair (byte[] data, ref int index);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(unsigned int8[] data, int32 index) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+        <Parameter Name="index" Type="System.Int32&amp;" RefType="ref" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing the name/value pair to
+            read.
+            </param>
+        <param name="index">
+            A <see cref="T:System.Int32" /> specifying the index at which to
+            read.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.NameValuePair" /> reading it from specified data
+            at a specified index, moving the index to the position of
+            the next pair.
+            </summary>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="data" /> is <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+            The data cannot be read at the <paramref name="index" />
+            because it would read outside of the array.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public NameValuePair (string name, string value);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(string name, string value) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="name" Type="System.String" />
+        <Parameter Name="value" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="name">
+            A <see cref="T:System.String" /> containing the name for the
+            new instance.
+            </param>
+        <param name="value">
+            A <see cref="T:System.String" /> containing the value for the
+            new instance.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.NameValuePair" /> with a specified name and value.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Empty">
+      <MemberSignature Language="C#" Value="public static readonly Mono.FastCgi.NameValuePair Empty;" />
+      <MemberSignature Language="ILAsm" Value=".field public static initonly valuetype Mono.FastCgi.NameValuePair Empty" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.NameValuePair</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            A contstant representation of an empty <see cref="T:Mono.FastCgi.NameValuePair" />.
+            </summary>
+        <returns>
+            An empty <see cref="T:Mono.FastCgi.NameValuePair" />.
+            </returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Encoding">
+      <MemberSignature Language="C#" Value="public static System.Text.Encoding Encoding { set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property class System.Text.Encoding Encoding" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Text.Encoding</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets the encoding to use when reading and
+            writing instances of <see cref="T:Mono.FastCgi.NameValuePair" /> to
+            memory.
+            </summary>
+        <value>
+            A <see cref="!:Text.Encoding" /> to use reading and writing
+            to memory.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="FromData">
+      <MemberSignature Language="C#" Value="public static System.Collections.Generic.IDictionary&lt;string,string&gt; FromData (byte[] data);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig class System.Collections.Generic.IDictionary`2&lt;string, string&gt; FromData(unsigned int8[] data) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Collections.Generic.IDictionary&lt;System.String,System.String&gt;</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="data" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="data">
+            A <see cref="T:System.Byte[]" /> containing a collection of
+            FastCGI name/value pairs.
+            </param>
+        <summary>
+            Reads FastCGI name/value pairs from memory and stores
+            them as a
+            <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />.
+            </summary>
+        <returns>
+            A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
+            object containing the name/value pairs read from
+            <paramref name="data" />.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="data" /> is <see langword="null" />.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="GetData">
+      <MemberSignature Language="C#" Value="public static byte[] GetData (System.Collections.Generic.IDictionary&lt;string,string&gt; pairs);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig unsigned int8[] GetData(class System.Collections.Generic.IDictionary`2&lt;string, string&gt; pairs) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="pairs" Type="System.Collections.Generic.IDictionary&lt;System.String,System.String&gt;" />
+      </Parameters>
+      <Docs>
+        <param name="pairs">
+            A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
+            containing string pairs.
+            </param>
+        <summary>
+            Reads name/value pairs from a
+            <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
+            and stores them as FastCGI name/value pairs.
+            </summary>
+        <returns>
+            A <see cref="T:System.Byte[]" /> containing FastCGI name/value
+            pairs.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="pairs" /> is <see langref="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="pairs" /> contains a name or value not of
+            type <see cref="T:System.String" />.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="Name">
+      <MemberSignature Language="C#" Value="public string Name { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance string Name" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the name of the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.String" /> containing the name of the
+            current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Value">
+      <MemberSignature Language="C#" Value="public string Value { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance string Value" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the value of the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.String" /> containing the value of the
+            current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

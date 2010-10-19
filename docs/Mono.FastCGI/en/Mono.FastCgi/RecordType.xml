@@ -1,0 +1,222 @@
+<Type Name="RecordType" FullName="Mono.FastCgi.RecordType">
+  <TypeSignature Language="C#" Value="public enum RecordType" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed RecordType extends System.Enum" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Enum</BaseTypeName>
+  </Base>
+  <Docs>
+    <summary>
+            Specifies the type of information contained in the record.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="AbortRequest">
+      <MemberSignature Language="C#" Value="AbortRequest" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType AbortRequest = unsigned int8(2)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record is informing that a request has been aborted.
+            (Sent by the client.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="BeginRequest">
+      <MemberSignature Language="C#" Value="BeginRequest" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType BeginRequest = unsigned int8(1)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains the beginning of a request. Sent by
+            the client.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Data">
+      <MemberSignature Language="C#" Value="Data" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType Data = unsigned int8(8)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains file contents for a request. (Sent
+            by the client.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="EndRequest">
+      <MemberSignature Language="C#" Value="EndRequest" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType EndRequest = unsigned int8(3)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains the end of a request. (Sent by the
+            server.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="GetValues">
+      <MemberSignature Language="C#" Value="GetValues" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType GetValues = unsigned int8(9)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains a request for server values. (Sent
+            by the client.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="GetValuesResult">
+      <MemberSignature Language="C#" Value="GetValuesResult" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType GetValuesResult = unsigned int8(10)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains a server values. (Sent by the
+            server.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="None">
+      <MemberSignature Language="C#" Value="None" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType None = unsigned int8(0)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            No record type specified.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Params">
+      <MemberSignature Language="C#" Value="Params" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType Params = unsigned int8(4)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains the parameters for a request. (Sent
+            by the client.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="StandardError">
+      <MemberSignature Language="C#" Value="StandardError" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType StandardError = unsigned int8(7)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains standard error for a request. (Sent
+            by the server.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="StandardInput">
+      <MemberSignature Language="C#" Value="StandardInput" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType StandardInput = unsigned int8(5)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains standard input for a request. (Sent
+            by the client.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="StandardOutput">
+      <MemberSignature Language="C#" Value="StandardOutput" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType StandardOutput = unsigned int8(6)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains standard output for a request. (Sent
+            by the server.)
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="UnknownType">
+      <MemberSignature Language="C#" Value="UnknownType" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.RecordType UnknownType = unsigned int8(11)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The record contains a notice of failure to recognize a
+            record type. (Sent by the server.)
+            </summary>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

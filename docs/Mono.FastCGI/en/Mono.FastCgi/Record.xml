@@ -1,0 +1,468 @@
+<Type Name="Record" FullName="Mono.FastCgi.Record">
+  <TypeSignature Language="C#" Value="public struct Record" />
+  <TypeSignature Language="ILAsm" Value=".class public sequential ansi sealed beforefieldinit Record extends System.ValueType" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.ValueType</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This struct sends and receives FastCGI records.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Record (Mono.FastCgi.Socket socket);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(class Mono.FastCgi.Socket socket) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="socket" Type="Mono.FastCgi.Socket" />
+      </Parameters>
+      <Docs>
+        <param name="socket">
+            A <see cref="T:Mono.FastCgi.Socket" /> object to receive the record data
+            from.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.Record" /> by reading the contents from a specified
+            socket.
+            </summary>
+        <remarks>
+            To improve performance, consider using a buffer and
+            <see cref="T:Mono.FastCgi.Record" /> instead.
+            </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="socket" /> is <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="socket" /> does not contain a complete
+            record.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Record (Mono.FastCgi.Socket socket, byte[] buffer);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(class Mono.FastCgi.Socket socket, unsigned int8[] buffer) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="socket" Type="Mono.FastCgi.Socket" />
+        <Parameter Name="buffer" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="socket">
+            A <see cref="T:Mono.FastCgi.Socket" /> object to receive the record data
+            from.
+            </param>
+        <param name="buffer">
+            A <see cref="T:System.Byte[]" /> containing the buffer to use when
+            receiving from the socket or <see langword="null" /> to
+            create the buffers on the fly.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.Record" /> by reading the contents from a specified
+            socket.
+            </summary>
+        <remarks>
+          <para>If <paramref name="buffer" /> is not <see langword="null" />, the suggested size is <see cref="F:Mono.FastCgi.Record.SuggestedBufferSize" />. If the size of the buffer
+            is insufficient to read the data, a sufficiently sized
+            array will be created on a per-instance basis.</para>
+          <note type="caution">
+            <para>If a buffer is used, the new instance
+            is only valid until the same buffer is used again.
+            Therefore, use an extra degree of caution when using
+            this constructor.</para>
+          </note>
+        </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="socket" /> is <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="socket" /> does not contain a complete
+            record.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Record (byte version, Mono.FastCgi.RecordType type, ushort requestID, byte[] bodyData);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(unsigned int8 version, valuetype Mono.FastCgi.RecordType type, unsigned int16 requestID, unsigned int8[] bodyData) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="version" Type="System.Byte" />
+        <Parameter Name="type" Type="Mono.FastCgi.RecordType" />
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="bodyData" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="version">
+            A <see cref="T:System.Byte" /> containing the FastCGI version the
+            record is structured for.
+            </param>
+        <param name="type">
+            A <see cref="T:Mono.FastCgi.RecordType" /> containing the type of
+            record to create.
+            </param>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the ID of the request
+            associated with the new record.
+            </param>
+        <param name="bodyData">
+            A <see cref="T:System.Byte[]" /> containing the contents to use
+            in the new record.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.Record" /> populating it with a specified version,
+            type, ID, and body.
+            </summary>
+        <remarks>
+          <note type="caution">
+            The new instance will store a reference to <paramref name="bodyData" /> and as such be invalid when the
+            value changes externally.
+            </note>
+        </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="bodyData" /> is <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="bodyData" /> contains more than 65535
+            bytes and cannot be sent.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Record (byte version, Mono.FastCgi.RecordType type, ushort requestID, byte[] bodyData, int bodyIndex, int bodyLength);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(unsigned int8 version, valuetype Mono.FastCgi.RecordType type, unsigned int16 requestID, unsigned int8[] bodyData, int32 bodyIndex, int32 bodyLength) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="version" Type="System.Byte" />
+        <Parameter Name="type" Type="Mono.FastCgi.RecordType" />
+        <Parameter Name="requestID" Type="System.UInt16" />
+        <Parameter Name="bodyData" Type="System.Byte[]" />
+        <Parameter Name="bodyIndex" Type="System.Int32" />
+        <Parameter Name="bodyLength" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="version">
+            A <see cref="T:System.Byte" /> containing the FastCGI version the
+            record is structured for.
+            </param>
+        <param name="type">
+            A <see cref="T:Mono.FastCgi.RecordType" /> containing the type of
+            record to create.
+            </param>
+        <param name="requestID">
+            A <see cref="T:System.UInt16" /> containing the ID of the request
+            associated with the new record.
+            </param>
+        <param name="bodyData">
+            A <see cref="T:System.Byte[]" /> containing the contents to use
+            in the new record.
+            </param>
+        <param name="bodyIndex">
+            A <see cref="T:System.Int32" /> specifying the index in <paramref name="bodyData" /> at which the body begins.
+            </param>
+        <param name="bodyLength">
+            A <see cref="T:System.Int32" /> specifying the length of the body in
+            <paramref name="bodyData" /> or -1 if all remaining data
+            (<c><paramref name="bodyData" />.Length - <paramref name="bodyIndex" /></c>) is used.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.Record" /> populating it with a specified version,
+            type, ID, and body.
+            </summary>
+        <remarks>
+          <note type="caution">
+            The new instance will store a reference to <paramref name="bodyData" /> and as such be invalid when the
+            value changes externally.
+            </note>
+        </remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="bodyData" /> is <see langword="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+          <paramref name="bodyIndex" /> is outside of the range
+            of <paramref name="bodyData" />.
+            </exception>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="bodyLength" /> contains more than 65535
+            bytes or is set to -1 and calculated to be greater than
+            65535 bytes.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="BodyLength">
+      <MemberSignature Language="C#" Value="public ushort BodyLength { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance unsigned int16 BodyLength" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.UInt16</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the length of the body of the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.UInt16" /> containing the body length of the
+            current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="CopyTo">
+      <MemberSignature Language="C#" Value="public void CopyTo (byte[] dest, int destIndex);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void CopyTo(unsigned int8[] dest, int32 destIndex) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="dest" Type="System.Byte[]" />
+        <Parameter Name="destIndex" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="dest">
+            A <see cref="T:System.Byte[]" /> to copy the body to.
+            </param>
+        <param name="destIndex">
+            A <see cref="T:System.Int32" /> specifying at what index to start
+            copying.
+            </param>
+        <summary>
+            Copies the body to another array.
+            </summary>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentNullException">
+          <paramref name="dest" /> is <see langref="null" />.
+            </exception>
+        <exception cref="T:System.ArgumentOutOfRangeException">
+          <paramref name="destIndex" /> is less than zero or does
+            not provide enough space to copy the body.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="GetBody">
+      <MemberSignature Language="C#" Value="public byte[] GetBody ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance unsigned int8[] GetBody() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Gets the body data of with the current instance.
+            </summary>
+        <returns>
+            A new <see cref="T:System.Byte[]" /> containing the body data of
+            the current instance.
+            </returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="HeaderSize">
+      <MemberSignature Language="C#" Value="public const int HeaderSize = 8;" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal int32 HeaderSize = (8)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <MemberValue>8</MemberValue>
+      <Docs>
+        <summary>
+            The size of a FastCGI record header.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestID">
+      <MemberSignature Language="C#" Value="public ushort RequestID { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance unsigned int16 RequestID" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.UInt16</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the ID of the request associated with the current
+            instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Byte" /> containing the ID of the request
+            associated with the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Send">
+      <MemberSignature Language="C#" Value="public void Send (Mono.FastCgi.Socket socket);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Send(class Mono.FastCgi.Socket socket) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="socket" Type="Mono.FastCgi.Socket" />
+      </Parameters>
+      <Docs>
+        <param name="socket">
+            A <see cref="T:Mono.FastCgi.Socket" /> object to send the data over.
+            </param>
+        <summary>
+            Sends a FastCGI record with the data from the current
+            instance over a given socket.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Send">
+      <MemberSignature Language="C#" Value="public void Send (Mono.FastCgi.Socket socket, byte[] buffer);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void Send(class Mono.FastCgi.Socket socket, unsigned int8[] buffer) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="socket" Type="Mono.FastCgi.Socket" />
+        <Parameter Name="buffer" Type="System.Byte[]" />
+      </Parameters>
+      <Docs>
+        <param name="socket">
+            A <see cref="T:Mono.FastCgi.Socket" /> object to send the data over.
+            </param>
+        <param name="buffer">
+            A <see cref="T:System.Byte[]" /> to write the record to or <see langword="null" /> to create a temporary buffer during
+            the send.
+            </param>
+        <summary>
+            Sends a FastCGI record with the data from the current
+            instance over a given socket.
+            </summary>
+        <remarks>
+            If <paramref name="buffer" /> is of insufficient size to
+            write to the buffer, a temporary buffer will be created.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SuggestedBufferSize">
+      <MemberSignature Language="C#" Value="public const int SuggestedBufferSize = 65798;" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal int32 SuggestedBufferSize = (65798)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <MemberValue>65798</MemberValue>
+      <Docs>
+        <summary>
+            Contains the suggested buffer size, equal to the maximum
+            possible size of a record.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ToString">
+      <MemberSignature Language="C#" Value="public override string ToString ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig virtual instance string ToString() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.String</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Creates and returns a <see cref="T:System.String" />
+            representation of the current instance.
+            </summary>
+        <returns>
+            A <see cref="T:System.String" /> representation of the current
+            instance.
+            </returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Type">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.RecordType Type { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance valuetype Mono.FastCgi.RecordType Type" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.RecordType</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the FastCGI record type of the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Byte" /> containing the FastCGI record type
+            of the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Version">
+      <MemberSignature Language="C#" Value="public byte Version { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance unsigned int8 Version" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the FastCGI version of the current instance.
+            </summary>
+        <value>
+            A <see cref="T:System.Byte" /> containing the FastCGI version of
+            the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

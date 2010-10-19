@@ -1,0 +1,136 @@
+<Type Name="LogLevel" FullName="Mono.FastCgi.LogLevel">
+  <TypeSignature Language="C#" Value="public enum LogLevel" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed LogLevel extends System.Enum" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Enum</BaseTypeName>
+  </Base>
+  <Attributes>
+    <Attribute>
+      <AttributeName>System.Flags</AttributeName>
+    </Attribute>
+  </Attributes>
+  <Docs>
+    <summary>
+            Specifies what type of message to log.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="All">
+      <MemberSignature Language="C#" Value="All" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel All = int32(15)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            All messages will be logged.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Debug">
+      <MemberSignature Language="C#" Value="Debug" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel Debug = int32(8)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Debug messages will be logged.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Error">
+      <MemberSignature Language="C#" Value="Error" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel Error = int32(1)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Error messages will be logged.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="None">
+      <MemberSignature Language="C#" Value="None" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel None = int32(0)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            No messages will be logged.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Notice">
+      <MemberSignature Language="C#" Value="Notice" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel Notice = int32(4)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Notice messages will be logged.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Standard">
+      <MemberSignature Language="C#" Value="Standard" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel Standard = int32(7)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Standard messages will be logged.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Warning">
+      <MemberSignature Language="C#" Value="Warning" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.LogLevel Warning = int32(2)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Warning message will be logged.
+            </summary>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

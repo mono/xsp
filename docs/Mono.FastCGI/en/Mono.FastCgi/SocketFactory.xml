@@ -1,0 +1,148 @@
+<Type Name="SocketFactory" FullName="Mono.FastCgi.SocketFactory">
+  <TypeSignature Language="C#" Value="public static class SocketFactory" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi abstract sealed beforefieldinit SocketFactory extends System.Object" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This static class creates bound instances of <see cref="T:Mono.FastCgi.Socket" /> to use for various implementations.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="CreatePipeSocket">
+      <MemberSignature Language="C#" Value="public static Mono.FastCgi.Socket CreatePipeSocket (IntPtr sock);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig class Mono.FastCgi.Socket CreatePipeSocket(native int sock) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Socket</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="sock" Type="System.IntPtr" />
+      </Parameters>
+      <Docs>
+        <param name="sock">
+            A <see cref="T:System.IntPtr" /> pointing to the bound socket.
+            </param>
+        <summary>
+            Creates a socket from a bound unmanaged socket.
+            </summary>
+        <returns>
+            A <see cref="T:Mono.FastCgi.Socket" /> object bound to the specified
+            IP address and end point.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="!:System.Net.Sockets.SocketException">
+            The specified socket is not bound.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="CreateTcpSocket">
+      <MemberSignature Language="C#" Value="public static Mono.FastCgi.Socket CreateTcpSocket (System.Net.IPEndPoint localEndPoint);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig class Mono.FastCgi.Socket CreateTcpSocket(class System.Net.IPEndPoint localEndPoint) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Socket</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="localEndPoint" Type="System.Net.IPEndPoint" />
+      </Parameters>
+      <Docs>
+        <param name="localEndPoint">
+            A <see cref="!:System.Net.IPEndPoint" /> containing the
+            local IP end point to bind to.
+            </param>
+        <summary>
+            Creates a bound socket for a specified local IP end
+            point.
+            </summary>
+        <returns>
+            A <see cref="T:Mono.FastCgi.Socket" /> object bound to the specified
+            end point.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="!:System.Net.Sockets.SocketException">
+            An error occurred while binding the socket.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="CreateTcpSocket">
+      <MemberSignature Language="C#" Value="public static Mono.FastCgi.Socket CreateTcpSocket (System.Net.IPAddress address, int port);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig class Mono.FastCgi.Socket CreateTcpSocket(class System.Net.IPAddress address, int32 port) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Socket</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="address" Type="System.Net.IPAddress" />
+        <Parameter Name="port" Type="System.Int32" />
+      </Parameters>
+      <Docs>
+        <param name="address">
+            A <see cref="!:System.Net.IPAddress" /> containing the
+            IP address be assigned.
+            </param>
+        <param name="port">
+            A <see cref="T:System.Int32" /> containing the port to bind to.
+            </param>
+        <summary>
+            Creates a bound socket for a specified IP address and
+            port.
+            </summary>
+        <returns>
+            A <see cref="T:Mono.FastCgi.Socket" /> object bound to the specified
+            IP address and end point.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="!:System.Net.Sockets.SocketException">
+            An error occurred while binding the socket.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="CreateUnixSocket">
+      <MemberSignature Language="C#" Value="public static Mono.FastCgi.Socket CreateUnixSocket (string path);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig class Mono.FastCgi.Socket CreateUnixSocket(string path) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Socket</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="path" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="path">
+            A <see cref="T:System.String" /> containing the path to use.
+            </param>
+        <summary>
+            Creates a unix socket for a specified path.
+            </summary>
+        <returns>
+            A <see cref="T:Mono.FastCgi.Socket" /> object bound to the specified
+            path.
+            </returns>
+        <remarks>To be added.</remarks>
+        <exception cref="!:System.Net.Sockets.SocketException">
+            An error occurred while binding the socket.
+            </exception>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

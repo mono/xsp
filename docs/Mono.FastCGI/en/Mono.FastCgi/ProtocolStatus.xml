@@ -1,0 +1,86 @@
+<Type Name="ProtocolStatus" FullName="Mono.FastCgi.ProtocolStatus">
+  <TypeSignature Language="C#" Value="public enum ProtocolStatus" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed ProtocolStatus extends System.Enum" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Enum</BaseTypeName>
+  </Base>
+  <Docs>
+    <summary>
+            Specifies the protocol status at the end of a request.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="CantMultiplexConnections">
+      <MemberSignature Language="C#" Value="CantMultiplexConnections" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.ProtocolStatus CantMultiplexConnections = unsigned int8(1)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.ProtocolStatus</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request cannot be complete because it would require
+            multiplexing.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Overloaded">
+      <MemberSignature Language="C#" Value="Overloaded" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.ProtocolStatus Overloaded = unsigned int8(2)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.ProtocolStatus</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request cannot be completed becuase a resource is
+            overloaded.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="RequestComplete">
+      <MemberSignature Language="C#" Value="RequestComplete" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.ProtocolStatus RequestComplete = unsigned int8(0)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.ProtocolStatus</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request was completed successfully.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="UnknownRole">
+      <MemberSignature Language="C#" Value="UnknownRole" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype Mono.FastCgi.ProtocolStatus UnknownRole = unsigned int8(3)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.ProtocolStatus</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request cannot be completed becuase the role is
+            unknown.
+            </summary>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

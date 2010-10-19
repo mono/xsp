@@ -1,0 +1,32 @@
+<Type Name="DataReceivedHandler" FullName="Mono.FastCgi.DataReceivedHandler">
+  <TypeSignature Language="C#" Value="public delegate void DataReceivedHandler(Request sender, DataReceivedArgs args);" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed DataReceivedHandler extends System.MulticastDelegate" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Delegate</BaseTypeName>
+  </Base>
+  <Parameters>
+    <Parameter Name="sender" Type="Mono.FastCgi.Request" />
+    <Parameter Name="args" Type="Mono.FastCgi.DataReceivedArgs" />
+  </Parameters>
+  <ReturnValue>
+    <ReturnType>System.Void</ReturnType>
+  </ReturnValue>
+  <Docs>
+    <param name="sender">
+            A <see cref="T:Mono.FastCgi.Request" /> object that sent the event.
+            </param>
+    <param name="args">
+            A <see cref="T:Mono.FastCgi.DataReceivedArgs" /> object containing the arguments
+            for the event.
+            </param>
+    <summary>
+            This delegate is used for notification that data has been
+            received, typically by <see cref="T:Mono.FastCgi.Request" />.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+</Type>

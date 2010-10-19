@@ -1,0 +1,65 @@
+<Type Name="UnknownTypeBody" FullName="Mono.FastCgi.UnknownTypeBody">
+  <TypeSignature Language="C#" Value="public struct UnknownTypeBody" />
+  <TypeSignature Language="ILAsm" Value=".class public sequential ansi sealed beforefieldinit UnknownTypeBody extends System.ValueType" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.ValueType</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This struct contains the body data for an UnknownType record.
+            </summary>
+    <remarks>
+            An UnknownType record is sent by the server when the client sends
+            it a type that it does not know how to handle.
+            </remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public UnknownTypeBody (Mono.FastCgi.RecordType unknownType);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(valuetype Mono.FastCgi.RecordType unknownType) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="unknownType" Type="Mono.FastCgi.RecordType" />
+      </Parameters>
+      <Docs>
+        <param name="unknownType">
+            A <see cref="T:Mono.FastCgi.RecordType" /> containing the unknown type.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.UnknownTypeBody" /> for a specified type.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetData">
+      <MemberSignature Language="C#" Value="public byte[] GetData ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance unsigned int8[] GetData() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Byte[]</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Gets the data contained in the current instance.
+            </summary>
+        <returns>
+            A <see cref="T:System.Byte[]" /> containing the data contained in
+            the current instance.
+            </returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

@@ -1,0 +1,88 @@
+<Type Name="BeginRequestBody" FullName="Mono.FastCgi.BeginRequestBody">
+  <TypeSignature Language="C#" Value="public struct BeginRequestBody" />
+  <TypeSignature Language="ILAsm" Value=".class public sequential ansi sealed beforefieldinit BeginRequestBody extends System.ValueType" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.ValueType</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This struct contains the body data for a BeginRequest record.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public BeginRequestBody (Mono.FastCgi.Record record);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(valuetype Mono.FastCgi.Record record) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="record" Type="Mono.FastCgi.Record" />
+      </Parameters>
+      <Docs>
+        <param name="record">
+            A <see cref="T:Mono.FastCgi.Record" /> object containing the body to
+            read.
+            </param>
+        <summary>
+            Constructs and initializes a new instance of <see cref="T:Mono.FastCgi.BeginRequestBody" /> by reading the body of a
+            specified record.
+            </summary>
+        <remarks>To be added.</remarks>
+        <exception cref="T:System.ArgumentException">
+          <paramref name="record" /> is not of type <see cref="F:Mono.FastCgi.RecordType.BeginRequest" /> or does not contain
+            exactly 8 bytes of body data.
+            </exception>
+      </Docs>
+    </Member>
+    <Member MemberName="Flags">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.BeginRequestFlags Flags { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance valuetype Mono.FastCgi.BeginRequestFlags Flags" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.BeginRequestFlags</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the flags contained in the current instance.
+            </summary>
+        <value>
+            A <see cref="T:Mono.FastCgi.BeginRequestFlags" /> containing the flags
+            contained in the current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Role">
+      <MemberSignature Language="C#" Value="public Mono.FastCgi.Role Role { get; }" />
+      <MemberSignature Language="ILAsm" Value=".property instance valuetype Mono.FastCgi.Role Role" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.Role</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets the role of the current instance.
+            </summary>
+        <value>
+            A <see cref="!:FastCgi.Role" /> containing the role of the
+            current instance.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

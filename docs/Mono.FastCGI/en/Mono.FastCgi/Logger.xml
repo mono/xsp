@@ -1,0 +1,279 @@
+<Type Name="Logger" FullName="Mono.FastCgi.Logger">
+  <TypeSignature Language="C#" Value="public class Logger" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit Logger extends System.Object" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            This class stores log messages in a specified file.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Logger ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor() cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Close">
+      <MemberSignature Language="C#" Value="public static void Close ();" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig void Close() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Closes the log file and flushes its output.
+            </summary>
+        <remarks>
+            This method is called automatically when the class is
+            destroyed.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Finalize">
+      <MemberSignature Language="C#" Value="~Logger ();" />
+      <MemberSignature Language="ILAsm" Value=".method familyhidebysig virtual instance void Finalize() cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters />
+      <Docs>
+        <summary>
+            Finalizes the singleton instance by closing the stream.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Level">
+      <MemberSignature Language="C#" Value="public static Mono.FastCgi.LogLevel Level { set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property valuetype Mono.FastCgi.LogLevel Level" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.FastCgi.LogLevel</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets the levels of messages to log.
+            </summary>
+        <value>
+            A bitwise combined <see cref="T:Mono.FastCgi.LogLevel" /> specifying the
+            levels of events to log.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Open">
+      <MemberSignature Language="C#" Value="public static void Open (string path);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig void Open(string path) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="path" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="path">
+          <para>A <see cref="T:System.String" /> containing the path of the
+            file to open.</para>
+          <para>This value is the same as the parameter that would
+            be passed to <see cref="M:System.IO.File.OpenWrite(System.String)" />.</para>
+        </param>
+        <summary>
+            Opens a file to log to.
+            </summary>
+        <remarks>
+            For information on what exceptions are thrown by this
+            method, see <see cref="M:System.IO.FileInfo.OpenWrite" />.
+            </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Write">
+      <MemberSignature Language="C#" Value="public static void Write (Mono.FastCgi.LogLevel level, string message);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig void Write(valuetype Mono.FastCgi.LogLevel level, string message) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="level" Type="Mono.FastCgi.LogLevel" />
+        <Parameter Name="message" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="level">
+            A <see cref="T:Mono.FastCgi.LogLevel" /> containing the severity of the
+            message.
+            </param>
+        <param name="message">
+            A <see cref="T:System.String" /> containing the message to write.
+            </param>
+        <summary>
+            Writes a formatted string with a specified warning level
+            to the log file, if one exists.
+            </summary>
+        <remarks>
+          <para>The message will only be written to the log if
+            <see cref="P:Mono.FastCgi.Logger.Level" /> contains <paramref name="level" />.
+            </para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Write">
+      <MemberSignature Language="C#" Value="public static void Write (Mono.FastCgi.LogLevel level, string format, object[] args);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig void Write(valuetype Mono.FastCgi.LogLevel level, string format, object[] args) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="level" Type="Mono.FastCgi.LogLevel" />
+        <Parameter Name="format" Type="System.String" />
+        <Parameter Name="args" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="level">
+            A <see cref="T:Mono.FastCgi.LogLevel" /> containing the severity of the
+            message.
+            </param>
+        <param name="format">
+            A <see cref="T:System.String" /> containing the format to use for
+            the message.
+            </param>
+        <param name="args">
+            A <see cref="T:System.Object[]" /> containing values to insert
+            into the format.
+            </param>
+        <summary>
+            Writes a formatted string with a specified warning level
+            to the log file, if one exists.
+            </summary>
+        <remarks>
+          <para>The message will only be written to the log if
+            <see cref="P:Mono.FastCgi.Logger.Level" /> contains <paramref name="level" />.
+            </para>
+          <para>This method outputs using the current culture of
+            the assembly. To use a different culture, use
+            <see cref="M:Mono.FastCgi.Logger.Write(Mono.FastCgi.LogLevel,System.IFormatProvider,System.String,System.Object[])" />.</para>
+          <para>See <see cref="M:System.String.Format(System.String,System.Object)" />
+            for more details on this method's arguments.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Write">
+      <MemberSignature Language="C#" Value="public static void Write (Mono.FastCgi.LogLevel level, IFormatProvider provider, string format, object[] args);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig void Write(valuetype Mono.FastCgi.LogLevel level, class System.IFormatProvider provider, string format, object[] args) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="level" Type="Mono.FastCgi.LogLevel" />
+        <Parameter Name="provider" Type="System.IFormatProvider" />
+        <Parameter Name="format" Type="System.String" />
+        <Parameter Name="args" Type="System.Object[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="level">
+            A <see cref="T:Mono.FastCgi.LogLevel" /> containing the severity of the
+            message.
+            </param>
+        <param name="provider">
+            A <see cref="T:System.IFormatProvider" /> object to use when
+            formatting values for the message.
+            </param>
+        <param name="format">
+            A <see cref="T:System.String" /> containing the format to use for
+            the message.
+            </param>
+        <param name="args">
+            A <see cref="T:System.Object[]" /> containing values to insert
+            into the format.
+            </param>
+        <summary>
+            Writes a formatted string with a specified warning level
+            to the log file, if one exists.
+            </summary>
+        <remarks>
+          <para>The message will only be written to the log if
+            <see cref="P:Mono.FastCgi.Logger.Level" /> contains <paramref name="level" />.
+            </para>
+          <para>See <see cref="M:System.String.Format(System.String,System.Object)" />
+            for more details on this method's arguments.</para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="WriteToConsole">
+      <MemberSignature Language="C#" Value="public static bool WriteToConsole { set; get; }" />
+      <MemberSignature Language="ILAsm" Value=".property bool WriteToConsole" />
+      <MemberType>Property</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Boolean</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Gets and sets whether or not to write log messages to the
+            console.
+            </summary>
+        <value>
+            A <see cref="T:System.Boolean" /> indicating whether or not log
+            messages will be displayed in the console.
+            </value>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

@@ -1,0 +1,77 @@
+<Type Name="Server" FullName="Mono.WebServer.FastCgi.Server">
+  <TypeSignature Language="C#" Value="public class Server" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit Server extends System.Object" />
+  <AssemblyInfo>
+    <AssemblyName>fastcgi-mono-server2</AssemblyName>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Object</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>To be added.</summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public Server ();" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor() cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters />
+      <Docs>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="GetApplicationForPath">
+      <MemberSignature Language="C#" Value="public static Mono.WebServer.VPathToHost GetApplicationForPath (string vhost, int port, string path, string realPath);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig class Mono.WebServer.VPathToHost GetApplicationForPath(string vhost, int32 port, string path, string realPath) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>Mono.WebServer.VPathToHost</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="vhost" Type="System.String" />
+        <Parameter Name="port" Type="System.Int32" />
+        <Parameter Name="path" Type="System.String" />
+        <Parameter Name="realPath" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="vhost">To be added.</param>
+        <param name="port">To be added.</param>
+        <param name="path">To be added.</param>
+        <param name="realPath">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="Main">
+      <MemberSignature Language="C#" Value="public static int Main (string[] args);" />
+      <MemberSignature Language="ILAsm" Value=".method public static hidebysig int32 Main(string[] args) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>2.8.1.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Int32</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="args" Type="System.String[]" />
+      </Parameters>
+      <Docs>
+        <param name="args">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

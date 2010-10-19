@@ -81,52 +81,11 @@ namespace Mono.WebServer.FastCgi
 			wr.CloseConnection ();
 		}
 		
-		/// <summary>
-		///    Splits a virtual URI into its virtual path and virtual 
-		///    path-info parts as identified by the web-application 
-		///    host in the current <see cref="AppDomain" />.
-		/// </summary>
-		/// <param name="verb">
-		///    The HTTP verb of the request.
-		/// </param>
-		/// <param name="uri">
-		///    the virtual URI, including any path-info, which need to be split.
-		/// </param>
-		/// <param name="realUri">
-		///    Returns the path part of the URI.
-		/// </param>
-		/// <param name="pathInfo">
-		///    Returns the trailing path-info part of the URI, if any.
-		/// </param>
-		/// <remarks>
-		///    This method wraps the <see 
-		///    cref="Mono.WebServer.Paths.GetPathsFromUri" /> 
-		///    method so that it can easily be called 
-		///    from a remote <see cref="AppDomain" />.
-		/// </remarks>
 		public void GetPathsFromUri (string verb, string uri, out string realUri, out string pathInfo)
 		{
 			Paths.GetPathsFromUri (this, verb, uri, out realUri, out pathInfo);
 		}
 		
-		/// <summary>
-		///    Maps the specified virtual path to a physical path on 
-		///    the server as defined in the <see cref="AppDomain" /> 
-		///    of the current <see cref="ApplicationHost" />.
-		/// </summary>
-		/// <param name="virtualPath">
-		///    The virtual path to be mapped.
-		/// </param>
-		/// <returns>
-		///    The physical path of the specified virtual path.
-		/// </returns>
-		/// <remarks>
-		///    As a method that is available on this <see 
-		///    cref="ApplicationHost" />, which derives 
-		///    from <see cref="MarshalByRefObject" />, it 
-		///    enables path mapping to be queried from a 
-		///    remote <see cref="AppDomain" />.
-		/// </remarks>
 		public string MapPath (string virtualPath)
 		{
 			string physPath;
@@ -177,24 +136,6 @@ namespace Mono.WebServer.FastCgi
 			return IOPath.Combine (this.Path, physPath);
 		}
 		
-		/// <summary>
-		///    Determines if a virtual path specifies a file on 
-		///    the server as defined in the <see cref="AppDomain" /> 
-		///    of the current <see cref="ApplicationHost" />.
-		/// </summary>
-		/// <param name="virtualPath">
-		///    The virtual path to be checked.
-		/// </param>
-		/// <returns>
-		///    True if the virtual path is that of a file, otherwise false.
-		/// </returns>
-		/// <remarks>
-		///    As a method that is available on this <see 
-		///    cref="ApplicationHost" />, which derives 
-		///    from <see cref="MarshalByRefObject" />, it 
-		///    enables virtual file checks to be performed 
-		///    from a remote <see cref="AppDomain" />.
-		/// </remarks>
 		public bool VirtualFileExists (string virtualPath)
 		{
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
@@ -205,25 +146,6 @@ namespace Mono.WebServer.FastCgi
 			return File.Exists (MapPath (virtualPath));
 		}
 		
-		/// <summary>
-		///    Determines if a virtual path specifies a directory on 
-		///    the server as defined in the <see cref="AppDomain" /> 
-		///    of the current <see cref="ApplicationHost" />, while 
-		///    possibly using the specified <see cref="WorkerRequest" /> 
-		///    to help with path mapping if needed.
-		/// </summary>
-		/// <param name="virtualPath">
-		///    The virtual path to be checked.
-		/// </param>
-		/// <param name="worker">
-		///    The worker request that should be used to perform 
-		///    the mapping of the virtual path to the physical 
-		///    path if no virtual-path provider is registered 
-		///    in the current <see cref="AppDomain" />.
-		/// </param>
-		/// <returns>
-		///    True if the virtual path is that of a directory, otherwise false.
-		/// </returns>
 		private bool VirtualDirectoryExists (string virtualPath, WorkerRequest worker)
 		{
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;

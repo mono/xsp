@@ -31,27 +31,14 @@ using System.Text;
 using System.Collections.Generic;
 
 namespace Mono.FastCgi {
-	/// <summary>
-	///    This struct reads and writes FastCGI name/value pairs.
-	/// </summary>
 	public struct NameValuePair
 	{
 		#region Private Fields
 		
-		/// <summary>
-		///    Contains the name of the pair.
-		/// </summary>
 		private string name;
 		
-		/// <summary>
-		///    Contains the value of the pair.
-		/// </summary>
 		private string value;
 		
-		/// <summary>
-		///    Contains the encoding to use when reading and writing
-		///    params.
-		/// </summary>
 		private static Encoding encoding = Encoding.Default;
 		
 		#endregion
@@ -60,13 +47,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Fields
 		
-		/// <summary>
-		///    A contstant representation of an empty <see
-		///    cref="NameValuePair" />.
-		/// </summary>
-		/// <value>
-		///    An empty <see cref="NameValuePair" />.
-		/// </value>
 		public static readonly NameValuePair Empty = new NameValuePair (
 			null, null);
 		
@@ -76,45 +56,12 @@ namespace Mono.FastCgi {
 		
 		#region Constructors
 		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="NameValuePair" /> with a specified name and value.
-		/// </summary>
-		/// <param name="name">
-		///    A <see cref="string" /> containing the name for the
-		///    new instance.
-		/// </param>
-		/// <param name="value">
-		///    A <see cref="string" /> containing the value for the
-		///    new instance.
-		/// </param>
 		public NameValuePair (string name, string value)
 		{
 			this.name  = name;
 			this.value = value;
 		}
 		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="NameValuePair" /> reading it from specified data
-		///    at a specified index, moving the index to the position of
-		///    the next pair.
-		/// </summary>
-		/// <param name="data">
-		///    A <see cref="byte[]" /> containing the name/value pair to
-		///    read.
-		/// </param>
-		/// <param name="index">
-		///    A <see cref="int" /> specifying the index at which to
-		///    read.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="data" /> is <see langword="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentOutOfRangeException">
-		///    The data cannot be read at the <paramref name="index" />
-		///    because it would read outside of the array.
-		/// </exception>
 		public NameValuePair (byte [] data, ref int index)
 		{
 			if (data == null)
@@ -154,24 +101,10 @@ namespace Mono.FastCgi {
 		
 		#region Public Properties
 		
-		/// <summary>
-		///    Gets the name of the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the name of the
-		///    current instance.
-		/// </value>
 		public string Name {
 			get {return name;}
 		}
 		
-		/// <summary>
-		///    Gets the value of the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the value of the
-		///    current instance.
-		/// </value>
 		public string Value {
 			get {return value;}
 		}
@@ -182,15 +115,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Static Properties
 		
-		/// <summary>
-		///    Gets and sets the encoding to use when reading and
-		///    writing instances of <see cref="NameValuePair" /> to
-		///    memory.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Text.Encoding" /> to use reading and writing
-		///    to memory.
-		/// </value>
 		public static Encoding Encoding {
 			get {return encoding;}
 			set {encoding = value != null ? value : Encoding.Default;}
@@ -202,23 +126,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Static Methods
 		
-		/// <summary>
-		///    Reads FastCGI name/value pairs from memory and stores
-		///    them as a
-		///    <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />.
-		/// </summary>
-		/// <param name="data">
-		///    A <see cref="byte[]" /> containing a collection of
-		///    FastCGI name/value pairs.
-		/// </param>
-		/// <returns>
-		///    A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
-		///    object containing the name/value pairs read from
-		///     <paramref name="data" />.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="data" /> is <see langword="null" />.
-		/// </exception>
 		public static IDictionary<string,string> FromData (byte [] data)
 		{
 			if (data == null)
@@ -250,26 +157,6 @@ namespace Mono.FastCgi {
 			return pairs;
 		}
 		
-		/// <summary>
-		///    Reads name/value pairs from a
-		///    <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
-		///    and stores them as FastCGI name/value pairs.
-		/// </summary>
-		/// <param name="pairs">
-		///    A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
-		///    containing string pairs.
-		/// </param>
-		/// <returns>
-		///    A <see cref="byte[]" /> containing FastCGI name/value
-		///    pairs.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="pairs" /> is <see langref="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="pairs" /> contains a name or value not of
-		///    type <see cref="string" />.
-		/// </exception>
 		public static byte [] GetData (IDictionary<string,string> pairs)
 		{
 			if (pairs == null)
@@ -331,30 +218,6 @@ namespace Mono.FastCgi {
 		
 		#region Private Static Methods
 		
-		/// <summary>
-		///    Reads a FastCGI name/value length from specified data at
-		///    a specified position, moving the index to the position
-		///    after the length data.
-		/// </summary>
-		/// <param name="data">
-		///    A <see cref="byte[]" /> containing a FastCGI name/value
-		///    length.
-		/// </param>
-		/// <param name="index">
-		///    A <see cref="int" /> specifying at what index to read.
-		/// </param>
-		/// <returns>
-		///    A <see cref="int" /> containing the length.
-		/// </returns>
-		/// <remarks>
-		///    For values less than 128, lengths are stored as a single
-		///    byte. Otherwise, they are stored as four bytes, with a
-		///    maximum value of <see cref="int.MaxValue" />.
-		/// </remarks>
-		/// <exception cref="ArgumentOutOfRangeException">
-		///    <paramref name="index" /> is less than zero or would
-		///    require reading past the end of <paramref name="data" />.
-		/// </exception>
 		private static int ReadLength (byte [] data, ref int index)
 		{
 			if (index < 0)
@@ -390,32 +253,6 @@ namespace Mono.FastCgi {
 			//	+ ((int) data [index++]);
 		}
 		
-		/// <summary>
-		///    Writes a FastCGI name/value length to specified data at
-		///    a specified position, moving the index to the position
-		///    after the length data.
-		/// </summary>
-		/// <param name="data">
-		///    A <see cref="byte[]" /> to write to.
-		/// </param>
-		/// <param name="index">
-		///    A <see cref="int" /> specifying at what index to write.
-		/// </param>
-		/// <param name="length">
-		///    A <see cref="int" /> containing the length.
-		/// </param>
-		/// <remarks>
-		///    For values less than 128, lengths are stored as a single
-		///    byte. Otherwise, they are stored as four bytes, with a
-		///    maximum value of <see cref="int.MaxValue" />.
-		/// </remarks>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="length" /> represents a negative length.
-		/// </exception>
-		/// <exception cref="ArgumentOutOfRangeException">
-		///    <paramref name="index" /> is less than zero or would
-		///    require writing past the end of <paramref name="data" />.
-		/// </exception>
 		private static void WriteLength (byte [] data, ref int index,
 		                                 int length)
 		{

@@ -29,60 +29,29 @@
 using System;
 
 namespace Mono.FastCgi {
-	/// <summary>
-	///    Specifies the role to use for a request.
-	/// </summary>
 	public enum Role : ushort
 	{
-		/// <summary>
-		///    The request is for the role of "Responder".
-		/// </summary>
 		Responder  = 1,
 		
-		/// <summary>
-		///    The request is for the role of "Authorizer".
-		/// </summary>
 		Authorizer = 2,
 		
-		/// <summary>
-		///    The request is for the role of "Filter".
-		/// </summary>
 		Filter     = 3
 	}
 	
-	/// <summary>
-	///    Specifies flags to use for a request.
-	/// </summary>
 	[Flags]
 	public enum BeginRequestFlags : byte
 	{
-		/// <summary>
-		///    The request has no flags.
-		/// </summary>
 		None      = 0,
 		
-		/// <summary>
-		///    The connection is to be kept alive after the request is
-		///    complete.
-		/// </summary>
 		KeepAlive = 1
 	}
 	
-	/// <summary>
-	///    This struct contains the body data for a BeginRequest record.
-	/// </summary>
 	public struct BeginRequestBody
 	{
 		#region Private Fields
 		
-		/// <summary>
-		///    Contains the role of the request.
-		/// </summary>
 		private Role role;
 		
-		/// <summary>
-		///    Contains the flags for the request.
-		/// </summary>
 		private BeginRequestFlags flags;
 		
 		#endregion
@@ -91,20 +60,6 @@ namespace Mono.FastCgi {
 		
 		#region Constructors
 		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="BeginRequestBody" /> by reading the body of a
-		///    specified record.
-		/// </summary>
-		/// <param name="record">
-		///    A <see cref="Record" /> object containing the body to
-		///    read.
-		/// </param>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="record" /> is not of type <see
-		///    cref="RecordType.BeginRequest" /> or does not contain
-		///    exactly 8 bytes of body data.
-		/// </exception>
 		public BeginRequestBody (Record record)
 		{
 			if (record.Type != RecordType.BeginRequest)
@@ -127,24 +82,10 @@ namespace Mono.FastCgi {
 		
 		#region Public Properties
 		
-		/// <summary>
-		///    Gets the role of the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="FastCgi.Role" /> containing the role of the
-		///    current instance.
-		/// </value>
 		public Role Role {
 			get {return role;}
 		}
 		
-		/// <summary>
-		///    Gets the flags contained in the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="BeginRequestFlags" /> containing the flags
-		///    contained in the current instance.
-		/// </value>
 		public BeginRequestFlags Flags {
 			get {return flags;}
 		}

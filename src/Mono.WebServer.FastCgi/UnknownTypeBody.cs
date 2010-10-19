@@ -29,20 +29,10 @@
 using System;
 
 namespace Mono.FastCgi {
-	/// <summary>
-	///    This struct contains the body data for an UnknownType record.
-	/// </summary>
-	/// <remarks>
-	///    An UnknownType record is sent by the server when the client sends
-	///    it a type that it does not know how to handle.
-	/// </remarks>
 	public struct UnknownTypeBody
 	{
 		#region Private Fields
 		
-		/// <summary>
-		///    Contains the unknown type.
-		/// </summary>
 		private RecordType type;
 		
 		#endregion
@@ -51,13 +41,6 @@ namespace Mono.FastCgi {
 		
 		#region Constructors
 		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="UnknownTypeBody" /> for a specified type.
-		/// </summary>
-		/// <param name="unknownType">
-		///    A <see cref="RecordType" /> containing the unknown type.
-		/// </param>
 		public UnknownTypeBody (RecordType unknownType)
 		{
 			type = unknownType;
@@ -69,13 +52,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Methods
 		
-		/// <summary>
-		///    Gets the data contained in the current instance.
-		/// </summary>
-		/// <returns>
-		///    A <see cref="byte[]" /> containing the data contained in
-		///    the current instance.
-		/// </returns>
 		public byte [] GetData ()
 		{
 			byte [] data = new byte [8];

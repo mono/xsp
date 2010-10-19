@@ -32,91 +32,36 @@ using System.Collections.Generic;
 using System.Globalization;
 
 namespace Mono.FastCgi {
-	/// <summary>
-	///    This class runs a FastCGI server and registers responder types.
-	/// </summary>
 	public class Server
 	{
 		#region Private Fields
 		
-		/// <summary>
-		///    Contains a list of the current connections.
-		/// </summary>
 		private List<Connection> connections = new List<Connection> ();
 		
-		/// <summary>
-		///    Contains the socket to listen on.
-		/// </summary>
 		private Socket listen_socket;
 		
-		/// <summary>
-		///    Indicates whether or not the server is running.
-		/// </summary>
 		private bool started = false;
 		
-		/// <summary>
-		///    Indicates whether or not the server is currently
-		///    accepting a connection.
-		/// </summary>
 		private bool accepting = false;
 		
-		/// <summary>
-		///    Contains the thread used to create the server and
-		///    optionally keep it alive.
-		/// </summary>
 		private Thread runner;
 		
-		/// <summary>
-		///    Contains the lock used to regulate the accepting of
-		///    sockets.
-		/// </summary>
 		private object accept_lock = new object ();
 		
-		/// <summary>
-		///    Contains the async callback to be called when a socket is
-		///    accepted.
-		/// </summary>
 		private AsyncCallback accept_cb;
 		
-		/// <summary>
-		///    Contains the maximum number of connections to permit, as
-		///    mandated by the FastCGI specification.
-		/// </summary>
 		private int  max_connections = int.MaxValue;
 		
-		/// <summary>
-		///    Contains the maximum number of requests to permit, as
-		///    mandated by the FastCGI specification.
-		/// </summary>
 		private int  max_requests = int.MaxValue;
 		
-		/// <summary>
-		///    Indicates whether or not to multiplex connections to
-		///    permit, as mandated by the FastCGI specification.
-		/// </summary>
 		private bool multiplex_connections = false;
 		
-		/// <summary>
-		///    Contains the type of class to use for handling the
-		///    responder role.
-		/// </summary>
 		private System.Type responder_type = null;
 		
-		/// <summary>
-		///    Contains buffers to use for new connections.
-		/// </summary>
 		private byte [][] buffers = new byte [200][];
 		
-		/// <summary>
-		///    Contains the number of buffers stored in <see
-		///    cref="buffers" />.
-		/// </summary>
 		private int buffer_count;
 		
-		/// <summary>
-		///    Contains the lock to use when allocating and releasing
-		///    buffers.
-		/// </summary>
 		private object buffer_lock = new object ();
 		
 		#endregion
@@ -125,16 +70,6 @@ namespace Mono.FastCgi {
 		
 		#region Constructors
 		
-		/// <summary>
-		///    Constructs and initializes a new instance of
-		///    <see cref="Server" /> with a given socket.
-		/// </summary>
-		/// <param name="socket">
-		///    A <see cref="Socket" /> object to listen on.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="socket" /> is <see langword="null" />.
-		/// </exception>
 		public Server (Socket socket)
 		{
 			if (socket == null)
@@ -149,23 +84,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Properties
 		
-		/// <summary>
-		///    Gets and sets the maximum number of concurrent
-		///    connections the current instance will allow before it
-		///    stops accepting new ones.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Int32" /> containing the number of
-		///    concurrent connections allowed by the current instance.
-		/// </value>
-		/// <remarks>
-		///    When the maximum number of connections has been reached,
-		///    the server will stop accepting connections until one of
-		///    the existing connection is terminated.
-		/// </remarks>
-		/// <exception cref="ArgumentOutOfRangeException">
-		///    The value is less than 1.
-		/// </exception>
 		public int MaxConnections {
 			get {return max_connections;}
 			set {
@@ -178,29 +96,6 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		/// <summary>
-		///    Gets and sets the maximum number of concurrent requests
-		///    the current instance will allow before it starts
-		///    rejecting new ones.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Int32" /> containing the number of
-		///    concurrent requests allowed by the current instance.
-		/// </value>
-		/// <remarks>
-		///    <para>When the maximum number of requests has been
-		///    reached, the server will respond to requests with the
-		///    FastCGI "Overloaded" end-of-request record.</para>
-		///    <para>In the case the connection multiplexing is
-		///    disabled, this property is redundant to
-		///    <see cref="MaxConnections" />, as only one request is
-		///    permitted per connection. In such a case, this property
-		///    should be no less than <see cref="MaxConnections" /> to
-		///    avoid unnecessary connections.</para>
-		/// </remarks>
-		/// <exception cref="ArgumentOutOfRangeException">
-		///    The value is less than 1.
-		/// </exception>
 		public int MaxRequests {
 			get {return max_requests;}
 			set {
@@ -213,57 +108,19 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		/// <summary>
-		///    Gets and sets whether or not the multiplexing of
-		///    requests is permitted in the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Boolean" /> indicating whether or not
-		///    multiplexing is permitted in the current instance.
-		/// </value>
-		/// <remarks>
-		///    Multiplexing of connections allows multiple requests and
-		///    responses to be sent simultaneously. This allows for
-		///    improved response times for multiple requests send over a
-		///    single connection.
-		/// </remarks>
 		public bool MultiplexConnections {
 			get {return multiplex_connections;}
 			set {multiplex_connections = value;}
 		}
 		
-		/// <summary>
-		///    Gets whether or not the current instance can accept
-		///    another connection.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Boolean" /> indicating whether or not
-		///    the current instance will permit another connection.
-		/// </value>
 		public bool CanAccept {
 			get {return started && ConnectionCount < max_connections;}
 		}
 		
-		/// <summary>
-		///    Gets whether or not the current instance can accept
-		///    another request.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Boolean" /> indicating whether or not
-		///    the current instance will permit another request.
-		/// </value>
 		public bool CanRequest {
 			get {return started && RequestCount < max_requests;}
 		}
 		
-		/// <summary>
-		///    Gets the total number of open connections managed by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Int32" /> containing the total number of
-		///    open connections managed by the current instance.
-		/// </value>
 		public int ConnectionCount {
 			get {
 				lock (connections)
@@ -271,14 +128,6 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		/// <summary>
-		///    Gets the total number of open requests managed by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Int32" /> containing the total number of
-		///    open requests managed by the current instance.
-		/// </value>
 		public int RequestCount {
 			get {
 				int requests = 0;
@@ -297,24 +146,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Methods
 		
-		/// <summary>
-		///    Starts the server in a different thread.
-		/// </summary>
-		/// <param name="background">
-		///    A <see cref="Boolean" /> specifying whether or not the
-		///    server thread should be run as a background thread.
-		/// </param>
-		/// <remarks>
-		///    <para>The behavior of background and foreground threads
-		///    are identical except in that fact that the application
-		///    will not terminate while foreground threads are
-		///    running.</para>
-		///    <para>See <see cref="Thread.IsBackground" /> for more
-		///    details.</para>
-		/// </remarks>
-		/// <exception cref="InvalidOperationException">
-		///    The server is already started.
-		/// </exception>
 		public void Start (bool background)
 		{
 			if (started)
@@ -328,17 +159,6 @@ namespace Mono.FastCgi {
 			runner.Start ();
 		}
 		
-		/// <summary>
-		///    Stops the server.
-		/// </summary>
-		/// <remarks>
-		///    This closes all connections and aborts the thread. If
-		///    the thread is a foreground thread, this will allow the
-		///    program to terminate.
-		/// </remarks>
-		/// <exception cref="InvalidOperationException">
-		///    The server is not started.
-		/// </exception>
 		public void Stop ()
 		{
 			if (!started)
@@ -357,24 +177,6 @@ namespace Mono.FastCgi {
 			runner = null;
 		}
 		
-		/// <summary>
-		///    Ends a specified connection.
-		/// </summary>
-		/// <param name="connection">
-		///    A <see cref="Connection" /> object to terminate.
-		/// </param>
-		/// <remarks>
-		///    <para>This method stops a connection by closing its
-		///    requests and listening sockets, permitting its thread to
-		///    terminate.</para>
-		///    <para>Once the connection is stopped, it is removed from
-		///    the list of managed connections, and if the server is not
-		///    accepting, begins the connection process.</para>
-		/// </remarks>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="connection" /> is
-		///    <see langword="null" />.
-		/// </exception>
 		public void EndConnection (Connection connection)
 		{
 			if (connection == null)
@@ -392,32 +194,6 @@ namespace Mono.FastCgi {
 		}
 		
 		
-		/// <summary>
-		///    Gets name/value pairs for server variables.
-		/// </summary>
-		/// <param name="names">
-		///    A <see cref="T:System.Collections.Generic.IEnumerable&lt;string&gt;" />
-		///    object containing FastCGI server variable names.
-		/// </param>
-		/// <returns>
-		///    A <see cref="T:System.Collections.Generic.IDictionary&lt;string,string&gt;" />
-		///    object containing the server variables used by the
-		///    current instance.
-		/// </returns>
-		/// <remarks>
-		///    <para>A FastCGI client can at any time request
-		///    information on a collection of server variables. It
-		///    provides a list of variable names to which the server
-		///    responds with name/value pairs containing their
-		///    content.</para>
-		/// </remarks>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="names" /> is
-		///    <see langword="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="names" /> contains a non-string value.
-		/// </exception>
 		public IDictionary<string,string> GetValues (IEnumerable<string> names)
 		{
 			if (names == null)
@@ -463,23 +239,6 @@ namespace Mono.FastCgi {
 			return pairs;
 		}
 		
-		/// <summary>
-		///    Allocates two buffers from the current instance for use
-		///    in sending and receiving records.
-		/// </summary>
-		/// <param name="buffer1">
-		///    A <see cref="byte[]" /> of size <see
-		///    cref="Record.SuggestedBufferSize" />.
-		/// </param>
-		/// <param name="buffer2">
-		///    A <see cref="byte[]" /> of size <see
-		///    cref="Record.SuggestedBufferSize" />.
-		/// </param>
-		/// <remarks>
-		///    The current instance manages buffers to improve
-		///    performance. To release buffers back to the current
-		///    instance, use <see cref="ReleaseBuffers" />.
-		/// </remarks>
 		public void AllocateBuffers (out byte [] buffer1,
 		                             out byte [] buffer2)
 		{
@@ -516,22 +275,6 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		/// <summary>
-		///    Releases two buffers back to the current instance.
-		/// </summary>
-		/// <param name="buffer1">
-		///    A <see cref="byte[]" /> allocated by <see
-		///    cref="AllocateBuffers" />.
-		/// </param>
-		/// <param name="buffer2">
-		///    A <see cref="byte[]" /> allocated by <see
-		///    cref="AllocateBuffers" />.
-		/// </param>
-		/// <remarks>
-		///    The current instance manages buffers to improve
-		///    performance. To allocate buffers, use <see
-		///    cref="AllocateBuffers" />.
-		/// </remarks>
 		public void ReleaseBuffers (byte [] buffer1, byte [] buffer2)
 		{
 			lock (buffer_lock) {
@@ -573,13 +316,6 @@ namespace Mono.FastCgi {
 		
 		#region Private Methods
 		
-		/// <summary>
-		///    Starts the server by beginning an accept call.
-		/// </summary>
-		/// <remarks>
-		///    If the server is running in the foreground, the thread 
-		///    loops, waiting to be aborted.
-		/// </remarks>
 		private void RunServer ()
 		{
 			started = true;
@@ -592,21 +328,6 @@ namespace Mono.FastCgi {
 				Thread.Sleep (1000000);
 		}
 		
-		/// <summary>
-		///    Accepts a connection.
-		/// </summary>
-		/// <param name="ares">
-		///    A <see cref="IAsyncResult" /> containing the results of
-		///    the accept call.
-		/// </param>
-		/// <remarks>
-		///    <para>Upon accepting the connection, it attempts to
-		///    create a <see cref="Connection" /> object, attempts to
-		///    start the accept process again, and then runs the
-		///    connection.</para>
-		///    <para>The thread that evoked this method is used for the
-		///    duration of the connection.</para>
-		/// </remarks>
 		private void OnAccept (IAsyncResult ares)
 		{
 			Logger.Write (LogLevel.Debug, Strings.Server_Accepting);
@@ -662,10 +383,6 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		/// <summary>
-		///    Begins accepting a connection, unless one is already
-		///    being accepted.
-		/// </summary>
 		private void BeginAccept ()
 		{
 			lock (accept_lock) {
@@ -683,19 +400,6 @@ namespace Mono.FastCgi {
 		
 		#region Responder Management
 		
-		/// <summary>
-		///    Sets the <see cref="IResponder" /> type to use for the
-		///    FastCGI responder role.
-		/// </summary>
-		/// <param name="responder">
-		///    A <see cref="Type" /> for a class implementing the
-		///    <see cref="IResponder" /> interface.
-		/// </param>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="responder" /> does not implement the
-		///    <see cref="IResponder" /> interface or does not provide
-		///    the proper constructor.
-		/// </exception>
 		public void SetResponder (System.Type responder)
 		{
 			if (responder == null) {
@@ -723,21 +427,6 @@ namespace Mono.FastCgi {
 			responder_type = responder;
 		}
 		
-		/// <summary>
-		///    Creates a new <see cref="IResponder" /> object for a
-		///    specified request.
-		/// </summary>
-		/// <param name="request">
-		///    A <see cref="ResponderRequest" /> object to create a
-		///    responder for.
-		/// </param>
-		/// <returns>
-		///    A <see cref="IResponder" /> object for the provided
-		///    request.
-		/// </returns>
-		/// <exception cref="InvalidOperationException">
-		///    The responder role is not supported.
-		/// </exception>
 		public IResponder CreateResponder (ResponderRequest request)
 		{
 			if (!SupportsResponder)
@@ -748,14 +437,6 @@ namespace Mono.FastCgi {
 				(responder_type, new object [] {request});
 		}
 		
-		/// <summary>
-		///    Gets whether or not the current instance supports
-		///    the role of FastCGI responder.
-		/// </summary>
-		/// <value>
-		///    A <see cref="Boolean" /> indicating whether or not the
-		///    responder role is supported by the current instance.
-		/// </value>
 		public bool SupportsResponder {
 			get {return responder_type != null;}
 		}

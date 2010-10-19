@@ -29,31 +29,20 @@
 using System;
 
 namespace Mono.FastCgi {
-	/// <summary>
-	///    This abstract class provides a wrapper around socket methods and
-	///    is to be removed once a FILDES solution has been reached.
-	/// </summary>
 	public abstract class Socket
 	{
-		/// <seealso cref="System.Net.Sockets.Socket.Close()" />
 		public abstract void Close ();
 		
-		/// <seealso cref="System.Net.Sockets.Socket.Receive(byte[],int,int,System.Net.Sockets.SocketFlags)" />
 		public abstract int Receive (byte [] buffer, int offset, int size, System.Net.Sockets.SocketFlags flags);
 		
-		/// <seealso cref="System.Net.Sockets.Socket.Send(byte[],int,int,System.Net.Sockets.SocketFlags)" />
 		public abstract int Send (byte [] data, int offset, int size, System.Net.Sockets.SocketFlags flags);
 		
-		/// <seealso cref="System.Net.Sockets.Socket.Listen" />
 		public abstract void Listen (int backlog);
 		
-		/// <seealso cref="System.Net.Sockets.Socket.BeginAccept(AsyncCallback,object)" />
 		public abstract IAsyncResult BeginAccept (AsyncCallback callback, object state);
 		
-		/// <seealso cref="System.Net.Sockets.Socket.EndAccept(IAsyncResult)" />
 		public abstract Socket EndAccept (IAsyncResult asyncResult);
 		
-		/// <seealso cref="System.Net.Sockets.Socket.Connected" />
 		public abstract bool Connected {get;}
 	}
 }

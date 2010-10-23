@@ -80,6 +80,9 @@ namespace Mono.WebServer.Apache
 			}
 		}
 
+		static bool singleAppUnloading;
+		static AppDomain singleAppDomain;
+
 		static void ShowVersion ()
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -219,6 +222,10 @@ namespace Mono.WebServer.Apache
 				Console.Error.WriteLine (ex);
 		}
 
+		void ApplicationDomainUnloading (object sender, EventArgs args)
+		{
+			singleAppUnloading = true;
+		}
 		
 		public static int Main (string [] args)
 		{
@@ -228,9 +235,30 @@ namespace Mono.WebServer.Apache
 				try {
 					return new Server ().RealMain (args, true, null, quiet);
 				} catch (ThreadAbortException) {
+					Console.WriteLine ("Single application mode and ASP.NET AppDomain has unloaded.");
 					// Single-app mode and ASP.NET appdomain unloaded
 					Thread.ResetAbort ();
 					quiet = true; // hush 'RealMain'
+				}
+				if (singleAppUnloading && singleAppDomain != null) {
+					Console.WriteLine ("Waiting for the AppDomain unload to finish.");
+					while (true) {
+						try {
+							if (!singleAppDomain.IsFinalizingForUnload ())
+								break;
+							Thread.Sleep (500);
+						} catch (AppDomainUnloadedException) {
+							Console.WriteLine ("AppDomain unloaded.");
+							break;
+						} catch (ThreadAbortException) {
+							Thread.ResetAbort ();
+						} catch (Exception ex) {
+							Console.WriteLine ("Unload exception: {0}", ex);
+							break;
+						}
+					}
+					singleAppDomain = null;
+					singleAppUnloading = false;
 				}
 			}
 		}
@@ -414,7 +442,9 @@ namespace Mono.WebServer.Apache
 			if (root && vh != null) {
 				// Redo in new domain
 				vh.CreateHost (server, webSource);
-				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
+				singleAppDomain = vh.AppHost.Domain;
+				singleAppDomain.DomainUnload += ApplicationDomainUnloading;
+				Server svr = (Server) singleAppDomain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
 				return svr.RealMain (args, false, vh.AppHost, quiet);
 			}

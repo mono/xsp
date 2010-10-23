@@ -77,6 +77,8 @@ namespace Mono.WebServer.XSP
 		}
 		
 		static RSA key;
+		static bool singleAppUnloading;
+		static AppDomain singleAppDomain;
 		
 		static void ShowVersion ()
 		{
@@ -249,6 +251,11 @@ namespace Mono.WebServer.XSP
 				Console.WriteLine (ex);
 		}
 
+		void ApplicationDomainUnloading (object sender, EventArgs args)
+		{
+			singleAppUnloading = true;
+		}
+
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
@@ -256,11 +263,31 @@ namespace Mono.WebServer.XSP
 			while (true) {
 				try {
 					return new Server ().RealMain (args, true, null, quiet);
-				} catch (ThreadAbortException ex) {
-					Console.WriteLine (ex);
+				} catch (ThreadAbortException) {
+					Console.WriteLine ("Single application mode and ASP.NET AppDomain is unloading.");
 					// Single-app mode and ASP.NET appdomain unloaded
 					Thread.ResetAbort ();
 					quiet = true; // hush 'RealMain'
+				}
+				if (singleAppUnloading && singleAppDomain != null) {
+					Console.WriteLine ("\twaiting for the unload to finish...");
+					while (true) {
+						try {
+							if (!singleAppDomain.IsFinalizingForUnload ())
+								break;
+							Thread.Sleep (500);
+						} catch (AppDomainUnloadedException) {
+							Console.WriteLine ("\tdone...");
+							break;
+						} catch (ThreadAbortException) {
+							Thread.ResetAbort ();
+						} catch (Exception ex) {
+							Console.WriteLine ("\tunload exception: {0} ({1})", ex.GetType (), ex.Message);
+							break;
+						}
+					}
+					singleAppDomain = null;
+					singleAppUnloading = false;
 				}
 			}
 		}
@@ -446,12 +473,13 @@ namespace Mono.WebServer.XSP
 			if (settings.Apps == null && settings.AppConfigDir == null && settings.AppConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 
-
 			VPathToHost vh = server.GetSingleApp ();
 			if (root && vh != null) {
 				// Redo in new domain
 				vh.CreateHost (server, webSource);
-				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
+				singleAppDomain = vh.AppHost.Domain;
+				singleAppDomain.DomainUnload += ApplicationDomainUnloading;
+				Server svr = (Server) singleAppDomain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
 				return svr.RealMain (args, false, vh.AppHost, quiet);
 			}

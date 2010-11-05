@@ -328,7 +328,14 @@ namespace Mono.FastCgi {
 			while (!stop && (UnfinishedRequests || keep_alive));
 			
 			if (requests.Count == 0) {
-				socket.Close ();
+				try {
+					socket.Close ();
+				} catch (System.Net.Sockets.SocketException e) {
+					// Ignore: "The descriptor is not a socket"
+					//         error from UnmanagedSocket.Close
+					if (e.ErrorCode != 10038)
+						throw;  // Rethrow other errors
+				}
 				server.EndConnection (this);
 				server.ReleaseBuffers (receive_buffer,
 					send_buffer);

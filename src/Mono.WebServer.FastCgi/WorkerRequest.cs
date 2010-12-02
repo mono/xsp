@@ -458,9 +458,18 @@ namespace Mono.WebServer.FastCgi
 		private static string ReformatHttpHeader (string header)
 		{
 			string [] parts = header.Substring (5).Split ('_');
-			for (int i = 0; i < parts.Length; i ++)
-				parts [i] = parts [i].Substring (0, 1).ToUpper ()
-					+ parts [i].Substring (1).ToLower ();
+			for (int i = 0; i < parts.Length; i ++) {
+				string s = parts [i];
+				if (String.IsNullOrEmpty (s)) {
+					parts [i] = "";
+					continue;
+				}
+
+				s = s.ToLower ();
+				char [] a = s.ToCharArray ();
+				a [0] = Char.ToUpper (a[0]);
+				parts [i] = new String (a);
+			}
 			
 			return string.Join ("-", parts);
 		}

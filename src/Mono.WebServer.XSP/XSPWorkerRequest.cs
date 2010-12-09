@@ -734,7 +734,7 @@ namespace Mono.WebServer
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
 			using (FileStream fs = File.OpenRead (filename)) {
-				if (secure || no_libc || (tried_sendfile && !use_sendfile)) {
+				if (secure || no_libc) {
 					// We must not call the SendResponseFromFile overload which
 					// takes  IntPtr in this case since it will call the base
 					// implementation of that overload which, in turn, will
@@ -743,21 +743,21 @@ namespace Mono.WebServer
 					// twice (FileStream owns the handle). So we just take a
 					// shortcut to what the base overload does here.
 					SendFromStream (fs, offset, length);
-				} else
+				} else {
 					SendResponseFromFile (fs.Handle, offset, length);
+				}
 			}
 		}
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{
-			if (secure || no_libc || (tried_sendfile && !use_sendfile)) {
+			if (secure || no_libc) {
 				base.SendResponseFromFile (handle, offset, length);
 				return;
 			}
 
 			int result;
 			try {
-				tried_sendfile = true;
 				Cork (true);
 				SendHeaders ();
 				while (length > 0) {
@@ -771,8 +771,6 @@ namespace Mono.WebServer
 			} finally {
 				Cork (false);
 			}
-
-			use_sendfile = true;
 		}
 
 		int SendHeaders ()

@@ -86,7 +86,7 @@ namespace Mono.WebServer
 				string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
 				SetDefaultIndexFiles (indexes);
 			} catch (Exception ex) {
-				Console.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
+				Console.Error.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
 			}
 
 			// by default the client certificate validity (CCV) checks are done by both Apache and Mono
@@ -351,9 +351,13 @@ namespace Mono.WebServer
 		public override void CloseConnection ()
 		{
 			if (!closed) {
-				if (requestId == -1)
-					worker.Close ();
-				else 
+				if (requestId == -1) {
+					try {
+						worker.Close ();
+					} finally {
+						worker.Dispose ();
+					}
+				} else 
 					requestBroker.Close (requestId);
 				closed = true;
 			}

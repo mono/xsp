@@ -43,10 +43,11 @@ using System.Collections.Generic;
 
 namespace Mono.WebServer
 {
-	public class ModMonoRequest
+	public class ModMonoRequest : IDisposable
 	{
 		const int MAX_STRING_SIZE = 1024 * 10;
-		const int INITIAL_MEMORY_STREAM_SIZE = 2048;
+		const int INITIAL_MEMORY_STREAM_SIZE = 1024 * 2;
+		const int MAX_MEMORY_STREAM_SIZE = 1024 * 128;
 		
 		BinaryReader reader;
 		BinaryWriter writer;
@@ -111,21 +112,79 @@ namespace Mono.WebServer
 			get { return shutdown; }
 		}
 
-		void FillBuffer (int count)
+		void Dispose (Action disposer, string name)
 		{
+			if (disposer == null)
+				return;
+
+			try {
+				disposer ();
+			} catch (Exception ex) {
+				Console.Error.WriteLine ("While disposing ModMonoRequest. {0} disposing failed with exception:", name);
+				Console.Error.WriteLine (ex);
+			}
+		}
+		
+		public void Dispose ()
+		{
+			fill_buffer = null;
+			Dispose (() => {
+				if (headers != null)
+					headers.Clear ();
+			}, "headers");
+			
+			Dispose (() => {
+				if (reader != null)
+					((IDisposable)reader).Dispose ();
+			}, "reader");
+			
+			Dispose (() => {
+				if (reader_ms != null)
+					reader_ms.Dispose ();
+			}, "reader_ms");
+
+			Dispose (() => {
+				if (writer != null)
+					((IDisposable)writer).Dispose ();
+			}, "writer");
+
+			Dispose (() => {
+				if (writer_ms != null)
+					writer_ms.Dispose ();
+			}, "writer_ms");
+			
+			GC.SuppressFinalize (this);
+		}
+		
+		void FillBuffer (uint count)
+		{
+			if (count == 0)
+				return;
+			
 			// This will "reset" the stream
 			reader_ms.SetLength (0);
 			reader_ms.Position = 0;
 
-			if (fill_buffer == null || fill_buffer.Length < count) {
-				if (fill_buffer == null)
+			int read_count = (int)count;
+			int fill_buffer_length = fill_buffer == null ? 0 : fill_buffer.Length;
+			if ((uint)fill_buffer_length < count) {
+				if (fill_buffer == null && count <= INITIAL_MEMORY_STREAM_SIZE) {
 					// Use slightly more memory initially, but save on time.
 					fill_buffer = new byte [INITIAL_MEMORY_STREAM_SIZE];
-				else
-					fill_buffer = new byte [count];
+				} else if (fill_buffer_length < MAX_MEMORY_STREAM_SIZE) {
+					fill_buffer = new byte [System.Math.Min (count, MAX_MEMORY_STREAM_SIZE)];
+					read_count = fill_buffer.Length;
+				} else
+					read_count = fill_buffer_length;
 			}
+
+			int total_received = 0;
+			int received;
+			do {
+				received = client.Receive (fill_buffer, read_count, SocketFlags.None);
+				total_received += received;
+			} while (received == read_count && total_received < count && client.Available > 0);
 			
-			int received = client.Receive (fill_buffer, count, SocketFlags.None);
 			reader_ms.Write (fill_buffer, 0, received);
 			reader_ms.Seek (0, SeekOrigin.Begin);
 		}
@@ -156,7 +215,7 @@ namespace Mono.WebServer
 			}
 
 			Int32 dataSize = reader.ReadInt32 ();
-			FillBuffer (dataSize);
+			FillBuffer ((uint)dataSize);
 			
 			verb = ReadString ();
 			vServerName = ReadString ();
@@ -372,8 +431,8 @@ namespace Mono.WebServer
 
 			FillBuffer (4);
 			int blockSize = reader.ReadInt32 ();
-
-			FillBuffer (blockSize);
+			
+			FillBuffer ((uint)blockSize);
 			int nvars = reader.ReadInt32 ();
 			while (nvars > 0) {
 				string key = ReadString ();
@@ -521,7 +580,7 @@ namespace Mono.WebServer
 			if (i > size)
 				throw new Exception ("Houston...");
 
-			FillBuffer (i);
+			FillBuffer ((uint)i);
 			return reader.Read (bytes, position, i);
 		} 
 

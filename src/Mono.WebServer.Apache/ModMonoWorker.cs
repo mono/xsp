@@ -40,7 +40,7 @@ namespace Mono.WebServer
 	// ModMonoWorker: The worker that does the initial processing of mod_mono
 	// requests.
 	//
-	internal class ModMonoWorker: Worker
+	internal class ModMonoWorker: Worker, IDisposable
 	{
 		public NetworkStream Stream;
 		
@@ -57,7 +57,35 @@ namespace Mono.WebServer
 			this.client = client;
 			this.server = server;
 		}
+
+		void Dispose (Action disposer, string name)
+		{
+			if (disposer == null)
+				return;
+
+			try {
+				disposer ();
+			} catch (Exception ex) {
+				Console.Error.WriteLine ("While disposing ModMonoWorker. {0} disposing failed with exception:", name);
+				Console.Error.WriteLine (ex);
+			}
+		}
+		
+		public void Dispose ()
+		{
+			Dispose (() => {
+				if (Stream != null)
+					Stream.Dispose ();
+			}, "Stream");
+
+			Dispose (() => {
+				if (modRequest != null)
+					modRequest.Dispose ();
+			}, "modRequest");
 			
+			GC.SuppressFinalize (this);
+		}
+
 		public override void Run (object state)
 		{
 			try {

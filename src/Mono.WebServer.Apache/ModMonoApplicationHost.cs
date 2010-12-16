@@ -61,50 +61,55 @@ namespace Mono.WebServer
 					    int remotePort, string remoteName, string [] headers, string [] headerValues, object worker)
 		{
 			ModMonoWorkerRequest mwr = null;
-			
-			if (reqId > -1) {
-				mwr = new ModMonoWorkerRequest (reqId, (ModMonoRequestBroker) RequestBroker, this, verb, path, queryString,
-								protocol, localAddress, serverPort, remoteAddress,
-								remotePort, remoteName, headers, headerValues);
-			} else {
-				mwr = new ModMonoWorkerRequest ((ModMonoWorker) worker, this, verb, path, queryString,
-								protocol, localAddress, serverPort, remoteAddress,
-								remotePort, remoteName, headers, headerValues);
-			}
 
-			if (mwr.IsSecure ()) {
-				// note: we're only setting what we use (and not the whole lot)
-				mwr.AddServerVariable ("CERT_KEYSIZE", mwr.GetServerVariable (reqId, "SSL_CIPHER_USEKEYSIZE"));
-				mwr.AddServerVariable ("CERT_SECRETKEYSIZE", mwr.GetServerVariable (reqId, "SSL_CIPHER_ALGKEYSIZE"));
-
-				string pem_cert = mwr.GetServerVariable (reqId, "SSL_CLIENT_CERT");
-				// 52 is the minimal PEM size for certificate header/footer
-				if ((pem_cert != null) && (pem_cert.Length > 52)) {
-					byte[] certBytes = FromPEM (pem_cert);
-					mwr.SetClientCertificate (certBytes);
-
-					// check client certificate validity with Apache and/or Mono
-					if (mwr.IsClientCertificateValid (certBytes)) {
-						// client cert present (bit0 = 1) and valid (bit1 = 0)
-						mwr.AddServerVariable ("CERT_FLAGS", "1");
-					} else {
-						// client cert present (bit0 = 1) but invalid (bit1 = 1)
-						mwr.AddServerVariable ("CERT_FLAGS", "3");
-					}
+			try {
+				if (reqId > -1) {
+					mwr = new ModMonoWorkerRequest (reqId, (ModMonoRequestBroker) RequestBroker, this, verb, path, queryString,
+									protocol, localAddress, serverPort, remoteAddress,
+									remotePort, remoteName, headers, headerValues);
 				} else {
-					mwr.AddServerVariable ("CERT_FLAGS", "0");
+					mwr = new ModMonoWorkerRequest ((ModMonoWorker) worker, this, verb, path, queryString,
+									protocol, localAddress, serverPort, remoteAddress,
+									remotePort, remoteName, headers, headerValues);
 				}
 
-				pem_cert = mwr.GetServerVariable (reqId, "SSL_SERVER_CERT");
-				// 52 is the minimal PEM size for certificate header/footer
-				if ((pem_cert != null) && (pem_cert.Length > 52)) {
-					byte[] certBytes = FromPEM (pem_cert);
-					X509Certificate cert = new X509Certificate (certBytes);
-					mwr.AddServerVariable ("CERT_SERVER_ISSUER", cert.GetIssuerName ());
-					mwr.AddServerVariable ("CERT_SERVER_SUBJECT", cert.GetName ());
+				if (mwr.IsSecure ()) {
+					// note: we're only setting what we use (and not the whole lot)
+					mwr.AddServerVariable ("CERT_KEYSIZE", mwr.GetServerVariable (reqId, "SSL_CIPHER_USEKEYSIZE"));
+					mwr.AddServerVariable ("CERT_SECRETKEYSIZE", mwr.GetServerVariable (reqId, "SSL_CIPHER_ALGKEYSIZE"));
+
+					string pem_cert = mwr.GetServerVariable (reqId, "SSL_CLIENT_CERT");
+					// 52 is the minimal PEM size for certificate header/footer
+					if ((pem_cert != null) && (pem_cert.Length > 52)) {
+						byte[] certBytes = FromPEM (pem_cert);
+						mwr.SetClientCertificate (certBytes);
+
+						// check client certificate validity with Apache and/or Mono
+						if (mwr.IsClientCertificateValid (certBytes)) {
+							// client cert present (bit0 = 1) and valid (bit1 = 0)
+							mwr.AddServerVariable ("CERT_FLAGS", "1");
+						} else {
+							// client cert present (bit0 = 1) but invalid (bit1 = 1)
+							mwr.AddServerVariable ("CERT_FLAGS", "3");
+						}
+					} else {
+						mwr.AddServerVariable ("CERT_FLAGS", "0");
+					}
+
+					pem_cert = mwr.GetServerVariable (reqId, "SSL_SERVER_CERT");
+					// 52 is the minimal PEM size for certificate header/footer
+					if ((pem_cert != null) && (pem_cert.Length > 52)) {
+						byte[] certBytes = FromPEM (pem_cert);
+						X509Certificate cert = new X509Certificate (certBytes);
+						mwr.AddServerVariable ("CERT_SERVER_ISSUER", cert.GetIssuerName ());
+						mwr.AddServerVariable ("CERT_SERVER_SUBJECT", cert.GetName ());
+					}
 				}
+			} catch (Exception) {
+				EndOfRequest (mwr);
+				throw;
 			}
-
+			
 			ProcessRequest (mwr);
 		}
 	}

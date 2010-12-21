@@ -215,7 +215,7 @@ namespace Mono.WebServer
 			}
 
 			if (vapp == null) {
-				rr.Decline ();
+				rr.NotFound ();
 				Stream.Close ();
 				Stream = null;
 				return;
@@ -223,7 +223,7 @@ namespace Mono.WebServer
 
 			ModMonoApplicationHost host = (ModMonoApplicationHost) vapp.AppHost;
 			if (host == null) {
-				rr.Decline ();
+				rr.NotFound ();
 				Stream.Close ();
 				Stream = null;
 				return;

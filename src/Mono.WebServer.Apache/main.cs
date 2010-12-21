@@ -224,15 +224,17 @@ namespace Mono.WebServer.Apache
 		{
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
 			bool quiet = false;
-			while (true) {
+			//while (true) {
 				try {
-					return new Server ().RealMain (args, true, null, quiet);
+					Server svr = new Server ();
+					return svr.RealMain (args, true, null, quiet);
 				} catch (ThreadAbortException) {
 					// Single-app mode and ASP.NET appdomain unloaded
 					Thread.ResetAbort ();
 					quiet = true; // hush 'RealMain'
 				}
-			}
+			//}
+			return 1;
 		}
 
 		//
@@ -459,6 +461,11 @@ namespace Mono.WebServer.Apache
 			}
 
 			return 0;
+		}
+
+		public override object InitializeLifetimeService ()
+		{
+			return null;
 		}
 	}
 }

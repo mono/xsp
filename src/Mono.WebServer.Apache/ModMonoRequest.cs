@@ -204,8 +204,10 @@ namespace Mono.WebServer
 			
 			byte cmd = reader.ReadByte ();
 			shutdown = (cmd == 0);
-			if (shutdown)
+			if (shutdown) {
+				Console.Error.WriteLine ("mod-mono-server received a shutdown message");
 				return;
+			}
 
 			if (cmd != protocol_version) {
 				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}", protocol_version, cmd);

@@ -351,14 +351,13 @@ namespace Mono.WebServer
 
 		public void ShutdownSockets ()
 		{
-			if (listen_socket != null && !listen_socket.IsBound) {
+			if (listen_socket != null) {
 				try {
-					if (listen_socket.Connected)
-						listen_socket.Shutdown (SocketShutdown.Receive);
+					listen_socket.Close ();
 				} catch {
-					// ignore - we don't care, we're closing anyway
+				} finally {
+					listen_socket = null;
 				}
-				listen_socket.Close ();
 			}
 			
 			lock (registeredSocketsLock) {

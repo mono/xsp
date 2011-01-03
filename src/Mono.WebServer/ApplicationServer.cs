@@ -391,7 +391,6 @@ namespace Mono.WebServer
 			runner.Abort ();
 			ShutdownSockets ();
 			UnloadAll ();
-			Thread.Sleep (1000);
 		}
 
 		public void UnloadAll ()

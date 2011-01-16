@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6B354D8B-17FC-48EB-B899-914885DB81DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mono.WebServer</RootNamespace>
+    <AssemblyName>Mono.WebServer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\DeployFu\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApplicationServer.cs" />
+    <Compile Include="BaseApplicationHost.cs" />
+    <Compile Include="BaseRequestBroker.cs" />
+    <Compile Include="EndOfRequestHandler.cs" />
+    <Compile Include="HttpErrors.cs" />
+    <Compile Include="IApplicationHost.cs" />
+    <Compile Include="InitialWorkerRequest.cs" />
+    <Compile Include="IRequestBroker.cs" />
+    <Compile Include="LingeringNetworkStream.cs" />
+    <Compile Include="LockRecursionException.cs" />
+    <Compile Include="LockRecursionPolicy.cs" />
+    <Compile Include="MapPathEventArgs.cs" />
+    <Compile Include="MapPathEventHandler.cs" />
+    <Compile Include="MonoWorkerRequest.cs" />
+    <Compile Include="Paths.cs" />
+    <Compile Include="ReaderWriterLockSlim.cs" />
+    <Compile Include="RequestData.cs" />
+    <Compile Include="RequestLineException.cs" />
+    <Compile Include="SearchPattern.cs" />
+    <Compile Include="UnregisterRequestEventArgs.cs" />
+    <Compile Include="UnregisterRequestEventHandler.cs" />
+    <Compile Include="VPathToHost.cs" />
+    <Compile Include="WebSource.cs" />
+    <Compile Include="WebTrace.cs" />
+    <Compile Include="Worker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

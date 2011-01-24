@@ -104,6 +104,7 @@ AC_SUBST(SN)
 AC_SUBST(VERSION)
 AC_SUBST(XSP_VERSION)
 AC_OUTPUT([
+	xsp.spec
 	Makefile
 	man/xsp.1
 	man/dbsessmgr.1

@@ -239,13 +239,6 @@ namespace Mono.WebServer
 					} catch {
 						// ignore
 					}
-					
-					try {
-						server.UnregisterSocket (sock);
-					} catch {
-						// ignore
-					}
-
 					try {
 						sock.Close ();
 					} catch {

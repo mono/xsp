@@ -84,8 +84,6 @@ namespace Mono.WebServer
 	
 	public class ApplicationServer : MarshalByRefObject
 	{
-		static readonly object registeredSocketsLock = new object ();
-
 		WebSource webSource;
 		bool started;
 		bool stop;
@@ -98,8 +96,6 @@ namespace Mono.WebServer
 		
 		Thread runner;
 
-		Dictionary <Socket, bool> registeredSockets;
-		
 		// This is much faster than hashtable for typical cases.
 		ArrayList vpathToHost = new ArrayList ();
 
@@ -359,30 +355,6 @@ namespace Mono.WebServer
 					listen_socket = null;
 				}
 			}
-			
-			lock (registeredSocketsLock) {
-				if (registeredSockets == null)
-					return;
-
-				shuttingDown = true;
-				foreach (Socket s in registeredSockets.Keys) {
-					if (s == null)
-						continue;
-
-					try {
-						if (s.Connected)
-							s.Shutdown (SocketShutdown.Both);
-					} catch {
-						// ignore - we don't care, we're closing anyway
-					}
-
-					try {
-						s.Close ();
-					} catch {
-						// ignore
-					}
-				}
-			}
 		}
 
 		void RealStop ()
@@ -402,34 +374,6 @@ namespace Mono.WebServer
 			}
 		}
 
-		public void RegisterSocket (Socket socket)
-		{
-			lock (registeredSocketsLock) {
-				if (registeredSockets == null) {
-					registeredSockets = new Dictionary <Socket, bool> ();
-					registeredSockets.Add (socket, true);
-
-					return;
-				}
-
-				if (registeredSockets.ContainsKey (socket))
-					return;
-
-				registeredSockets.Add (socket, true);
-			}
-		}
-
-		public void UnregisterSocket (Socket socket)
-		{
-			lock (registeredSocketsLock) {
-				if (registeredSockets == null || shuttingDown)
-					return;
-
-				if (registeredSockets.ContainsKey (socket))
-					registeredSockets.Remove (socket);
-			}
-		}
-		
 		void SetSocketOptions (Socket sock)
 		{
 
@@ -484,7 +428,6 @@ namespace Mono.WebServer
 
 			accepted.Blocking = true;
 			SetSocketOptions (accepted);
-			RegisterSocket (accepted);
 			StartRequest (accepted, 0);
 		}
 

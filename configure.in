@@ -27,6 +27,17 @@ AC_ARG_WITH([runtime],
  AC_HELP_STRING([--with-runtime],[use the specified runtime when xsp is installed]),
  [RUNTIME=$withval])
 
+AC_ARG_WITH([unit-tests],
+ AC_HELP_STRING([--with-unit-tests],[build the unit tests]),
+ [UNIT_TESTS=$withval])
+
+if test ! "x${UNIT_TESTS}" = "x" ; then
+	AC_PATH_PROG(PKG_CONFIG,pkg-config,no)
+	if test "x$PKG_CONFIG" = "xno" ; then
+		UNIT_TESTS="no"
+	fi
+fi
+
 AC_PATH_PROG(CSC, csc, no)
 AC_PATH_PROG(GMCS, gmcs, no)
 AC_PATH_PROG(DMCS, dmcs, no)
@@ -70,6 +81,7 @@ case "$host" in
 	;;
 esac
 
+AM_CONDITIONAL(UNITTESTS, test x${UNIT_TESTS} = xyes)
 AM_CONDITIONAL(PLATFORM_WIN32, test x$platform_win32 = xyes)
 AM_CONDITIONAL(NET_2_0, test ! x$GMCS = xno)
 AM_CONDITIONAL(NET_4_0, test ! x$DMCS = xno)

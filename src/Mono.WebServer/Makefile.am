@@ -60,13 +60,13 @@ monowebserver4_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)
 endif
 
 2.0/Mono.WebServer2.dll: $(monowebserver2_build_sources)
-	-mkdir 2.0
+	-$(MKDIR_P) 2.0
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(monowebserver2_references) /target:library /out:$@ $(monowebserver2_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 if NET_4_0
 4.0/Mono.WebServer2.dll: $(monowebserver4_build_sources)
-	-mkdir 4.0
+	-$(MKDIR_P) 4.0
 	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(monowebserver4_references) /target:library /out:$@ $(monowebserver4_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 endif

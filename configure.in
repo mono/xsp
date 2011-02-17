@@ -4,13 +4,7 @@ AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(xsp, 2.11)
 AM_MAINTAINER_MODE
 
-
 AC_PROG_INSTALL
-
-AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-if test "x$PKG_CONFIG" = "xno"; then
-	AC_MSG_ERROR([You need to install pkg-config])
-fi
 
 #
 # --enable-tracing

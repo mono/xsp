@@ -51,7 +51,8 @@ namespace Mono.FastCgi {
 		private byte[] receive_buffer;
 		
 		private byte[] send_buffer;
-		
+
+		object connection_teardown_lock = new object ();
 		#endregion
 		
 		
@@ -60,10 +61,14 @@ namespace Mono.FastCgi {
 		
 		public Connection (Socket socket, Server server)
 		{
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
+			if (server == null)
+				throw new ArgumentNullException ("server");
+			
 			this.socket = socket;
 			this.server = server;
-			server.AllocateBuffers (out receive_buffer,
-				out send_buffer);
+			server.AllocateBuffers (out receive_buffer, out send_buffer);
 		}
 		
 		#endregion
@@ -77,7 +82,11 @@ namespace Mono.FastCgi {
 		}
 		
 		public bool IsConnected {
-			get {return socket.Connected;}
+			get {
+				if (socket == null)
+					return false;
+				return socket.Connected;
+			}
 		}
 		
 		public Server Server {
@@ -94,7 +103,10 @@ namespace Mono.FastCgi {
 		{
 			Logger.Write (LogLevel.Notice,
 				Strings.Connection_BeginningRun);
-			
+			if (socket == null) {
+				Logger.Write (LogLevel.Notice, Strings.Connection_NoSocketInRun);
+				return;
+			}
 			do {
 				Record record;
 				
@@ -207,6 +219,7 @@ namespace Mono.FastCgi {
 					if (request == null) {
 						StopRun (Strings.Connection_RequestDoesNotExist,
 							record.RequestID);
+						break;
 					}
 					
 					request.AddInputData (record);
@@ -218,6 +231,7 @@ namespace Mono.FastCgi {
 					if (request == null) {
 						StopRun (Strings.Connection_RequestDoesNotExist,
 							record.RequestID);
+						break;
 					}
 					
 					request.AddFileData (record);
@@ -226,7 +240,7 @@ namespace Mono.FastCgi {
 				
 				// Aborts a request when the server aborts.
 				case RecordType.AbortRequest:
-					if (request != null)
+					if (request == null)
 						break;
 					
 					request.Abort (
@@ -251,17 +265,26 @@ namespace Mono.FastCgi {
 			while (!stop && (UnfinishedRequests || keep_alive));
 			
 			if (requests.Count == 0) {
-				try {
-					socket.Close ();
-				} catch (System.Net.Sockets.SocketException e) {
-					// Ignore: "The descriptor is not a socket"
-					//         error from UnmanagedSocket.Close
-					if (e.ErrorCode != 10038)
-						throw;  // Rethrow other errors
+				lock (connection_teardown_lock) {
+					try {
+						if (socket != null)
+							socket.Close ();
+					} catch (System.Net.Sockets.SocketException e) {
+						// Ignore: "The descriptor is not a socket"
+						//         error from UnmanagedSocket.Close
+						if (e.ErrorCode != 10038)
+							throw;  // Rethrow other errors
+					} finally {
+						socket = null;
+					}
+					if (!stop)
+						server.EndConnection (this);
+					if (receive_buffer != null && send_buffer != null) {
+						server.ReleaseBuffers (receive_buffer, send_buffer);
+						receive_buffer = null;
+						send_buffer = null;
+					}
 				}
-				server.EndConnection (this);
-				server.ReleaseBuffers (receive_buffer,
-					send_buffer);
 			}
 			
 			Logger.Write (LogLevel.Notice,
@@ -299,7 +322,7 @@ namespace Mono.FastCgi {
 			
 			if (IsConnected)
 				new Record (1, RecordType.EndRequest, requestID,
-					body.GetData ()).Send (socket);
+					    body.GetData ()).Send (socket);
 			
 			int index = GetRequestIndex (requestID);
 			
@@ -308,12 +331,25 @@ namespace Mono.FastCgi {
 					requests.RemoveAt (index);
 				}
 			}
-			
-			if (requests.Count == 0 && (!keep_alive || stop)) {
-				socket.Close ();
-				server.EndConnection (this);
-				server.ReleaseBuffers (receive_buffer,
-					send_buffer);
+
+			lock (connection_teardown_lock) {
+				if (requests.Count == 0 && (!keep_alive || stop)) {
+					if (socket != null) {
+						try {
+							socket.Close ();
+						} finally {
+							socket = null;
+						}
+					}
+
+					if (!stop)
+						server.EndConnection (this);
+					if (receive_buffer != null && send_buffer != null) {
+						server.ReleaseBuffers (receive_buffer, send_buffer);
+						receive_buffer = null;
+						send_buffer = null;
+					}
+				}
 			}
 		}
 		

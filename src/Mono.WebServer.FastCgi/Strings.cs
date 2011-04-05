@@ -22,6 +22,7 @@ namespace Mono.FastCgi {
 		public static string Connection_AbortRecordReceived = "FastCGI Abort Request";
 		public static string Connection_UnknownRecordType = "Unknown type, {0}, encountered.";
 		public static string Connection_Terminating = "Terminating connection.";
+		public static string Connection_NoSocketInRun = "Run called, but no socket found.";
 		public static string NameValuePair_ParameterRead = "Read parameter. ({0} = {1})";
 		public static string NameValuePair_DuplicateParameter = "Duplicate name, {0}, encountered. Overwriting existing value.";
 		public static string NameValuePair_DictionaryContainsNonString = "Dictionary must only contain string values.";

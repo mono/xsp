@@ -5,7 +5,7 @@ SYSTEMCORE_DEP=@SYSTEMCORE_DEP@
 
 monowebserver2dir = $(prefix)/lib/xsp/2.0
 monowebserver2_install = 2.0/Mono.WebServer2.dll
-monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Security.dll 
+monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mono.Security.dll -r:System.Core.dll
 GACUTIL2=$(GACUTIL) -package 2.0
 
 if NET_4_0
@@ -35,7 +35,6 @@ monowebserver2_sources  = \
 			VPathToHost.cs \
 			WebTrace.cs \
 			SearchPattern.cs \
-			ReaderWriterLockSlim.cs \
 			LockRecursionException.cs \
 			LockRecursionPolicy.cs \
 			UnregisterRequestEventArgs.cs \

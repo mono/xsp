@@ -137,7 +137,6 @@ AC_CONFIG_FILES([Makefile
 	scripts/Makefile
 	src/Makefile
 	src/Mono.WebServer.Apache/Makefile
-	src/Mono.WebServer.FCGI/Makefile
 	src/Mono.WebServer.FastCgi/Makefile
 	src/Mono.WebServer.XSP/Makefile
 	src/Mono.WebServer/Makefile

@@ -31,7 +31,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("@XSP_VERSION@")]
 [assembly: AssemblyTitle ("Mono.WebServer.Apache")]
 [assembly: AssemblyDescription ("Mod_mono backend for XSP")]
-[assembly: AssemblyCopyright ("(c) 2002-2007 Novell, Inc.")]
+[assembly: AssemblyCopyright ("(c) 2002-2011 Novell, Inc.")]
 [assembly: AssemblyCompany ("Novell, Inc.")]
-[assembly: AssemblyDelaySign(true)]
-[assembly: AssemblyKeyFile("@top_srcdir@/src/mono.pub")]

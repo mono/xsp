@@ -88,7 +88,6 @@ namespace Mono.WebServer
 		bool started;
 		bool stop;
 		bool verbose;
-		bool shuttingDown;
 		Socket listen_socket;
 		bool single_app;
 		Exception initialException;
@@ -388,8 +387,6 @@ namespace Mono.WebServer
 			}
 		}
 
-
-		AsyncCallback accept_cb;
 		void RunServer ()
 		{
 			started = true;
@@ -480,7 +477,7 @@ namespace Mono.WebServer
 					ThreadPool.QueueUserWorkItem (new WaitCallback (worker.Run));
 				else
 					worker.Run (null);
-			} catch (Exception e) {
+			} catch (Exception) {
 				try {
 					if (accepted != null) {
 						try {

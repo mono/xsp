@@ -1,7 +1,7 @@
 builddir=$(top_builddir)/src/Mono.WebServer.XSP
 pkgconfigdir=$(libdir)/pkgconfig
 
-MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 -unsafe $(WEBTRACING)
+MCSFLAGS= -debug+ -debug:full -nologo -nowarn:618 -unsafe $(WEBTRACING) -keyfile:$(top_srcdir)/src/mono.snk
 
 XSP2_EXE = xsp2.exe
 GACUTIL2=$(GACUTIL) -package 2.0

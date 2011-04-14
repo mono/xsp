@@ -815,9 +815,6 @@ namespace Mono.WebServer
 			return total;
 		}
 
-		static bool tried_sendfile;
-		static bool use_sendfile;
-
 		[DllImport ("libc", SetLastError=true)]
 		extern static int setsockopt (int handle, int level, int opt, ref bool val, IntPtr len);
 

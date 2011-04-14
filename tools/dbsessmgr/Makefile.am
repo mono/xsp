@@ -23,9 +23,9 @@ dbsessmgr_input = AssemblyInfo.cs.in \
 dbsessmgr_sources = $(dbsessmgr_input:.in=)
 
 dbsessmgr2.exe: $(dbsessmgr_sources)
-	$(GMCS) $(MCSFLAGS) -r:System.Data.dll -out:$@ $^
+	$(GMCS) $(MCSFLAGS) -r:System.Data.dll -r:System.Configuration.dll -out:$@ $^
 
 if NET_4_0
 dbsessmgr4.exe: $(dbsessmgr_sources)
-	$(DMCS) $(MCSFLAGS) -r:System.Data.dll -out:$@ $^
+	$(DMCS) $(MCSFLAGS) -r:System.Data.dll -r:System.Configuration.dll -out:$@ $^
 endif

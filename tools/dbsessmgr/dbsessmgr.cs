@@ -128,7 +128,7 @@ namespace Mono.ASPNET.Tools {
 			conn_str = null;
 			param_prefix = null;
 
-			NameValueCollection config = ConfigurationSettings.AppSettings;
+			NameValueCollection config = ConfigurationManager.AppSettings;
 			if (config != null) {
 				asm = config ["DBProviderAssembly"];
 				type = config ["DBConnectionType"];

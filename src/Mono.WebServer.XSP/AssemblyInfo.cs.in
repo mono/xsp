@@ -31,7 +31,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("@XSP_VERSION@")]
 [assembly: AssemblyTitle ("Mono.WebServer.XSP")]
 [assembly: AssemblyDescription ("Minimalistic web server for testing System.Web")]
-[assembly: AssemblyCopyright ("(C) 2002-2010 Novell, Inc.")]
+[assembly: AssemblyCopyright ("(C) 2002-2011 Novell, Inc.")]
 [assembly: AssemblyCompany ("Novell, Inc.")]
-[assembly: AssemblyDelaySign(true)]
-[assembly: AssemblyKeyFile("@top_srcdir@/src/mono.pub")]

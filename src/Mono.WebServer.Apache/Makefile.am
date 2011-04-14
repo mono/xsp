@@ -1,6 +1,6 @@
 builddir=$(top_builddir)/src/Mono.WebServer.Apache
 
-MCSFLAGS= -unsafe -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING)
+MCSFLAGS= -unsafe -debug+ -debug:full -nologo -nowarn:618 $(WEBTRACING) -keyfile:$(top_srcdir)/src/mono.snk
 
 MODMONOSERVER2_EXE = mod-mono-server2.exe
 GACUTIL2=$(GACUTIL) -package 2.0

@@ -64,7 +64,7 @@ and works until <Enter> is pressed.
 		public static void Main (string [] args)
 		{
 			if (args.Length == 0) {
-				RemotingConfiguration.Configure (ConfigurationFileName);
+				RemotingConfiguration.Configure (ConfigurationFileName, false);
 				ShowVerboseConfigurationInfo(ConfigurationFileName);
 				Console.Write("Press <Enter> to stop...");
 				Console.ReadLine ();

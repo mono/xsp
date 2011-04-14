@@ -1,9 +1,5 @@
 DOCS_ARCHIVE_BASE=Mono.WebServer
 
-MDOC=mdoc
-
-INSTALLATION_DIR=$(shell pkg-config monodoc --variable=sourcesdir)
-
 DOCS_ARCHIVE_20=$(DOCS_ARCHIVE_BASE).zip
 DOCS_TREE_20=$(DOCS_ARCHIVE_BASE).tree
 DOCS_SOURCE_20=$(DOCS_ARCHIVE_BASE).source
@@ -30,8 +26,8 @@ docs-stamp:
 	touch docs-stamp
 
 install-data-local:
-	$(mkinstalldirs) $(DESTDIR)$(INSTALLATION_DIR)
-	$(INSTALL_DATA) $(INSTALL_FILES) $(DESTDIR)$(INSTALLATION_DIR)
+	$(mkinstalldirs) $(DESTDIR)$(DOCDIR)
+	$(INSTALL_DATA) $(INSTALL_FILES) $(DESTDIR)$(DOCDIR)
 
 docs-update:
 	$(MDOC) update --out=en --delete -fno-assembly-versions $(MONO_WEBSERVER_ASSEMBLY_20)

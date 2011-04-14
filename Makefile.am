@@ -1,6 +1,9 @@
+SUBDIRS=build man src test tools scripts packaging
+
 if UNITTESTS
-SUBDIRS=man src test tools scripts docs packaging unittests
-else
-SUBDIRS=man src test tools scripts docs packaging
+SUBDIRS += unittests
 endif
 
+if BUILD_DOCS
+SUBDIRS += docs
+endif

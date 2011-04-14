@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.67])
+AC_PREREQ([2.53])
 AC_INIT([xsp], [2.11], [http://bugzilla.novell.com/])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_MACRO_DIR([build/m4])

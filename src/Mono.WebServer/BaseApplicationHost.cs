@@ -231,7 +231,6 @@ namespace Mono.WebServer
 				
 				string matchExact = null;
 				string endsWith = null;
-				Regex regEx = null;
 
 				if (handlerPath.Length > 0) {
 					if (handlerPath [0] == '*' && (handlerPath.IndexOf ('*', 1) == -1))
@@ -239,8 +238,6 @@ namespace Mono.WebServer
 
 					if (handlerPath.IndexOf ('*') == -1)
 						if (handlerPath [0] != '/') {
-							HttpContext ctx = HttpContext.Current;
-							HttpRequest req = ctx != null ? ctx.Request : null;
 							string vpath = HttpRuntime.AppDomainAppVirtualPath;
 
 							if (vpath == "/")

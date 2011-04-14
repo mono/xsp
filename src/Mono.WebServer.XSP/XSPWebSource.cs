@@ -57,7 +57,6 @@ namespace Mono.WebServer
 		PrivateKeySelectionCallback keyCB;
 		bool allowClientCert;
 		bool requireClientCert;
-		bool single_app;
 
 		public XSPWebSource(IPAddress address, int port, SecurityProtocolType securityProtocol,
 				    X509Certificate cert, PrivateKeySelectionCallback keyCB, 
@@ -70,12 +69,10 @@ namespace Mono.WebServer
 			this.keyCB = keyCB;
 			this.allowClientCert = allowClientCert;
 			this.requireClientCert = requireClientCert;
-			this.single_app = single_app;
 		}
 
 		public XSPWebSource (IPAddress address, int port, bool single_app)
 		{
-			this.single_app = single_app;
 			SetListenAddress (address, port);
 		}
 

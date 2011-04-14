@@ -5,5 +5,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Mono.WebServer.FastCGI")]
 [assembly: AssemblyDescription("FastCGI Backend for XSP")]
 [assembly: AssemblyCopyright("2007 Brian Nickel")]
-[assembly: AssemblyDelaySign(true)]
-[assembly: AssemblyKeyFile("@top_srcdir@/src/mono.pub")]
+

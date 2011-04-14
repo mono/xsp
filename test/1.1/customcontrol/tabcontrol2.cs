@@ -166,7 +166,7 @@ namespace Mono.Controls
 					writer.WriteBeginTag ("a");
 					string postbackEvent = String.Empty;
 					if (Page != null)
-						postbackEvent = Page.GetPostBackClientHyperlink (
+						postbackEvent = Page.ClientScript.GetPostBackClientHyperlink (
 									this, key);
 
 					writer.WriteAttribute ("href", postbackEvent);

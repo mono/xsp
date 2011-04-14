@@ -50,7 +50,6 @@ namespace Mono.WebServer
 		{
 			// There's a hidden missing feature here... :)
 			realUri = uri; pathInfo = String.Empty;
-			string basepath = HttpRuntime.AppDomainAppPath;
 			string vpath = HttpRuntime.AppDomainAppVirtualPath;
 			int vpathLen = vpath.Length;
 			

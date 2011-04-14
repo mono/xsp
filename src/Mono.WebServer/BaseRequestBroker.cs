@@ -127,7 +127,7 @@ namespace Mono.WebServer
 
 			if (newid != -1) {
 				// TODO: newid had better not exceed 0xFFFF.
-				newid = (int)((newid & 0xFFFF) | ((requests_served & 0x7FFF) << 16));
+				newid = (int)(((ushort)newid & 0xFFFF) | (((ushort)requests_served & 0x7FFF) << 16));
 				request_ids [IdToIndex(newid)] = newid;
 				return newid;
 			}

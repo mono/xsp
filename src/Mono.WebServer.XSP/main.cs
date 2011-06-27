@@ -181,6 +181,8 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ();
 			Console.WriteLine ("    --no-hidden: allow access to hidden files (see 'man xsp' for details)");
 			Console.WriteLine ();
+			Console.WriteLine ("    --quiet: disables the initial start up information");
+			Console.WriteLine ();
 			Console.WriteLine ("    --version: displays version information and exits.");
 			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
 			Console.WriteLine ("    --pidfile file: write the process PID to the specified file.");
@@ -358,6 +360,9 @@ namespace Mono.WebServer.XSP
 				case "--help":
 					ShowHelp ();
 					return 0;
+				case "--quiet":
+					quiet = true;
+					break;
 				case "--version":
 					ShowVersion ();
 					return 0;

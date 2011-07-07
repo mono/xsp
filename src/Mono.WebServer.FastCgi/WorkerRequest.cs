@@ -59,11 +59,18 @@ namespace Mono.WebServer.FastCgi
 		string uri_path = null;
 		private string [][] unknownHeaders = null;
 		private string [] knownHeaders = null;
-		
+		string path_info;
+
 		public WorkerRequest (Responder responder, ApplicationHost appHost) : base (appHost)
 		{
 			this.responder = responder;
 			input_data = responder.InputData;
+			try {
+				Paths.GetPathsFromUri (appHost, GetHttpVerbName (), GetFilePath (), out file_path, out path_info);
+			} catch {
+				path_info = null;
+				file_path = null;
+			}
 		}
 		
 		#region Overrides
@@ -132,7 +139,11 @@ namespace Mono.WebServer.FastCgi
 
 		public override string GetPathInfo ()
 		{
-			return responder.GetParameter ("PATH_INFO") ?? String.Empty;
+			string pi = responder.GetParameter ("PATH_INFO");
+			if (!String.IsNullOrEmpty (pi))
+				return pi;
+			
+			return path_info ?? String.Empty;
 		}
 		
 		public override string GetRawUrl ()

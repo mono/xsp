@@ -109,6 +109,7 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("                    Default value: 0.0.0.0");
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
+			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
 			Console.WriteLine ("    --https:        enable SSL for the server");
 			Console.WriteLine ("                    Default value: false.");
 			Console.WriteLine ("                    AppSettings key name: ");
@@ -289,6 +290,7 @@ namespace Mono.WebServer.XSP
 
 			Options options = 0;
 			int hash = 0;
+			int backlog = 500;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
 				int idx = (i + 1 < args.Length) ? i + 1 : i;
@@ -337,6 +339,15 @@ namespace Mono.WebServer.XSP
 				case "--address":
 					CheckAndSetOptions (a, Options.Address, ref options);
 					settings.IP = args [++i];
+					break;
+				case "--backlog":
+					string backlogstr = args [++i];
+					try {
+						backlog = Convert.ToInt32 (backlogstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for backlog is not valid {0}", backlogstr);
+						return 1;
+					}
 					break;
 				case "--root":
 					CheckAndSetOptions (a, Options.Root, ref options);
@@ -469,7 +480,7 @@ namespace Mono.WebServer.XSP
 			}
 
 			try {
-				if (server.Start (!settings.NonStop, settings.Exception) == false)
+				if (server.Start (!settings.NonStop, settings.Exception, backlog) == false)
 					return 2;
 				
 				if (!quiet) {

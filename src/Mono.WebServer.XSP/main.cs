@@ -109,6 +109,9 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("                    Default value: 0.0.0.0");
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
+			Console.WriteLine ("    --minThreads N:    the minimum number of threads the thread pool creates on startup.");
+			Console.WriteLine ("                       Increase this value to handle a sudden inflow of connections.");
+			Console.WriteLine ("                       Default value: (runtime default)");
 			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
 			Console.WriteLine ("    --https:        enable SSL for the server");
 			Console.WriteLine ("                    Default value: false.");
@@ -364,6 +367,20 @@ namespace Mono.WebServer.XSP
 				case "--appconfigdir":
 					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
 					settings.AppConfigDir = args [++i];
+					break;
+				case "--minThreads":
+					string mtstr = args [++i];
+					int minThreads = 0;
+					try {
+						minThreads = Convert.ToInt32 (mtstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
+						return 1;
+					}
+
+					if (minThreads > 0)
+						ThreadPool.SetMinThreads(minThreads, minThreads);
+
 					break;
 				case "--nonstop":
 					settings.NonStop = true;

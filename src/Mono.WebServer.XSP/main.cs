@@ -109,6 +109,10 @@ namespace Mono.WebServer.XSP
 			Console.WriteLine ("                    Default value: 0.0.0.0");
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
+			Console.WriteLine ("    --minThreads N:    the minimum number of threads the thread pool creates on startup.");
+			Console.WriteLine ("                       Increase this value to handle a sudden inflow of connections.");
+			Console.WriteLine ("                       Default value: (runtime default)");
+			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
 			Console.WriteLine ("    --https:        enable SSL for the server");
 			Console.WriteLine ("                    Default value: false.");
 			Console.WriteLine ("                    AppSettings key name: ");
@@ -289,6 +293,7 @@ namespace Mono.WebServer.XSP
 
 			Options options = 0;
 			int hash = 0;
+			int backlog = 500;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
 				int idx = (i + 1 < args.Length) ? i + 1 : i;
@@ -338,6 +343,15 @@ namespace Mono.WebServer.XSP
 					CheckAndSetOptions (a, Options.Address, ref options);
 					settings.IP = args [++i];
 					break;
+				case "--backlog":
+					string backlogstr = args [++i];
+					try {
+						backlog = Convert.ToInt32 (backlogstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for backlog is not valid {0}", backlogstr);
+						return 1;
+					}
+					break;
 				case "--root":
 					CheckAndSetOptions (a, Options.Root, ref options);
 					settings.RootDir = args [++i];
@@ -353,6 +367,20 @@ namespace Mono.WebServer.XSP
 				case "--appconfigdir":
 					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
 					settings.AppConfigDir = args [++i];
+					break;
+				case "--minThreads":
+					string mtstr = args [++i];
+					int minThreads = 0;
+					try {
+						minThreads = Convert.ToInt32 (mtstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
+						return 1;
+					}
+
+					if (minThreads > 0)
+						ThreadPool.SetMinThreads(minThreads, minThreads);
+
 					break;
 				case "--nonstop":
 					settings.NonStop = true;
@@ -469,7 +497,7 @@ namespace Mono.WebServer.XSP
 			}
 
 			try {
-				if (server.Start (!settings.NonStop, settings.Exception) == false)
+				if (server.Start (!settings.NonStop, settings.Exception, backlog) == false)
 					return 2;
 				
 				if (!quiet) {

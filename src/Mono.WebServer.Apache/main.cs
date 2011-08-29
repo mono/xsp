@@ -113,6 +113,7 @@ namespace Mono.WebServer.Apache
 			Console.WriteLine ("                    Default value: 127.0.0.1");
 			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
 			Console.WriteLine ();
+			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
 			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
 			Console.WriteLine ("                    anything else.");
 			Console.WriteLine ("                    Default value: current directory.");
@@ -151,6 +152,10 @@ namespace Mono.WebServer.Apache
 			Console.WriteLine ("                    Default value: /:.");
 			Console.WriteLine ("                    AppSettings key name: MonoApplications");
 			Console.WriteLine ();
+			Console.WriteLine ("    --minThreads N:    the minimum number of threads the thread pool creates on startup.");
+			Console.WriteLine ("                       Increase this value to handle a sudden inflow of connections.");
+			Console.WriteLine ("                       Default value: (runtime default)");
+			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
 			Console.WriteLine ("    --terminate: gracefully terminates a running mod-mono-server instance.");
 			Console.WriteLine ("                 All other options but --filename or --address and --port");
 			Console.WriteLine ("                 are ignored if this option is provided.");
@@ -253,6 +258,7 @@ namespace Mono.WebServer.Apache
 				settings.RootDir = ext_apphost.Path;
 
 			Options options = 0;
+			int backlog = 500;
 			int hash = 0;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
@@ -279,6 +285,15 @@ namespace Mono.WebServer.Apache
 					CheckAndSetOptions (a, Options.Address, ref options);
 					settings.IP = args [++i];
 					break;
+				case "--backlog":
+					string backlogstr = args [++i];
+					try {
+						backlog = Convert.ToInt32 (backlogstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for backlog is not valid {0}", backlogstr);
+						return 1;
+					}
+					break;
 				case "--root":
 					CheckAndSetOptions (a, Options.Root, ref options);
 					settings.RootDir = args [++i];
@@ -294,6 +309,20 @@ namespace Mono.WebServer.Apache
 				case "--appconfigdir":
 					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
 					settings.AppConfigDir = args [++i];
+					break;
+				case "--minThreads":
+					string mtstr = args [++i];
+					int minThreads = 0;
+					try {
+						minThreads = Convert.ToInt32 (mtstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
+						return 1;
+					}
+
+					if (minThreads > 0)
+						ThreadPool.SetMinThreads(minThreads, minThreads);
+
 					break;
 				case "--nonstop":
 					settings.NonStop = true;
@@ -435,7 +464,7 @@ namespace Mono.WebServer.Apache
 				Console.Error.WriteLine ("Root directory: {0}", settings.RootDir);
 
 			try {
-				if (server.Start (!settings.NonStop) == false)
+				if (server.Start (!settings.NonStop, backlog) == false)
 					return 2;
 
 				if (!settings.NonStop) {

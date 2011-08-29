@@ -54,6 +54,15 @@ requests.  By default XSP listens on port 8080 and mod-mono-server has
 no default.
 AppSettings key name: MonoServerPort
 .TP
+.I \-\-backlog N
+The backlog of connections to set on the listener socket.
+By default the value is set to 500.
+.TP
+.I \-\-minThreads N
+The minimum number of threads the threadpool allocates. Increase this value
+to better handle the sudden arrival of connections.
+The default value is determined by the mono runtime.
+.TP
 .I \-\-filename file (mod-mono-server and fastcgi-mono-server)
 The unix socket file name to listen on.
 Default value: /tmp/mod_mono_server (fastcgi-mono-server: /tmp/fastcgi-mono-server)

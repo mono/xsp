@@ -295,13 +295,13 @@ namespace Mono.WebServer
  			}
  		}
 
-		public bool Start (bool bgThread, Exception initialException)
+		public bool Start (bool bgThread, Exception initialException, int backlog)
 		{
 			this.initialException = initialException;
-			return Start (bgThread);
+			return Start (bgThread, backlog);
 		}
 		
-		public bool Start (bool bgThread)
+		public bool Start (bool bgThread, int backlog)
 		{
 			if (started)
 				throw new InvalidOperationException ("The server is already started.");
@@ -319,8 +319,7 @@ namespace Mono.WebServer
 			}
 
 			listen_socket = webSource.CreateSocket ();
-			listen_socket.Listen (500);
-			listen_socket.Blocking = false;
+			listen_socket.Listen (backlog);
 			runner = new Thread (new ThreadStart (RunServer));
 			runner.IsBackground = bgThread;
 			runner.Start ();
@@ -402,30 +401,50 @@ namespace Mono.WebServer
 
 		void OnAccept (object sender, EventArgs e)
 		{
-			Socket accepted = null;
 			SocketAsyncEventArgs args = (SocketAsyncEventArgs) e;
-			if (args.SocketError == SocketError.Success) {
-				accepted = args.AcceptSocket;
-				args.AcceptSocket = null;
+			Socket accepted = args.AcceptSocket;
+			args.AcceptSocket = null;
+
+			if (args.SocketError != SocketError.Success) {
+				CloseSocket(accepted);
+				accepted = null;
 			}
 
 			try {
 				if (started)
 					listen_socket.AcceptAsync (args);
 			} catch (Exception ex) {
-				if (accepted != null) {
-					SendException (accepted, ex);
-					accepted.Close ();
-					throw;
-				}
+				CloseSocket(accepted);
+
+				// not much we can do. fast fail by killing the process.
+				Console.Error.WriteLine ("Unable to accept socket. Exiting the process. {0}", ex);
+				Environment.Exit (1);
 			}
 
 			if (accepted == null)
 				return;
 
-			accepted.Blocking = true;
 			SetSocketOptions (accepted);
 			StartRequest (accepted, 0);
+		}
+
+		void CloseSocket(Socket socket)
+		{
+			if (socket == null)
+				return;
+
+			// attempt a quick RST of the connection
+			try {
+				socket.LingerState = new LingerOption (true, 0);
+			} catch {
+				// ignore
+			}
+
+			try {
+				socket.Close();
+			} catch {
+				// ignore
+			}
 		}
 
 		void SendException (Socket socket, Exception ex)

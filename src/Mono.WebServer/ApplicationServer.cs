@@ -401,6 +401,11 @@ namespace Mono.WebServer
 
 		void OnAccept (object sender, EventArgs e)
 		{
+			if (!started && single_app) {
+				// We are shutting down. Last call...
+				Environment.Exit (0);
+			}
+
 			SocketAsyncEventArgs args = (SocketAsyncEventArgs) e;
 			Socket accepted = args.AcceptSocket;
 			args.AcceptSocket = null;
@@ -414,7 +419,8 @@ namespace Mono.WebServer
 				if (started)
 					listen_socket.AcceptAsync (args);
 			} catch (Exception ex) {
-				CloseSocket(accepted);
+				if (accepted != null)
+					CloseSocket (accepted);
 
 				// not much we can do. fast fail by killing the process.
 				Console.Error.WriteLine ("Unable to accept socket. Exiting the process. {0}", ex);

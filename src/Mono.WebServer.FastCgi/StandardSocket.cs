@@ -76,7 +76,26 @@ namespace Mono.FastCgi {
 		
 		public override int Receive (byte [] buffer, int offset, int size, System.Net.Sockets.SocketFlags flags)
 		{
-			return socket.Receive (buffer, offset, size, flags);
+                        // According to the MSDN specification, a call to Sockets.Socket.Receive
+                        // (http://msdn.microsoft.com/en-us/library/8s4y8aff.aspx) will return 
+                        // 0 immediately, if the remote end has read all incoming data and 
+                        // gracefully closed the connection.
+                        // 
+                        // As all calls to this function are synchronous in the current FastCGI
+                        // implementation, we can safely assume that a Receive of 0 bytes would 
+                        // only arise in this case.
+                        // All other errors are expected to throw an exception.
+
+                        int received = socket.Receive(buffer, offset, size, flags);
+                        
+                        if (received == 0)
+                        {
+                            // Note: a better error message would probably be deemed fit.
+                            socket.Close();
+                            throw new Exception("Remote end hung up.");
+                        }
+
+			return received;
 		}
 		
 		public override int Send (byte [] data, int offset, int size, System.Net.Sockets.SocketFlags flags)

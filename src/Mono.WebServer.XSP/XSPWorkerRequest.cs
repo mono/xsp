@@ -4,9 +4,11 @@
 // Authors:
 //	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //	Simon Waite (simon@psionics.demon.co.uk)
+//	Marek Habersack (grendel@twistedcode.net)
 //
 // (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
 // (C) Copyright 2004-2005 Novell, Inc. (http://www.novell.com)
+// Copyright 2012 Xamarin, Inc (http://xamarin.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -51,6 +53,7 @@ namespace Mono.WebServer
 	{
 		string verb;
 		string path;
+		string rawUrl;
 		string pathInfo;
 		string queryString;
 		string protocol;
@@ -174,6 +177,9 @@ namespace Mono.WebServer
 			this.requestBroker = requestBroker;
 			this.remoteEP = remoteEP;
 			this.verb = verb;
+			this.rawUrl = path;
+			if (!String.IsNullOrEmpty (queryString))
+				this.rawUrl += "?" + queryString;
 			try {
 				Paths.GetPathsFromUri (appHost, verb, path, out this.path, out pathInfo);
 			} catch {
@@ -508,14 +514,7 @@ namespace Mono.WebServer
 
 		public override string GetRawUrl ()
 		{
-			string result = path;
-			if (pathInfo != null && pathInfo.Length > 0)
-				result += pathInfo;
-
-			if (queryString != null && queryString.Length > 0)
-				return result + "?" + queryString;
-
-			return result;
+			return rawUrl;
 		}
 
 		public override string GetRemoteAddress ()

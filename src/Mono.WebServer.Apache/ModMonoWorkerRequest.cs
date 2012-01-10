@@ -4,11 +4,13 @@
 // Authors:
 //	Daniel Lopez Ridruejo
 // 	Gonzalo Paniagua Javier
+//	Marek Habersack <grendel@twistedcode.net>
 //
 // Copyright (c) 2002 Daniel Lopez Ridruejo.
 //           (c) 2002,2003 Ximian, Inc.
 //           All rights reserved.
 // (C) Copyright 2004-2008 Novell, Inc. (http://www.novell.com)
+// Copyright 2012 Xamarin, Inc (http://xamarin.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -52,6 +54,7 @@ namespace Mono.WebServer
 		string protocol;
 		string path;
 		string pathInfo;
+		string rawUrl;
 		string localAddress;
 		int serverPort;
 		string remoteAddress;
@@ -137,6 +140,9 @@ namespace Mono.WebServer
 			this.requestBroker = requestBroker;
 			this.verb = verb;
 			this.appHost = appHost;
+			this.rawUrl = path;
+			if (!String.IsNullOrEmpty (queryString))
+				this.rawUrl += "?" + queryString;
 			//this.protocol = protocol;
 			// Don't let System.Web know if it's 1.1. This way apache handles the chunked
 			// encoding for us, without sys.web interfering.
@@ -174,14 +180,7 @@ namespace Mono.WebServer
 
 		public override string GetRawUrl ()
 		{
-			string result = path;
-			if (pathInfo != null && pathInfo.Length > 0)
-				result += pathInfo;
-
-			if (queryString != null && queryString.Length > 0)
-				return result + "?" + queryString;
-
-			return result;
+			return rawUrl;
 		}
 
 		bool TryDirectory ()

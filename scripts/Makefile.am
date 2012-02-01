@@ -20,7 +20,7 @@ plat_bindir2 = $(prefix)/lib/mono/2.0
 plat_tooldir2 = $(prefix)/lib/xsp/2.0
 
 if NET_4_0
-plat_bindir4 = $(prefix)/lib/mono/4.0
+plat_bindir4 = $(prefix)/lib/mono/4.5
 plat_tooldir4 = $(prefix)/lib/xsp/4.0
 endif
 

@@ -7,7 +7,7 @@ GACUTIL2=$(GACUTIL) -package 2.0
 
 if NET_4_0
 XSP4_EXE = fastcgi-mono-server4.exe
-GACUTIL4=$(GACUTIL) -package 4.0
+GACUTIL4=$(GACUTIL) -package 4.5
 endif
 
 noinst_SCRIPTS = $(XSP2_EXE) $(XSP4_EXE)

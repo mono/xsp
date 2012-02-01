@@ -9,10 +9,10 @@ monowebserver2_references = -r:System.Web.dll -r:System.Configuration.dll -r:Mon
 GACUTIL2=$(GACUTIL) -package 2.0
 
 if NET_4_0
-monowebserver4dir = $(prefix)/lib/xsp/4.0
+monowebserver4dir = $(prefix)/lib/xsp/4.5
 monowebserver4_install = 4.0/Mono.WebServer2.dll
 monowebserver4_references = $(monowebserver2_references)
-GACUTIL4=$(GACUTIL) -package 4.0
+GACUTIL4=$(GACUTIL) -package 4.5
 endif
 
 noinst_SCRIPTS= $(monowebserver2_install) $(monowebserver4_install)

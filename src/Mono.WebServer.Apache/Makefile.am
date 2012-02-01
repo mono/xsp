@@ -7,7 +7,7 @@ GACUTIL2=$(GACUTIL) -package 2.0
 
 if NET_4_0
 MODMONOSERVER4_EXE = mod-mono-server4.exe
-GACUTIL4=$(GACUTIL) -package 4.0
+GACUTIL4=$(GACUTIL) -package 4.5
 endif
 
 noinst_SCRIPTS = $(MODMONOSERVER2_EXE) $(MODMONOSERVER4_EXE)

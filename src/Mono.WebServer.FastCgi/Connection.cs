@@ -319,10 +319,13 @@ namespace Mono.FastCgi {
 		{
 			EndRequestBody body = new EndRequestBody (appStatus,
 				protocolStatus);
-			
-			if (IsConnected)
-				new Record (1, RecordType.EndRequest, requestID,
-					    body.GetData ()).Send (socket);
+			try {	
+				if (IsConnected)
+					new Record (1, RecordType.EndRequest, requestID,
+						    body.GetData ()).Send (socket);
+			} catch (System.Net.Sockets.SocketException) {
+			}
+				
 			
 			int index = GetRequestIndex (requestID);
 			

@@ -12,3 +12,7 @@ Makefile.in
 *.mdb
 *.dll
 *.exe
+*.suo
+bin
+obj
+*.user

@@ -8,7 +8,7 @@
     <ProjectGuid>{6A65EE42-6B11-40F4-8E3C-B40E4AB21001}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Mono.WebServer.FastCgi</RootNamespace>
-    <AssemblyName>Mono.WebServer.FastCgi</AssemblyName>
+    <AssemblyName>fastcgi-mono-server4</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

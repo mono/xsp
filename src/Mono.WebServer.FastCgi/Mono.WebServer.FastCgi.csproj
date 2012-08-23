@@ -40,7 +40,6 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
-    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BeginRequestBody.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="Connection.cs" />

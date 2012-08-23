@@ -49,6 +49,7 @@
     <Compile Include="ModMonoWorker.cs" />
     <Compile Include="ModMonoWorkerRequest.cs" />
     <Compile Include="RequestReader.cs" />
+    <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

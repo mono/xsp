@@ -62,6 +62,7 @@
     <Compile Include="UnmanagedSocket.cs" />
     <Compile Include="WebSource.cs" />
     <Compile Include="WorkerRequest.cs" />
+    <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

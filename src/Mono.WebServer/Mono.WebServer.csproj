@@ -60,5 +60,6 @@
     <Compile Include="WebSource.cs" />
     <Compile Include="Worker.cs" />
     <Compile Include="WebTrace.cs" />
+    <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
 </Project>

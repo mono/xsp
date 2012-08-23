@@ -33,6 +33,6 @@ Global
 		{6A65EE42-6B11-40F4-8E3C-B40E4AB21001}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = src\Mono.WebServer\Mono.WebServer.csproj
+		StartupItem = src\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj
 	EndGlobalSection
 EndGlobal

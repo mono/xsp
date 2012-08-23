@@ -8,7 +8,7 @@
     <ProjectGuid>{6A65EE42-6B11-40F4-8E3C-B40E4AB21001}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Mono.WebServer.FastCgi</RootNamespace>
-    <AssemblyName>Mono.WebServer.FastCgi</AssemblyName>
+    <AssemblyName>fastcgi-mono-server4</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,6 +20,11 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="MONO_PATH" value="." />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -62,11 +67,17 @@
     <Compile Include="UnmanagedSocket.cs" />
     <Compile Include="WebSource.cs" />
     <Compile Include="WorkerRequest.cs" />
+    <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">
       <Project>{5339C36C-A524-44CE-93BD-59A79F57B346}</Project>
       <Name>Mono.WebServer</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ConfigurationManager.xml">
+      <LogicalName>ConfigurationManager.xml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

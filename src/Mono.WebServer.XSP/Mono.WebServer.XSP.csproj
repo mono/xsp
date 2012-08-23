@@ -46,6 +46,7 @@
     <Compile Include="XSPWebSource.cs" />
     <Compile Include="XSPWorker.cs" />
     <Compile Include="XSPWorkerRequest.cs" />
+    <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

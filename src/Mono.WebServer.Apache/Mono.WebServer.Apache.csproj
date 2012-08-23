@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4F774362-208F-4C21-9668-9013BE0C5032}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Mono.WebServer.Apache</RootNamespace>
+    <AssemblyName>Mono.WebServer.Apache</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Web" />
+    <Reference Include="Mono.Posix" />
+    <Reference Include="Mono.Security" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="main.cs" />
+    <Compile Include="ModMonoApplicationHost.cs" />
+    <Compile Include="ModMonoCmd.cs" />
+    <Compile Include="ModMonoConfig.cs" />
+    <Compile Include="ModMonoRequest.cs" />
+    <Compile Include="ModMonoRequestBroker.cs" />
+    <Compile Include="ModMonoTCPWebSource.cs" />
+    <Compile Include="ModMonoWebSource.cs" />
+    <Compile Include="ModMonoWorker.cs" />
+    <Compile Include="ModMonoWorkerRequest.cs" />
+    <Compile Include="RequestReader.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">
+      <Project>{5339C36C-A524-44CE-93BD-59A79F57B346}</Project>
+      <Name>Mono.WebServer</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

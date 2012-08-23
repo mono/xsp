@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5339C36C-A524-44CE-93BD-59A79F57B346}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Mono.WebServer</RootNamespace>
+    <AssemblyName>Mono.WebServer</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="ApplicationServer.cs" />
+    <Compile Include="BaseApplicationHost.cs" />
+    <Compile Include="BaseRequestBroker.cs" />
+    <Compile Include="EndOfRequestHandler.cs" />
+    <Compile Include="HttpErrors.cs" />
+    <Compile Include="IApplicationHost.cs" />
+    <Compile Include="InitialWorkerRequest.cs" />
+    <Compile Include="IRequestBroker.cs" />
+    <Compile Include="LingeringNetworkStream.cs" />
+    <Compile Include="LockRecursionException.cs" />
+    <Compile Include="LockRecursionPolicy.cs" />
+    <Compile Include="MapPathEventArgs.cs" />
+    <Compile Include="MapPathEventHandler.cs" />
+    <Compile Include="MonoWorkerRequest.cs" />
+    <Compile Include="Paths.cs" />
+    <Compile Include="RequestData.cs" />
+    <Compile Include="RequestLineException.cs" />
+    <Compile Include="SearchPattern.cs" />
+    <Compile Include="UnregisterRequestEventArgs.cs" />
+    <Compile Include="UnregisterRequestEventHandler.cs" />
+    <Compile Include="VPathToHost.cs" />
+    <Compile Include="WebSource.cs" />
+    <Compile Include="Worker.cs" />
+    <Compile Include="WebTrace.cs" />
+  </ItemGroup>
+</Project>

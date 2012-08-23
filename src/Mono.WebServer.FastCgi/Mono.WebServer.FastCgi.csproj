@@ -69,4 +69,9 @@
       <Name>Mono.WebServer</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ConfigurationManager.xml">
+      <LogicalName>ConfigurationManager.xml</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

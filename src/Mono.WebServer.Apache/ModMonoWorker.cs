@@ -191,15 +191,29 @@ namespace Mono.WebServer
 
 			string vhost = rr.Request.GetRequestHeader ("Host");
 			int port = -1;
-			if (vhost != null) {
-				int colon = vhost.IndexOf (':');
-				if (colon != -1) {
-					port = Int32.Parse (vhost.Substring (colon + 1));
-					vhost = vhost.Substring (0, colon);
-				} else {
-					port = 80;
-				}
-			}
+      if (vhost != null) {
+        int lead = vhost.IndexOf('[');
+        int follow = lead >= 0 ? vhost.IndexOf(']') : -1;
+        if (follow > lead) {
+          //ipv6 address
+          int colon = vhost.IndexOf("]:", StringComparison.Ordinal);
+          if (colon != -1) {
+            Int32.TryParse (vhost.Substring (colon + 2), out port);
+            vhost = vhost.Substring(0, colon + 1);
+          }
+        } else {
+          //ipv4 or hostname
+          int colon = vhost.IndexOf (':');
+          if (colon != -1) {
+            Int32.TryParse (vhost.Substring (colon + 1), out port);
+            vhost = vhost.Substring (0, colon);
+          }
+        }
+        if (port <= 0 || port > 65535) {
+          //No port specified, Int32.TryParse failed or invalid port number
+          port = 80;
+        }
+      }
 
 			string vServerName = rr.Request.GetVirtualServerName ();
 			if (vServerName == null)

@@ -150,6 +150,13 @@ namespace Mono.WebServer.FastCgi
 		{
 			if (raw_url != null)
 				return raw_url;
+				
+			string fcgiRequestUri = responder.GetParameter ("REQUEST_URI");
+			if (fcgiRequestUri != null)
+			{
+				raw_url = fcgiRequestUri;
+				return raw_url;
+			}
 			
 			StringBuilder b = new StringBuilder (GetUriPath ());
 			string query = GetQueryString ();

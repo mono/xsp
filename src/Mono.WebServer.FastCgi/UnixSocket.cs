@@ -1,10 +1,12 @@
 //
 // UnixSocket.cs: Provides a wrapper around a unix domain socket file.
 //
-// Author:
+// Authors:
 //   Brian Nickel (brian.nickel@gmail.com)
+//   Andres G. Aragoneses (andres@7digital.com)
 //
 // Copyright (C) 2007 Brian Nickel
+// Copyright (C) 2013 7digital Media Ltd (http://www.7digital.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -27,6 +29,7 @@
 //
 
 using System;
+using Mono.Unix;
 using System.Globalization;
 
 namespace Mono.FastCgi
@@ -34,6 +37,7 @@ namespace Mono.FastCgi
 	internal class UnixSocket : StandardSocket, IDisposable
 	{
 		string path = null;
+		long inode;
 		
 		protected UnixSocket (Mono.Unix.UnixEndPoint localEndPoint)
 			: base (System.Net.Sockets.AddressFamily.Unix,
@@ -46,6 +50,7 @@ namespace Mono.FastCgi
 		public UnixSocket (string path) : this (CreateEndPoint (path))
 		{
 			this.path = path;
+			this.inode = new UnixFileInfo (path).Inode;
 		}
 		
 		
@@ -85,7 +90,10 @@ namespace Mono.FastCgi
                 	if (path != null) {
                 		string f = path;
                 		path = null;
-                		System.IO.File.Delete (f);
+
+				if (System.IO.File.Exists (f) && this.inode == new UnixFileInfo (f).Inode) {
+					System.IO.File.Delete (f);
+				}
                 	}
 		}
 		
@@ -95,3 +103,4 @@ namespace Mono.FastCgi
                 }
 	}
 }
+

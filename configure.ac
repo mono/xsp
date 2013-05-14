@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.53])
-AC_INIT([xsp], [2.11], [http://bugzilla.novell.com/])
+AC_INIT([xsp], [3.0], [http://bugzilla.xamarin.com/])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_MACRO_DIR([build/m4])
 AM_INIT_AUTOMAKE([foreign])

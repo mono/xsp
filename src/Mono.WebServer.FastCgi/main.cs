@@ -30,13 +30,9 @@
 //
 
 using System;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Web.Hosting;
-using Mono.WebServer;
 using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi
@@ -117,7 +113,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			try {
-				string config_file = (string)
+				var config_file = (string)
 					configmanager ["configfile"];
 				if (config_file != null)
 					configmanager.LoadXmlConfig (
@@ -133,8 +129,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			try {
-				string log_level = (string)
-					configmanager ["loglevels"];
+				var log_level = configmanager ["loglevels"] as string;
 				
 				if (log_level != null)
 					Logger.Level = (LogLevel)
@@ -150,8 +145,7 @@ namespace Mono.WebServer.FastCgi
 			Logger.WriteToConsole = true;
 			
 			try {
-				string log_file = (string)
-					configmanager ["logfile"];
+				var log_file = configmanager ["logfile"] as string;
 				
 				if (log_file != null)
 					Logger.Open (log_file);
@@ -172,12 +166,10 @@ namespace Mono.WebServer.FastCgi
 			
 			// Socket strings are in the format
 			// "type[:ARG1[:ARG2[:...]]]".
-			string socket_type = configmanager ["socket"] as string;
-			if (socket_type == null)
-				socket_type = "pipe";
-			
+			var socket_type = configmanager ["socket"] as string ?? "pipe";
+
 			string [] socket_parts = socket_type.Split (
-				new char [] {':'}, 3);
+				new[] {':'}, 3);
 			
 			switch (socket_parts [0].ToLower ()) {
 			case "pipe":
@@ -188,7 +180,7 @@ namespace Mono.WebServer.FastCgi
 					Logger.Write (LogLevel.Error,
 						"Error: Pipe socket is not bound.");
 					return 1;
-				} catch (System.NotSupportedException) {
+				} catch (NotSupportedException) {
 					Logger.Write (LogLevel.Error,
 						"Error: Pipe sockets are not supported on this system.");
 					return 1;
@@ -203,7 +195,7 @@ namespace Mono.WebServer.FastCgi
 					configmanager ["filename"] =
 						socket_parts [1];
 				
-				string path = (string) configmanager ["filename"];
+				var path = configmanager ["filename"] as string;
 				
 				try {
 					socket = SocketFactory.CreateUnixSocket (
@@ -238,8 +230,8 @@ namespace Mono.WebServer.FastCgi
 					return 1;
 				}
 				
-				string address_str =
-					(string) configmanager ["address"];
+				var address_str =
+					configmanager ["address"] as string;
 				IPAddress address;
 				
 				try {
@@ -274,8 +266,8 @@ namespace Mono.WebServer.FastCgi
 				return 1;
 			}
 			
-			string root_dir = configmanager ["root"] as string;
-			if (root_dir != null && root_dir.Length != 0) {
+			var root_dir = configmanager ["root"] as string;
+			if (!string.IsNullOrEmpty(root_dir)) {
 				try {
 					Environment.CurrentDirectory = root_dir;
 				} catch (Exception e) {
@@ -287,12 +279,12 @@ namespace Mono.WebServer.FastCgi
 			
 			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
-                        WebSource webSource = new WebSource ();
-			appserver = new ApplicationServer (webSource, root_dir);
-			appserver.Verbose = (bool) configmanager ["verbose"];
-			
-			string applications = (string)
-				configmanager ["applications"];
+			var webSource = new WebSource ();
+			appserver = new ApplicationServer (webSource, root_dir) {
+				Verbose = (bool) configmanager["verbose"]
+			};
+
+			var applications = configmanager ["applications"] as string;
 			string app_config_file;
 			string app_config_dir;
 			
@@ -332,8 +324,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
-			Mono.FastCgi.Server server = new Mono.FastCgi.Server (
-				socket);
+			var server = new Mono.FastCgi.Server (socket);
 			
 			server.SetResponder (typeof (Responder));
 			
@@ -351,7 +342,7 @@ namespace Mono.WebServer.FastCgi
 			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}",
 				      server.MultiplexConnections);
 			
-			bool stopable = (bool) configmanager ["stopable"];
+			var stopable = (bool) configmanager ["stopable"];
 			Logger.WriteToConsole = (bool) configmanager ["printlog"];
 			server.Start (stopable);
 			

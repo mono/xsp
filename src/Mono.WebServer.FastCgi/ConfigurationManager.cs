@@ -27,11 +27,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using System.IO;
 using System.Reflection;
 using System.Globalization;
-using System.Collections;
 using System.Collections.Specialized;
 using System.Text;
 
@@ -43,18 +43,18 @@ namespace Mono.WebServer
 		
 		private XmlNodeList elems;
 		
-		private NameValueCollection cmd_args = 
+		readonly NameValueCollection cmd_args = 
 			new NameValueCollection ();
 		
-		private NameValueCollection xml_args =
+		readonly NameValueCollection xml_args =
 			new NameValueCollection ();
 
-		private NameValueCollection default_args =
+		readonly NameValueCollection default_args =
 			new NameValueCollection ();
 		
 		public ConfigurationManager (Assembly asm, string resource)
 		{
-			XmlDocument doc = new XmlDocument ();
+			var doc = new XmlDocument ();
 			doc.Load (asm.GetManifestResourceStream (resource));
 			ImportSettings (doc, default_args, true, false);
 
@@ -119,23 +119,23 @@ namespace Mono.WebServer
 			XmlElement setting;
 			return GetValue (name, out setting) != null;
 		}
-		
-		private static string except_unregistered =
+
+		private const string except_unregistered =
 			"Argument \"{0}\" is unknown.";
-		
-		private static string except_uint16 =
+
+		private const string except_uint16 =
 			"Error in argument \"{0}\". \"{1}\" cannot be converted to an integer.";
-		
-		private static string except_bool =
+
+		private const string except_bool =
 			"Error in argument \"{0}\". \"{1}\" should be \"True\" or \"False\".";
 		
-		private static string except_directory =
+		private const string except_directory =
 			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
 			
-		private static string except_file =
+		private const string except_file =
 			"Error in argument \"{0}\". \"{1}\" does not exist.";
 		
-		private static string except_unknown =
+		private const string except_unknown =
 			"The Argument \"{0}\" has an invalid type: {1}.";
 		
 		public object this [string name] {
@@ -185,8 +185,7 @@ namespace Mono.WebServer
 						value);
 					
 				case "directory":
-					DirectoryInfo dir = new DirectoryInfo (
-						value);
+					var dir = new DirectoryInfo (value);
 					if (dir.Exists)
 						return value;
 					
@@ -194,7 +193,7 @@ namespace Mono.WebServer
 						value);
 					
 				case "file":
-					FileInfo file = new FileInfo (value);
+					var file = new FileInfo (value);
 					if (file.Exists)
 						return value;
 					
@@ -212,7 +211,7 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private ApplicationException AppExcept (Exception except,
+		private static ApplicationException AppExcept (Exception except,
 							string message,
 							params object [] args)
 		{
@@ -221,7 +220,7 @@ namespace Mono.WebServer
 				except);
 		}
 		
-		private ApplicationException AppExcept (string message,
+		private static ApplicationException AppExcept (string message,
 							params object [] args)
 		{
 			return new ApplicationException (string.Format (
@@ -273,7 +272,7 @@ namespace Mono.WebServer
 				
 				Console.Write (arg);
 				
-				ArrayList values = new ArrayList ();
+				var values = new List<string> ();
 				foreach (XmlElement desc in setting.GetElementsByTagName ("Description"))
 					RenderXml (desc, values, 0, 78 - left_margin);
 				
@@ -283,10 +282,10 @@ namespace Mono.WebServer
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
 					
-					if (val == null || val.Length == 0)
+					if (string.IsNullOrEmpty(val))
 						val = default_args [name];
 
-					if (val == null || val.Length == 0)
+					if (string.IsNullOrEmpty(val))
 						val = "none";
 					
 					values.Add (" Default Value: " + val);
@@ -315,10 +314,10 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private void RenderXml (XmlElement elem, ArrayList values, int indent, int length)
+		private void RenderXml (XmlElement elem, List<string> values, int indent, int length)
 		{
 			foreach (XmlNode node in elem.ChildNodes) {
-				XmlElement child = node as XmlElement;
+				var child = node as XmlElement;
 				switch (node.LocalName) {
 					case "para":
 						RenderXml (child, values, indent, length);
@@ -342,7 +341,7 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private void RenderText (string text, ArrayList values, int indent, int length)
+		private void RenderText (string text, List<string> values, int indent, int length)
 		{
 			StringBuilder output = CreateBuilder (indent);
 			int start = -1;
@@ -368,7 +367,7 @@ namespace Mono.WebServer
 		
 		private StringBuilder CreateBuilder (int indent)
 		{
-			StringBuilder builder = new StringBuilder (80);
+			var builder = new StringBuilder (80);
 			for (int i = 0; i < indent; i ++)
 				builder.Append (' ');
 			return builder;
@@ -401,8 +400,7 @@ namespace Mono.WebServer
 						"Warning: \"{0}\" has already been set. Overwriting.",
 						args [i]);
 				
-				string [] pair = arg.Split (new char [] {'='},
-					2);
+				string [] pair = arg.Split (new[] {'='}, 2);
 				
 				if (pair.Length == 2) {
 					cmd_args.Add (pair [0], pair [1]);
@@ -440,15 +438,15 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private static readonly string except_bad_elem =
+		private const string except_bad_elem =
 			"XML setting \"{0}={1}\" is invalid.";
 		
-		private static readonly string except_xml_duplicate =
+		private const string except_xml_duplicate =
 			"XML setting \"{0}\" can only be assigned once.";
 		
 		public void LoadXmlConfig (string filename)
 		{
-			XmlDocument doc = new XmlDocument ();
+			var doc = new XmlDocument ();
 			doc.Load (filename);
 			ImportSettings (doc, xml_args, false, true);
 		}
@@ -478,12 +476,12 @@ namespace Mono.WebServer
 		private static string GetXmlValue (XmlElement elem, string name)
 		{
 			string value = elem.GetAttribute (name);
-			if (value != null && value.Length != 0)
+			if (!string.IsNullOrEmpty(value))
 				return value;
 			
 			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
 				value = child.InnerText;
-				if (value != null && value.Length != 0)
+				if (!string.IsNullOrEmpty(value))
 					return value;
 			}
 			

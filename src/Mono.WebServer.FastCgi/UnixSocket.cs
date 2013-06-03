@@ -36,10 +36,10 @@ namespace Mono.FastCgi
 {
 	internal class UnixSocket : StandardSocket, IDisposable
 	{
-		string path = null;
-		long inode;
+		string path;
+		readonly long inode;
 		
-		protected UnixSocket (Mono.Unix.UnixEndPoint localEndPoint)
+		protected UnixSocket (UnixEndPoint localEndPoint)
 			: base (System.Net.Sockets.AddressFamily.Unix,
 			        System.Net.Sockets.SocketType.Stream,
 			        System.Net.Sockets.ProtocolType.IP,
@@ -50,24 +50,22 @@ namespace Mono.FastCgi
 		public UnixSocket (string path) : this (CreateEndPoint (path))
 		{
 			this.path = path;
-			this.inode = new UnixFileInfo (path).Inode;
+			inode = new UnixFileInfo (path).Inode;
 		}
 		
 		
-		protected static Mono.Unix.UnixEndPoint CreateEndPoint (string path)
+		protected static UnixEndPoint CreateEndPoint (string path)
 		{
 			if (path == null)
 				throw new ArgumentNullException ("path");
 			
-			Mono.Unix.UnixEndPoint ep = new Mono.Unix.UnixEndPoint (
-				path);
+			var ep = new UnixEndPoint (path);
 			
 			if (System.IO.File.Exists (path)) {
-				System.Net.Sockets.Socket conn =
-					new System.Net.Sockets.Socket (
-						System.Net.Sockets.AddressFamily.Unix,
-						System.Net.Sockets.SocketType.Stream,
-						System.Net.Sockets.ProtocolType.IP);
+				var conn = new System.Net.Sockets.Socket (
+					System.Net.Sockets.AddressFamily.Unix,
+					System.Net.Sockets.SocketType.Stream,
+					System.Net.Sockets.ProtocolType.IP);
 				
 				try {
 					conn.Connect (ep);
@@ -91,7 +89,7 @@ namespace Mono.FastCgi
                 		string f = path;
                 		path = null;
 
-				if (System.IO.File.Exists (f) && this.inode == new UnixFileInfo (f).Inode) {
+				if (System.IO.File.Exists (f) && inode == new UnixFileInfo (f).Inode) {
 					System.IO.File.Delete (f);
 				}
                 	}

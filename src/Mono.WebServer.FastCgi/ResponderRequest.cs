@@ -35,11 +35,11 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private byte [] input_data;
+		byte [] input_data;
 		
-		private int write_index;
+		int write_index;
 		
-		private IResponder responder;
+		readonly IResponder responder;
 		
 		#endregion
 		
@@ -66,7 +66,7 @@ namespace Mono.FastCgi {
 		#region Public Properties
 		
 		public byte [] InputData {
-			get {return input_data != null ? input_data : new byte [0];}
+			get {return input_data ?? new byte [0];}
 		}
 		
 		#endregion
@@ -98,8 +98,7 @@ namespace Mono.FastCgi {
 			// If input_data is null, create the new array by
 			// reading the length from the CONTENT_LENGTH parameter.
 			if (input_data == null) {
-				string length_text = this.GetParameter
-					("CONTENT_LENGTH");
+				string length_text = GetParameter ("CONTENT_LENGTH");
 				
 				// If the field is missing we can't continue.
 				if (length_text == null) {

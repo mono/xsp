@@ -34,25 +34,25 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private List<Request> requests = new List<Request> ();
+		readonly List<Request> requests = new List<Request> ();
 		
-		private Socket socket;
+		Socket socket;
 		
-		private Server server;
+		readonly Server server;
 		
-		private bool keep_alive;
+		bool keep_alive;
 		
-		private bool stop;
-		
-		private object request_lock = new object ();
-		
-		private object send_lock = new object ();
-		
-		private byte[] receive_buffer;
-		
-		private byte[] send_buffer;
+		bool stop;
 
-		object connection_teardown_lock = new object ();
+		readonly object request_lock = new object ();
+
+		readonly object send_lock = new object ();
+		
+		byte[] receive_buffer;
+		
+		byte[] send_buffer;
+
+		readonly object connection_teardown_lock = new object ();
 		#endregion
 		
 		
@@ -154,8 +154,7 @@ namespace Mono.FastCgi {
 						break;
 					}
 					
-					BeginRequestBody body = new BeginRequestBody
-						(record);
+					var body = new BeginRequestBody (record);
 						
 					// If the role is "Responder", and it is
 					// supported, create a ResponderRequest.
@@ -317,8 +316,7 @@ namespace Mono.FastCgi {
 		public void EndRequest (ushort requestID, int appStatus,
 		                        ProtocolStatus protocolStatus)
 		{
-			EndRequestBody body = new EndRequestBody (appStatus,
-				protocolStatus);
+			var body = new EndRequestBody (appStatus, protocolStatus);
 			try {	
 				if (IsConnected)
 					new Record (1, RecordType.EndRequest, requestID,
@@ -400,7 +398,7 @@ namespace Mono.FastCgi {
 			int i = 0;
 			int count = requests.Count;
 			while (i < count &&
-				(requests [i] as Request).RequestID != requestID)
+				requests [i].RequestID != requestID)
 				i ++;
 			
 			return (i != count) ? i : -1;

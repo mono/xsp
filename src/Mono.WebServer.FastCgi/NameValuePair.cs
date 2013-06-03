@@ -35,11 +35,11 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private string name;
+		readonly string name;
 		
-		private string value;
+		readonly string value;
 		
-		private static Encoding encoding = Encoding.Default;
+		static Encoding encoding = Encoding.Default;
 		
 		#endregion
 		
@@ -83,16 +83,16 @@ namespace Mono.FastCgi {
 			Encoding enc = encoding;
 			
 			// Read the name.
-			this.name = enc.GetString (data, index, name_length);
+			name = enc.GetString (data, index, name_length);
 			index += name_length;
 			
 			// Read the value.
-			this.value = enc.GetString (data, index, value_length);
+			value = enc.GetString (data, index, value_length);
 			index += value_length;
 			
 			Logger.Write (LogLevel.Debug,
 				Strings.NameValuePair_ParameterRead,
-				this.name, this.value);
+				name, value);
 		}
 		
 		#endregion
@@ -117,7 +117,7 @@ namespace Mono.FastCgi {
 		
 		public static Encoding Encoding {
 			get {return encoding;}
-			set {encoding = value != null ? value : Encoding.Default;}
+			set {encoding = value ?? Encoding.Default;}
 		}
 		
 		#endregion
@@ -133,16 +133,14 @@ namespace Mono.FastCgi {
 			
 			// Specialized.NameValueCollection would probably be
 			// better, but it doesn't implement IDictionary.
-			Dictionary<string,string> pairs =
-				new Dictionary<string,string> ();
+			var pairs = new Dictionary<string,string> ();
 			int index = 0;
 			
 			// Loop through the array, reading pairs at a specified
 			// position until the end is reached.
 			
 			while (index < data.Length) {
-				NameValuePair pair = new NameValuePair
-					(data, ref index);
+				var pair = new NameValuePair (data, ref index);
 				
 				if (pairs.ContainsKey (pair.Name)) {
 					Logger.Write (LogLevel.Warning,
@@ -172,17 +170,16 @@ namespace Mono.FastCgi {
 			
 			foreach (string key in pairs.Keys)
 			{
-				string name = key as string;
-				string value = pairs [key] as string;
+				string value = pairs [key];
 				
 				// Sanity check: "pairs" must only contain
 				// strings.
-				if (name == null || value == null)
+				if (key == null || value == null)
 					throw new ArgumentException (
 						Strings.NameValuePair_DictionaryContainsNonString,
 						"pairs");
 				
-				int name_length = enc.GetByteCount (name);
+				int name_length = enc.GetByteCount (key);
 				int value_length = enc.GetByteCount (value);
 				
 				total_size += name_length > 0x7F ? 4 : 1;
@@ -190,22 +187,21 @@ namespace Mono.FastCgi {
 				total_size += name_length + value_length;
 			}
 			
-			byte [] data = new byte [total_size];
+			var data = new byte [total_size];
 			
 			// Fill the data array with the data.
 			int index = 0;
 			
 			foreach (string key in pairs.Keys)
 			{
-				string name = key as string;
-				string value = pairs [key] as string;
+				string value = pairs [key];
 				
-				int name_length = enc.GetByteCount (name);
+				int name_length = enc.GetByteCount (key);
 				int value_length = enc.GetByteCount (value);
 				
 				WriteLength (data, ref index, name_length);
 				WriteLength (data, ref index, value_length);
-				index += enc.GetBytes (name, 0, name.Length, data, index);
+				index += enc.GetBytes (key, 0, key.Length, data, index);
 				index += enc.GetBytes (value, 0, value.Length, data, index);
 			}
 			
@@ -241,10 +237,10 @@ namespace Mono.FastCgi {
 				throw new ArgumentOutOfRangeException ("index");
 			
 			
-			return (0x7F & (int) data [index++]) * 0x1000000
-				+ ((int) data [index++]) * 0x10000
-				+ ((int) data [index++]) *0x100
-				+ ((int) data [index++]);
+			return (0x7F & data [index++]) * 0x1000000
+				+ data [index++] * 0x10000
+				+ data [index++] *0x100
+				+ data [index++];
 			
 			// TODO: Returns zero. What gives?
 			//return (0x7F & (int) data [index++]) << 24

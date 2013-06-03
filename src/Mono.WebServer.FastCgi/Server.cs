@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
 using System.Globalization;
@@ -36,17 +37,17 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private List<Connection> connections = new List<Connection> ();
+		private readonly List<Connection> connections = new List<Connection> ();
 		
-		private Socket listen_socket;
+		private readonly Socket listen_socket;
 		
-		private bool started = false;
+		private bool started;
 		
-		private bool accepting = false;
+		private bool accepting;
 		
 		private Thread runner;
 		
-		private object accept_lock = new object ();
+		private readonly object accept_lock = new object ();
 		
 		private AsyncCallback accept_cb;
 		
@@ -54,15 +55,15 @@ namespace Mono.FastCgi {
 		
 		private int  max_requests = int.MaxValue;
 		
-		private bool multiplex_connections = false;
+		private bool multiplex_connections;
 		
-		private System.Type responder_type = null;
+		private Type responder_type;
 		
 		private byte [][] buffers = new byte [200][];
 		
 		private int buffer_count;
 		
-		private object buffer_lock = new object ();
+		private readonly object buffer_lock = new object ();
 		
 		#endregion
 		
@@ -75,7 +76,7 @@ namespace Mono.FastCgi {
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
 			
-			this.listen_socket = socket;
+			listen_socket = socket;
 		}
 		
 		#endregion
@@ -132,8 +133,7 @@ namespace Mono.FastCgi {
 			get {
 				int requests = 0;
 				lock (connections) {
-					foreach (Connection c in connections)
-						requests += c.RequestCount;
+					requests += connections.Sum(c => c.RequestCount);
 				}
 				
 				return requests;
@@ -154,8 +154,7 @@ namespace Mono.FastCgi {
 			
 			listen_socket.Listen (500);
 			
-			runner = new Thread (new ThreadStart (RunServer));
-			runner.IsBackground = background;
+			runner = new Thread (RunServer) {IsBackground = background};
 			runner.Start ();
 		}
 		
@@ -199,10 +198,8 @@ namespace Mono.FastCgi {
 			if (names == null)
 				throw new ArgumentNullException ("names");
 			
-			Dictionary<string,string> pairs = new Dictionary<string,string> ();
-			foreach (string key in names) {				
-				string name = key as string;
-				
+			var pairs = new Dictionary<string,string> ();
+			foreach (string name in names) {
 				// We can't handle null values and we don't need
 				// to store the same value twice.
 				if (name == null || pairs.ContainsKey (name))
@@ -229,7 +226,7 @@ namespace Mono.FastCgi {
 				if (value == null) {
 					Logger.Write (LogLevel.Warning,
 						Strings.Server_ValueUnknown,
-						key);
+						name);
 					continue;
 				}
 				
@@ -279,7 +276,7 @@ namespace Mono.FastCgi {
 		{
 			lock (buffer_lock) {
 				int length = buffers.Length;
-				foreach (byte [] buffer in new byte [][] {buffer1, buffer2}) {
+				foreach (byte [] buffer in new[] {buffer1, buffer2}) {
 					if (buffer.Length < Record.SuggestedBufferSize)
 						continue;
 					
@@ -287,7 +284,7 @@ namespace Mono.FastCgi {
 					// length of the buffer array, it needs
 					// to be enlarged.
 					if (buffer_count == length) {
-						byte [][] buffers_new = new byte [length + length / 3][];
+						var buffers_new = new byte [length + length / 3][];
 						buffers.CopyTo (buffers_new, 0);
 						buffers = buffers_new;
 						buffers [buffer_count++] = buffer;
@@ -319,7 +316,7 @@ namespace Mono.FastCgi {
 		private void RunServer ()
 		{
 			started = true;
-			accept_cb = new AsyncCallback (OnAccept);
+			accept_cb = OnAccept;
 			listen_socket.BeginAccept (accept_cb, null);
 			if (runner.IsBackground)
 				return;
@@ -348,14 +345,14 @@ namespace Mono.FastCgi {
 						Strings.Server_AcceptFailed, e.Message);
 					if (e.ErrorCode == 10022)
 						Stop ();
-				} catch (System.ObjectDisposedException) {
+				} catch (ObjectDisposedException) {
 					Logger.Write (LogLevel.Debug, Strings.Server_ConnectionClosed);
 					return; // Already done (e.g., shutdown)
 				}
 			
 				if (CanAccept)
 					BeginAccept ();
-			} catch (System.Exception e) {
+			} catch (Exception e) {
 				Logger.Write (LogLevel.Error,
 					Strings.Server_AcceptFailed, e.Message);
 			}
@@ -364,7 +361,7 @@ namespace Mono.FastCgi {
 				return;
 			try {
 				connection.Run ();
-			} catch (System.Exception e) {
+			} catch (Exception e) {
 				Logger.Write (LogLevel.Error,
 					Strings.Server_ConnectionFailed, e.Message);
 				try {
@@ -400,7 +397,7 @@ namespace Mono.FastCgi {
 		
 		#region Responder Management
 		
-		public void SetResponder (System.Type responder)
+		public void SetResponder (Type responder)
 		{
 			if (responder == null) {
 				responder_type = responder;
@@ -413,7 +410,7 @@ namespace Mono.FastCgi {
 					"responder");
 			
 			// Checks that the correct constructor is available.
-			if (responder.GetConstructor (new System.Type[]
+			if (responder.GetConstructor (new[]
 				{typeof (ResponderRequest)}) == null) {
 				
 				string msg = string.Format (

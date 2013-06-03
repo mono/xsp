@@ -26,14 +26,12 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.FastCgi {
 	public struct UnknownTypeBody
 	{
 		#region Private Fields
 		
-		private RecordType type;
+		readonly RecordType type;
 		
 		#endregion
 		
@@ -54,7 +52,8 @@ namespace Mono.FastCgi {
 		
 		public byte [] GetData ()
 		{
-			byte [] data = new byte [8];
+			// TODO: Investigate caching this
+			var data = new byte [8];
 			data [0] = (byte) type;
 			return data;
 		}

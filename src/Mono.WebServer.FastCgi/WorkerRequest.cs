@@ -29,8 +29,7 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.FastCgi;
-using Mono.WebServer;
+using System.Linq;
 using System.Text;
 using System.Net;
 using System.Globalization;
@@ -50,16 +49,16 @@ namespace Mono.WebServer.FastCgi
 			SetDefaultIndexFiles (System.Configuration.ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"]);
 		}
 		
-		private StringBuilder headers = new StringBuilder ();
-		private Responder responder;
-		private byte [] input_data;
-		private string file_path;
-		string raw_url = null;
-		private bool closed = false;
-		string uri_path = null;
-		private string [][] unknownHeaders = null;
-		private string [] knownHeaders = null;
-		string path_info;
+		StringBuilder headers = new StringBuilder ();
+		readonly Responder responder;
+		readonly byte [] input_data;
+		string file_path;
+		string raw_url;
+		bool closed;
+		string uri_path;
+		string [][] unknownHeaders;
+		string [] knownHeaders;
+		readonly string path_info;
 
 		public WorkerRequest (Responder responder, ApplicationHost appHost) : base (appHost)
 		{
@@ -102,7 +101,7 @@ namespace Mono.WebServer.FastCgi
 				return;
 			
 			closed = true;
-			this.EnsureHeadersSent ();
+			EnsureHeadersSent ();
 			responder.CompleteRequest (0);
 		}
 		public override void SendResponseFromMemory (byte [] data, int length)
@@ -158,14 +157,14 @@ namespace Mono.WebServer.FastCgi
 				return raw_url;
 			}
 			
-			StringBuilder b = new StringBuilder (GetUriPath ());
+			var builder = new StringBuilder (GetUriPath ());
 			string query = GetQueryString ();
-			if (query != null && query.Length > 0) {
-				b.Append ('?');
-				b.Append (query);
+			if (!string.IsNullOrEmpty(query)) {
+				builder.Append ('?');
+				builder.Append (query);
 			}
 			
-			raw_url = b.ToString ();
+			raw_url = builder.ToString ();
 			return raw_url;
 		}
 
@@ -190,17 +189,17 @@ namespace Mono.WebServer.FastCgi
 		public override string GetLocalAddress ()
 		{
 			string address = responder.GetParameter ("SERVER_ADDR");
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 			
 			address = AddressFromHostName (
 				responder.GetParameter ("HTTP_HOST"));
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 			
 			address = AddressFromHostName (
 				responder.GetParameter ("SERVER_NAME"));
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 			
 			return base.GetLocalAddress ();
@@ -231,14 +230,14 @@ namespace Mono.WebServer.FastCgi
 		public override string GetRemoteAddress ()
 		{
 			string addr = responder.GetParameter ("REMOTE_ADDR");
-			return addr != null && addr.Length > 0 ?
+			return !string.IsNullOrEmpty(addr) ?
 				addr : base.GetRemoteAddress ();
 		}
 		
 		public override string GetRemoteName ()
 		{
 			string ip = GetRemoteAddress ();
-			string name = null;
+			string name;
 			try {
 				IPHostEntry entry = Dns.GetHostEntry (ip);
 				name = entry.HostName;
@@ -252,7 +251,7 @@ namespace Mono.WebServer.FastCgi
 		public override int GetRemotePort ()
 		{
 			string port = responder.GetParameter ("REMOTE_PORT");
-			if (port == null || port.Length == 0)
+			if (string.IsNullOrEmpty(port))
 				return base.GetRemotePort ();
 			
 			try {
@@ -264,12 +263,9 @@ namespace Mono.WebServer.FastCgi
 		
 		public override string GetServerVariable (string name)
 		{
-			string value = responder.GetParameter (name);
-			
-			if (value == null)
-				value = Environment.GetEnvironmentVariable (name);
-			
-			return value != null ? value : base.GetServerVariable (name);
+			return (responder.GetParameter (name)
+				?? Environment.GetEnvironmentVariable (name))
+				?? base.GetServerVariable (name);
 		}
 		
 
@@ -296,7 +292,7 @@ namespace Mono.WebServer.FastCgi
 			
 			string path = responder.PhysicalPath;
 			
-			DirectoryInfo dir = new DirectoryInfo (path);
+			var dir = new DirectoryInfo (path);
 			
 			if (!dir.Exists)
 				return file_path;
@@ -337,7 +333,7 @@ namespace Mono.WebServer.FastCgi
 			
 			IDictionary<string,string> pairs = responder.GetParameters ();
 			knownHeaders = new string [RequestHeaderMaximum];
-			string [][] headers = new string [pairs.Count][];
+			var headers = new string [pairs.Count][];
 			int count = 0;
 			
 			foreach (string key in pairs.Keys) {
@@ -345,7 +341,7 @@ namespace Mono.WebServer.FastCgi
 					continue;
 				
 				string name  = ReformatHttpHeader (key);
-				string value = (string) pairs [key];
+				string value = pairs [key];
 				int id = GetKnownRequestHeaderIndex (name);
 				
 				if (id >= 0) {
@@ -353,25 +349,25 @@ namespace Mono.WebServer.FastCgi
 					continue;
 				}
 				
-				headers [count++] = new string [] {name, value};
+				headers [count++] = new[] {name, value};
 			}
 			
 			unknownHeaders = new string [count][];
-			System.Array.Copy (headers, 0, unknownHeaders, 0, count);
+			Array.Copy (headers, 0, unknownHeaders, 0, count);
 			
 			return unknownHeaders;
 		}
 		
 		public override string GetKnownRequestHeader (int index)
 		{
-			string value = null;
+			string value;
 			switch (index)
 			{
-			case System.Web.HttpWorkerRequest.HeaderContentType:
+			case HeaderContentType:
 				value = responder.GetParameter ("CONTENT_TYPE");
 				break;
 				
-			case System.Web.HttpWorkerRequest.HeaderContentLength:
+			case HeaderContentLength:
 				value = responder.GetParameter ("CONTENT_LENGTH");
 				break;
 			default:
@@ -380,23 +376,14 @@ namespace Mono.WebServer.FastCgi
 				break;
 			}
 			
-			return (value != null) ?
-				value : base.GetKnownRequestHeader (index);
+			return value ?? base.GetKnownRequestHeader (index);
 		}
 		
 		public override string GetServerName ()
 		{
-			string server_name = HostNameFromString (
-				responder.GetParameter ("SERVER_NAME"));
-			
-			if (server_name == null)
-				server_name = HostNameFromString (
-					responder.GetParameter ("HTTP_HOST"));
-			
-			if (server_name == null)
-				server_name = GetLocalAddress ();
-			
-			return server_name;
+			return (HostNameFromString (responder.GetParameter ("SERVER_NAME"))
+				?? HostNameFromString (responder.GetParameter ("HTTP_HOST")))
+				?? GetLocalAddress ();
 		}
 
 		public override byte [] GetPreloadedEntityBody ()
@@ -422,13 +409,13 @@ namespace Mono.WebServer.FastCgi
 		
 		private void EnsureHeadersSent ()
 		{
-			if (headers != null) {
-				headers.Append ("\r\n");
-				string str = headers.ToString ();
-				responder.SendOutput (str,
-					HeaderEncoding);
-				headers = null;
-			}
+			if (headers == null)
+				return;
+
+			headers.Append ("\r\n");
+			string str = headers.ToString ();
+			responder.SendOutput (str, HeaderEncoding);
+			headers = null;
 		}
 		
 		#endregion
@@ -442,7 +429,7 @@ namespace Mono.WebServer.FastCgi
 			if (host == null || host.Length > 126)
 				return null;
 			
-			System.Net.IPAddress [] addresses = null;
+			IPAddress [] addresses;
 			try {
 				addresses = Dns.GetHostAddresses (host);
 			} catch (System.Net.Sockets.SocketException) {
@@ -459,7 +446,7 @@ namespace Mono.WebServer.FastCgi
 		
 		private static string HostNameFromString (string host)
 		{
-			if (host == null || host.Length == 0)
+			if (string.IsNullOrEmpty(host))
 				return null;
 			
 			int colon_index = host.IndexOf (':');
@@ -496,15 +483,15 @@ namespace Mono.WebServer.FastCgi
 		{
 			if (list == null)
 				return;
-			
-			List<string> files = new List<string> ();
+
+			var files = new List<string> ();
 			
 			string [] fs = list.Split (',');
 			foreach (string f in fs) {
 				string trimmed = f.Trim ();
-				if (trimmed == "") 
+				if (trimmed.Length == 0) 
 					continue;
-
+ 
 				files.Add (trimmed);
 			}
 

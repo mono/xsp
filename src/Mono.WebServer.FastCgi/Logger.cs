@@ -28,7 +28,6 @@
 
 using System;
 using System.IO;
-using System.Text;
 using System.Globalization;
 
 namespace Mono.FastCgi {
@@ -56,15 +55,15 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private StreamWriter writer;
+		StreamWriter writer;
 		
-		private bool write_to_console;
+		bool write_to_console;
 		
-		private LogLevel level = LogLevel.Standard;
+		LogLevel level = LogLevel.Standard;
 		
-		private object write_lock = new object ();
+		readonly object write_lock = new object ();
 		
-		private static Logger logger = new Logger ();
+		static readonly Logger logger = new Logger ();
 		
 		#endregion
 		
@@ -161,7 +160,7 @@ namespace Mono.FastCgi {
 				try {
 					logger.writer.Flush ();
 					logger.writer.Close ();
-				} catch (System.ObjectDisposedException) {
+				} catch (ObjectDisposedException) {
 					// Already done
 				}
 				logger.writer = null;

@@ -39,8 +39,6 @@ namespace Mono.WebServer
 {
 	public class ConfigurationManager
 	{
-		int hash;
-		
 		XmlNodeList settings;
 		
 		readonly NameValueCollection cmd_args = 
@@ -378,10 +376,6 @@ namespace Mono.WebServer
 				throw new ArgumentNullException ("args");
 			
 			for (int i = 0; i < args.Length; i ++) {
-				// Randomize the hash a bit.
-				int idx = (i + 1 < args.Length) ? i + 1 : i;
-				hash ^= args [idx].GetHashCode () + i;
-				
 				string arg = args [i];
 				int len = PrefixLength (arg);
 				
@@ -462,10 +456,6 @@ namespace Mono.WebServer
 				return 1;
 			
 			return 0;
-		}
-		
-		public int Hash {
-			get {return hash < 0 ? -hash : hash;}
 		}
 		
 		static NameValueCollection AppSettings {

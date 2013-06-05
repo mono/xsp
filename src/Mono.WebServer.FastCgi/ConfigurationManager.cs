@@ -34,6 +34,7 @@ using System.Reflection;
 using System.Globalization;
 using System.Collections.Specialized;
 using System.Text;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.WebServer
 {
@@ -41,14 +42,14 @@ namespace Mono.WebServer
 	{
 		XmlNodeList settings;
 		
-		readonly NameValueCollection cmd_args = 
-			new NameValueCollection ();
+		readonly IDictionary<string,string> cmd_args =
+			new Dictionary<string,string> ();
 		
-		readonly NameValueCollection xml_args =
-			new NameValueCollection ();
+		readonly IDictionary<string,string> xml_args =
+			new Dictionary<string,string> ();
 
-		readonly NameValueCollection default_args =
-			new NameValueCollection ();
+		readonly IDictionary<string,string> default_args =
+			new Dictionary<string,string> ();
 		
 		public ConfigurationManager (Assembly asm, string resource)
 		{
@@ -57,8 +58,9 @@ namespace Mono.WebServer
 			ImportSettings (doc, default_args, false);
 		}
 
-		void ImportSettings (XmlDocument doc, NameValueCollection collection,
-				     bool insertEmptyValue)
+		void ImportSettings (XmlDocument doc,
+		                     IDictionary<string,string> collection,
+		                     bool insertEmptyValue)
 		{
 			settings = doc.GetElementsByTagName ("Setting");
 			foreach (XmlElement setting in settings) {
@@ -68,11 +70,12 @@ namespace Mono.WebServer
 					throw AppExcept (except_bad_elem,
 						name, value);
 
-				if (collection [name] != null)
-					throw AppExcept (except_xml_duplicate, name);
+				if (collection.ContainsKey (name))
+					throw AppExcept (except_xml_duplicate,
+						name);
 
-				if (insertEmptyValue ||  value.Length > 0)
-					collection [name] = value;
+				if (insertEmptyValue || value.Length > 0)
+					collection.Add (name, value);
 			}
 		}
 		
@@ -93,13 +96,16 @@ namespace Mono.WebServer
 				return null;
 			
 			string value;
-			if ((value = cmd_args [name]) != null) return value;
-			if ((value = xml_args [name]) != null) return value;
+			if (cmd_args.TryGetValue(name, out value)) return value;
+			if (xml_args.TryGetValue(name, out value)) return value;
 
 			string env_setting = GetXmlValue (setting, "Environment");
-			if (env_setting.Length > 0)
-				if ((value = Environment.GetEnvironmentVariable (env_setting)) != null)
+			if (env_setting.Length > 0){
+				value = Environment.GetEnvironmentVariable(
+					env_setting);
+				if (value != null)
 					return value;
+			}
 			
 			string app_setting = GetXmlValue (setting,
 				"AppSetting");
@@ -108,7 +114,8 @@ namespace Mono.WebServer
 				if ((value = AppSettings [app_setting]) != null)
 					return value;
 
-			return default_args [name];
+			default_args.TryGetValue(name, out value);
+			return value;
 		}
 		
 		public bool Contains (string name)
@@ -204,7 +211,7 @@ namespace Mono.WebServer
 			}
 			
 			set {
-				cmd_args.Set (name, value.ToString ());
+				cmd_args.AddOrReplace (name, value.ToString ());
 			}
 		}
 		
@@ -279,10 +286,11 @@ namespace Mono.WebServer
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
 					
-					if (String.IsNullOrEmpty(val))
-						val = default_args [name];
+					if (String.IsNullOrEmpty (val))
+						default_args.TryGetValue (
+							name, out val);
 
-					if (String.IsNullOrEmpty(val))
+					if (String.IsNullOrEmpty (val))
 						val = "none";
 					
 					values.Add (" Default Value: " + val);
@@ -388,7 +396,7 @@ namespace Mono.WebServer
 					continue;
 				}
 				
-				if (cmd_args [arg] != null)
+				if (cmd_args.ContainsKey (arg))
 					Console.WriteLine (
 						"Warning: \"{0}\" has already been set. Overwriting.",
 						args [i]);
@@ -396,7 +404,8 @@ namespace Mono.WebServer
 				string [] pair = arg.Split (new[] {'='}, 2);
 				
 				if (pair.Length == 2) {
-					cmd_args.Add (pair [0], pair [1]);
+					cmd_args.AddOrReplace (pair [0],
+						pair [1]);
 					continue;
 				}
 				
@@ -426,8 +435,8 @@ namespace Mono.WebServer
 						args [i]);
 					continue;
 				}
-				
-				cmd_args [arg] = value;
+
+				cmd_args.AddOrReplace (arg, value);
 			}
 		}
 		

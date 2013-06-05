@@ -2,6 +2,7 @@ ApplicationHost.cs
 BeginRequestBody.cs
 ConfigurationManager.cs
 Connection.cs
+DictionaryExtensions.cs
 EndRequestBody.cs
 ISocketAbstraction.cs
 Logger.cs

@@ -41,7 +41,7 @@ namespace Mono.WebServer
 	{
 		int hash;
 		
-		XmlNodeList elems;
+		XmlNodeList settings;
 		
 		readonly NameValueCollection cmd_args = 
 			new NameValueCollection ();
@@ -56,22 +56,21 @@ namespace Mono.WebServer
 		{
 			var doc = new XmlDocument ();
 			doc.Load (asm.GetManifestResourceStream (resource));
-			ImportSettings (doc, default_args, true, false);
-
+			ImportSettings (doc, default_args, false);
 		}
 
 		void ImportSettings (XmlDocument doc, NameValueCollection collection,
-				     bool allowDuplicates, bool insertEmptyValue)
+				     bool insertEmptyValue)
 		{
-			elems = doc.GetElementsByTagName ("Setting");
-			foreach (XmlElement setting in elems) {
+			settings = doc.GetElementsByTagName ("Setting");
+			foreach (XmlElement setting in settings) {
 				string name = GetXmlValue (setting, "Name");
 				string value = GetXmlValue (setting, "Value");
 				if (name.Length == 0)
 					throw AppExcept (except_bad_elem,
 						name, value);
 
-				if (!allowDuplicates && collection [name] != null)
+				if (collection [name] != null)
 					throw AppExcept (except_xml_duplicate, name);
 
 				if (insertEmptyValue ||  value.Length > 0)
@@ -81,7 +80,7 @@ namespace Mono.WebServer
 		
 		XmlElement GetSetting (string name)
 		{
-			foreach (XmlElement setting in elems)
+			foreach (XmlElement setting in settings)
 				if (GetXmlValue (setting, "Name") == name)
 					return setting;
 			
@@ -230,7 +229,7 @@ namespace Mono.WebServer
 		public void PrintHelp ()
 		{
 			int left_margin = 0;
-			foreach (XmlElement setting in elems) {
+			foreach (XmlElement setting in settings) {
 				string show = GetXmlValue (setting,
 					"ConsoleVisible").ToLower (
 						CultureInfo.InvariantCulture);
@@ -250,7 +249,7 @@ namespace Mono.WebServer
 					left_margin = length;
 			}
 			
-			foreach (XmlElement setting in elems) {
+			foreach (XmlElement setting in settings) {
 				string show = GetXmlValue (setting,
 					"ConsoleVisible").ToLower (
 						CultureInfo.InvariantCulture);
@@ -448,7 +447,7 @@ namespace Mono.WebServer
 		{
 			var doc = new XmlDocument ();
 			doc.Load (filename);
-			ImportSettings (doc, xml_args, false, true);
+			ImportSettings (doc, xml_args, true);
 		}
 		
 		int PrefixLength (string arg)

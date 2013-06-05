@@ -143,6 +143,7 @@ namespace Mono.WebServer.FastCgi
 
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
+			Logger.Level = LogLevel.All;
 			
 			try {
 				var log_file = configmanager ["logfile"] as string;
@@ -162,7 +163,7 @@ namespace Mono.WebServer.FastCgi
 			
 			
 			// Create the socket.
-			Socket socket;
+			Socket socket = null;
 			
 			// Socket strings are in the format
 			// "type[:ARG1[:ARG2[:...]]]".
@@ -176,9 +177,27 @@ namespace Mono.WebServer.FastCgi
 				try {
 					socket = SocketFactory.CreatePipeSocket (
 						IntPtr.Zero);
-				} catch (System.Net.Sockets.SocketException){
+				} catch (System.Net.Sockets.SocketException e){
 					Logger.Write (LogLevel.Error,
-						"Error: Pipe socket is not bound.");
+						"Pipe socket is not bound.");
+					Logger.Write (e);
+					var errorcode = e.SocketErrorCode;
+					Logger.Write (LogLevel.Debug,
+						"Errorcode: {0}", errorcode);
+					switch (errorcode) {
+					default:
+					case System.Net.Sockets.SocketError.NotSocket:
+						if (socket == null)
+							Logger.Write (
+								LogLevel.Debug,
+								"Null socket");
+						else
+							Logger.Write (
+								LogLevel.Debug,
+								socket.ToString
+									());
+						break;
+					}
 					return 1;
 				} catch (NotSupportedException) {
 					Logger.Write (LogLevel.Error,
@@ -223,9 +242,12 @@ namespace Mono.WebServer.FastCgi
 						socket_parts [1];
 				
 				ushort port;
-				try {
-					port = (ushort) configmanager ["port"];
-				} catch (ApplicationException e) {
+				try
+				{
+					port = (ushort)configmanager ["port"];
+				}
+				catch (ApplicationException e)
+				{
 					Logger.Write (LogLevel.Error, e.Message);
 					return 1;
 				}
@@ -233,15 +255,18 @@ namespace Mono.WebServer.FastCgi
 				var address_str =
 					configmanager ["address"] as string;
 				IPAddress address;
-				
-				try {
-					address = IPAddress.Parse (address_str);
-				} catch {
-					Logger.Write (LogLevel.Error,
-						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
-						address_str);
-					return 1;
-				}
+
+				if (address_str == null)
+					address = IPAddress.Loopback;
+				else
+					try {
+						address = IPAddress.Parse (address_str);
+					} catch {
+						Logger.Write (LogLevel.Error,
+							"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
+							address_str);
+						return 1;
+					}
 				
 				try {
 					socket = SocketFactory.CreateTcpSocket (

@@ -87,7 +87,7 @@ namespace Mono.WebServer
 			
 			return null;
 		}
-		
+
 		string GetValue (string name, out XmlElement setting)
 		{
 			setting = GetSetting (name);
@@ -158,7 +158,7 @@ namespace Mono.WebServer
 				if (value == null)
 					switch (type) {
 					case "uint16":
-						return 0;
+						return default(UInt16);
 					case "bool":
 						return false;
 					default:
@@ -184,21 +184,19 @@ namespace Mono.WebServer
 					
 					if (value.ToLower () == "false")
 						return false;
-						
+
 					throw AppExcept (except_bool, name,
 						value);
 					
 				case "directory":
-					var dir = new DirectoryInfo (value);
-					if (dir.Exists)
+					if (Directory.Exists (value))
 						return value;
 					
 					throw AppExcept (except_directory, name,
 						value);
 					
 				case "file":
-					var file = new FileInfo (value);
-					if (file.Exists)
+					if (File.Exists (value))
 						return value;
 					
 					throw AppExcept (except_file, name,

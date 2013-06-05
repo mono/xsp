@@ -185,7 +185,6 @@ namespace Mono.WebServer.FastCgi
 					Logger.Write (LogLevel.Debug,
 						"Errorcode: {0}", errorcode);
 					switch (errorcode) {
-					default:
 					case System.Net.Sockets.SocketError.NotSocket:
 						if (socket == null)
 							Logger.Write (

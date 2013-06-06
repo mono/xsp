@@ -17,11 +17,11 @@
 		</Description>
 	</Setting>
 	
-	<Setting Name="stopable" Type="Bool" ConsoleVisible="True">
+	<Setting Name="stoppable" Type="Bool" ConsoleVisible="True">
 		<Description>
-			<para>Allows the user to stop the server by if "Enter"
-			is pressed. This should not be used when the server has
-			no controlling terminal.</para>
+			<para>Allows the user to stop the server by pressing "Enter".
+			This should not be used when the server has no controlling terminal.
+			</para>
 		</Description>
 	</Setting>
 	
@@ -96,7 +96,7 @@
 	</Setting>
 	
 	<Setting Name="address" AppSetting="MonoServerAddress" Type="String"
-		Environment="MONO_FCGI_ADDRESS" ConsoleVisible="True">
+		Environment="MONO_FCGI_ADDRESS" ConsoleVisible="True" Value="127.0.0.1">
 		<Description>
 			<para>Specifies the IP address to listen on.<br />
 			To use this argument, "socket" must be set to "tcp".</para>

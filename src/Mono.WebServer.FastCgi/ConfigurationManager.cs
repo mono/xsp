@@ -42,14 +42,11 @@ namespace Mono.WebServer
 	{
 		XmlNodeList settings;
 		
-		readonly IDictionary<string,string> cmd_args =
-			new Dictionary<string,string> ();
+		readonly IDictionary<string,string> cmd_args = new Dictionary<string,string> ();
 		
-		readonly IDictionary<string,string> xml_args =
-			new Dictionary<string,string> ();
+		readonly IDictionary<string,string> xml_args = new Dictionary<string,string> ();
 
-		readonly IDictionary<string,string> default_args =
-			new Dictionary<string,string> ();
+		readonly IDictionary<string,string> default_args = new Dictionary<string,string> ();
 		
 		public ConfigurationManager (Assembly asm, string resource)
 		{
@@ -96,8 +93,10 @@ namespace Mono.WebServer
 				return null;
 			
 			string value;
-			if (cmd_args.TryGetValue(name, out value)) return value;
-			if (xml_args.TryGetValue(name, out value)) return value;
+			if (cmd_args.TryGetValue(name, out value))
+				return value;
+			if (xml_args.TryGetValue(name, out value))
+				return value;
 
 			string env_setting = GetXmlValue (setting, "Environment");
 			if (env_setting.Length > 0){
@@ -285,8 +284,7 @@ namespace Mono.WebServer
 					string val = AppSettings [app_setting];
 					
 					if (String.IsNullOrEmpty (val))
-						default_args.TryGetValue (
-							name, out val);
+						default_args.TryGetValue (name, out val);
 
 					if (String.IsNullOrEmpty (val))
 						val = "none";

@@ -26,8 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.FastCgi {
 	internal class TcpSocket : StandardSocket
 	{
@@ -38,7 +36,7 @@ namespace Mono.FastCgi {
 		}
 		
 		public TcpSocket (System.Net.IPAddress address, int port)
-			: this (new System.Net.IPEndPoint (address == System.Net.IPAddress.Any ?
+			: this (new System.Net.IPEndPoint (Equals(address, System.Net.IPAddress.Any) ?
 				System.Net.IPAddress.Loopback : address, port))
 		{
 		}

@@ -27,21 +27,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.WebServer.FastCgi {
 	
 	// FIXME: This class could be removed if
 	// Mono.WebServer.ApplicationServer is broken into two classes:
-		// * ApplicationManager to handle application hosts, and
-		// * ApplicationServer, a subclass of ApplicationManager that
-		//   adds on server support.
+	//     * ApplicationManager to handle application hosts, and
+	//     * ApplicationServer, a subclass of ApplicationManager that
+	//       adds on server support.
 	
-	public class WebSource : Mono.WebServer.WebSource {
-		public WebSource ()
-		{
-		}
-		
+	public class WebSource : WebServer.WebSource {
 		public override IRequestBroker CreateRequestBroker()
 		{
 			return null;

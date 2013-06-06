@@ -50,9 +50,9 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private Role role;
+		readonly Role role;
 		
-		private BeginRequestFlags flags;
+		readonly BeginRequestFlags flags;
 		
 		#endregion
 		

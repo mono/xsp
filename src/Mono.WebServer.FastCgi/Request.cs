@@ -29,18 +29,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using IOPath = System.IO.Path;
+using Mono.WebServer;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	public class Request
 	{
 		#region Private Fields
 		
-		private ushort requestID;
-		
-		private Connection connection;
+		readonly Connection connection;
 		
 		#endregion
 		
@@ -50,7 +48,7 @@ namespace Mono.FastCgi {
 		
 		public Request (ushort requestID, Connection connection)
 		{
-			this.requestID  = requestID;
+			RequestID  = requestID;
 			this.connection = connection;
 		}
 		#endregion
@@ -79,7 +77,7 @@ namespace Mono.FastCgi {
 				SendStreamData (RecordType.StandardError,
 					new byte [0], 0);
 			
-			connection.EndRequest (requestID, appStatus,
+			connection.EndRequest (RequestID, appStatus,
 				protocolStatus);
 		}
 		
@@ -91,21 +89,14 @@ namespace Mono.FastCgi {
 			Logger.Write (LogLevel.Error, message, args);
 			CompleteRequest (-1, ProtocolStatus.RequestComplete);
 		}
-		
-		private bool data_needed = true;
-		
-		public bool DataNeeded {
-			get {return data_needed;}
-			protected set {data_needed = value;}
-		}
+
+		public bool DataNeeded { get; protected set; }
 		
 		public Server Server {
 			get {return connection.Server;}
 		}
 		
-		public ushort RequestID {
-			get {return requestID;}
-		}
+		public ushort RequestID { get; private set; }
 		
 		public bool IsConnected {
 			get {return connection.IsConnected;}
@@ -116,19 +107,17 @@ namespace Mono.FastCgi {
 		
 		#region Request Details
 		
-		private string vhost = null;
+		string vhost;
 		
-		private int port = -1;
+		int port = -1;
 		
-		private string path = null;
+		string path;
 		
-		private string rpath = null;
-		
-		private Mono.WebServer.FastCgi.ApplicationHost appHost;
-		
+		string rpath;
+
 		public string HostName {
 			get {
-				if (vhost == null)
+				if (String.IsNullOrEmpty(vhost))
 					vhost = GetParameter ("HTTP_HOST");
 				
 				return vhost;
@@ -138,36 +127,33 @@ namespace Mono.FastCgi {
 		public int PortNumber {
 			get {
 				if (port < 0)
-					port = int.Parse (GetParameter (
-							"SERVER_PORT"));
-				
+					Int32.TryParse (GetParameter ("SERVER_PORT"),
+						out port);
+
 				return port;
 			}
 		}
-		
+
 		public string Path {
-			get {
-				if (path == null)
+			get
+			{
+				if (String.IsNullOrEmpty(path))
 					path = GetParameter ("SCRIPT_NAME");
-				
+
 				return path;
 			}
 		}
 		
 		public string PhysicalPath {
 			get {
-				if (rpath == null)
+				if (String.IsNullOrEmpty(rpath))
 					rpath = GetParameter ("SCRIPT_FILENAME");
-				
+
 				return rpath;
 			}
 		}
 		
-		internal protected Mono.WebServer.FastCgi.ApplicationHost ApplicationHost {
-			get {
-				return appHost;
-			}
-		}
+		internal protected ApplicationHost ApplicationHost { get; private set; }
 		
 		#endregion
 		
@@ -179,7 +165,7 @@ namespace Mono.FastCgi {
 		
 		List<byte> parameter_data = new List<byte> ();
 		
-		IDictionary<string,string> parameter_table = null;
+		IDictionary<string,string> parameter_table;
 		
 		public void AddParameterData (byte [] data)
 		{
@@ -207,7 +193,7 @@ namespace Mono.FastCgi {
 			// of data. When it is received, the data can then be
 			// examined and worked on.
 			
-			data = parameter_data.ToArray ();			
+			data = parameter_data.ToArray ();
 			try {
 				parameter_table = NameValuePair.FromData (data);
 				// The parameter data is no longer needed and
@@ -230,9 +216,9 @@ namespace Mono.FastCgi {
 			string redirectUrl;
 			string pathInfo = GetParameter ("PATH_INFO");
 			string pathTranslated = GetParameter ("PATH_TRANSLATED");
-			Mono.WebServer.VPathToHost vapp;
-			if (pathTranslated == null || pathTranslated.Length == 0 || 
-				pathInfo == null || pathInfo.Length == 0 || pathInfo [0] != '/' || 
+			VPathToHost vapp;
+			if (String.IsNullOrEmpty(pathTranslated) || 
+				String.IsNullOrEmpty(pathInfo) || pathInfo [0] != '/' || 
 				(null != (redirectUrl = GetParameter ("REDIRECT_URL")) && redirectUrl.Length != 0 && pathInfo != redirectUrl)) {
 				// Only consider REDIRECT_URL if it actually contains 
 				// something, since it may not always be present (depending 
@@ -243,9 +229,9 @@ namespace Mono.FastCgi {
 					SetParameter ("PATH_INFO", String.Empty);
 				if (pathTranslated == null)
 					SetParameter ("PATH_TRANSLATED", String.Empty);
-				vapp = Mono.WebServer.FastCgi.Server.GetApplicationForPath (this.HostName, this.PortNumber, this.Path, this.PhysicalPath);
+				vapp = WebServer.FastCgi.Server.GetApplicationForPath (HostName, PortNumber, Path, PhysicalPath);
 				if (vapp != null)
-					appHost = (Mono.WebServer.FastCgi.ApplicationHost)vapp.AppHost;
+					ApplicationHost = vapp.AppHost as ApplicationHost;
 				return;
 			}
 
@@ -262,28 +248,26 @@ namespace Mono.FastCgi {
 			string virtPathInfo = String.Empty;
 			string physPathInfo = String.Empty;
 			try {
-				vapp = Mono.WebServer.FastCgi.Server.GetApplicationForPath (
-					this.HostName, this.PortNumber, virtPath, physPath);
+				vapp = WebServer.FastCgi.Server.GetApplicationForPath (
+					HostName, PortNumber, virtPath, physPath);
 				if (vapp == null)
 					return;  // Set values in finally
-				appHost = (Mono.WebServer.FastCgi.ApplicationHost)vapp.AppHost;
-				if (appHost == null)
+				ApplicationHost = vapp.AppHost as ApplicationHost;
+				if (ApplicationHost == null)
 					return;  // Set values in finally
 
 				// Split the virtual path and virtual path-info
 				string verb = GetParameter ("REQUEST_METHOD");
-				if (verb == null || verb.Length == 0)
+				if (String.IsNullOrEmpty(verb))
 					verb = "GET";  // For the sake of paths, assume a default
-				appHost.GetPathsFromUri (verb, pathInfo, out virtPath, out virtPathInfo);
+				ApplicationHost.GetPathsFromUri (verb, pathInfo, out virtPath, out virtPathInfo);
 				if (virtPathInfo == null)
 					virtPathInfo = String.Empty;
 				if (virtPath == null)
 					virtPath = String.Empty;
 
 				// Re-map the physical path
-				physPath = appHost.MapPath (virtPath);
-				if (physPath == null)
-					physPath = String.Empty;
+				physPath = ApplicationHost.MapPath (virtPath) ?? String.Empty;
 
 				// Re-map the physical path-info
 				string relaPathInfo = virtPathInfo;
@@ -298,10 +282,8 @@ namespace Mono.FastCgi {
 				}
 				string physRoot = physPath;
 				try {
-					if (appHost.VirtualFileExists (virtPath)) {
-						physRoot = IOPath.GetDirectoryName (physRoot);
-						if (physRoot == null)
-							physRoot = String.Empty;
+					if (ApplicationHost.VirtualFileExists (virtPath)) {
+						physRoot = IOPath.GetDirectoryName (physRoot) ?? String.Empty;
 					}
 				} catch {
 					// Assume virtPath, physPath & physRoot 
@@ -326,7 +308,7 @@ namespace Mono.FastCgi {
 		public string GetParameter (string parameter)
 		{
 			if (parameter_table != null && parameter_table.ContainsKey (parameter))
-				return (string) parameter_table [parameter];
+				return parameter_table [parameter];
 			
 			return null;
 		}
@@ -350,7 +332,7 @@ namespace Mono.FastCgi {
 		
 		protected event DataReceivedHandler  InputDataReceived;
 		
-		private bool input_data_completed = false;
+		bool input_data_completed;
 		
 		public void AddInputData (Record record)
 		{
@@ -380,9 +362,9 @@ namespace Mono.FastCgi {
 		
 		#region File Data Handling
 		
-		protected event DataReceivedHandler  FileDataReceived;
+		protected event DataReceivedHandler FileDataReceived;
 		
-		private bool file_data_completed = false;
+		bool file_data_completed;
 		
 		public void AddFileData (Record record)
 		{
@@ -412,7 +394,7 @@ namespace Mono.FastCgi {
 		
 		#region Standard Output Handling
 		
-		bool stdout_sent = false;
+		bool stdout_sent;
 		
 		public void SendOutput (byte [] data, int length)
 		{
@@ -436,7 +418,7 @@ namespace Mono.FastCgi {
 		{
 			SendOutput (text, System.Text.Encoding.UTF8);
 		}
-		
+
 		public void SendOutput (string text, System.Text.Encoding encoding)
 		{
 			SendOutput (encoding.GetBytes (text));
@@ -447,7 +429,7 @@ namespace Mono.FastCgi {
 		
 		#region Standard Error Handling
 		
-		bool stderr_sent = false;
+		bool stderr_sent;
 		
 		public void SendError (byte [] data, int length)
 		{
@@ -483,8 +465,8 @@ namespace Mono.FastCgi {
 		
 		#region Private Methods
 		
-		private void SendStreamData (RecordType type, byte [] data,
-		                             int length)
+		void SendStreamData (RecordType type, byte [] data,
+		                     int length)
 		{
 			// Records are only able to hold 65535 bytes of data. If
 			// larger data is to be sent, it must be broken into
@@ -493,24 +475,24 @@ namespace Mono.FastCgi {
 			if (length > data.Length)
 				length = data.Length;
 			
-			int max_size = 0x7fff;
+			const int maxSize = 0x7fff;
 			
-			if (length < max_size)
-				connection.SendRecord (type, requestID, data, 0,
+			if (length < maxSize)
+				connection.SendRecord (type, RequestID, data, 0,
 					length);
 			else
 			{
 				int index = 0;
 				while (index < length)
 				{
-					int chunk_length = (max_size <
-						length - index) ? max_size :
+					int chunkLength = (maxSize <
+						length - index) ? maxSize :
 							(length - index);
 					
-					connection.SendRecord (type, requestID,
-						data, index, chunk_length);
+					connection.SendRecord (type, RequestID,
+						data, index, chunkLength);
 					
-					index += chunk_length;
+					index += chunkLength;
 				}
 			}
 		}
@@ -522,7 +504,7 @@ namespace Mono.FastCgi {
 	
 	public class DataReceivedArgs : EventArgs
 	{
-		private Record record;
+		Record record;
 		
 		public DataReceivedArgs (Record record)
 		{

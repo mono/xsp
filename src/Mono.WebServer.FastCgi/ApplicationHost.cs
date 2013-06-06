@@ -38,13 +38,9 @@ namespace Mono.WebServer.FastCgi
 {
 	public class ApplicationHost : BaseApplicationHost
 	{
-		public ApplicationHost ()
-		{
-		}
-		
 		public void ProcessRequest (Responder responder)
 		{
-			WorkerRequest worker = new WorkerRequest (responder,
+			var worker = new WorkerRequest (responder,
 				this);
 			
 			string path = responder.Path;
@@ -57,14 +53,14 @@ namespace Mono.WebServer.FastCgi
 			ProcessRequest (worker);
 		}
 		
-		private static string content301 =
+		const string content301 =
 			"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
 			"<html><head>\n<title>301 Moved Permanently</title>\n</head><body>\n" +
 			"<h1>Moved Permanently</h1>\n" +
 			"<p>The document has moved to <a href='http://{0}{1}'>http://{0}{1}</a>.</p>\n" +
 			"</body></html>\n";
 		
-		private static void Redirect (MonoWorkerRequest wr, string location)
+		static void Redirect (MonoWorkerRequest wr, string location)
 		{
 			string host = wr.GetKnownRequestHeader (HttpWorkerRequest.HeaderHost);
 			wr.SendStatus (301, "Moved Permanently");
@@ -88,10 +84,9 @@ namespace Mono.WebServer.FastCgi
 		
 		public string MapPath (string virtualPath)
 		{
-			string physPath;
+			string physPath = HostingEnvironment.MapPath ((String.IsNullOrEmpty(virtualPath) || virtualPath.TrimStart().Length == 0) ? "/" : virtualPath);
 
-			physPath = HostingEnvironment.MapPath ((virtualPath == null || virtualPath.Length == 0 || virtualPath.TrimStart().Length == 0) ? "/" : virtualPath);
-			if (physPath != null && physPath.Length != 0)
+			if (!String.IsNullOrEmpty(physPath))
 				return physPath;
 
 			// For old .NET 1.x, and as a fallback mechanism until Mono's 
@@ -105,19 +100,18 @@ namespace Mono.WebServer.FastCgi
 			// remove the workarounds in ApplicationHost.VirtualFileExists and
 			// ApplicationHost.VirtualDirectoryExists)
 
-			if (virtualPath == null || virtualPath.Length == 0 || virtualPath == this.VPath) {
+			if (String.IsNullOrEmpty(virtualPath) || virtualPath == VPath) {
 				if (IOPath.DirectorySeparatorChar != '/')
-					return this.Path.Replace ('/', IOPath.DirectorySeparatorChar);
-				else
-					return this.Path;
+					return Path.Replace ('/', IOPath.DirectorySeparatorChar);
+				return Path;
 			}
 
 			physPath = virtualPath;
 			if (physPath[0] == '~' && physPath.Length > 2 && physPath[1] == '/')
 				physPath = physPath.Substring (1);
 
-			int len = this.VPath.Length;
-			if (physPath.StartsWith (this.VPath) && (physPath.Length == len || physPath[len] == '/'))
+			int len = VPath.Length;
+			if (physPath.StartsWith (VPath) && (physPath.Length == len || physPath[len] == '/'))
 				physPath = physPath.Substring (len + 1);
 
 			int i = 0;
@@ -128,12 +122,12 @@ namespace Mono.WebServer.FastCgi
 			if (i < len)
 				physPath = physPath.Substring (i);
 			else
-				return this.Path;
+				return Path;
 			
 			if (IOPath.DirectorySeparatorChar != '/')
 				physPath = physPath.Replace ('/', IOPath.DirectorySeparatorChar);
 
-			return IOPath.Combine (this.Path, physPath);
+			return IOPath.Combine (Path, physPath);
 		}
 		
 		public bool VirtualFileExists (string virtualPath)
@@ -146,7 +140,7 @@ namespace Mono.WebServer.FastCgi
 			return File.Exists (MapPath (virtualPath));
 		}
 		
-		private bool VirtualDirectoryExists (string virtualPath, WorkerRequest worker)
+		bool VirtualDirectoryExists (string virtualPath, WorkerRequest worker)
 		{
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
 			// TODO: Remove the second condition of the "if" statement (it is only a workaround) involving DefaultVirtualPathProvider as soon as Mono's DefaultVirtualPathProvider.DirectoryExists method works properly (i.e., the indirectly-called HostingEnvironment.MapPath method should not require an HttpContext.Current.Request object to do its work; also see the comment in the ApplicationHost.MapPath method above)

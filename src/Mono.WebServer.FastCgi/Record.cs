@@ -60,17 +60,17 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private byte version;
+		readonly byte version;
 		
-		private RecordType type;
+		readonly RecordType type;
 		
-		private ushort request_id;
+		readonly ushort request_id;
 		
-		private byte [] data;
+		readonly byte [] data;
 		
-		private int body_index;
+		readonly int body_index;
 		
-		private ushort body_length;
+		readonly ushort body_length;
 		
 		public const int SuggestedBufferSize = 0x08 + 0xFFFF + 0xFF;
 		
@@ -99,8 +99,7 @@ namespace Mono.FastCgi {
 			
 			byte[] header_buffer = (buffer != null && buffer.Length
 				> 8) ? buffer : new byte [HeaderSize];
-			byte   padding_length;
-			
+
 			// Read the 8 byte record header.
 			ReceiveAll (socket, header_buffer, HeaderSize);
 			
@@ -109,7 +108,7 @@ namespace Mono.FastCgi {
 			type           = (RecordType) header_buffer [1];
 			request_id     = ReadUInt16 (header_buffer, 2);
 			body_length    = ReadUInt16 (header_buffer, 4);
-			padding_length = header_buffer [6];
+			byte padding_length = header_buffer [6];
 			
 			int total_length = body_length + padding_length;
 			
@@ -150,15 +149,15 @@ namespace Mono.FastCgi {
 			if (bodyLength > 0xFFFF)
 				throw new ArgumentException (
 					Strings.Record_DataTooBig,
-					"data");
+					"bodyLength");
 			
 			
 			this.version     = version;
 			this.type        = type;
-			this.request_id  = requestID;
-			this.data        = bodyData;
-			this.body_index  = bodyIndex;
-			this.body_length = (ushort) bodyLength;
+			request_id  = requestID;
+			data        = bodyData;
+			body_index  = bodyIndex;
+			body_length = (ushort) bodyLength;
 		}
 		
 		#endregion
@@ -203,7 +202,7 @@ namespace Mono.FastCgi {
 		
 		public byte[] GetBody ()
 		{
-			byte[] body_data = new byte [body_length];
+			var body_data = new byte [body_length];
 			Array.Copy (data, body_index, body_data, 0,
 				body_length);
 			return body_data;
@@ -211,7 +210,7 @@ namespace Mono.FastCgi {
 		
 		public override string ToString ()
 		{
-			return string.Format (CultureInfo.CurrentCulture,
+			return String.Format (CultureInfo.CurrentCulture,
 				Strings.Record_ToString,
 				Version, Type, RequestID, BodyLength);
 		}
@@ -223,7 +222,7 @@ namespace Mono.FastCgi {
 		
 		public void Send (Socket socket, byte [] buffer)
 		{
-			byte padding_size = (byte) ((8 - (body_length % 8)) % 8);
+			var padding_size = (byte) ((8 - (body_length % 8)) % 8);
 			
 			int total_size = 8 + body_length + padding_size;
 			
@@ -272,7 +271,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Static Methods
 		
-		private static void ReceiveAll (Socket socket, byte [] data, int length)
+		static void ReceiveAll (Socket socket, byte [] data, int length)
 		{
 			if (length <= 0)
 				return;
@@ -285,7 +284,7 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		private static void SendAll (Socket socket, byte [] data, int length)
+		static void SendAll (Socket socket, byte [] data, int length)
 		{
 			if (length <= 0)
 				return;

@@ -26,8 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.FastCgi {
 	public enum ProtocolStatus : byte
 	{
@@ -43,10 +41,10 @@ namespace Mono.FastCgi {
 	public struct EndRequestBody
 	{
 		#region Private Fields
-		
-		int app_status;
-		
-		ProtocolStatus protocol_status;
+
+		readonly int app_status;
+
+		readonly ProtocolStatus protocol_status;
 		
 		#endregion
 		
@@ -73,7 +71,7 @@ namespace Mono.FastCgi {
 			unchecked {
 				app = (uint) app_status;
 			}
-			byte [] data = new byte [8];
+			var data = new byte [8];
 			data [0] = (byte)((app >> 24) & 0xFF);
 			data [1] = (byte)((app >> 16) & 0xFF);
 			data [2] = (byte)((app >>  8) & 0xFF);

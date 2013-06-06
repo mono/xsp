@@ -35,16 +35,14 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-using System.Web.Hosting;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Protocol.Tls;
-using Mono.WebServer;
 
 namespace Mono.WebServer.XSP
 {
 	public class Server : MarshalByRefObject
 	{
+		// TODO: Rewrite this using "Haskell's Either"
 		private class ApplicationSettings
 		{
 			public string Apps;
@@ -53,25 +51,25 @@ namespace Mono.WebServer.XSP
 			public string RootDir;
 			public object Oport = 8080;
 			public string IP = "0.0.0.0";
-			public Exception Exception;
+			public readonly Exception Exception;
 			public bool NonStop;
 			public bool Verbose;
 			//public bool Master; This field is not used for XSP
 			
 			public ApplicationSettings ()
 			{
-				this.Exception = null;
+				Exception = null;
 				try {
-					this.Apps = AppSettings ["MonoApplications"];
-					this.AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
-					this.AppConfigFile = AppSettings ["MonoApplicationsConfigFile"];
-					this.RootDir = AppSettings ["MonoServerRootDir"];
-					this.IP = AppSettings ["MonoServerAddress"];
-					this.Oport = AppSettings ["MonoServerPort"];
+					Apps = AppSettings ["MonoApplications"];
+					AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
+					AppConfigFile = AppSettings ["MonoApplicationsConfigFile"];
+					RootDir = AppSettings ["MonoServerRootDir"];
+					IP = AppSettings ["MonoServerAddress"];
+					Oport = AppSettings ["MonoServerPort"];
 				} catch (Exception ex) {
-					Console.WriteLine ("Exception caught during reading the configuration file:");
+					Console.WriteLine ("Exception caught while reading the configuration file:");
 					Console.WriteLine (ex);
-					this.Exception = ex;
+					Exception = ex;
 				}
 			}
 		}
@@ -246,7 +244,7 @@ namespace Mono.WebServer.XSP
 
 		public static void CurrentDomain_UnhandledException (object sender, UnhandledExceptionEventArgs e)
 		{
-			Exception ex = (Exception)e.ExceptionObject;
+			var ex = (Exception)e.ExceptionObject;
 
 			Console.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
 			Console.WriteLine ("Message is {0}", ex.Message);
@@ -257,7 +255,7 @@ namespace Mono.WebServer.XSP
 
 		public static int Main (string [] args)
 		{
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (CurrentDomain_UnhandledException);
+			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 			bool quiet = false;
 			while (true) {
 				try {
@@ -282,23 +280,20 @@ namespace Mono.WebServer.XSP
 		//
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
-			SecurityConfiguration security = new SecurityConfiguration ();
-			ApplicationSettings settings = new ApplicationSettings ();
+			var security = new SecurityConfiguration ();
+			var settings = new ApplicationSettings ();
 			
-			if (settings.IP == null || settings.IP.Length == 0)
+			if (string.IsNullOrEmpty (settings.IP))
 				settings.IP = "0.0.0.0";
 			
 			if (settings.Oport == null)
 				settings.Oport = 8080;
 
 			Options options = 0;
-			int hash = 0;
 			int backlog = 500;
 			for (int i = 0; i < args.Length; i++){
 				string a = args [i];
-				int idx = (i + 1 < args.Length) ? i + 1 : i;
-				hash ^= args [idx].GetHashCode () + i;
-				
+
 				switch (a){
 				case "--https":
 					CheckAndSetOptions (a, Options.Https, ref options);
@@ -370,7 +365,7 @@ namespace Mono.WebServer.XSP
 					break;
 				case "--minThreads":
 					string mtstr = args [++i];
-					int minThreads = 0;
+					int minThreads;
 					try {
 						minThreads = Convert.ToInt32 (mtstr);
 					} catch (Exception) {
@@ -399,7 +394,7 @@ namespace Mono.WebServer.XSP
 					break;
 				case "--pidfile": {
 					string pidfile = args[++i];
-					if (pidfile != null && pidfile.Length > 0) {
+					if (!string.IsNullOrEmpty (pidfile)) {
 						try {
 							using (StreamWriter sw = File.CreateText (pidfile))
 								sw.Write (Process.GetCurrentProcess ().Id);
@@ -419,7 +414,7 @@ namespace Mono.WebServer.XSP
 				}
 			}
 
-			IPAddress ipaddr = null;
+			IPAddress ipaddr;
 			ushort port;
 			try {
 				
@@ -436,7 +431,7 @@ namespace Mono.WebServer.XSP
 				return 1;
 			}
 
-			if (settings.RootDir != null && settings.RootDir.Length != 0) {
+			if (!string.IsNullOrEmpty (settings.RootDir)) {
 				try {
 					Environment.CurrentDirectory = settings.RootDir;
 				} catch (Exception e) {
@@ -451,9 +446,13 @@ namespace Mono.WebServer.XSP
 			if (security.Enabled) {
 				try {
 					key = security.KeyPair;
-					webSource = new XSPWebSource (ipaddr, port, security.Protocol, security.ServerCertificate, 
-						new PrivateKeySelectionCallback (GetPrivateKey), 
-						security.AcceptClientCertificates, security.RequireClientCertificates, !root);
+					webSource = new XSPWebSource (ipaddr,
+						port, security.Protocol, 
+						security.ServerCertificate, 
+						GetPrivateKey, 
+						security.AcceptClientCertificates,
+						security.RequireClientCertificates,
+						!root);
 				}
 				catch (CryptographicException ce) {
 					Console.WriteLine (ce.Message);
@@ -463,9 +462,10 @@ namespace Mono.WebServer.XSP
 				webSource = new XSPWebSource (ipaddr, port, !root);
 			}
 
-			ApplicationServer server = new ApplicationServer (webSource, settings.RootDir);
-			server.Verbose = settings.Verbose;
-			server.SingleApplication = !root;
+			var server = new ApplicationServer (webSource, settings.RootDir) {
+				Verbose = settings.Verbose,
+				SingleApplication = !root
+			};
 
 			if (settings.Apps != null)
 				server.AddApplicationsFromCommandLine (settings.Apps);
@@ -484,7 +484,7 @@ namespace Mono.WebServer.XSP
 			if (root && vh != null) {
 				// Redo in new domain
 				vh.CreateHost (server, webSource);
-				Server svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
+				var svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
 				return svr.RealMain (args, false, vh.AppHost, quiet);
 			}
@@ -511,9 +511,8 @@ namespace Mono.WebServer.XSP
 					if (!quiet)
 						Console.WriteLine ("Hit Return to stop the server.");
 
-					bool doSleep;
 					while (true) {
-						doSleep = false;
+						bool doSleep;
 						try {
 							Console.ReadLine ();
 							break;

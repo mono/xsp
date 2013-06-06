@@ -34,7 +34,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 using Mono.Security.Authenticode;
-using Mono.Security.Protocol.Tls;
 using MSX = Mono.Security.X509;
 using Mono.Security.X509.Extensions;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
@@ -42,55 +41,33 @@ using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 namespace Mono.WebServer.XSP {
 
 	public class SecurityConfiguration {
-		private bool enabled;
 		private bool valid;
-		private bool accept_client_certificates;
-		private bool require_client_certificates;
 		private RSA key;
-		private SecurityProtocolType protocol;
 		private X509Certificate x509;
-		private string p12Filename;
-		private string certFilename;
-		private string keyFilename;
 		private string password;
 
 
 		public SecurityConfiguration ()
 		{
-			protocol = SecurityProtocolType.Default;
+			Protocol = SecurityProtocolType.Default;
 		}
 
 		// properties
 
-		public bool AcceptClientCertificates {
-			get { return accept_client_certificates; }
-			set { accept_client_certificates = value; }
-		}
+		public bool AcceptClientCertificates { get; set; }
 
-		public string CertificateFile {
-			get { return certFilename; }
-			set { certFilename = value; }
-		}
+		public string CertificateFile { get; set; }
 
-		public bool Enabled {
-			get { return enabled; }
-			set { enabled = value; }
-		}
+		public bool Enabled { get; set; }
 
-		public bool RequireClientCertificates {
-			get { return require_client_certificates; }
-			set { require_client_certificates = value; }
-		}
+		public bool RequireClientCertificates { get; set; }
 
 		public string Password {
 			get { throw new CryptographicException ("Password is write-only."); }
 			set { password = value; }
 		}
 
-		public string Pkcs12File {
-			get { return p12Filename; }
-			set { p12Filename = value; }
-		}
+		public string Pkcs12File { get; set; }
 
 		public RSA KeyPair {
 			get {
@@ -100,10 +77,7 @@ namespace Mono.WebServer.XSP {
 			}
 		}
 
-		public string PvkFile {
-			get { return keyFilename; }
-			set { keyFilename = value; }
-		}
+		public string PvkFile { get; set; }
 
 		public X509Certificate ServerCertificate {
 			get {
@@ -113,31 +87,28 @@ namespace Mono.WebServer.XSP {
 			}
 		}
 
-		public SecurityProtocolType Protocol {
-			get { return protocol; }
-			set { protocol = value; }
-		}
+		public SecurityProtocolType Protocol { get; set; }
 
 		// methods
 
 		public void CheckSecurityContextValidity ()
 		{
-			if (enabled) {
+			if (Enabled) {
 				// give priority to pkcs12 (for conflicting options)
-				LoadPkcs12File (p12Filename, password);
-				LoadCertificate (certFilename);
-				LoadPrivateKeyFile (keyFilename, password);
+				LoadPkcs12File (Pkcs12File, password);
+				LoadCertificate (CertificateFile);
+				LoadPrivateKeyFile (PvkFile, password);
 			}
 			valid = true;
 		}
 
 		public override string ToString ()
 		{
-			if (!enabled)
+			if (!Enabled)
 				return "(non-secure)";
 
-			StringBuilder sb = new StringBuilder ("(");
-			switch (protocol) {
+			var sb = new StringBuilder ("(");
+			switch (Protocol) {
 			case SecurityProtocolType.Default:
 				sb.Append ("auto-detect SSL3/TLS1");
 				break;
@@ -148,7 +119,7 @@ namespace Mono.WebServer.XSP {
 				sb.Append ("TLS1");
 				break;
 			}
-			if (require_client_certificates)
+			if (RequireClientCertificates)
 				sb.Append (" with mandatory client certificates");
 			sb.Append (")");
 			return sb.ToString ();
@@ -158,14 +129,14 @@ namespace Mono.WebServer.XSP {
 		{
 			if (protocol != null) {
 				try {
-					this.protocol = (SecurityProtocolType) Enum.Parse (typeof (SecurityProtocolType), protocol);
+					Protocol = (SecurityProtocolType) Enum.Parse (typeof (SecurityProtocolType), protocol);
 				}
 				catch (Exception e) {
 					string message = String.Format ("The value '{0}' given for security protocol is invalid.", protocol);
 					throw new CryptographicException (message, e);
 				}
 			} else {
-				this.protocol = SecurityProtocolType.Default;
+				Protocol = SecurityProtocolType.Default;
 			}
 		}
 
@@ -191,10 +162,9 @@ namespace Mono.WebServer.XSP {
 				return;
 
 			try {
-				if (password == null)
-					key = PrivateKey.CreateFromFile (filename).RSA;
-				else
-					key = PrivateKey.CreateFromFile (filename, password).RSA;
+				key = password == null 
+					? PrivateKey.CreateFromFile (filename).RSA 
+					: PrivateKey.CreateFromFile (filename, password).RSA;
 			}
 			catch (CryptographicException ce) {
 				string message = String.Format ("Invalid private key password or private key file '{0}' is corrupt.", filename);
@@ -212,11 +182,9 @@ namespace Mono.WebServer.XSP {
 				return;
 
 			try {
-				MSX.PKCS12 pfx = null;
-				if (password == null)
-					pfx = MSX.PKCS12.LoadFromFile (filename);
-				else
-					pfx = MSX.PKCS12.LoadFromFile (filename, password);
+				MSX.PKCS12 pfx = password == null
+					? MSX.PKCS12.LoadFromFile (filename)
+					: MSX.PKCS12.LoadFromFile (filename, password);
 
 				// a PKCS12 file may contain many certificates and keys so we must find 
 				// the best one (i.e. not the first one)
@@ -294,7 +262,7 @@ namespace Mono.WebServer.XSP {
 				if (xtn == null)
 					continue;
 
-				ExtendedKeyUsageExtension eku = new ExtendedKeyUsageExtension (xtn);
+				var eku = new ExtendedKeyUsageExtension (xtn);
 				if (!eku.KeyPurpose.Contains ("1.3.6.1.5.5.7.3.1"))
 					continue;
 
@@ -317,7 +285,7 @@ namespace Mono.WebServer.XSP {
 				if (xtn == null)
 					continue;
 
-				KeyUsageExtension ku = new KeyUsageExtension (xtn);
+				var ku = new KeyUsageExtension (xtn);
 				if (!ku.Support (KeyUsages.digitalSignature) && !ku.Support (KeyUsages.keyEncipherment))
 					continue;
 
@@ -340,7 +308,7 @@ namespace Mono.WebServer.XSP {
 				if (xtn == null)
 					continue;
 
-				NetscapeCertTypeExtension ct = new NetscapeCertTypeExtension (xtn);
+				var ct = new NetscapeCertTypeExtension (xtn);
 				if (!ct.Support (NetscapeCertTypeExtension.CertTypes.SslServer))
 					continue;
 

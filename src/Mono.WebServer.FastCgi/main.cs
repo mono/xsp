@@ -111,52 +111,21 @@ namespace Mono.WebServer.FastCgi
 				ShowVersion ();
 				return 0;
 			}
-			
-			try {
-				var config_file = configmanager ["configfile"]
-					as string;
-				if (config_file != null)
-					configmanager.LoadXmlConfig (
-						config_file);
-			} catch (ApplicationException e) {
-				Console.WriteLine (e.Message);
-				return 1;
-			} catch (System.Xml.XmlException e) {
-				Console.WriteLine (
-					"Error reading XML configuration: {0}",
-					e.Message);
-				return 1;
-			}
-			
-			try {
-				var log_level = configmanager ["loglevels"] as string;
-				
-				if (log_level != null)
-					Logger.Level = (LogLevel)
-						Enum.Parse (typeof (LogLevel),
-							log_level);
-			} catch {
-				Console.WriteLine ("Failed to parse log levels.");
-				Console.WriteLine ("Using default levels: {0}",
-					Logger.Level);
-			}
 
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
+
+			if (!LoadConfig())
+				return 1;
+
+#if DEBUG
+			// Log everything while debugging
 			Logger.Level = LogLevel.All;
-			
-			try {
-				var log_file = configmanager ["logfile"] as string;
-				
-				if (log_file != null)
-					Logger.Open (log_file);
-			} catch (Exception e) {
-				Logger.Write (LogLevel.Error,
-					      "Error opening log file: {0}",
-					      e.Message);
-				Logger.Write (LogLevel.Error,
-					      "Events will not be logged.");
-			}
+#endif
+
+			SetLogLevel();
+
+			OpenLogFile ();
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
@@ -167,120 +136,31 @@ namespace Mono.WebServer.FastCgi
 			
 			// Socket strings are in the format
 			// "type[:ARG1[:ARG2[:...]]]".
-			var socket_type = configmanager ["socket"] as string ?? "pipe";
+			var socket_type = configmanager ["socket"] as string 
+				?? "pipe";
 
 			string [] socket_parts = socket_type.Split (
 				new[] {':'}, 3);
 			
 			switch (socket_parts [0].ToLower ()) {
 			case "pipe":
-				try {
-					socket = SocketFactory.CreatePipeSocket (
-						IntPtr.Zero);
-				} catch (System.Net.Sockets.SocketException e){
-					Logger.Write (LogLevel.Error,
-						"Pipe socket is not bound.");
-					Logger.Write (e);
-					var errorcode = e.SocketErrorCode;
-					Logger.Write (LogLevel.Debug,
-						"Errorcode: {0}", errorcode);
-					switch (errorcode) {
-					case System.Net.Sockets.SocketError.NotSocket:
-						if (socket == null)
-							Logger.Write (
-								LogLevel.Debug,
-								"Null socket");
-						else
-							Logger.Write (
-								LogLevel.Debug,
-								socket.ToString
-									());
-						break;
-					}
+				if (!CreatePipe (ref socket))
 					return 1;
-				} catch (NotSupportedException) {
-					Logger.Write (LogLevel.Error,
-						"Error: Pipe sockets are not supported on this system.");
-					return 1;
-				}
 				break;
 			
 			// The FILE sockets is of the format
 			// "file[:PATH]".
 			case "unix":
 			case "file":
-				if (socket_parts.Length == 2)
-					configmanager ["filename"] =
-						socket_parts [1];
-				
-				var path = configmanager ["filename"] as string;
-				
-				try {
-					socket = SocketFactory.CreateUnixSocket (
-						path);
-				} catch (System.Net.Sockets.SocketException e){
-					Logger.Write (LogLevel.Error,
-						"Error creating the socket: {0}",
-						e.Message);
+				if (!CreateUnixSocket (socket_parts, ref socket))
 					return 1;
-				}
-				
-				Logger.Write (LogLevel.Debug,
-					      "Listening on file: {0}",	path);
 				break;
 			
 			// The TCP socket is of the format
 			// "tcp[[:ADDRESS]:PORT]".
 			case "tcp":
-				if (socket_parts.Length > 1)
-					configmanager ["port"] = socket_parts [
-						socket_parts.Length - 1];
-				
-				if (socket_parts.Length == 3)
-					configmanager ["address"] =
-						socket_parts [1];
-				
-				ushort port;
-				try
-				{
-					port = (ushort)configmanager ["port"];
-				}
-				catch (ApplicationException e)
-				{
-					Logger.Write (LogLevel.Error, e.Message);
+				if (!CreateTcpSocket (socket_parts, ref socket))
 					return 1;
-				}
-				
-				var address_str =
-					configmanager ["address"] as string;
-				IPAddress address;
-
-				if (address_str == null)
-					address = IPAddress.Loopback;
-				else
-					try {
-						address = IPAddress.Parse (address_str);
-					} catch {
-						Logger.Write (LogLevel.Error,
-							"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
-							address_str);
-						return 1;
-					}
-				
-				try {
-					socket = SocketFactory.CreateTcpSocket (
-						address, port);
-				} catch (System.Net.Sockets.SocketException e){
-					Logger.Write (LogLevel.Error,
-						"Error creating the socket: {0}",
-						e.Message);
-					return 1;
-				}
-				
-				Logger.Write (LogLevel.Debug,
-					      "Listening on port: {0}", address_str);
-				Logger.Write (LogLevel.Debug,
-					      "Listening on address: {0}", port);
 				break;
 				
 			default:
@@ -380,6 +260,165 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			return 0;
+		}
+
+		static bool CreateTcpSocket (string[] socketParts, ref Socket socket)
+		{
+			if (socketParts.Length > 1)
+				configmanager ["port"] = socketParts [
+					socketParts.Length - 1];
+
+			if (socketParts.Length == 3)
+				configmanager ["address"] = socketParts [1];
+
+			ushort port;
+			try {
+				port = (ushort) configmanager ["port"];
+			} catch (ApplicationException e) {
+				Logger.Write (LogLevel.Error, e.Message);
+				return false;
+			}
+
+			var address_str = configmanager ["address"] as string;
+			IPAddress address;
+
+			if (address_str == null)
+				address = IPAddress.Loopback;
+			else {
+				try {
+					address = IPAddress.Parse (address_str);
+				} catch {
+					Logger.Write (LogLevel.Error,
+						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
+						address_str);
+					return false;
+				}
+			}
+
+			try {
+				socket = SocketFactory.CreateTcpSocket (
+					address, port);
+			} catch (System.Net.Sockets.SocketException e) {
+				Logger.Write (LogLevel.Error,
+					"Error creating the socket: {0}",
+					e.Message);
+				return false;
+			}
+
+			Logger.Write (LogLevel.Debug,
+				"Listening on port: {0}", address_str);
+			Logger.Write (LogLevel.Debug,
+				"Listening on address: {0}", port);
+			return true;
+		}
+
+		static bool CreateUnixSocket (string[] socketParts, ref Socket socket)
+		{
+			if (socketParts.Length == 2)
+				configmanager ["filename"] = socketParts [1];
+
+			var path = configmanager ["filename"] as string;
+
+			try {
+				socket = SocketFactory.CreateUnixSocket (
+					path);
+			} catch (System.Net.Sockets.SocketException e) {
+				Logger.Write (LogLevel.Error,
+					"Error creating the socket: {0}",
+					e.Message);
+				return false;
+			}
+
+			Logger.Write (LogLevel.Debug,
+				"Listening on file: {0}", path);
+			return true;
+		}
+
+		static bool CreatePipe (ref Socket socket)
+		{
+			try {
+				socket = SocketFactory.CreatePipeSocket (
+					IntPtr.Zero);
+			} catch (System.Net.Sockets.SocketException e) {
+				Logger.Write (LogLevel.Error,
+					"Pipe socket is not bound.");
+				Logger.Write (e);
+				var errorcode = e.SocketErrorCode;
+				Logger.Write (LogLevel.Debug,
+					"Errorcode: {0}", errorcode);
+				return false;
+			} catch (NotSupportedException) {
+				Logger.Write (LogLevel.Error,
+					"Error: Pipe sockets are not supported on this system.");
+				return false;
+			}
+			return true;
+		}
+
+		static void OpenLogFile ()
+		{
+			try {
+				var log_file = configmanager ["logfile"]
+					as string;
+
+				if (log_file != null)
+					Logger.Open (log_file);
+			} catch (Exception e) {
+				Logger.Write (LogLevel.Error,
+					"Error opening log file: {0}",
+					e.Message);
+				Logger.Write (LogLevel.Warning,
+					"Events will not be logged to file.");
+			}
+		}
+
+		static void SetLogLevel()
+		{
+			var log_level = configmanager["loglevels"] as string;
+
+			if (log_level == null)
+				return;
+
+			LogLevel level;
+			if (Enum.TryParse(log_level, true, out level)) {
+				Logger.Level = level;
+			}
+			else {
+				Logger.Write(LogLevel.Warning,
+					"Failed to parse log levels.");
+				Logger.Write(LogLevel.Notice,
+					"Using default levels: {0}",
+					Logger.Level);
+			}
+		}
+
+		/// <summary>
+		/// If a configfile option was specified, tries to load
+		/// the configuration file
+		/// </summary>
+		/// <returns>false on failure, true on success or
+		/// option not present</returns>
+		static bool LoadConfig()
+		{
+			try {
+				var config_file = configmanager["configfile"]
+					as string;
+				if (config_file != null)
+					configmanager.LoadXmlConfig(
+						config_file);
+			}
+			catch (ApplicationException e) {
+				Logger.Write(LogLevel.Error, e.Message);
+				return false;
+			}
+			catch (System.Xml.XmlException e)
+			{
+				Logger.Write(LogLevel.Error,
+					"Error reading XML configuration: {0}",
+					e.Message);
+				return false;
+			}
+			return true;
 		}
 	}
 }

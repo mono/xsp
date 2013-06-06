@@ -113,8 +113,8 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			try {
-				var config_file = (string)
-					configmanager ["configfile"];
+				var config_file = configmanager ["configfile"]
+					as string;
 				if (config_file != null)
 					configmanager.LoadXmlConfig (
 						config_file);

@@ -34,60 +34,57 @@ using System.Reflection;
 using System.Globalization;
 using System.Collections.Specialized;
 using System.Text;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.WebServer
 {
 	public class ConfigurationManager
 	{
-		int hash;
+		XmlNodeList settings;
 		
-		XmlNodeList elems;
+		readonly IDictionary<string,string> cmd_args = new Dictionary<string,string> ();
 		
-		readonly NameValueCollection cmd_args = 
-			new NameValueCollection ();
-		
-		readonly NameValueCollection xml_args =
-			new NameValueCollection ();
+		readonly IDictionary<string,string> xml_args = new Dictionary<string,string> ();
 
-		readonly NameValueCollection default_args =
-			new NameValueCollection ();
+		readonly IDictionary<string,string> default_args = new Dictionary<string,string> ();
 		
 		public ConfigurationManager (Assembly asm, string resource)
 		{
 			var doc = new XmlDocument ();
 			doc.Load (asm.GetManifestResourceStream (resource));
-			ImportSettings (doc, default_args, true, false);
-
+			ImportSettings (doc, default_args, false);
 		}
 
-		void ImportSettings (XmlDocument doc, NameValueCollection collection,
-				     bool allowDuplicates, bool insertEmptyValue)
+		void ImportSettings (XmlDocument doc,
+		                     IDictionary<string,string> collection,
+		                     bool insertEmptyValue)
 		{
-			elems = doc.GetElementsByTagName ("Setting");
-			foreach (XmlElement setting in elems) {
+			settings = doc.GetElementsByTagName ("Setting");
+			foreach (XmlElement setting in settings) {
 				string name = GetXmlValue (setting, "Name");
 				string value = GetXmlValue (setting, "Value");
 				if (name.Length == 0)
 					throw AppExcept (except_bad_elem,
 						name, value);
 
-				if (!allowDuplicates && collection [name] != null)
-					throw AppExcept (except_xml_duplicate, name);
+				if (collection.ContainsKey (name))
+					throw AppExcept (except_xml_duplicate,
+						name);
 
-				if (insertEmptyValue ||  value.Length > 0)
-					collection [name] = value;
+				if (insertEmptyValue || value.Length > 0)
+					collection.Add (name, value);
 			}
 		}
 		
 		XmlElement GetSetting (string name)
 		{
-			foreach (XmlElement setting in elems)
+			foreach (XmlElement setting in settings)
 				if (GetXmlValue (setting, "Name") == name)
 					return setting;
 			
 			return null;
 		}
-		
+
 		string GetValue (string name, out XmlElement setting)
 		{
 			setting = GetSetting (name);
@@ -96,13 +93,18 @@ namespace Mono.WebServer
 				return null;
 			
 			string value;
-			if ((value = cmd_args [name]) != null) return value;
-			if ((value = xml_args [name]) != null) return value;
+			if (cmd_args.TryGetValue(name, out value))
+				return value;
+			if (xml_args.TryGetValue(name, out value))
+				return value;
 
 			string env_setting = GetXmlValue (setting, "Environment");
-			if (env_setting.Length > 0)
-				if ((value = Environment.GetEnvironmentVariable (env_setting)) != null)
+			if (env_setting.Length > 0){
+				value = Environment.GetEnvironmentVariable(
+					env_setting);
+				if (value != null)
 					return value;
+			}
 			
 			string app_setting = GetXmlValue (setting,
 				"AppSetting");
@@ -111,7 +113,8 @@ namespace Mono.WebServer
 				if ((value = AppSettings [app_setting]) != null)
 					return value;
 
-			return default_args [name];
+			default_args.TryGetValue(name, out value);
+			return value;
 		}
 		
 		public bool Contains (string name)
@@ -154,7 +157,7 @@ namespace Mono.WebServer
 				if (value == null)
 					switch (type) {
 					case "uint16":
-						return 0;
+						return default(UInt16);
 					case "bool":
 						return false;
 					default:
@@ -180,21 +183,19 @@ namespace Mono.WebServer
 					
 					if (value.ToLower () == "false")
 						return false;
-						
+
 					throw AppExcept (except_bool, name,
 						value);
 					
 				case "directory":
-					var dir = new DirectoryInfo (value);
-					if (dir.Exists)
+					if (Directory.Exists (value))
 						return value;
 					
 					throw AppExcept (except_directory, name,
 						value);
 					
 				case "file":
-					var file = new FileInfo (value);
-					if (file.Exists)
+					if (File.Exists (value))
 						return value;
 					
 					throw AppExcept (except_file, name,
@@ -207,7 +208,7 @@ namespace Mono.WebServer
 			}
 			
 			set {
-				cmd_args.Set (name, value.ToString ());
+				cmd_args.AddOrReplace (name, value.ToString ());
 			}
 		}
 		
@@ -230,7 +231,7 @@ namespace Mono.WebServer
 		public void PrintHelp ()
 		{
 			int left_margin = 0;
-			foreach (XmlElement setting in elems) {
+			foreach (XmlElement setting in settings) {
 				string show = GetXmlValue (setting,
 					"ConsoleVisible").ToLower (
 						CultureInfo.InvariantCulture);
@@ -250,7 +251,7 @@ namespace Mono.WebServer
 					left_margin = length;
 			}
 			
-			foreach (XmlElement setting in elems) {
+			foreach (XmlElement setting in settings) {
 				string show = GetXmlValue (setting,
 					"ConsoleVisible").ToLower (
 						CultureInfo.InvariantCulture);
@@ -282,10 +283,10 @@ namespace Mono.WebServer
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
 					
-					if (String.IsNullOrEmpty(val))
-						val = default_args [name];
+					if (String.IsNullOrEmpty (val))
+						default_args.TryGetValue (name, out val);
 
-					if (String.IsNullOrEmpty(val))
+					if (String.IsNullOrEmpty (val))
 						val = "none";
 					
 					values.Add (" Default Value: " + val);
@@ -379,10 +380,6 @@ namespace Mono.WebServer
 				throw new ArgumentNullException ("args");
 			
 			for (int i = 0; i < args.Length; i ++) {
-				// Randomize the hash a bit.
-				int idx = (i + 1 < args.Length) ? i + 1 : i;
-				hash ^= args [idx].GetHashCode () + i;
-				
 				string arg = args [i];
 				int len = PrefixLength (arg);
 				
@@ -395,7 +392,7 @@ namespace Mono.WebServer
 					continue;
 				}
 				
-				if (cmd_args [arg] != null)
+				if (cmd_args.ContainsKey (arg))
 					Console.WriteLine (
 						"Warning: \"{0}\" has already been set. Overwriting.",
 						args [i]);
@@ -403,7 +400,8 @@ namespace Mono.WebServer
 				string [] pair = arg.Split (new[] {'='}, 2);
 				
 				if (pair.Length == 2) {
-					cmd_args.Add (pair [0], pair [1]);
+					cmd_args.AddOrReplace (pair [0],
+						pair [1]);
 					continue;
 				}
 				
@@ -433,8 +431,8 @@ namespace Mono.WebServer
 						args [i]);
 					continue;
 				}
-				
-				cmd_args [arg] = value;
+
+				cmd_args.AddOrReplace (arg, value);
 			}
 		}
 		
@@ -448,7 +446,7 @@ namespace Mono.WebServer
 		{
 			var doc = new XmlDocument ();
 			doc.Load (filename);
-			ImportSettings (doc, xml_args, false, true);
+			ImportSettings (doc, xml_args, true);
 		}
 		
 		int PrefixLength (string arg)
@@ -463,10 +461,6 @@ namespace Mono.WebServer
 				return 1;
 			
 			return 0;
-		}
-		
-		public int Hash {
-			get {return hash < 0 ? -hash : hash;}
 		}
 		
 		static NameValueCollection AppSettings {

@@ -32,18 +32,14 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Web;
-using System.Web.Hosting;
 using System.Runtime.InteropServices;
 
 namespace Mono.WebServer
@@ -51,37 +47,37 @@ namespace Mono.WebServer
 	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
-		string verb;
+		readonly string verb;
 		string path;
-		string rawUrl;
-		string pathInfo;
-		string queryString;
-		string protocol;
+		readonly string rawUrl;
+		readonly string pathInfo;
+		readonly string queryString;
+		readonly string protocol;
 		Hashtable headers;
 		string [][] unknownHeaders;
 		bool headersSent;
-		StringBuilder responseHeaders;
+		readonly StringBuilder responseHeaders;
 		int statusCode;
 		string statusDescription;
 		byte [] inputBuffer;
 		int inputLength;
 		bool refilled;
 		int position;
-		EndPoint remoteEP;
+		readonly EndPoint remoteEP;
 		bool sentConnection;
-		int localPort;
-		string localAddress;
-		int requestId;
+		readonly int localPort;
+		readonly string localAddress;
+		readonly int requestId;
 		XSPRequestBroker requestBroker;
 		bool keepAlive;
 		bool haveContentLength;
-		IntPtr socket;
-		bool secure;
+		readonly IntPtr socket;
+		readonly bool secure;
 
-		static bool running_tests;
-		static bool no_libc;
-		static string server_software;
-		static string serverHeader;
+		static readonly bool running_tests;
+		static readonly bool no_libc;
+		static readonly string server_software;
+		static readonly string serverHeader;
 
 		static string [] indexFiles = { "index.aspx",
 						"Default.aspx",
@@ -101,7 +97,7 @@ namespace Mono.WebServer
 			if (att.Length > 0)
 				title = ((AssemblyTitleAttribute) att [0]).Title;
 
-			int platform = (int) Environment.OSVersion.Platform;
+			var platform = (int) Environment.OSVersion.Platform;
 			string plat;
 			if (platform == 4 || platform == 6 || platform == 128)
 				plat = "Unix";
@@ -128,11 +124,7 @@ namespace Mono.WebServer
 
 			bool is_linux = false;
 			try {
-				string os = "";
-				using (Stream st = File.OpenRead ("/proc/sys/kernel/ostype")) {
-					StreamReader sr = new StreamReader (st);
-					os = sr.ReadToEnd ();
-				}
+				string os = File.ReadAllText ("/proc/sys/kernel/ostype");
 				is_linux = os.StartsWith ("Linux");
 			} catch {
 			}
@@ -145,7 +137,7 @@ namespace Mono.WebServer
 			if (list == null)
 				return;
 
-			ArrayList files = new ArrayList ();
+			var files = new List<string> ();
 			string [] fs = list.Split (',');
 			foreach (string f in fs) {
 				string trimmed = f.Trim ();
@@ -155,21 +147,17 @@ namespace Mono.WebServer
 				files.Add (trimmed);
 			}
 
-			indexFiles = (string []) files.ToArray (typeof (string));
+			indexFiles = files.ToArray ();
 		}
 		
-		public XSPWorkerRequest (int requestId, 
-								XSPRequestBroker requestBroker, 
-								IApplicationHost appHost, 
-								EndPoint localEP,
-					 			EndPoint remoteEP, 
-								string verb, 
-								string path, 
-								string queryString, 
-								string protocol, 
-								byte[] inputBuffer,
-								IntPtr socket,
-								bool secure)
+		public XSPWorkerRequest (int requestId,
+		                         XSPRequestBroker requestBroker,
+		                         IApplicationHost appHost,
+		                         EndPoint localEP, EndPoint remoteEP,
+		                         string verb, string path,
+		                         string queryString, string protocol,
+		                         byte[] inputBuffer, IntPtr socket,
+		                         bool secure)
 			: base (appHost)
 		{
 			this.socket = socket;
@@ -177,9 +165,9 @@ namespace Mono.WebServer
 			this.requestBroker = requestBroker;
 			this.remoteEP = remoteEP;
 			this.verb = verb;
-			this.rawUrl = path;
+			rawUrl = path;
 			if (!String.IsNullOrEmpty (queryString))
-				this.rawUrl += "?" + queryString;
+				rawUrl += "?" + queryString;
 			try {
 				Paths.GetPathsFromUri (appHost, verb, path, out this.path, out pathInfo);
 			} catch {
@@ -207,7 +195,7 @@ namespace Mono.WebServer
 				throw;
 			}
 
-			string cncHeader = (string) headers ["Connection"];
+			var cncHeader = (string) headers ["Connection"];
 			if (cncHeader != null) {
 				cncHeader = cncHeader.ToLower ();
 				if (cncHeader.IndexOf ("keep-alive") != -1)
@@ -241,8 +229,7 @@ namespace Mono.WebServer
 
 		string ReadLine ()
 		{
-			StringBuilder text = new StringBuilder ();
-			bool cr = false;
+			var text = new StringBuilder ();
 			do {
 				if (inputBuffer == null || position >= inputLength)
 					FillBuffer ();
@@ -250,7 +237,7 @@ namespace Mono.WebServer
 				if (position >= inputLength)
 					break;
 				
-				cr = false;
+				bool cr = false;
 				int count = 0;
 				byte b = 0;
 				int i;
@@ -259,7 +246,6 @@ namespace Mono.WebServer
 					if (b == '\r') {
 						cr = true;
 						count--;
-						continue;
 					} else if (b == '\n' || cr) {
 						count--;
 						break;
@@ -285,16 +271,14 @@ namespace Mono.WebServer
 					if (b != '\r' && b != '\n')
 						continue;
 					FillBuffer();
-					if (b == '\r' && inputLength > 0 && inputBuffer[0] == '\n')
+					if (b == '\r' && inputLength > 0
+						&& inputBuffer[0] == '\n')
 						position++;
 				}
 				break;
 			} while (true);
 
-			if (text.Length == 0)
-				return null;
-
-			return text.ToString ();
+			return text.Length == 0 ? null : text.ToString ();
 		}
 
 		void GetRequestHeaders ()
@@ -320,12 +304,12 @@ namespace Mono.WebServer
 
 		public override void CloseConnection ()
 		{
-			if (requestBroker != null) {
-				// We check for headersSent as broken user code might call
-				// CloseConnection at an early stage.
-				requestBroker.Close (requestId, (headersSent ? keepAlive : false));
-				requestBroker = null;
-			}
+			if (requestBroker == null)
+				return;
+			// We check for headersSent as broken user code might call
+			// CloseConnection at an early stage.
+			requestBroker.Close (requestId, headersSent && keepAlive);
+			requestBroker = null;
 		}
 
 		void AddConnectionHeader ()
@@ -350,7 +334,7 @@ namespace Mono.WebServer
 
 		byte [] GetHeaders ()
 		{
-			StringBuilder basicHeaders = new StringBuilder();
+			var basicHeaders = new StringBuilder();
 			basicHeaders.Append (protocol);
 			if (statusCode == 200)
 				basicHeaders.Append (" 200 ");
@@ -409,7 +393,7 @@ namespace Mono.WebServer
 			if (headers == null)
 				return null;
 
-			string headerName = HttpWorkerRequest.GetKnownRequestHeaderName (index);
+			string headerName = GetKnownRequestHeaderName (index);
 			return headers [headerName] as string;
 		}
 
@@ -429,26 +413,22 @@ namespace Mono.WebServer
 
 				ICollection keysColl = headers.Keys;
 				ICollection valuesColl = headers.Values;
-				string [] keys = new string [keysColl.Count];
-				string [] values = new string [valuesColl.Count];
+				var keys = new string [keysColl.Count];
+				var values = new string [valuesColl.Count];
 				keysColl.CopyTo (keys, 0);
 				valuesColl.CopyTo (values, 0);
 
 				int count = keys.Length;
-				ArrayList pairs = new ArrayList ();
+				var pairs = new List<string[]> ();
 				for (int i = 0; i < count; i++) {
-					int index = HttpWorkerRequest.GetKnownRequestHeaderIndex (keys [i]);
+					int index = GetKnownRequestHeaderIndex (keys [i]);
 					if (index != -1)
 						continue;
-					pairs.Add (new string [] { keys [i], values [i]});
+					pairs.Add (new[] { keys [i], values [i]});
 				}
 				
-				if (pairs.Count != 0) {
-					unknownHeaders = new string [pairs.Count][];
-					for (int i = 0; i < pairs.Count; i++)
-						unknownHeaders [i] = (string []) pairs [i];
-					//unknownHeaders = (string [][]) pairs.ToArray (typeof (string [][]));
-				}
+				if (pairs.Count != 0)
+					unknownHeaders = pairs.ToArray ();
 			}
 
 			return unknownHeaders;
@@ -477,10 +457,10 @@ namespace Mono.WebServer
 			if (inputLength == 0)
 				return null;
 
-			string content_length = (string) headers ["Content-Length"];
+			var content_length = (string) headers ["Content-Length"];
 			long length = -1;
 			try {
-				if (content_length != null && content_length.Length > 0)
+				if (!string.IsNullOrEmpty (content_length))
 					length = Int64.Parse (content_length);
 				if (length > Int32.MaxValue)
 					throw new InvalidOperationException ("Content-Length exceeds the maximum accepted size.");
@@ -492,7 +472,7 @@ namespace Mono.WebServer
 			if (length == -1 || length > input_data_length)
 				length = input_data_length;
 
-			byte [] result = new byte [length];
+			var result = new byte [length];
 			Buffer.BlockCopy (inputBuffer, position, result, 0, (int)length);
 			position = 0;
 			inputLength = 0;
@@ -525,7 +505,7 @@ namespace Mono.WebServer
 		public override string GetRemoteName ()
 		{
 			string ip = GetRemoteAddress ();
-			string name = null;
+			string name;
 			try {
 				IPHostEntry entry = Dns.GetHostByName (ip);
 				name = entry.HostName;
@@ -544,7 +524,7 @@ namespace Mono.WebServer
 
 		public override string GetServerVariable (string name)
 		{
-			string result = null;
+			string result;
 			switch (name) {
 			case "GATEWAY_INTERFACE":
 				result = "CGI/1.1";
@@ -566,7 +546,7 @@ namespace Mono.WebServer
 		public override string GetUriPath ()
 		{
 			string result = path;
-			if (pathInfo != null && pathInfo.Length > 0)
+			if (!string.IsNullOrEmpty (pathInfo))
 				result += pathInfo;
 
 			return result;
@@ -587,8 +567,8 @@ namespace Mono.WebServer
 			if (verb != "POST" || refilled || position >= inputLength)
 				return false;
 
-			string content_length = (string) headers ["Content-Length"];
-			long length = -1;
+			var content_length = (string) headers ["Content-Length"];
+			long length;
 			try {
 				length = Int64.Parse (content_length);
 			} catch {
@@ -713,16 +693,17 @@ namespace Mono.WebServer
 			}
 
 			if (!sentConnection && !haveContentLength &&
-			     String.Compare (name, "Content-Length", true, CultureInfo.InvariantCulture) == 0) {
+				String.Compare (name, "Content-Length", true, CultureInfo.InvariantCulture) == 0) {
 				haveContentLength = true;
 			}
 
-			if (!headersSent) {
-				responseHeaders.Append (name);
-				responseHeaders.Append (": ");
-				responseHeaders.Append (value);
-				responseHeaders.Append ("\r\n");
-			}
+			if (headersSent)
+				return;
+
+			responseHeaders.Append (name);
+			responseHeaders.Append (": ");
+			responseHeaders.Append (value);
+			responseHeaders.Append ("\r\n");
 		}
 
  		public override bool IsSecure ()
@@ -755,12 +736,11 @@ namespace Mono.WebServer
 				return;
 			}
 
-			int result;
 			try {
 				Cork (true);
 				SendHeaders ();
 				while (length > 0) {
-					result = sendfile ((int) socket, (int) handle, ref offset, (IntPtr) length);
+					int result = sendfile ((int) socket, (int) handle, ref offset, (IntPtr) length);
 					if (result == -1)
 						throw new System.ComponentModel.Win32Exception ();
 
@@ -802,7 +782,7 @@ namespace Mono.WebServer
 			while (total < len) {
 				fixed (byte *ptr = buffer) {
 					// 0x4000 no sigpipe
-					int n = send ((int) socket, ptr + total, (IntPtr) (len - total), (int) 0x4000);
+					int n = send ((int) socket, ptr + total, (IntPtr) (len - total), 0x4000);
 					if (n >= 0) {
 						total += n;
 					} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {

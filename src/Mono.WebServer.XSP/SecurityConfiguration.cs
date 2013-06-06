@@ -41,10 +41,10 @@ using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 namespace Mono.WebServer.XSP {
 
 	public class SecurityConfiguration {
-		private bool valid;
-		private RSA key;
-		private X509Certificate x509;
-		private string password;
+		bool valid;
+		RSA key;
+		X509Certificate x509;
+		string password;
 
 
 		public SecurityConfiguration ()
@@ -142,7 +142,7 @@ namespace Mono.WebServer.XSP {
 
 		// private stuff
 
-		private void LoadCertificate (string filename)
+		void LoadCertificate (string filename)
 		{
 			if ((filename == null) || (x509 != null))
 				return;
@@ -156,7 +156,7 @@ namespace Mono.WebServer.XSP {
 			}
 		}
 
-		private void LoadPrivateKeyFile (string filename, string password)
+		void LoadPrivateKeyFile (string filename, string password)
 		{
 			if ((filename == null) || (key != null))
 				return;
@@ -176,7 +176,7 @@ namespace Mono.WebServer.XSP {
 			}
 		}
 
-		private void LoadPkcs12File (string filename, string password)
+		void LoadPkcs12File (string filename, string password)
 		{
 			if ((filename == null) || (key != null))
 				return;
@@ -225,7 +225,7 @@ namespace Mono.WebServer.XSP {
 			}
 		}
 
-		private bool Simple (MSX.PKCS12 pfx)
+		bool Simple (MSX.PKCS12 pfx)
 		{
 			int ncerts = pfx.Certificates.Count;
 			if (ncerts == 0)
@@ -255,7 +255,7 @@ namespace Mono.WebServer.XSP {
 			return false;
 		}
 
-		private bool ExtendedKeyUsage (MSX.PKCS12 pfx)
+		bool ExtendedKeyUsage (MSX.PKCS12 pfx)
 		{
 			foreach (MSX.X509Certificate cert in pfx.Certificates) {
 				MSX.X509Extension xtn = cert.Extensions ["2.5.29.37"];
@@ -278,7 +278,7 @@ namespace Mono.WebServer.XSP {
 			return ((x509 != null) && (key != null));
 		}
 
-		private bool KeyUsage (MSX.PKCS12 pfx)
+		bool KeyUsage (MSX.PKCS12 pfx)
 		{
 			foreach (MSX.X509Certificate cert in pfx.Certificates) {
 				MSX.X509Extension xtn = cert.Extensions ["2.5.29.15"];
@@ -301,7 +301,7 @@ namespace Mono.WebServer.XSP {
 			return ((x509 != null) && (key != null));
 		}
 
-		private bool NetscapeCertType (MSX.PKCS12 pfx)
+		bool NetscapeCertType (MSX.PKCS12 pfx)
 		{
 			foreach (MSX.X509Certificate cert in pfx.Certificates) {
 				MSX.X509Extension xtn = cert.Extensions ["2.16.840.1.113730.1.1"];
@@ -324,7 +324,7 @@ namespace Mono.WebServer.XSP {
 			return ((x509 != null) && (key != null));
 		}
 
-		private bool BruteForce (MSX.PKCS12 pfx)
+		bool BruteForce (MSX.PKCS12 pfx)
 		{
 			foreach (object o in pfx.Keys) {
 				key = (o as RSA);
@@ -344,7 +344,7 @@ namespace Mono.WebServer.XSP {
 			return false;
 		}
 
-		private RSA GetKeyMatchingCertificate (MSX.PKCS12 pfx, MSX.X509Certificate cert)
+		RSA GetKeyMatchingCertificate (MSX.PKCS12 pfx, MSX.X509Certificate cert)
 		{
 			IDictionary attributes = pfx.GetAttributes (cert);
 			return (pfx.GetAsymmetricAlgorithm (attributes) as RSA);

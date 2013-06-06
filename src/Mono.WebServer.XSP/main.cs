@@ -43,7 +43,7 @@ namespace Mono.WebServer.XSP
 	public class Server : MarshalByRefObject
 	{
 		// TODO: Rewrite this using "Haskell's Either"
-		private class ApplicationSettings
+		class ApplicationSettings
 		{
 			public string Apps;
 			public string AppConfigDir;
@@ -283,7 +283,7 @@ namespace Mono.WebServer.XSP
 			var security = new SecurityConfiguration ();
 			var settings = new ApplicationSettings ();
 			
-			if (string.IsNullOrEmpty (settings.IP))
+			if (String.IsNullOrEmpty (settings.IP))
 				settings.IP = "0.0.0.0";
 			
 			if (settings.Oport == null)
@@ -394,7 +394,7 @@ namespace Mono.WebServer.XSP
 					break;
 				case "--pidfile": {
 					string pidfile = args[++i];
-					if (!string.IsNullOrEmpty (pidfile)) {
+					if (!String.IsNullOrEmpty (pidfile)) {
 						try {
 							using (StreamWriter sw = File.CreateText (pidfile))
 								sw.Write (Process.GetCurrentProcess ().Id);
@@ -431,7 +431,7 @@ namespace Mono.WebServer.XSP
 				return 1;
 			}
 
-			if (!string.IsNullOrEmpty (settings.RootDir)) {
+			if (!String.IsNullOrEmpty (settings.RootDir)) {
 				try {
 					Environment.CurrentDirectory = settings.RootDir;
 				} catch (Exception e) {

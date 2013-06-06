@@ -460,7 +460,7 @@ namespace Mono.WebServer
 			var content_length = (string) headers ["Content-Length"];
 			long length = -1;
 			try {
-				if (!string.IsNullOrEmpty (content_length))
+				if (!String.IsNullOrEmpty (content_length))
 					length = Int64.Parse (content_length);
 				if (length > Int32.MaxValue)
 					throw new InvalidOperationException ("Content-Length exceeds the maximum accepted size.");
@@ -546,7 +546,7 @@ namespace Mono.WebServer
 		public override string GetUriPath ()
 		{
 			string result = path;
-			if (!string.IsNullOrEmpty (pathInfo))
+			if (!String.IsNullOrEmpty (pathInfo))
 				result += pathInfo;
 
 			return result;

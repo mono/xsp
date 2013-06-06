@@ -30,24 +30,18 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.WebServer
 {
 	struct ModMonoConfig
 	{
-		bool changed;
 		bool outputBuffering;
-		
-		public bool Changed {
-			get { return changed; }
-			set { changed = value; } 
-		}
+
+		public bool Changed { get; set; }
 
 		public bool OutputBuffering {
 			get { return outputBuffering; }
 			set {
-				changed |= (value != outputBuffering);
+				Changed |= (value != outputBuffering);
 				outputBuffering = value;
 			}
 		}

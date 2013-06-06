@@ -28,11 +28,7 @@
 //
 
 using System;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
-using Mono.Unix;
 
 namespace Mono.WebServer
 {
@@ -68,7 +64,7 @@ namespace Mono.WebServer
 									protocol, localAddress, serverPort, remoteAddress,
 									remotePort, remoteName, headers, headerValues);
 				} else {
-					mwr = new ModMonoWorkerRequest ((ModMonoWorker) worker, this, verb, path, queryString,
+					mwr = new ModMonoWorkerRequest (worker, this, verb, path, queryString,
 									protocol, localAddress, serverPort, remoteAddress,
 									remotePort, remoteName, headers, headerValues);
 				}
@@ -100,9 +96,9 @@ namespace Mono.WebServer
 					// 52 is the minimal PEM size for certificate header/footer
 					if ((pem_cert != null) && (pem_cert.Length > 52)) {
 						byte[] certBytes = FromPEM (pem_cert);
-						X509Certificate cert = new X509Certificate (certBytes);
-						mwr.AddServerVariable ("CERT_SERVER_ISSUER", cert.GetIssuerName ());
-						mwr.AddServerVariable ("CERT_SERVER_SUBJECT", cert.GetName ());
+						var cert = new X509Certificate (certBytes);
+						mwr.AddServerVariable ("CERT_SERVER_ISSUER", cert.Issuer);
+						mwr.AddServerVariable ("CERT_SERVER_SUBJECT", cert.Subject);
 					}
 				}
 			} catch (Exception) {

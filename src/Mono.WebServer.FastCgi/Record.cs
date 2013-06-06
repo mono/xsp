@@ -210,7 +210,7 @@ namespace Mono.FastCgi {
 		
 		public override string ToString ()
 		{
-			return string.Format (CultureInfo.CurrentCulture,
+			return String.Format (CultureInfo.CurrentCulture,
 				Strings.Record_ToString,
 				Version, Type, RequestID, BodyLength);
 		}

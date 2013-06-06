@@ -117,7 +117,7 @@ namespace Mono.FastCgi {
 		                          IFormatProvider provider,
 		                          string format, params object [] args)
 		{
-			Write (level, string.Format (provider, format, args));
+			Write (level, String.Format (provider, format, args));
 		}
 				
 		public static void Write (LogLevel level, string format,
@@ -134,7 +134,7 @@ namespace Mono.FastCgi {
 			if ((Level & level) == LogLevel.None)
 				return;
 			
-			string text = string.Format (CultureInfo.CurrentCulture,
+			string text = String.Format (CultureInfo.CurrentCulture,
 				Strings.Logger_Format,
 				DateTime.Now,
 				level,

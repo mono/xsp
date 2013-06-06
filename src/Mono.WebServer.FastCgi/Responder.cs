@@ -79,7 +79,7 @@ namespace Mono.WebServer.FastCgi
 			// If the application host is null, the server was
 			// unable to determine a sane plan. Alert the client.
 			if (appHost == null) {
-				request.SendOutputText (string.Format (error500,
+				request.SendOutputText (String.Format (error500,
 					HostName, PortNumber,
 					Path, PhysicalPath));
 				return -1;
@@ -94,7 +94,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			// MIN_VALUE means don't close.
-			return int.MinValue;
+			return Int32.MinValue;
 		}
 		
 		public ResponderRequest Request {

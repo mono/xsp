@@ -110,7 +110,7 @@ namespace Mono.FastCgi {
 				// continue.
 				int length;
 				try {
-					length = int.Parse (length_text,
+					length = Int32.Parse (length_text,
 						CultureInfo.InvariantCulture);
 				} catch {
 					Abort (Strings.ResponderRequest_NoContentLengthNotNumber);
@@ -133,7 +133,7 @@ namespace Mono.FastCgi {
 		private void Worker (object state)
 		{
 			int appStatus = responder.Process ();
-			if (appStatus != int.MinValue)
+			if (appStatus != Int32.MinValue)
 				CompleteRequest (appStatus,
 					ProtocolStatus.RequestComplete);
 		}

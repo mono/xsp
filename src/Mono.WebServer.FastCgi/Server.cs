@@ -37,33 +37,33 @@ namespace Mono.FastCgi {
 	{
 		#region Private Fields
 		
-		private readonly List<Connection> connections = new List<Connection> ();
+		readonly List<Connection> connections = new List<Connection> ();
 		
-		private readonly Socket listen_socket;
+		readonly Socket listen_socket;
 		
-		private bool started;
+		bool started;
 		
-		private bool accepting;
+		bool accepting;
 		
-		private Thread runner;
+		Thread runner;
 		
-		private readonly object accept_lock = new object ();
+		readonly object accept_lock = new object ();
 		
-		private AsyncCallback accept_cb;
+		AsyncCallback accept_cb;
 		
-		private int  max_connections = int.MaxValue;
+		int max_connections = Int32.MaxValue;
 		
-		private int  max_requests = int.MaxValue;
+		int max_requests = Int32.MaxValue;
 		
-		private bool multiplex_connections;
+		bool multiplex_connections;
 		
-		private Type responder_type;
+		Type responder_type;
 		
-		private byte [][] buffers = new byte [200][];
+		byte [][] buffers = new byte [200][];
 		
-		private int buffer_count;
+		int buffer_count;
 		
-		private readonly object buffer_lock = new object ();
+		readonly object buffer_lock = new object ();
 		
 		#endregion
 		
@@ -413,7 +413,7 @@ namespace Mono.FastCgi {
 			if (responder.GetConstructor (new[]
 				{typeof (ResponderRequest)}) == null) {
 				
-				string msg = string.Format (
+				string msg = String.Format (
 					CultureInfo.CurrentCulture,
 					Strings.Server_ResponderLacksProperConstructor,
 					responder);

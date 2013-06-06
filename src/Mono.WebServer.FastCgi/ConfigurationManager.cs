@@ -215,7 +215,7 @@ namespace Mono.WebServer
 							string message,
 							params object [] args)
 		{
-			return new ApplicationException (string.Format (
+			return new ApplicationException (String.Format (
 				CultureInfo.InvariantCulture, message, args),
 				except);
 		}
@@ -223,7 +223,7 @@ namespace Mono.WebServer
 		private static ApplicationException AppExcept (string message,
 							params object [] args)
 		{
-			return new ApplicationException (string.Format (
+			return new ApplicationException (String.Format (
 				CultureInfo.InvariantCulture, message, args));
 		}
 		
@@ -263,7 +263,7 @@ namespace Mono.WebServer
 						CultureInfo.InvariantCulture);
 
 				string name = GetXmlValue (setting, "Name"); 
-				string arg = string.Format (
+				string arg = String.Format (
 					CultureInfo.InvariantCulture,
 					"  /{0}{1}",
 					name,
@@ -282,10 +282,10 @@ namespace Mono.WebServer
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
 					
-					if (string.IsNullOrEmpty(val))
+					if (String.IsNullOrEmpty(val))
 						val = default_args [name];
 
-					if (string.IsNullOrEmpty(val))
+					if (String.IsNullOrEmpty(val))
 						val = "none";
 					
 					values.Add (" Default Value: " + val);
@@ -302,7 +302,7 @@ namespace Mono.WebServer
 					values.Add (" Environment Variable Name: " +
 						env_setting);
 				
-				values.Add (string.Empty);
+				values.Add (String.Empty);
 
 				int start = arg.Length;
 				foreach (string text in values) {
@@ -321,14 +321,14 @@ namespace Mono.WebServer
 				switch (node.LocalName) {
 					case "para":
 						RenderXml (child, values, indent, length);
-						values.Add (string.Empty);
+						values.Add (String.Empty);
 						break;
 					case "block":
 						RenderXml (child, values, indent + 4, length);
 						break;
 					case "example":
 						RenderXml (child, values, indent + 4, length);
-						values.Add (string.Empty);
+						values.Add (String.Empty);
 						break;
 					case "code":
 					case "desc":
@@ -476,16 +476,16 @@ namespace Mono.WebServer
 		private static string GetXmlValue (XmlElement elem, string name)
 		{
 			string value = elem.GetAttribute (name);
-			if (!string.IsNullOrEmpty(value))
+			if (!String.IsNullOrEmpty(value))
 				return value;
 			
 			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
 				value = child.InnerText;
-				if (!string.IsNullOrEmpty(value))
+				if (!String.IsNullOrEmpty(value))
 					return value;
 			}
 			
-			return string.Empty;
+			return String.Empty;
 		}
 	}
 }

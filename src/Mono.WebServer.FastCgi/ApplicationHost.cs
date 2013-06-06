@@ -84,9 +84,9 @@ namespace Mono.WebServer.FastCgi
 		
 		public string MapPath (string virtualPath)
 		{
-			string physPath = HostingEnvironment.MapPath ((string.IsNullOrEmpty(virtualPath) || virtualPath.TrimStart().Length == 0) ? "/" : virtualPath);
+			string physPath = HostingEnvironment.MapPath ((String.IsNullOrEmpty(virtualPath) || virtualPath.TrimStart().Length == 0) ? "/" : virtualPath);
 
-			if (!string.IsNullOrEmpty(physPath))
+			if (!String.IsNullOrEmpty(physPath))
 				return physPath;
 
 			// For old .NET 1.x, and as a fallback mechanism until Mono's 
@@ -100,7 +100,7 @@ namespace Mono.WebServer.FastCgi
 			// remove the workarounds in ApplicationHost.VirtualFileExists and
 			// ApplicationHost.VirtualDirectoryExists)
 
-			if (string.IsNullOrEmpty(virtualPath) || virtualPath == VPath) {
+			if (String.IsNullOrEmpty(virtualPath) || virtualPath == VPath) {
 				if (IOPath.DirectorySeparatorChar != '/')
 					return Path.Replace ('/', IOPath.DirectorySeparatorChar);
 				return Path;

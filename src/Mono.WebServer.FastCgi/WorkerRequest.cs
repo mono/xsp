@@ -158,7 +158,7 @@ namespace Mono.WebServer.FastCgi
 			
 			var builder = new StringBuilder (GetUriPath ());
 			string query = GetQueryString ();
-			if (!string.IsNullOrEmpty(query)) {
+			if (!StringIsNullOrEmpty(query)) {
 				builder.Append ('?');
 				builder.Append (query);
 			}
@@ -188,17 +188,17 @@ namespace Mono.WebServer.FastCgi
 		public override string GetLocalAddress ()
 		{
 			string address = responder.GetParameter ("SERVER_ADDR");
-			if (!string.IsNullOrEmpty(address))
+			if (!String.IsNullOrEmpty(address))
 				return address;
 			
 			address = AddressFromHostName (
 				responder.GetParameter ("HTTP_HOST"));
-			if (!string.IsNullOrEmpty(address))
+			if (!String.IsNullOrEmpty(address))
 				return address;
 			
 			address = AddressFromHostName (
 				responder.GetParameter ("SERVER_NAME"));
-			if (!string.IsNullOrEmpty(address))
+			if (!String.IsNullOrEmpty(address))
 				return address;
 			
 			return base.GetLocalAddress ();
@@ -229,7 +229,7 @@ namespace Mono.WebServer.FastCgi
 		public override string GetRemoteAddress ()
 		{
 			string addr = responder.GetParameter ("REMOTE_ADDR");
-			return !string.IsNullOrEmpty(addr) ?
+			return !String.IsNullOrEmpty(addr) ?
 				addr : base.GetRemoteAddress ();
 		}
 		
@@ -250,11 +250,11 @@ namespace Mono.WebServer.FastCgi
 		public override int GetRemotePort ()
 		{
 			string port = responder.GetParameter ("REMOTE_PORT");
-			if (string.IsNullOrEmpty(port))
+			if (String.IsNullOrEmpty(port))
 				return base.GetRemotePort ();
 			
 			try {
-				return int.Parse (port);
+				return Int32.Parse (port);
 			} catch {
 				return base.GetRemotePort ();
 			}
@@ -445,7 +445,7 @@ namespace Mono.WebServer.FastCgi
 		
 		private static string HostNameFromString (string host)
 		{
-			if (string.IsNullOrEmpty(host))
+			if (StringIsNullOrEmpty(host))
 				return null;
 			
 			int colon_index = host.IndexOf (':');
@@ -475,7 +475,7 @@ namespace Mono.WebServer.FastCgi
 				parts [i] = new String (a);
 			}
 			
-			return string.Join ("-", parts);
+			return StringJoin ("-", parts);
 		}
 
 		private static void SetDefaultIndexFiles (string list)

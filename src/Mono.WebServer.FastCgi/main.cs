@@ -267,7 +267,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			var root_dir = configmanager ["root"] as string;
-			if (!string.IsNullOrEmpty(root_dir)) {
+			if (!String.IsNullOrEmpty(root_dir)) {
 				try {
 					Environment.CurrentDirectory = root_dir;
 				} catch (Exception e) {

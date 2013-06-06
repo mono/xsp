@@ -71,7 +71,7 @@ namespace Mono.FastCgi
 					conn.Connect (ep);
 					conn.Close ();
 					throw new InvalidOperationException (
-						string.Format (CultureInfo.CurrentCulture,
+						String.Format (CultureInfo.CurrentCulture,
 							Strings.UnixSocket_AlreadyExists,
 							path));
 				} catch (System.Net.Sockets.SocketException) {

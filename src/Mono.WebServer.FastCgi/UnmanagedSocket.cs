@@ -239,12 +239,7 @@ namespace Mono.FastCgi {
 		static UnmanagedSocket ()
 		{
 			try {
-				string os = "";
-				using (Stream st = File.OpenRead (
-					"/proc/sys/kernel/ostype")) {
-					var sr = new StreamReader (st);
-					os = sr.ReadToEnd ();
-				}
+				string os = File.ReadAllText("/proc/sys/kernel/ostype");
 				supports_libc = os.StartsWith ("Linux");
 			} catch {
 			}

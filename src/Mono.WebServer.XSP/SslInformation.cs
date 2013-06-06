@@ -28,66 +28,31 @@
 //
 
 using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Protocol.Tls;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
-namespace Mono.WebServer
-{
+namespace Mono.WebServer {
 	[Serializable]
 	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class SslInformation {
-		bool client_cert_allowed;
-		bool client_cert_required;
-		bool client_cert_valid;
-		byte[] raw_client_cert;
-		byte[] raw_server_cert;
-		int key_size;
-		int secret_key_size;
+		public bool AllowClientCertificate { get; set; }
 
-		public bool AllowClientCertificate {
-			get { return client_cert_allowed; }
-			set { client_cert_allowed = value; }
-		}
+		public bool RequireClientCertificate { get; set; }
 
-		public bool RequireClientCertificate {
-			get { return client_cert_required; }
-			set { client_cert_required = value; }
-		}
+		public bool ClientCertificateValid { get; set; }
 
-		public bool ClientCertificateValid {
-			get { return client_cert_valid; }
-			set { client_cert_valid = value; }
-		}
+		public int KeySize { get; set; }
 
-		public int KeySize {
-			get { return key_size; }
-			set { key_size = value; }
-		}			
+		public byte[] RawClientCertificate { get; set; }
 
-		public byte[] RawClientCertificate {
-			get { return raw_client_cert; }
-			set { raw_client_cert = value; }
-		}
+		public byte[] RawServerCertificate { get; set; }
 
-		public byte[] RawServerCertificate {
-			get { return raw_server_cert; }
-			set { raw_server_cert = value; }
-		}
-
-		public int SecretKeySize {
-			get { return secret_key_size; }
-			set { secret_key_size = value; }
-		}
+		public int SecretKeySize { get; set; }
 
 		public X509Certificate GetServerCertificate ()
 		{
-			if (raw_server_cert == null)
-				return null;
-
-			return new X509Certificate (raw_server_cert);
+			return RawServerCertificate == null
+				? null 
+				: new X509Certificate (RawServerCertificate);
 		}
 	}
 }

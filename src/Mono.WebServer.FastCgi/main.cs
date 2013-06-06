@@ -168,12 +168,9 @@ namespace Mono.WebServer.FastCgi
 
 			server.SetResponder (typeof (Responder));
 
-			server.MaxConnections = (ushort)
-				configmanager ["maxconns"];
-			server.MaxRequests = (ushort)
-				configmanager ["maxreqs"];
-			server.MultiplexConnections = (bool)
-				configmanager ["multiplex"];
+			server.MaxConnections = (ushort) configmanager ["maxconns"];
+			server.MaxRequests = (ushort) configmanager ["maxreqs"];
+			server.MultiplexConnections = (bool) configmanager ["multiplex"];
 
 			Logger.Write (LogLevel.Debug, "Max connections: {0}",
 				server.MaxConnections);

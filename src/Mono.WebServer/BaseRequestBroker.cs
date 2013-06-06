@@ -59,11 +59,11 @@ namespace Mono.WebServer
 		byte[][] buffers = new byte [INITIAL_REQUESTS][];
 		
 		// Contains the number of active requests.
-		int requests_count = 0;
+		int requests_count;
 
 		// Contains the total number of requests served so far.
 		// May freely wrap around.
-		uint requests_served = 0;
+		uint requests_served;
 
 		// Grows the size of the request allocation tables by 33%.
 		//

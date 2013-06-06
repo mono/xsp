@@ -422,7 +422,7 @@ namespace Mono.WebServer
 				SendResponseFromMemory (bytes, bytes.Length);
 				FlushResponse (true);
 			} catch (Exception ex) { // should "never" happen
-				throw ex;
+				throw ex; // TODO: This looks like a bug
 			}
 		}
 

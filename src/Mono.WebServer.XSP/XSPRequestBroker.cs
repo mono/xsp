@@ -28,18 +28,6 @@
 //
 
 using System;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Web;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Protocol.Tls;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
-using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
 namespace Mono.WebServer
 {	
@@ -52,7 +40,7 @@ namespace Mono.WebServer
 	{
 		public int GetReuseCount (int requestId)
 		{
-			XSPWorker worker = (XSPWorker) GetWorker (requestId);
+			var worker = (XSPWorker) GetWorker (requestId);
 			if (worker == null)
 				return 0;
 			
@@ -61,12 +49,12 @@ namespace Mono.WebServer
 
 		public void Close (int requestId, bool keepAlive)
 		{
-			XSPWorker worker = (XSPWorker) GetWorker (requestId);
-			if (worker != null) {
-				try {
-					worker.Close (keepAlive);
-				} catch {}
-			}
+			var worker = (XSPWorker) GetWorker (requestId);
+			if (worker == null)
+				return;
+			try {
+				worker.Close (keepAlive);
+			} catch {}
 		}
 	}
 }

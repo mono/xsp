@@ -48,6 +48,7 @@ namespace Mono.WebServer.Apache
 			public string RootDir;
 			public object Oport = 8080;
 			public string IP = "0.0.0.0";
+			// TODO: This field is unused, why is it there?
 			Exception Exception;
 			public bool NonStop;
 			public bool Verbose;

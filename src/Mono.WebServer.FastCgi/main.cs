@@ -43,14 +43,13 @@ namespace Mono.WebServer.FastCgi
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string version = assembly.GetName ().Version.ToString ();
-			object att;
 			
 			// att = assembly.GetCustomAttributes (
 			//	typeof (AssemblyTitleAttribute), false) [0];
 			// string title =
 			//	((AssemblyTitleAttribute) att).Title;
 			
-			att = assembly.GetCustomAttributes (
+			object att = assembly.GetCustomAttributes (
 				typeof (AssemblyCopyrightAttribute), false) [0];
 			string copyright =
 				((AssemblyCopyrightAttribute) att).Copyright;
@@ -114,7 +113,7 @@ namespace Mono.WebServer.FastCgi
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
 
-			if (!LoadConfig(configmanager))
+			if (!LoadConfigFile(configmanager))
 				return 1;
 
 #if DEBUG
@@ -431,7 +430,7 @@ namespace Mono.WebServer.FastCgi
 		/// </summary>
 		/// <returns>false on failure, true on success or
 		/// option not present</returns>
-		static bool LoadConfig(ConfigurationManager configmanager)
+		static bool LoadConfigFile(ConfigurationManager configmanager)
 		{
 			try {
 				var config_file = configmanager["configfile"]

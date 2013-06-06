@@ -179,7 +179,7 @@ namespace System.IO {
 				Next = null;
 			}
 		
-			public OpCode Code;
+			public readonly OpCode Code;
 			public string Argument;
 			public Op Next;
 		}

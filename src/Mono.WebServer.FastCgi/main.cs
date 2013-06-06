@@ -65,7 +65,7 @@ namespace Mono.WebServer.FastCgi
 				copyright, description);
 		}
 
-		static void ShowHelp ()
+		static void ShowHelp (ConfigurationManager configmanager)
 		{
 			string name = Path.GetFileName (
 				Assembly.GetExecutingAssembly ().Location);
@@ -79,7 +79,6 @@ namespace Mono.WebServer.FastCgi
 		}
 
 		static ApplicationServer appserver;
-		static ConfigurationManager configmanager;
 
 		public static VPathToHost GetApplicationForPath (string vhost,
                                                                  int port,
@@ -93,7 +92,7 @@ namespace Mono.WebServer.FastCgi
 		{
 			// Load the configuration file stored in the
 			// executable's resources.
-			configmanager = new ConfigurationManager (
+			var configmanager = new ConfigurationManager (
 				typeof (Server).Assembly,
 				"ConfigurationManager.xml");
 			
@@ -102,7 +101,7 @@ namespace Mono.WebServer.FastCgi
 			// Show the help and exit.
 			if ((bool) configmanager ["help"] ||
 				(bool) configmanager ["?"]) {
-				ShowHelp ();
+				ShowHelp (configmanager);
 				return 0;
 			}
 			
@@ -115,7 +114,7 @@ namespace Mono.WebServer.FastCgi
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
 
-			if (!LoadConfig())
+			if (!LoadConfig(configmanager))
 				return 1;
 
 #if DEBUG
@@ -123,93 +122,36 @@ namespace Mono.WebServer.FastCgi
 			Logger.Level = LogLevel.All;
 #endif
 
-			SetLogLevel();
+			SetLogLevel(configmanager);
 
-			OpenLogFile ();
+			OpenLogFile (configmanager);
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
 
 			Socket socket;
-			if (!CreateSocket (out socket))
+			if (!CreateSocket (configmanager, out socket))
 				return 1;
 
 			string root_dir;
-			if (!GetRootDirectory (out root_dir))
+			if (!GetRootDirectory (configmanager, out root_dir))
 				return 1;
 
-			bool auto_map = false; //(bool) configmanager ["automappaths"];
-			var webSource = new WebSource ();
-			appserver = new ApplicationServer (webSource, root_dir) {
-				Verbose = (bool) configmanager["verbose"]
-			};
-
-			var applications = configmanager ["applications"] as string;
-			string app_config_file;
-			string app_config_dir;
-			
-			try {
-				app_config_file = configmanager ["appconfigfile"]
-					as string;
-				app_config_dir = configmanager ["appconfigdir"]
-					as string;
-			} catch (ApplicationException e) {
-				Logger.Write (LogLevel.Error, e.Message);
+			if (!LoadApplicationsConfig (configmanager))
 				return 1;
-			}
-			
-			if (applications != null)
-				appserver.AddApplicationsFromCommandLine (
-					applications);
-			
-			if (app_config_file != null)
-				appserver.AddApplicationsFromConfigFile (
-					app_config_file);
-			
-			if (app_config_dir != null)
-				appserver.AddApplicationsFromConfigDirectory (
-					app_config_dir);
 
-			if (applications == null && app_config_dir == null &&
-				app_config_file == null && !auto_map) {
-				Logger.Write (LogLevel.Error,
-					"There are no applications defined, and path mapping is disabled.");
-				Logger.Write (LogLevel.Error,
-					"Define an application using /applications, /appconfigfile, /appconfigdir");
-				/*
-				Logger.Write (LogLevel.Error,
-					"or by enabling application mapping with /automappaths=True.");
-				*/
-				return 1;
-			}
+			CreateAppServer (configmanager, root_dir);
+
+			Mono.FastCgi.Server server = CreateServer (configmanager,
+				socket);
+
+			Logger.WriteToConsole = (bool)configmanager ["printlog"];
 			
-			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
-			var server = new Mono.FastCgi.Server (socket);
+			var stoppable = (bool) configmanager ["stoppable"];
+			server.Start (stoppable);
 			
-			server.SetResponder (typeof (Responder));
-			
-			server.MaxConnections = (ushort)
-				configmanager ["maxconns"];
-			server.MaxRequests = (ushort)
-				configmanager ["maxreqs"];
-			server.MultiplexConnections = (bool)
-				configmanager ["multiplex"];
-			
-			Logger.Write (LogLevel.Debug, "Max connections: {0}",
-				server.MaxConnections);
-			Logger.Write (LogLevel.Debug, "Max requests: {0}",
-				server.MaxRequests);
-			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}",
-				server.MultiplexConnections);
-			
-			var stopable = (bool) configmanager ["stopable"];
-			Logger.WriteToConsole = (bool) configmanager ["printlog"];
-			server.Start (stopable);
-			
-			configmanager = null;
-			
-			if (stopable) {
+			if (stoppable) {
 				Console.WriteLine (
 					"Hit Return to stop the server.");
 				Console.ReadLine ();
@@ -219,7 +161,89 @@ namespace Mono.WebServer.FastCgi
 			return 0;
 		}
 
-		static bool CreateSocket (out Socket socket)
+		static Mono.FastCgi.Server CreateServer (ConfigurationManager configmanager,
+		                                         Socket socket)
+		{
+			var server = new Mono.FastCgi.Server (socket);
+
+			server.SetResponder (typeof (Responder));
+
+			server.MaxConnections = (ushort)
+				configmanager ["maxconns"];
+			server.MaxRequests = (ushort)
+				configmanager ["maxreqs"];
+			server.MultiplexConnections = (bool)
+				configmanager ["multiplex"];
+
+			Logger.Write (LogLevel.Debug, "Max connections: {0}",
+				server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}",
+				server.MaxRequests);
+			Logger.Write (LogLevel.Debug,
+				"Multiplex connections: {0}",
+				server.MultiplexConnections);
+			return server;
+		}
+
+		static void CreateAppServer (ConfigurationManager configmanager,
+		                             string rootDir)
+		{
+			var webSource = new WebSource ();
+			appserver = new ApplicationServer (webSource, rootDir) {
+				Verbose = (bool) configmanager ["verbose"]
+			};
+		}
+
+		static bool LoadApplicationsConfig (ConfigurationManager configmanager)
+		{
+			bool autoMap = false; //(bool) configmanager ["automappaths"];
+
+			var applications = configmanager ["applications"] as string;
+			string app_config_file;
+			string app_config_dir;
+
+			try {
+				app_config_file = configmanager ["appconfigfile"]
+					as string;
+				app_config_dir = configmanager ["appconfigdir"]
+					as string;
+			} catch (ApplicationException e) {
+				Logger.Write (LogLevel.Error, e.Message);
+				return false;
+			}
+
+			if (applications != null) {
+				appserver.AddApplicationsFromCommandLine (
+					applications);
+			}
+
+			if (app_config_file != null) {
+				appserver.AddApplicationsFromConfigFile (
+					app_config_file);
+			}
+
+			if (app_config_dir != null) {
+				appserver.AddApplicationsFromConfigDirectory (
+					app_config_dir);
+			}
+
+			if (applications == null && app_config_dir == null &&
+			    app_config_file == null && !autoMap) {
+				Logger.Write (LogLevel.Error,
+				              "There are no applications defined, and path mapping is disabled.");
+				Logger.Write (LogLevel.Error,
+				              "Define an application using /applications, /appconfigfile, /appconfigdir");
+				/*
+				Logger.Write (LogLevel.Error,
+					"or by enabling application mapping with /automappaths=True.");
+				*/
+				return false;
+			}
+			return true;
+		}
+
+		static bool CreateSocket (ConfigurationManager configmanager,
+		                          out Socket socket)
 		{
 			socket = null;
 
@@ -239,12 +263,14 @@ namespace Mono.WebServer.FastCgi
 			// "file[:PATH]".
 			case "unix":
 			case "file":
-				return CreateUnixSocket (socket_parts, ref socket);
+				return CreateUnixSocket (configmanager, 
+					socket_parts, ref socket);
 
 			// The TCP socket is of the format
 			// "tcp[[:ADDRESS]:PORT]".
 			case "tcp":
-				return CreateTcpSocket (socket_parts, ref socket);
+				return CreateTcpSocket (configmanager,
+					socket_parts, ref socket);
 
 			default:
 				Logger.Write (LogLevel.Error,
@@ -254,7 +280,8 @@ namespace Mono.WebServer.FastCgi
 			}
 		}
 
-		static bool GetRootDirectory (out string rootDir)
+		static bool GetRootDirectory (ConfigurationManager configmanager,
+		                              out string rootDir)
 		{
 			rootDir = configmanager ["root"] as string;
 			if (!string.IsNullOrEmpty (rootDir)) {
@@ -266,10 +293,14 @@ namespace Mono.WebServer.FastCgi
 				}
 			}
 			rootDir = Environment.CurrentDirectory;
+			Logger.Write (LogLevel.Debug, "Root directory: {0}",
+				rootDir);
 			return true;
 		}
 
-		static bool CreateTcpSocket (string[] socketParts, ref Socket socket)
+		static bool CreateTcpSocket (ConfigurationManager configmanager,
+		                             string [] socketParts,
+			                     ref Socket socket)
 		{
 			if (socketParts.Length > 1)
 				configmanager ["port"] = socketParts [
@@ -315,7 +346,9 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateUnixSocket (string[] socketParts, ref Socket socket)
+		static bool CreateUnixSocket (ConfigurationManager configmanager,
+		                              string [] socketParts,
+		                              ref Socket socket)
 		{
 			if (socketParts.Length == 2)
 				configmanager ["filename"] = socketParts [1];
@@ -358,7 +391,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static void OpenLogFile ()
+		static void OpenLogFile (ConfigurationManager configmanager)
 		{
 			try {
 				var log_file = configmanager ["logfile"]
@@ -375,7 +408,7 @@ namespace Mono.WebServer.FastCgi
 			}
 		}
 
-		static void SetLogLevel()
+		static void SetLogLevel(ConfigurationManager configmanager)
 		{
 			var log_level = configmanager["loglevels"] as string;
 
@@ -401,7 +434,7 @@ namespace Mono.WebServer.FastCgi
 		/// </summary>
 		/// <returns>false on failure, true on success or
 		/// option not present</returns>
-		static bool LoadConfig()
+		static bool LoadConfig(ConfigurationManager configmanager)
 		{
 			try {
 				var config_file = configmanager["configfile"]

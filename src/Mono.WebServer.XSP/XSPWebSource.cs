@@ -28,21 +28,13 @@
 //
 
 using System;
-using System.Globalization;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Web;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Mono.Security.Protocol.Tls;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
-namespace Mono.WebServer
-{
+namespace Mono.WebServer {
 	//
 	// XSPWebSource: Provides methods to get objects and types specific
 	// to XSP.
@@ -51,20 +43,20 @@ namespace Mono.WebServer
 	public class XSPWebSource: WebSource
 	{
 		IPEndPoint bindAddress;
-		bool secureConnection;
-		SecurityProtocolType SecurityProtocol;
-		X509Certificate cert;
-		PrivateKeySelectionCallback keyCB;
-		bool allowClientCert;
-		bool requireClientCert;
+		readonly bool secureConnection;
+		readonly SecurityProtocolType SecurityProtocol;
+		readonly X509Certificate cert;
+		readonly PrivateKeySelectionCallback keyCB;
+		readonly bool allowClientCert;
+		readonly bool requireClientCert;
 
 		public XSPWebSource(IPAddress address, int port, SecurityProtocolType securityProtocol,
 				    X509Certificate cert, PrivateKeySelectionCallback keyCB, 
 				    bool allowClientCert, bool requireClientCert, bool single_app)
 		{			
 			secureConnection = (cert != null && keyCB != null);
-			this.bindAddress = new IPEndPoint (address, port);
-			this.SecurityProtocol = securityProtocol;
+			bindAddress = new IPEndPoint (address, port);
+			SecurityProtocol = securityProtocol;
 			this.cert = cert;
 			this.keyCB = keyCB;
 			this.allowClientCert = allowClientCert;
@@ -100,7 +92,8 @@ namespace Mono.WebServer
 		
 		public override Socket CreateSocket ()
 		{
-			Socket listen_socket = new Socket (bindAddress.AddressFamily, SocketType.Stream, ProtocolType.IP);
+			var listen_socket = new Socket (bindAddress.AddressFamily,
+				SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (bindAddress);
 			return listen_socket;
 		} 

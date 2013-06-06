@@ -368,7 +368,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Properties
 		
-		private bool UnfinishedRequests {
+		bool UnfinishedRequests {
 			get {
 				foreach (Request request in requests)
 					if (request.DataNeeded)
@@ -384,7 +384,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Methods
 		
-		private Request GetRequest (ushort requestID)
+		Request GetRequest (ushort requestID)
 		{
 			foreach (Request request in requests)
 				if (request.RequestID == requestID)
@@ -393,7 +393,7 @@ namespace Mono.FastCgi {
 			return null;
 		}
 		
-		private int GetRequestIndex (ushort requestID)
+		int GetRequestIndex (ushort requestID)
 		{
 			int i = 0;
 			int count = requests.Count;
@@ -404,7 +404,7 @@ namespace Mono.FastCgi {
 			return (i != count) ? i : -1;
 		}
 		
-		private void StopRun (string message, params object [] args)
+		void StopRun (string message, params object [] args)
 		{
 			Logger.Write (LogLevel.Error, message, args);
 			Logger.Write (LogLevel.Error,

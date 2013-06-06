@@ -271,7 +271,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Static Methods
 		
-		private static void ReceiveAll (Socket socket, byte [] data, int length)
+		static void ReceiveAll (Socket socket, byte [] data, int length)
 		{
 			if (length <= 0)
 				return;
@@ -284,7 +284,7 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		private static void SendAll (Socket socket, byte [] data, int length)
+		static void SendAll (Socket socket, byte [] data, int length)
 		{
 			if (length <= 0)
 				return;

@@ -78,8 +78,8 @@ namespace Mono.WebServer.FastCgi
 			configmanager.PrintHelp ();
 		}
 
-		private static ApplicationServer appserver;
-		private static ConfigurationManager configmanager;
+		static ApplicationServer appserver;
+		static ConfigurationManager configmanager;
 
 		public static VPathToHost GetApplicationForPath (string vhost,
                                                                  int port,

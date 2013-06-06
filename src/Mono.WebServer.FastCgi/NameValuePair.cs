@@ -214,7 +214,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Static Methods
 		
-		private static int ReadLength (byte [] data, ref int index)
+		static int ReadLength (byte [] data, ref int index)
 		{
 			if (index < 0)
 				throw new ArgumentOutOfRangeException ("index");
@@ -249,7 +249,7 @@ namespace Mono.FastCgi {
 			//	+ ((int) data [index++]);
 		}
 		
-		private static void WriteLength (byte [] data, ref int index,
+		static void WriteLength (byte [] data, ref int index,
 		                                 int length)
 		{
 			if (length < 0)

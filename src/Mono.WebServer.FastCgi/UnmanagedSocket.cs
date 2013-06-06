@@ -168,7 +168,7 @@ namespace Mono.FastCgi {
 		[DllImport ("libc", SetLastError=true, EntryPoint="listen")]
 		extern static int listen (IntPtr s, int count);
 		
-		private class SockAccept : IAsyncResult
+		class SockAccept : IAsyncResult
 		{
 			bool completed;
 			ManualResetEvent waithandle;
@@ -250,12 +250,12 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		private static sock.SocketException GetException ()
+		static sock.SocketException GetException ()
 		{
 			return GetException (Stdlib.GetLastError ());
 		}
 		
-		private static sock.SocketException GetException (Errno error)
+		static sock.SocketException GetException (Errno error)
 		{
 			if (error == Errno.EAGAIN ||
 				error == Errno.EWOULDBLOCK) // WSAEWOULDBLOCK

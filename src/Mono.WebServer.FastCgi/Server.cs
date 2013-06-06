@@ -313,7 +313,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Methods
 		
-		private void RunServer ()
+		void RunServer ()
 		{
 			started = true;
 			accept_cb = OnAccept;
@@ -325,7 +325,7 @@ namespace Mono.FastCgi {
 				Thread.Sleep (1000000);
 		}
 		
-		private void OnAccept (IAsyncResult ares)
+		void OnAccept (IAsyncResult ares)
 		{
 			Logger.Write (LogLevel.Debug, Strings.Server_Accepting);
 			Connection connection = null;
@@ -380,7 +380,7 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		private void BeginAccept ()
+		void BeginAccept ()
 		{
 			lock (accept_lock) {
 				if (accepting)

@@ -38,7 +38,7 @@ namespace Mono.WebServer.FastCgi
 {
 	public class WorkerRequest : MonoWorkerRequest
 	{
-		private static string [] indexFiles = { "index.aspx",
+		static string [] indexFiles = { "index.aspx",
 							"default.aspx",
 							"index.html",
 							"index.htm" };
@@ -158,7 +158,7 @@ namespace Mono.WebServer.FastCgi
 			
 			var builder = new StringBuilder (GetUriPath ());
 			string query = GetQueryString ();
-			if (!StringIsNullOrEmpty(query)) {
+			if (!String.IsNullOrEmpty(query)) {
 				builder.Append ('?');
 				builder.Append (query);
 			}
@@ -396,7 +396,7 @@ namespace Mono.WebServer.FastCgi
 		
 		#region Private Methods
 		
-		private void AppendHeaderLine (string format, params object [] args)
+		void AppendHeaderLine (string format, params object [] args)
 		{
 			if (headers == null)
 				return;
@@ -406,7 +406,7 @@ namespace Mono.WebServer.FastCgi
 			headers.Append ("\r\n");
 		}
 		
-		private void EnsureHeadersSent ()
+		void EnsureHeadersSent ()
 		{
 			if (headers == null)
 				return;
@@ -421,7 +421,7 @@ namespace Mono.WebServer.FastCgi
 		
 		#region Private Static Methods
 		
-		private static string AddressFromHostName (string host)
+		static string AddressFromHostName (string host)
 		{
 			host = HostNameFromString (host);
 			
@@ -443,9 +443,9 @@ namespace Mono.WebServer.FastCgi
 			return addresses [0].ToString ();
 		}
 		
-		private static string HostNameFromString (string host)
+		static string HostNameFromString (string host)
 		{
-			if (StringIsNullOrEmpty(host))
+			if (String.IsNullOrEmpty(host))
 				return null;
 			
 			int colon_index = host.IndexOf (':');
@@ -459,7 +459,7 @@ namespace Mono.WebServer.FastCgi
 			return host.Substring (0, colon_index);
 		}
 		
-		private static string ReformatHttpHeader (string header)
+		static string ReformatHttpHeader (string header)
 		{
 			string [] parts = header.Substring (5).Split ('_');
 			for (int i = 0; i < parts.Length; i ++) {
@@ -475,10 +475,10 @@ namespace Mono.WebServer.FastCgi
 				parts [i] = new String (a);
 			}
 			
-			return StringJoin ("-", parts);
+			return String.Join ("-", parts);
 		}
 
-		private static void SetDefaultIndexFiles (string list)
+		static void SetDefaultIndexFiles (string list)
 		{
 			if (list == null)
 				return;

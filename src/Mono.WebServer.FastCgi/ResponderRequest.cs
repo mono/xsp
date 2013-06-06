@@ -75,7 +75,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Methods
 		
-		private void OnInputDataReceived (Request sender,
+		void OnInputDataReceived (Request sender,
 		                                  DataReceivedArgs args)
 		{
 			// If the data is completed, call the worker and return.
@@ -130,7 +130,7 @@ namespace Mono.FastCgi {
 			write_index += args.DataLength;
 		}
 		
-		private void Worker (object state)
+		void Worker (object state)
 		{
 			int appStatus = responder.Process ();
 			if (appStatus != Int32.MinValue)

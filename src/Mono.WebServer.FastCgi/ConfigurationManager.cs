@@ -39,9 +39,9 @@ namespace Mono.WebServer
 {
 	public class ConfigurationManager
 	{
-		private int hash;
+		int hash;
 		
-		private XmlNodeList elems;
+		XmlNodeList elems;
 		
 		readonly NameValueCollection cmd_args = 
 			new NameValueCollection ();
@@ -79,7 +79,7 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private XmlElement GetSetting (string name)
+		XmlElement GetSetting (string name)
 		{
 			foreach (XmlElement setting in elems)
 				if (GetXmlValue (setting, "Name") == name)
@@ -88,7 +88,7 @@ namespace Mono.WebServer
 			return null;
 		}
 		
-		private string GetValue (string name, out XmlElement setting)
+		string GetValue (string name, out XmlElement setting)
 		{
 			setting = GetSetting (name);
 			
@@ -120,22 +120,22 @@ namespace Mono.WebServer
 			return GetValue (name, out setting) != null;
 		}
 
-		private const string except_unregistered =
+		const string except_unregistered =
 			"Argument \"{0}\" is unknown.";
 
-		private const string except_uint16 =
+		const string except_uint16 =
 			"Error in argument \"{0}\". \"{1}\" cannot be converted to an integer.";
 
-		private const string except_bool =
+		const string except_bool =
 			"Error in argument \"{0}\". \"{1}\" should be \"True\" or \"False\".";
 		
-		private const string except_directory =
+		const string except_directory =
 			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
 			
-		private const string except_file =
+		const string except_file =
 			"Error in argument \"{0}\". \"{1}\" does not exist.";
 		
-		private const string except_unknown =
+		const string except_unknown =
 			"The Argument \"{0}\" has an invalid type: {1}.";
 		
 		public object this [string name] {
@@ -211,7 +211,7 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private static ApplicationException AppExcept (Exception except,
+		static ApplicationException AppExcept (Exception except,
 							string message,
 							params object [] args)
 		{
@@ -220,7 +220,7 @@ namespace Mono.WebServer
 				except);
 		}
 		
-		private static ApplicationException AppExcept (string message,
+		static ApplicationException AppExcept (string message,
 							params object [] args)
 		{
 			return new ApplicationException (String.Format (
@@ -314,7 +314,7 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private void RenderXml (XmlElement elem, List<string> values, int indent, int length)
+		void RenderXml (XmlElement elem, List<string> values, int indent, int length)
 		{
 			foreach (XmlNode node in elem.ChildNodes) {
 				var child = node as XmlElement;
@@ -341,7 +341,7 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private void RenderText (string text, List<string> values, int indent, int length)
+		void RenderText (string text, List<string> values, int indent, int length)
 		{
 			StringBuilder output = CreateBuilder (indent);
 			int start = -1;
@@ -365,7 +365,7 @@ namespace Mono.WebServer
 			values.Add (output.ToString ());
 		}
 		
-		private StringBuilder CreateBuilder (int indent)
+		StringBuilder CreateBuilder (int indent)
 		{
 			var builder = new StringBuilder (80);
 			for (int i = 0; i < indent; i ++)
@@ -438,10 +438,10 @@ namespace Mono.WebServer
 			}
 		}
 		
-		private const string except_bad_elem =
+		const string except_bad_elem =
 			"XML setting \"{0}={1}\" is invalid.";
 		
-		private const string except_xml_duplicate =
+		const string except_xml_duplicate =
 			"XML setting \"{0}\" can only be assigned once.";
 		
 		public void LoadXmlConfig (string filename)
@@ -451,7 +451,7 @@ namespace Mono.WebServer
 			ImportSettings (doc, xml_args, false, true);
 		}
 		
-		private int PrefixLength (string arg)
+		int PrefixLength (string arg)
 		{
 			if (arg.StartsWith ("--"))
 				return 2;
@@ -469,11 +469,11 @@ namespace Mono.WebServer
 			get {return hash < 0 ? -hash : hash;}
 		}
 		
-		private static NameValueCollection AppSettings {
+		static NameValueCollection AppSettings {
 			get { return System.Configuration.ConfigurationManager.AppSettings; }
 		}
 		
-		private static string GetXmlValue (XmlElement elem, string name)
+		static string GetXmlValue (XmlElement elem, string name)
 		{
 			string value = elem.GetAttribute (name);
 			if (!String.IsNullOrEmpty(value))

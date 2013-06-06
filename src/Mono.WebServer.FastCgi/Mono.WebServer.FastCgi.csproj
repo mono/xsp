@@ -68,6 +68,7 @@
     <Compile Include="WebSource.cs" />
     <Compile Include="WorkerRequest.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

@@ -98,8 +98,7 @@ namespace Mono.WebServer.FastCgi
 			configmanager.LoadCommandLineArgs (args);
 			
 			// Show the help and exit.
-			if ((bool) configmanager ["help"] ||
-				(bool) configmanager ["?"]) {
+			if (configmanager.Help) {
 				ShowHelp (configmanager);
 				return 0;
 			}

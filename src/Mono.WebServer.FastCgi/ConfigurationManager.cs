@@ -35,6 +35,7 @@ using System.Globalization;
 using System.Collections.Specialized;
 using System.Text;
 using Mono.WebServer.FastCgi;
+using NDesk.Options;
 
 namespace Mono.WebServer
 {
@@ -140,7 +141,29 @@ namespace Mono.WebServer
 		
 		const string EXCEPT_UNKNOWN =
 			"The Argument \"{0}\" has an invalid type: {1}.";
+
+		bool GetBool (string name)
+		{
+			XmlElement setting;
+			string value = GetValue (name, out setting);
+
+			if (setting == null)
+				throw AppExcept (EXCEPT_UNREGISTERED,
+					name);
+
+			if (value == null)
+				return false;
+			
+			if (value.ToLower () == "true")
+				return true;
+
+			if (value.ToLower () == "false")
+				return false;
+
+			throw AppExcept (EXCEPT_BOOL, name, value);
+		}
 		
+		[Obsolete("Lacks type safety")]
 		public object this [string name] {
 			get {
 				XmlElement setting;
@@ -373,12 +396,18 @@ namespace Mono.WebServer
 				builder.Append (' ');
 			return builder;
 		}
+
+		public bool Help {
+			get {
+				return GetBool ("help") || GetBool ("?");
+			}
+		}
 		
 		public void LoadCommandLineArgs (string [] args)
 		{
 			if (args == null)
 				throw new ArgumentNullException ("args");
-			
+
 			for (int i = 0; i < args.Length; i ++) {
 				string arg = args [i];
 				int len = PrefixLength (arg);

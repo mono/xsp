@@ -31,14 +31,8 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Web;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Protocol.Tls;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
 namespace Mono.WebServer
@@ -55,8 +49,8 @@ namespace Mono.WebServer
 					   string queryString, string protocol, byte[] inputBuffer, string redirect,
 					   IntPtr socket, SslInformation ssl)
 		{
-			IPEndPoint localEP = new IPEndPoint (localEPAddr, localEPPort);
-			IPEndPoint remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
+			var localEP = new IPEndPoint (localEPAddr, localEPPort);
+			var remoteEP = new IPEndPoint (remoteEPAdds, remoteEPPort);
 			ProcessRequest (reqId, localEP, remoteEP, verb, path, queryString, protocol, inputBuffer, redirect, socket, ssl);
 		}
 
@@ -65,10 +59,11 @@ namespace Mono.WebServer
 					   string queryString, string protocol, byte [] inputBuffer, string redirect,
 					   IntPtr socket, SslInformation ssl)
 		{
-			XSPRequestBroker broker = (XSPRequestBroker) RequestBroker;
+			var broker = (XSPRequestBroker) RequestBroker;
 			bool secure = (ssl != null);
-			XSPWorkerRequest mwr = new XSPWorkerRequest (reqId, broker, this, localEP, remoteEP, verb, path,
-								     queryString, protocol, inputBuffer, socket, secure);
+			var mwr = new XSPWorkerRequest (reqId, broker, this,
+				localEP, remoteEP, verb, path, queryString,
+				protocol, inputBuffer, socket, secure);
 
 			if (secure) {
 				// note: we're only setting what we use (and not the whole lot)
@@ -115,7 +110,7 @@ namespace Mono.WebServer
 			ProcessRequest (mwr);
 		}
 
-		static string content301 = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
+		const string content301 = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
 				"<html><head>\n<title>301 Moved Permanently</title>\n</head><body>\n" +
 				"<h1>Moved Permanently</h1>\n" +
 				"<p>The document has moved to <a href='http://{0}{1}'>http://{0}{1}</a>.</p>\n" +
@@ -139,4 +134,3 @@ namespace Mono.WebServer
 		}
 	}
 }
-

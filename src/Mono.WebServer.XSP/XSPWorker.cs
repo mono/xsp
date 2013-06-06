@@ -28,15 +28,10 @@
 //
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Web;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Mono.Security.Protocol.Tls;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
@@ -49,36 +44,37 @@ namespace Mono.WebServer
 	//
 	class XSPWorker: Worker
 	{
-		ApplicationServer server;
-		LingeringNetworkStream netStream;
-		Stream stream;
-		IPEndPoint remoteEP;
-		IPEndPoint localEP;
-		Socket sock;
-		SslInformation ssl;
+		readonly ApplicationServer server;
+		readonly LingeringNetworkStream netStream;
+		readonly Stream stream;
+		readonly IPEndPoint remoteEP;
+		readonly IPEndPoint localEP;
+		readonly Socket sock;
+		readonly SslInformation ssl;
 		InitialWorkerRequest initial;
 		int requestId = -1;
-		XSPRequestBroker broker = null;
+		XSPRequestBroker broker;
 		int reuses;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
 			bool secureConnection,
-			Mono.Security.Protocol.Tls.SecurityProtocolType SecurityProtocol,
+			SecurityProtocolType SecurityProtocol,
 			X509Certificate cert,
 			PrivateKeySelectionCallback keyCB,
 			bool allowClientCert,
 			bool requireClientCert) 
 		{
 			if (secureConnection) {
-				ssl = new SslInformation ();
-				ssl.AllowClientCertificate = allowClientCert;
-				ssl.RequireClientCertificate = requireClientCert;
-				ssl.RawServerCertificate = cert.GetRawCertData ();
+				ssl = new SslInformation {
+					AllowClientCertificate = allowClientCert,
+					RequireClientCertificate = requireClientCert,
+					RawServerCertificate = cert.GetRawCertData ()
+				};
 
 				netStream = new LingeringNetworkStream (client, true);
-				SslServerStream s = new SslServerStream (netStream, cert, requireClientCert, false);
+				var s = new SslServerStream (netStream, cert, requireClientCert, false);
 				s.PrivateKeyCertSelectionDelegate += keyCB;
-				s.ClientCertValidationDelegate += new CertificateValidationCallback (ClientCertificateValidation);
+				s.ClientCertValidationDelegate += ClientCertificateValidation;
 				stream = s;
 			} else {
 				netStream = new LingeringNetworkStream (client, false);
@@ -87,7 +83,7 @@ namespace Mono.WebServer
 
 			sock = client;
 			this.server = server;
-			this.remoteEP = (IPEndPoint) client.RemoteEndPoint;
+			remoteEP = (IPEndPoint) client.RemoteEndPoint;
 			this.localEP = (IPEndPoint) localEP;
 		}
 
@@ -109,18 +105,18 @@ namespace Mono.WebServer
 		{
 			initial = new InitialWorkerRequest (stream);
 			byte [] buffer = InitialWorkerRequest.AllocateBuffer ();
-			stream.BeginRead (buffer, 0, buffer.Length, new AsyncCallback (ReadCB), buffer);
+			stream.BeginRead (buffer, 0, buffer.Length, ReadCB, buffer);
 		}
 
 		void ReadCB (IAsyncResult ares)
 		{
-			byte [] buffer = (byte []) ares.AsyncState;
+			var buffer = (byte []) ares.AsyncState;
 			try {
 				int nread = stream.EndRead (ares);
 				// See if we got at least 1 line
 				initial.SetBuffer (buffer, nread);
 				initial.ReadRequestData ();
-				ThreadPool.QueueUserWorkItem (new WaitCallback (RunInternal));
+				ThreadPool.QueueUserWorkItem (RunInternal);
 			} catch (Exception e) {
 				InitialWorkerRequest.FreeBuffer (buffer);
 				HandleInitialException (e);
@@ -153,7 +149,7 @@ namespace Mono.WebServer
 			RequestData rdata = initial.RequestData;
 			initial.FreeBuffer ();
 			string vhost = null; // TODO: read the headers in InitialWorkerRequest
-			int port = ((IPEndPoint) localEP).Port;
+			int port = localEP.Port;
 			VPathToHost vapp; 
 
 			try {
@@ -182,7 +178,7 @@ namespace Mono.WebServer
 			requestId = broker.RegisterRequest (this);
 
 			if (ssl != null) {
-				SslServerStream s = (stream as SslServerStream);
+				var s = (stream as SslServerStream);
 				ssl.KeySize = s.CipherStrength;
 				ssl.SecretKeySize = s.KeyExchangeStrength;
 			}
@@ -276,7 +272,7 @@ namespace Mono.WebServer
 			// right now we're accepting any client certificate - i.e. it's up to the 
 			// web application to check if the certificate is valid (HttpClientCertificate.IsValid)
 			ssl.ClientCertificateValid = (certificateErrors.Length == 0);
-			return ssl.RequireClientCertificate ? (certificate != null) : true;
+			return !ssl.RequireClientCertificate || (certificate != null);
 		}
 	}
 }

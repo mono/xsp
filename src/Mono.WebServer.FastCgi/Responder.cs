@@ -30,13 +30,12 @@
 using System;
 using System.Collections.Generic;
 using Mono.FastCgi;
-using System.Text;
 
 namespace Mono.WebServer.FastCgi
 {
 	public class Responder : MarshalByRefObject, IResponder
 	{
-		private static string error500 =
+		const string error500 =
 			"Status: 500 Internal Server Error\r\n" +
 			"Content-Type: text/html; charset=utf-8\r\n" +
 			"Connection: close\r\n\r\n" +
@@ -56,7 +55,7 @@ namespace Mono.WebServer.FastCgi
 			"	</body>\r\n" +
 			"</html>\r\n";
 		
-		private ResponderRequest request;
+		readonly ResponderRequest request;
 		
 		public Responder (ResponderRequest request)
 		{
@@ -80,7 +79,7 @@ namespace Mono.WebServer.FastCgi
 			// If the application host is null, the server was
 			// unable to determine a sane plan. Alert the client.
 			if (appHost == null) {
-				request.SendOutputText (string.Format (error500,
+				request.SendOutputText (String.Format (error500,
 					HostName, PortNumber,
 					Path, PhysicalPath));
 				return -1;
@@ -95,7 +94,7 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			// MIN_VALUE means don't close.
-			return int.MinValue;
+			return Int32.MinValue;
 		}
 		
 		public ResponderRequest Request {

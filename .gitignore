@@ -12,3 +12,11 @@ Makefile.in
 *.mdb
 *.dll
 *.exe
+build/m4/shave/shave
+build/m4/shave/shave-libtool
+reautogen.sh
+xsp.spec
+xsp.userprefs
+src/*/bin
+src/*/obj
+xsp.v11.suo

@@ -38,10 +38,10 @@ namespace Mono.FastCgi {
 	internal class UnmanagedSocket : Socket
 	{
 		[DllImport ("libc", SetLastError=true, EntryPoint="close")] 
-		unsafe extern static int close (IntPtr s);
+		extern static int close (IntPtr s);
 
-		private IntPtr socket;
-		private bool connected = false;
+		readonly IntPtr socket;
+		bool connected;
 		
 		unsafe public UnmanagedSocket (IntPtr socket)
 		{
@@ -53,7 +53,7 @@ namespace Mono.FastCgi {
 				throw new ArgumentException ("Invalid socket.",
 					"socket");
 			
-			byte [] address = new byte [1024];
+			var address = new byte [1024];
 			int size = 1024;
 			fixed (byte* ptr = address)
 				if (getsockname (socket, ptr, ref size) != 0)
@@ -117,7 +117,7 @@ namespace Mono.FastCgi {
 		public override IAsyncResult BeginAccept (AsyncCallback callback,
 		                                 object state)
 		{
-			SockAccept s = new SockAccept (socket, callback, state);
+			var s = new SockAccept (socket, callback, state);
 			ThreadPool.QueueUserWorkItem (s.Run);
 			return s;
 		}
@@ -127,7 +127,7 @@ namespace Mono.FastCgi {
 			if (asyncResult == null)
 				throw new ArgumentNullException ("asyncResult");
 			
-			SockAccept s = asyncResult as SockAccept;
+			var s = asyncResult as SockAccept;
 			if (s == null || s.socket != socket)
 				throw new ArgumentException (
 					"Result was not produced by current instance.",
@@ -139,9 +139,7 @@ namespace Mono.FastCgi {
 			if (s.except != null)
 				throw s.except;
 			
-			UnmanagedSocket u = new UnmanagedSocket (s.accepted);
-			u.connected = true;
-			return u;
+			return new UnmanagedSocket (s.accepted) {connected = true};
 		}
 		
 		public override bool Connected {
@@ -149,7 +147,7 @@ namespace Mono.FastCgi {
 		}
 		
 		[DllImport ("libc", SetLastError=true, EntryPoint="shutdown")]
-		unsafe extern static int shutdown (IntPtr s, int how);
+		extern static int shutdown (IntPtr s, int how);
 		
 		[DllImport ("libc", SetLastError=true, EntryPoint="send")]
 		unsafe extern static int send (IntPtr s, byte *buffer, int len,
@@ -168,17 +166,17 @@ namespace Mono.FastCgi {
 		                                     ref int namelen);
 		
 		[DllImport ("libc", SetLastError=true, EntryPoint="listen")]
-		unsafe extern static int listen (IntPtr s, int count);
+		extern static int listen (IntPtr s, int count);
 		
-		private class SockAccept : IAsyncResult
+		class SockAccept : IAsyncResult
 		{
-			private bool completed = false;
-			private ManualResetEvent waithandle;
-			public  IntPtr socket;
-			public  IntPtr accepted;
-			public  sock.SocketException except = null;
-			private AsyncCallback callback;
-			private object state;
+			bool completed;
+			ManualResetEvent waithandle;
+			readonly AsyncCallback callback;
+			readonly object state;
+			public readonly IntPtr socket;
+			public IntPtr accepted;
+			public sock.SocketException except;
 			
 			public SockAccept (IntPtr socket, AsyncCallback callback,
 			                   object state)
@@ -190,7 +188,7 @@ namespace Mono.FastCgi {
 			
 			unsafe public void Run (object state)
 			{
-				byte[] address = new byte [1024];
+				var address = new byte [1024];
 				int size = 1024;
 				Errno errno;
 				fixed (byte* ptr = address)
@@ -236,7 +234,7 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		private static bool supports_libc;
+		static readonly bool supports_libc;
 		
 		static UnmanagedSocket ()
 		{
@@ -244,7 +242,7 @@ namespace Mono.FastCgi {
 				string os = "";
 				using (Stream st = File.OpenRead (
 					"/proc/sys/kernel/ostype")) {
-					StreamReader sr = new StreamReader (st);
+					var sr = new StreamReader (st);
 					os = sr.ReadToEnd ();
 				}
 				supports_libc = os.StartsWith ("Linux");
@@ -252,12 +250,12 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		private static sock.SocketException GetException ()
+		static sock.SocketException GetException ()
 		{
 			return GetException (Stdlib.GetLastError ());
 		}
 		
-		private static sock.SocketException GetException (Errno error)
+		static sock.SocketException GetException (Errno error)
 		{
 			if (error == Errno.EAGAIN ||
 				error == Errno.EWOULDBLOCK) // WSAEWOULDBLOCK

@@ -44,7 +44,7 @@ namespace Mono.WebServer.FastCgi
 				this);
 			
 			string path = responder.Path;
-			if (!string.IsNullOrEmpty(path) && path [path.Length - 1] != '/' 
+			if (!String.IsNullOrEmpty(path) && path [path.Length - 1] != '/' 
 				&& VirtualDirectoryExists (path, worker)) {
 				Redirect (worker, path + '/');
 				return;

@@ -284,7 +284,7 @@ namespace Mono.WebServer.FastCgi
 		                              out string rootDir)
 		{
 			rootDir = configmanager ["root"] as string;
-			if (!string.IsNullOrEmpty (rootDir)) {
+			if (!String.IsNullOrEmpty (rootDir)) {
 				try {
 					Environment.CurrentDirectory = rootDir;
 				} catch (Exception e) {

@@ -129,6 +129,8 @@ namespace Mono.FastCgi {
 		public static void Write (Exception e)
 		{
 			Write (LogLevel.Error, e.Message);
+			if(e.StackTrace != null)
+				Write (LogLevel.Error, e.StackTrace);
 		}
 
 		public static void Write (LogLevel level, string message)

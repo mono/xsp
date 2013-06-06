@@ -129,59 +129,16 @@ namespace Mono.WebServer.FastCgi
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
-			
-			
-			// Create the socket.
-			Socket socket = null;
-			
-			// Socket strings are in the format
-			// "type[:ARG1[:ARG2[:...]]]".
-			var socket_type = configmanager ["socket"] as string 
-				?? "pipe";
 
-			string [] socket_parts = socket_type.Split (
-				new[] {':'}, 3);
-			
-			switch (socket_parts [0].ToLower ()) {
-			case "pipe":
-				if (!CreatePipe (ref socket))
-					return 1;
-				break;
-			
-			// The FILE sockets is of the format
-			// "file[:PATH]".
-			case "unix":
-			case "file":
-				if (!CreateUnixSocket (socket_parts, ref socket))
-					return 1;
-				break;
-			
-			// The TCP socket is of the format
-			// "tcp[[:ADDRESS]:PORT]".
-			case "tcp":
-				if (!CreateTcpSocket (socket_parts, ref socket))
-					return 1;
-				break;
-				
-			default:
-				Logger.Write (LogLevel.Error,
-					"Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
-					socket_parts [0]);
+
+			Socket socket;
+			if (!CreateSocket (out socket))
 				return 1;
-			}
-			
-			var root_dir = configmanager ["root"] as string;
-			if (!String.IsNullOrEmpty(root_dir)) {
-				try {
-					Environment.CurrentDirectory = root_dir;
-				} catch (Exception e) {
-					Logger.Write (LogLevel.Error,
-						      "Error: {0}", e.Message);
-					return 1;
-				}
-			}
-			
-			root_dir = Environment.CurrentDirectory;
+
+			string root_dir;
+			if (!GetRootDirectory (out root_dir))
+				return 1;
+
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
 			var webSource = new WebSource ();
 			appserver = new ApplicationServer (webSource, root_dir) {
@@ -193,10 +150,10 @@ namespace Mono.WebServer.FastCgi
 			string app_config_dir;
 			
 			try {
-				app_config_file = (string)
-					configmanager ["appconfigfile"];
-				app_config_dir = (string)
-					configmanager ["appconfigdir"];
+				app_config_file = configmanager ["appconfigfile"]
+					as string;
+				app_config_dir = configmanager ["appconfigdir"]
+					as string;
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return 1;
@@ -240,11 +197,11 @@ namespace Mono.WebServer.FastCgi
 				configmanager ["multiplex"];
 			
 			Logger.Write (LogLevel.Debug, "Max connections: {0}",
-				      server.MaxConnections);
+				server.MaxConnections);
 			Logger.Write (LogLevel.Debug, "Max requests: {0}",
-				      server.MaxRequests);
+				server.MaxRequests);
 			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}",
-				      server.MultiplexConnections);
+				server.MultiplexConnections);
 			
 			var stopable = (bool) configmanager ["stopable"];
 			Logger.WriteToConsole = (bool) configmanager ["printlog"];
@@ -260,6 +217,56 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			return 0;
+		}
+
+		static bool CreateSocket (out Socket socket)
+		{
+			socket = null;
+
+			// Socket strings are in the format
+			// "type[:ARG1[:ARG2[:...]]]".
+			var socket_type = configmanager ["socket"] as string
+				?? "pipe";
+
+			string[] socket_parts = socket_type.Split (
+				new[] {':'}, 3);
+
+			switch (socket_parts [0].ToLower ()) {
+			case "pipe":
+				return CreatePipe (ref socket);
+
+			// The FILE sockets is of the format
+			// "file[:PATH]".
+			case "unix":
+			case "file":
+				return CreateUnixSocket (socket_parts, ref socket);
+
+			// The TCP socket is of the format
+			// "tcp[[:ADDRESS]:PORT]".
+			case "tcp":
+				return CreateTcpSocket (socket_parts, ref socket);
+
+			default:
+				Logger.Write (LogLevel.Error,
+					"Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
+					socket_parts [0]);
+				return false;
+			}
+		}
+
+		static bool GetRootDirectory (out string rootDir)
+		{
+			rootDir = configmanager ["root"] as string;
+			if (!string.IsNullOrEmpty (rootDir)) {
+				try {
+					Environment.CurrentDirectory = rootDir;
+				} catch (Exception e) {
+					Logger.Write (e);
+					return false;
+				}
+			}
+			rootDir = Environment.CurrentDirectory;
+			return true;
 		}
 
 		static bool CreateTcpSocket (string[] socketParts, ref Socket socket)
@@ -284,15 +291,11 @@ namespace Mono.WebServer.FastCgi
 
 			if (address_str == null)
 				address = IPAddress.Loopback;
-			else {
-				try {
-					address = IPAddress.Parse (address_str);
-				} catch {
-					Logger.Write (LogLevel.Error,
-						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
-						address_str);
-					return false;
-				}
+			else if(!IPAddress.TryParse (address_str,out address)) {
+				Logger.Write (LogLevel.Error,
+					"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
+					address_str);
+				return false;
 			}
 
 			try {

@@ -27,11 +27,8 @@
 //
 
 using System;
-using System.Collections;
 using System.IO;
 using System.Threading;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Configuration;
 using System.Collections.Generic;
@@ -44,15 +41,13 @@ namespace Mono.WebServer
 		
 		string path;
 		string vpath;
-		IRequestBroker requestBroker;
-		EndOfRequestHandler endOfRequest;
-		ApplicationServer appserver;
+		readonly EndOfRequestHandler endOfRequest;
 		Dictionary <string, bool> handlersCache;		
 
 		public BaseApplicationHost ()
 		{
-			endOfRequest = new EndOfRequestHandler (EndOfRequest);
-			AppDomain.CurrentDomain.DomainUnload += new EventHandler (OnUnload);
+			endOfRequest = EndOfRequest;
+			AppDomain.CurrentDomain.DomainUnload += OnUnload;
 		}
 
 		public void Unload ()
@@ -62,8 +57,8 @@ namespace Mono.WebServer
 
 		public void OnUnload (object o, EventArgs args)
 		{
-			if (appserver != null)
-				appserver.DestroyHost (this);
+			if (Server != null)
+				Server.DestroyHost (this);
 		}
 
 		public override object InitializeLifetimeService ()
@@ -71,26 +66,19 @@ namespace Mono.WebServer
 			return null; // who wants to live forever?
 		}
 
-		public ApplicationServer Server {
-			get { return appserver; }
-			set { appserver = value; }
-		}
+		public ApplicationServer Server { get; set; }
 
 		public string Path {
 			get {
-				if (path == null)
-					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
-
-				return path;
+				return path ??
+					(path = AppDomain.CurrentDomain.GetData (".appPath").ToString ());
 			}
 		}
 
 		public string VPath {
 			get {
-				if (vpath == null)
-					vpath =  AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
-
-				return vpath;
+				return vpath ??
+					(vpath = AppDomain.CurrentDomain.GetData (".appVPath").ToString ());
 			}
 		}
 
@@ -98,14 +86,11 @@ namespace Mono.WebServer
 			get { return AppDomain.CurrentDomain; }
 		}
 
-		public IRequestBroker RequestBroker
-		{
-			get { return requestBroker; }
-			set { requestBroker = value; }
-		}
+		public IRequestBroker RequestBroker { get; set; }
 
 		protected void ProcessRequest (MonoWorkerRequest mwr)
 		{
+			// TODO: Check this, it looks like a bug
 			if (mwr == null) {
 				EndOfRequest (mwr);
 				return;
@@ -136,7 +121,7 @@ namespace Mono.WebServer
 				mwr.CloseConnection ();
 			} catch {
 			} finally {
-				BaseRequestBroker brb = requestBroker as BaseRequestBroker;
+				var brb = RequestBroker as BaseRequestBroker;
 				if (brb != null)
 					brb.UnregisterRequest (mwr.RequestId);
 			}
@@ -145,9 +130,8 @@ namespace Mono.WebServer
 		public virtual bool IsHttpHandler (string verb, string uri)
 		{
 			string cacheKey = verb + "_" + uri;
-			bool locked;
 
-			locked = false;
+			bool locked = false;
 			try {
 				handlersCacheLock.EnterReadLock ();
 
@@ -185,18 +169,16 @@ namespace Mono.WebServer
 
 		bool LocateHandler (string verb, string uri)
 		{
-			HttpHandlersSection config = WebConfigurationManager.GetSection ("system.web/httpHandlers") as HttpHandlersSection;
+			var config = WebConfigurationManager.GetSection ("system.web/httpHandlers") as HttpHandlersSection;
 			HttpHandlerActionCollection handlers = config != null ? config.Handlers : null;
 			int count = handlers != null ? handlers.Count : 0;
 			
 			if (count == 0)
 				return false;
 
-			HttpHandlerAction handler;
-			string[] verbs;
 			for (int i = 0; i < count; i++) {
-				handler = handlers [i];
-				verbs = SplitVerbs (handler.Verb);
+				HttpHandlerAction handler = handlers [i];
+				string[] verbs = SplitVerbs (handler.Verb);
 
 				if (verbs == null) {
 					if (PathMatches (handler, uri))
@@ -249,16 +231,15 @@ namespace Mono.WebServer
 
 				if (matchExact != null) {
 					result = matchExact.Length == origUri.Length && origUri.EndsWith (matchExact, StringComparison.OrdinalIgnoreCase);
-					if (result == true)
+					if (result)
 						break;
-					else
-						continue;
-				} else if (endsWith != null) {
+					continue;
+				}
+				if (endsWith != null) {
 					result = uri.EndsWith (endsWith, StringComparison.OrdinalIgnoreCase);
-					if (result == true)
+					if (result)
 						break;
-					else
-						continue;
+					continue;
 				}
 
 				string pattern;
@@ -275,18 +256,15 @@ namespace Mono.WebServer
 				if (sp.IsMatch (origUri)) {
 					result = true;
 					break;
-				}				
+				}
 			}
 			
 			return result;
 		}
-		
-		string[] SplitVerbs (string verb)
-		{
-			if (verb == "*")
-				return null;
 
-			return verb.Split (',');
+		static string[] SplitVerbs (string verb)
+		{
+			return verb == "*" ? null : verb.Split (',');
 		}
 	}
 }

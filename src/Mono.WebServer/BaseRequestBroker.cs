@@ -29,7 +29,6 @@
 
 
 using System;
-using System.Collections;
 
 namespace Mono.WebServer
 {
@@ -48,7 +47,7 @@ namespace Mono.WebServer
 		
 		// Contains a lock to use when accessing and modifying the
 		// request allocation tables.
-		static object reqlock = new object();		
+		static readonly object reqlock = new object();
 
 		// Contains the request ID's.
 		int[] request_ids = new int [INITIAL_REQUESTS];
@@ -77,9 +76,9 @@ namespace Mono.WebServer
 		void GrowRequests (ref int curlen, ref int newid)
 		{
 			int newsize = curlen + curlen/3;
-			int[] new_request_ids = new int [newsize];
-			Worker[] new_requests = new Worker [newsize];
-			byte[][] new_buffers = new byte [newsize][];
+			var new_request_ids = new int [newsize];
+			var new_requests = new Worker [newsize];
+			var new_buffers = new byte [newsize][];
 
 			request_ids.CopyTo (new_request_ids, 0);
 			Array.Clear (request_ids, 0, request_ids.Length);
@@ -119,15 +118,15 @@ namespace Mono.WebServer
 				GrowRequests (ref reqlen, ref newid);
 			if (newid == -1)
 				for (int i = 0; i < reqlen; i++) {
-					if (request_ids [i] == 0) {
-						newid = i;
-						break;
-					}
-			}
+					if (request_ids [i] != 0)
+						continue;
+					newid = i;
+					break;
+				}
 
 			if (newid != -1) {
 				// TODO: newid had better not exceed 0xFFFF.
-				newid = (int)(((ushort)newid & 0xFFFF) | (((ushort)requests_served & 0x7FFF) << 16));
+				newid = ((ushort)newid & 0xFFFF) | (((ushort)requests_served & 0x7FFF) << 16);
 				request_ids [IdToIndex(newid)] = newid;
 				return newid;
 			}
@@ -191,7 +190,7 @@ namespace Mono.WebServer
 			if (handlers == null || handlers.Length == 0)
 				return;
 			
-			UnregisterRequestEventArgs args = new UnregisterRequestEventArgs (id);
+			var args = new UnregisterRequestEventArgs (id);
 			foreach (UnregisterRequestEventHandler handler in handlers)
 				handler (this, args);
 		}		
@@ -236,7 +235,7 @@ namespace Mono.WebServer
 				if (!ValidRequest (requestId))
 					return null;
 			
-				return (Worker) requests [IdToIndex (requestId)];
+				return requests [IdToIndex (requestId)];
 			}
 		}
 
@@ -274,4 +273,3 @@ namespace Mono.WebServer
 		}
 	}
 }
-

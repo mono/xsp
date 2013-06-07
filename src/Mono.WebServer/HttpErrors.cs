@@ -29,35 +29,25 @@
 
 
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Xml;
-using System.Web;
-using System.Web.Hosting;
-using System.Collections;
 using System.Text;
-using System.Threading;
-using System.IO;
-using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace Mono.WebServer
 {
 	public class HttpErrors
 	{
-		static byte [] error500;
-		static byte [] badRequest;
+		static readonly byte [] error500;
+		static readonly byte [] badRequest;
 
 		static HttpErrors ()
 		{
-			string s = "HTTP/1.0 500 Server error\r\n" +
+			const string s = "HTTP/1.0 500 Server error\r\n" +
 				"Connection: close\r\n\r\n" +
 				"<html><head><title>500 Server Error</title><body><h1>Server error</h1>\r\n" +
 				"Your client sent a request that was not understood by this server.\r\n" +
 				"</body></html>\r\n";
 			error500 = Encoding.ASCII.GetBytes (s);
 
-			string br = "HTTP/1.0 400 Bad Request\r\n" + 
+			const string br = "HTTP/1.0 400 Bad Request\r\n" + 
 				"Connection: close\r\n\r\n" +
 				"<html><head><title>400 Bad Request</title></head>" +
 				"<body><h1>Bad Request</h1>The request was not understood" +

@@ -32,7 +32,6 @@
 
 
 using System;
-using System.Web;
 
 namespace Mono.WebServer
 {
@@ -47,4 +46,3 @@ namespace Mono.WebServer
 		bool IsHttpHandler (string verb, string uri);
 	}
 }
-

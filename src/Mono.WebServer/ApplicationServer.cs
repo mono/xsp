@@ -29,10 +29,10 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Xml;
-using System.Collections;
 using System.Text;
 using System.Threading;
 using System.IO;
@@ -89,18 +89,18 @@ namespace Mono.WebServer
 		Thread runner;
 
 		// This is much faster than hashtable for typical cases.
-		readonly ArrayList vpathToHost = new ArrayList ();
+		readonly List<VPathToHost> vpathToHost = new List<VPathToHost> ();
 
 		public bool SingleApplication { get; set; }
 
 		public IApplicationHost AppHost {
-			get { return ((VPathToHost) vpathToHost [0]).AppHost; }
-			set { ((VPathToHost) vpathToHost [0]).AppHost = value; }
+			get { return vpathToHost [0].AppHost; }
+			set { vpathToHost [0].AppHost = value; }
 		}
 
 		public IRequestBroker Broker {
-			get { return ((VPathToHost) vpathToHost [0]).RequestBroker; }
-			set { ((VPathToHost) vpathToHost [0]).RequestBroker = value; }
+			get { return vpathToHost [0].RequestBroker; }
+			set { vpathToHost [0].RequestBroker = value; }
 		}
 
 		public int Port {
@@ -289,7 +289,7 @@ namespace Mono.WebServer
  				throw new InvalidOperationException ("SetApplications must be called first.");
 
 			if (SingleApplication) {
-				var v = (VPathToHost) vpathToHost [0];
+				var v = vpathToHost [0];
 				v.AppHost = AppHost;
 				// Link the host in the application domain with a request broker in the *same* domain
 				// Not needed for SingleApplication and mod_mono
@@ -506,13 +506,13 @@ namespace Mono.WebServer
 							  bool defaultToRoot)
 		{
 			if (SingleApplication)
-				return (VPathToHost) vpathToHost [0];
+				return vpathToHost [0];
 
 			VPathToHost bestMatch = null;
 			int bestMatchLength = 0;
 
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
-				var v = (VPathToHost) vpathToHost [i];
+				var v = vpathToHost [i];
 				int matchLength = v.vpath.Length;
 				if (matchLength <= bestMatchLength || !v.Match (vhost, port, path))
 					continue;
@@ -541,7 +541,7 @@ namespace Mono.WebServer
 		public VPathToHost GetSingleApp ()
 		{
 			if (vpathToHost.Count == 1)
-				return (VPathToHost) vpathToHost [0];
+				return vpathToHost [0];
 			return null;
 		}
 
@@ -549,7 +549,7 @@ namespace Mono.WebServer
 		{
 			// Called when the host appdomain is being unloaded
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
-				var v = (VPathToHost) vpathToHost [i];
+				var v = vpathToHost [i];
 				if (v.TryClearHost (host))
 					break;
 			}

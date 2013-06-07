@@ -27,7 +27,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -47,7 +46,7 @@ namespace Mono.WebServer
 		int position;
 		const int BSize = 1024 * 32;
 		
-		static readonly Stack bufferStack = new Stack ();
+		static readonly Stack<byte[]> bufferStack = new Stack<byte[]> ();
 		static readonly Encoding encoding = Encoding.GetEncoding (28591);
 
 		public bool GotSomeInput { get; private set; }
@@ -70,7 +69,7 @@ namespace Mono.WebServer
 		{
 			lock (bufferStack) {
 				if (bufferStack.Count != 0)
-					return (byte []) bufferStack.Pop ();
+					return bufferStack.Pop ();
 			}
 			return new byte [BSize];
 		}

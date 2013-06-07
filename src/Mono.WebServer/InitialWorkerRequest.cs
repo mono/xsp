@@ -28,10 +28,8 @@
 //
 using System;
 using System.Collections;
-using System.Configuration;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Web;
 
@@ -43,16 +41,14 @@ namespace Mono.WebServer
 		string path;
 		string queryString;
 		string protocol;
-		Stream stream;
-		bool gotSomeInput;
+		readonly Stream stream;
 
-		byte [] inputBuffer;
 		int inputLength;
 		int position;
 		const int BSize = 1024 * 32;
 		
-		static Stack bufferStack = new Stack ();
-		static Encoding encoding = Encoding.GetEncoding (28591);
+		static readonly Stack bufferStack = new Stack ();
+		static readonly Encoding encoding = Encoding.GetEncoding (28591);
 		
 		public static byte [] AllocateBuffer ()
 		{
@@ -83,51 +79,51 @@ namespace Mono.WebServer
 
 		public void FreeBuffer ()
 		{
-			if (inputBuffer != null)
-				FreeBuffer (inputBuffer);
+			if (InputBuffer != null)
+				FreeBuffer (InputBuffer);
 		}
 
 		public void SetBuffer (byte [] buffer, int length)
 		{
-			inputBuffer = buffer;
+			InputBuffer = buffer;
 			inputLength = length;
-			gotSomeInput = (length > 0);
+			GotSomeInput = (length > 0);
 			position = 0;
 		}
 
 		void FillBuffer ()
 		{
 			position = 0;
-			inputBuffer = AllocateBuffer ();
-			inputLength = stream.Read (inputBuffer, 0, BSize);
+			InputBuffer = AllocateBuffer ();
+			inputLength = stream.Read (InputBuffer, 0, BSize);
 			if (inputLength == 0) // Socket closed
 				throw new IOException ("socket closed");
 
-			gotSomeInput = true;
+			GotSomeInput = true;
 		}
 
 		string ReadRequestLine ()
 		{
-			StringBuilder text = new StringBuilder ();
-			bool cr = false;
+			var text = new StringBuilder ();
 			do {
-				if (inputBuffer == null || position >= inputLength)
+				if (InputBuffer == null || position >= inputLength)
 					FillBuffer ();
 
 				if (position >= inputLength)
 					break;
 				
-				cr = false;
+				bool cr = false;
 				int count = 0;
 				byte b = 0;
 				int i;
 				for (i = position; count < 8192 && i < inputLength; i++, count++) {
-					b = inputBuffer [i];
+					b = InputBuffer [i];
 					if (b == '\r') {
 						cr = true;
 						count--;
 						continue;
-					} else if (b == '\n' || cr) {
+					}
+					if (b == '\n' || cr) {
 						count--;
 						break;
 					}
@@ -144,15 +140,15 @@ namespace Mono.WebServer
 					break;
 				}
 
-				text.Append (encoding.GetString (inputBuffer, position, count));
+				text.Append (encoding.GetString (InputBuffer, position, count));
 				position = i + 1;
 
 				if (i >= inputLength) {
-					b = inputBuffer [inputLength - 1];
+					b = InputBuffer [inputLength - 1];
 					if (b != '\r' && b != '\n')
 						continue;
 					FillBuffer();
-					if (b == '\r' && inputLength > 0 && inputBuffer[0] == '\n')
+					if (b == '\r' && inputLength > 0 && InputBuffer[0] == '\n')
 						position++;
 				}
 				break;
@@ -167,12 +163,12 @@ namespace Mono.WebServer
 
 		bool GetRequestLine ()
 		{
-			string req = null;
+			string req;
 			try {
 				while (true) {
 					req = ReadRequestLine ();
 					if (req == null) {
-						gotSomeInput = false;
+						GotSomeInput = false;
 						return false;
 					}
 
@@ -182,7 +178,7 @@ namespace Mono.WebServer
 						break;
 				}
 			} catch (Exception) {
-				gotSomeInput = false;
+				GotSomeInput = false;
 				return false;
 			}
 
@@ -229,7 +225,7 @@ namespace Mono.WebServer
 				path = path.Replace ("//", "/");
 
 			string [] parts = path.Split ('/');
-			ArrayList result = new ArrayList (parts.Length);
+			var result = new List<string> (parts.Length);
 			
 			int end = parts.Length;
 			for (int i = 0; i < end; i++) {
@@ -250,7 +246,7 @@ namespace Mono.WebServer
 				return "/";
 
 			result.Insert (0, "");
-			return String.Join ("/", (string []) result.ToArray (typeof (string))) + trail;
+			return String.Join ("/", result.ToArray ()) + trail;
 		}
 		
 		public void ReadRequestData ()
@@ -263,19 +259,15 @@ namespace Mono.WebServer
 			}
 		}
 
-		public bool GotSomeInput {
-			get { return gotSomeInput; }
-		}
+		public bool GotSomeInput { get; private set; }
 
-		public byte [] InputBuffer {
-			get { return inputBuffer; }
-		}
+		public byte[] InputBuffer { get; private set; }
 
 		public RequestData RequestData {
 			get {
-				RequestData rd = new RequestData (verb, path, queryString, protocol);
-				byte [] buffer = new byte [inputLength - position];
-				Buffer.BlockCopy (inputBuffer, position, buffer, 0, inputLength - position);
+				var rd = new RequestData (verb, path, queryString, protocol);
+				var buffer = new byte [inputLength - position];
+				Buffer.BlockCopy (InputBuffer, position, buffer, 0, inputLength - position);
 				rd.InputBuffer = buffer;
 				return rd;
 			}

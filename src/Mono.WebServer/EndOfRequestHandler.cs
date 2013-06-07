@@ -33,21 +33,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading;
-using System.Web;
-using System.Web.Hosting;
-
 namespace Mono.WebServer
 {
 	public delegate void EndOfRequestHandler (MonoWorkerRequest request);

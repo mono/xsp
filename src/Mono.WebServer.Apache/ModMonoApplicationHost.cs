@@ -37,7 +37,7 @@ namespace Mono.WebServer
 	//
 	public class ModMonoApplicationHost : BaseApplicationHost
 	{
-		private byte[] FromPEM (string pem) 
+		byte[] FromPEM (string pem) 
 		{
 			int start = pem.IndexOf ("-----BEGIN CERTIFICATE-----");
 			if (start < 0)

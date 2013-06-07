@@ -257,7 +257,7 @@ namespace Mono.WebServer
 			return null;
 		}
 
-		private bool IsClientCertificateValidForApache ()
+		bool IsClientCertificateValidForApache ()
 		{
 			string val = GetServerVariable (requestId, "SSL_CLIENT_VERIFY");
 			if ((val == null) || (val.Length == 0))
@@ -265,7 +265,7 @@ namespace Mono.WebServer
 			return (val.Trim () == "SUCCESS");
 		}
 
-		private bool CheckClientCertificateExtensions (X509Certificate cert)
+		bool CheckClientCertificateExtensions (X509Certificate cert)
 		{
 			KeyUsages ku = KeyUsages.digitalSignature | KeyUsages.keyEncipherment | KeyUsages.keyAgreement;
 			KeyUsageExtension kux = null;
@@ -303,12 +303,12 @@ namespace Mono.WebServer
 			return false;
 		}
 
-		private bool CheckChain (X509Certificate cert)
+		bool CheckChain (X509Certificate cert)
 		{
 			return new X509Chain ().Build (cert);
 		}
 
-		private bool IsCertificateValidForMono (byte[] der)
+		bool IsCertificateValidForMono (byte[] der)
 		{
 			X509Certificate cert = new X509Certificate (der);
 			// invalidate cache if the certificate validity period has ended

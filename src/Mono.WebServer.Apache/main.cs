@@ -48,7 +48,7 @@ namespace Mono.WebServer.Apache
 			public string RootDir;
 			public object Oport = 8080;
 			public string IP = "0.0.0.0";
-			private Exception Exception;
+			Exception Exception;
 			public bool NonStop;
 			public bool Verbose;
 			public bool Master;
@@ -67,7 +67,7 @@ namespace Mono.WebServer.Apache
 					FileName = AppSettings ["MonoUnixSocket"];
 
 					// TODO: Fix for IPv6
-					if (string.IsNullOrEmpty (IP))
+					if (String.IsNullOrEmpty (IP))
 						IP = "0.0.0.0";
 					if (Oport == null)
 						Oport = 8080;
@@ -338,7 +338,7 @@ namespace Mono.WebServer.Apache
 					break;
 				case "--pidfile": {
 					string pidfile = args[++i];
-					if (!string.IsNullOrEmpty (pidfile)) {
+					if (!String.IsNullOrEmpty (pidfile)) {
 						try {
 							using (StreamWriter sw = File.CreateText (pidfile))
 								sw.Write (Process.GetCurrentProcess ().Id);
@@ -364,7 +364,7 @@ namespace Mono.WebServer.Apache
 			string lockfile;
 			bool useTCP = ((options & Options.Port) != 0);
 			if (!useTCP) {
-				if (string.IsNullOrEmpty (settings.FileName))
+				if (String.IsNullOrEmpty (settings.FileName))
 					settings.FileName = "/tmp/mod_mono_server";
 
 				if ((options & Options.Address) != 0) {
@@ -396,7 +396,7 @@ namespace Mono.WebServer.Apache
 				return 1;
 			}
 
-			if (!string.IsNullOrEmpty (settings.RootDir)) {
+			if (!String.IsNullOrEmpty (settings.RootDir)) {
 				try {
 					Environment.CurrentDirectory = settings.RootDir;
 				} catch (Exception e) {

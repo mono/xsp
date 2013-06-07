@@ -29,17 +29,8 @@
 
 
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Xml;
-using System.Web;
 using System.Web.Hosting;
-using System.Collections;
-using System.Text;
-using System.Threading;
-using System.IO;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace Mono.WebServer
 {
@@ -58,12 +49,12 @@ namespace Mono.WebServer
 			this.vhost = (vhost != null) ? vhost.ToLower (CultureInfo.InvariantCulture) : null;
 			this.vport = vport;
 			this.vpath = vpath;
-			if (vpath == null || vpath == "" || vpath [0] != '/')
+			if (String.IsNullOrEmpty (vpath) || vpath [0] != '/')
 				throw new ArgumentException ("Virtual path must begin with '/': " + vpath,
 							     "vpath");
 
 			this.realPath = realPath;
-			this.AppHost = null;
+			AppHost = null;
 			if (vhost != null && this.vhost.Length != 0 && this.vhost [0] == '*') {
 				haveWildcard = true;
 				if (this.vhost.Length > 2 && this.vhost [1] == '.')
@@ -73,8 +64,8 @@ namespace Mono.WebServer
 
 		public bool TryClearHost (IApplicationHost host)
 		{
-			if (this.AppHost == host) {
-				this.AppHost = null;
+			if (AppHost == host) {
+				AppHost = null;
 				return true;
 			}
 
@@ -92,9 +83,8 @@ namespace Mono.WebServer
 		public bool Redirect (string path, out string redirect)
 		{
 			redirect = null;
-			int plen = path.Length;
-			if (plen == this.vpath.Length - 1) {
-				redirect = this.vpath;
+			if (path.Length == vpath.Length - 1) {
+				redirect = vpath;
 				return true;
 			}
 

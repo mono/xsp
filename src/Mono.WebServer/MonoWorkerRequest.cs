@@ -34,17 +34,11 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Specialized;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Web;
 using System.Web.Hosting;
 
@@ -52,15 +46,14 @@ namespace Mono.WebServer
 {	
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
-		static readonly string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
+		const string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
 		static readonly char[] mapPathTrimStartChars = { '/' };
-		
-		static bool runningOnWindows;
+
 		static bool checkFileAccess = true;
-		static bool needToReplacePathSeparator;
-		static char pathSeparatorChar;
+		readonly static bool needToReplacePathSeparator;
+		readonly static char pathSeparatorChar;
 		
-		IApplicationHost appHostBase;
+		readonly IApplicationHost appHostBase;
 		Encoding encoding;
 		Encoding headerEncoding;
 		byte [] queryStringBytes;
@@ -69,8 +62,8 @@ namespace Mono.WebServer
 		string hostPhysicalRoot;
 		EndOfSendNotification end_send;
 		object end_send_data;
-		X509Certificate client_cert;		
-		NameValueCollection server_variables;		
+		X509Certificate client_cert;
+		NameValueCollection server_variables;
 		bool inUnhandledException;
 		
  		// as we must have the client certificate (if provided) then we're able to avoid
@@ -87,10 +80,8 @@ namespace Mono.WebServer
 		public event EndOfRequestHandler EndOfRequestEvent;
 
 		public abstract int RequestId { get; }
-		
-		protected static bool RunningOnWindows {
-			get { return runningOnWindows; }
-		}
+
+		protected static bool RunningOnWindows { get; private set; }
 
 		public static bool CheckFileAccess {
 			get { return checkFileAccess; }
@@ -100,42 +91,24 @@ namespace Mono.WebServer
 		// Gets the physical path of the application host of the
 		// current instance.
 		string HostPath {
-			get { 
-				if (hostPath == null)
-					hostPath = appHostBase.Path;
-
-				return hostPath;
-			}
+			get { return hostPath ?? (hostPath = appHostBase.Path); }
 		}
 
 		// Gets the virtual path of the application host of the
 		// current instance.
 		string HostVPath {
-			get { 
-				if (hostVPath == null)
-					hostVPath = appHostBase.VPath;
-
-				return hostVPath;
-			}
+			get { return hostVPath ?? (hostVPath = appHostBase.VPath); }
 		}
 
 		string HostPhysicalRoot {
 			get {
-				if (hostPhysicalRoot == null)
-					hostPhysicalRoot = appHostBase.Server.PhysicalRoot;
-
-				return hostPhysicalRoot;
+				return hostPhysicalRoot ??
+					(hostPhysicalRoot = appHostBase.Server.PhysicalRoot);
 			}
 		}
 		
 		protected virtual Encoding Encoding {
-			get {
-				if (encoding == null)
-					encoding = Encoding.GetEncoding (28591);
-
-				return encoding;
-			}
-
+			get { return encoding ?? (encoding = Encoding.GetEncoding (28591)); }
 			set { encoding = value; }
 		}
 
@@ -146,10 +119,7 @@ namespace Mono.WebServer
 					HttpResponse response = ctx != null ? ctx.Response : null;
 					Encoding enc = inUnhandledException ? null :
 						response != null ? response.HeaderEncoding : null;
-					if (enc != null)
-						headerEncoding = enc;
-					else
-						headerEncoding = this.Encoding;
+					headerEncoding = enc ?? Encoding;
 				}
 				return headerEncoding;
 			}
@@ -158,7 +128,7 @@ namespace Mono.WebServer
 		static MonoWorkerRequest ()
 		{
 			PlatformID pid = Environment.OSVersion.Platform;
-                        runningOnWindows = ((int) pid != 128 && pid != PlatformID.Unix && pid != PlatformID.MacOSX);
+			RunningOnWindows = ((int) pid != 128 && pid != PlatformID.Unix && pid != PlatformID.MacOSX);
 
 			if (Path.DirectorySeparatorChar != '/') {
 				needToReplacePathSeparator = true;
@@ -167,7 +137,7 @@ namespace Mono.WebServer
 			
 			try {
 				string v = ConfigurationManager.AppSettings ["MonoServerCheckHiddenFiles"];
-				if (v != null && v.Length > 0) {
+				if (!String.IsNullOrEmpty (v)) {
 					if (!Boolean.TryParse (v, out checkFileAccess))
 						checkFileAccess = true;
 				}
@@ -175,9 +145,9 @@ namespace Mono.WebServer
 				// ignore
 				checkFileAccess = true;
 			}
-		}		
+		}
 
-		public MonoWorkerRequest (IApplicationHost appHost)
+		protected MonoWorkerRequest (IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
 		{
 			if (appHost == null)
@@ -209,7 +179,7 @@ namespace Mono.WebServer
 		public override string GetServerName ()
 		{
 			string hostHeader = GetKnownRequestHeader(HeaderHost);
-			if (hostHeader == null || hostHeader.Length == 0) {
+			if (String.IsNullOrEmpty (hostHeader)) {
 				hostHeader = GetLocalAddress ();
 			} else {
 				int colonIndex = hostHeader.IndexOf (':');
@@ -254,7 +224,7 @@ namespace Mono.WebServer
 		string DoMapPathEvent (string path)
 		{
 			if (MapPathEvent != null) {
-				MapPathEventArgs args = new MapPathEventArgs (path);
+				var args = new MapPathEventArgs (path);
 				foreach (MapPathEventHandler evt in MapPathEvent.GetInvocationList ()) {
 					evt (this, args);
 					if (args.IsMapped)
@@ -263,7 +233,7 @@ namespace Mono.WebServer
 			}
 
 			return null;
-		}		
+		}
 
 		// The logic here is as follows:
 		//
@@ -289,11 +259,10 @@ namespace Mono.WebServer
 			string hostVPath = HostVPath;
 			int hostVPathLen = HostVPath.Length;
 			int pathLen = path != null ? path.Length : 0;
-			bool inThisApp;
 #if NET_2_0
-			inThisApp = path.StartsWith (hostVPath, StringComparison.Ordinal);
+			bool inThisApp = path.StartsWith (hostVPath, StringComparison.Ordinal);
 #else
-			inThisApp = path.StartsWith (hostVPath);
+			bool inThisApp = path.StartsWith (hostVPath);
 #endif
 			if (pathLen == 0 || (inThisApp && (pathLen == hostVPathLen || (pathLen == hostVPathLen + 1 && path [pathLen - 1] == '/')))) {
 				if (needToReplacePathSeparator)
@@ -338,9 +307,9 @@ namespace Mono.WebServer
 		{
 			bool doThrow = false;
 			
-			if (runningOnWindows) {
+			if (RunningOnWindows) {
 				try {
-					FileInfo fi = new FileInfo (localPath);
+					var fi = new FileInfo (localPath);
 					FileAttributes attr = fi.Attributes;
 
 					if ((attr & FileAttributes.Hidden) != 0 || (attr & FileAttributes.System) != 0)
@@ -374,7 +343,7 @@ namespace Mono.WebServer
 			string appPath = GetAppPathTranslated ();
 			string[] segments = localPath.Substring (appPath.Length).Split (dirsep);
 
-			StringBuilder sb = new StringBuilder (appPath);
+			var sb = new StringBuilder (appPath);
 			foreach (string s in segments) {
 				if (s.Length == 0)
 					continue;
@@ -403,7 +372,8 @@ namespace Mono.WebServer
 				error = ex.GetHtmlErrorMessage ();
 			} catch (Exception ex) {
 				inUnhandledException = true;
-				HttpException hex = new HttpException (400, "Bad request", ex);
+				var hex = new HttpException (400, "Bad request", ex);
+				// TODO: Check, this looks like a bug
 				if (hex != null) // just a precaution
 					error = hex.GetHtmlErrorMessage ();
 				else
@@ -422,6 +392,7 @@ namespace Mono.WebServer
 				SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
 				
 				Encoding enc = Encoding.UTF8;
+				// TODO: Check, this looks like a bug
 				if (enc == null)
 					enc = Encoding.ASCII;
 				
@@ -462,7 +433,7 @@ namespace Mono.WebServer
 			if (HeadersSent ())
 				return;
 
-			string headerName = HttpWorkerRequest.GetKnownResponseHeaderName (index);
+			string headerName = GetKnownResponseHeaderName (index);
 			SendUnknownResponseHeader (headerName, value);
 		}
 
@@ -478,12 +449,12 @@ namespace Mono.WebServer
 			if (offset > 0)
 				stream.Seek (offset, SeekOrigin.Begin);
 
-			byte [] fileContent = new byte [8192];
+			var fileContent = new byte [8192];
 			int count = fileContent.Length;
 			while (length > 0 && (count = stream.Read (fileContent, 0, count)) != 0) {
 				SendResponseFromMemory (fileContent, count);
 				length -= count;
-				count = (int) System.Math.Min (length, fileContent.Length);
+				count = (int) Math.Min (length, fileContent.Length);
 			}
 		}
 
@@ -555,7 +526,7 @@ namespace Mono.WebServer
 			}
 
 			string s = server_variables [name];
-			return (s == null) ? String.Empty : s;
+			return s ?? String.Empty;
 		}
 
 		public void AddServerVariable (string name, string value)

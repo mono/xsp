@@ -114,17 +114,7 @@ namespace Mono.WebServer
 			if (list == null)
 				return;
 
-			var files = new List<string> ();
-			string [] fs = list.Split (',');
-			foreach (string f in fs) {
-				string trimmed = f.Trim ();
-				if (trimmed == "") 
-					continue;
-
-				files.Add (trimmed);
-			}
-
-			indexFiles = files.ToArray ();
+			indexFiles = SplitAndTrim (list);
 		}
 
 		public ModMonoWorkerRequest (int requestId, ModMonoRequestBroker requestBroker,

@@ -153,7 +153,7 @@ namespace Mono.WebServer
 			return request_ids [result];
 		}
 
-		private int IdToIndex(int requestId) {
+		int IdToIndex(int requestId) {
 			return requestId & 0xFFFF;
 		}
 

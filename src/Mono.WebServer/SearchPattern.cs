@@ -58,10 +58,10 @@ namespace System.IO {
 
 		// private
 
-		private Op ops;		// the compiled pattern
-		private bool ignore;	// ignore case
+		Op ops;		// the compiled pattern
+		bool ignore;	// ignore case
 
-		private void Compile (string pattern)
+		void Compile (string pattern)
 		{
 			if (pattern == null)
 				throw new ArgumentException ("Invalid search pattern.");
@@ -117,7 +117,7 @@ namespace System.IO {
 				last_op.Next = new Op (OpCode.End);
 		}
 
-		private bool Match (Op op, string text, int ptr)
+		bool Match (Op op, string text, int ptr)
 		{
 			while (op != null) {
 				switch (op.Code) {
@@ -171,7 +171,7 @@ namespace System.IO {
 
 		internal static readonly char [] WildcardChars = { '*', '?' };
 
-		private class Op {
+		class Op {
 			public Op (OpCode code)
 			{
 				Code = code;
@@ -184,7 +184,7 @@ namespace System.IO {
 			public Op Next;
 		}
 
-		private enum OpCode {
+		enum OpCode {
 			ExactString,		// literal
 			AnyChar,		// ?
 			AnyString,		// *

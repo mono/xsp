@@ -30,8 +30,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace System.IO {
 
 	// FIXME: there's a complication with this algorithm under windows.
@@ -176,9 +174,9 @@ namespace System.IO {
 		private class Op {
 			public Op (OpCode code)
 			{
-				this.Code = code;
-				this.Argument = null;
-				this.Next = null;
+				Code = code;
+				Argument = null;
+				Next = null;
 			}
 		
 			public OpCode Code;

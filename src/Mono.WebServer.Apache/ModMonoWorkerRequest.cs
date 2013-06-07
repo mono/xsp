@@ -33,14 +33,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Collections;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using Mono.Security.X509;
 using Mono.Security.X509.Extensions;
 
@@ -49,32 +47,32 @@ namespace Mono.WebServer
 	public class ModMonoWorkerRequest : MonoWorkerRequest
 	{
 		bool closed;
-		string verb;
-		string queryString;
-		string protocol;
+		readonly string verb;
+		readonly string queryString;
+		readonly string protocol;
 		string path;
 		string pathInfo;
-		string rawUrl;
-		string localAddress;
-		int serverPort;
-		string remoteAddress;
-		int remotePort;
-		string remoteName;
-		ModMonoRequestBroker requestBroker;
-		ModMonoWorker worker;
-		string[] headers;
+		readonly string rawUrl;
+		readonly string localAddress;
+		readonly int serverPort;
+		readonly string remoteAddress;
+		readonly int remotePort;
+		readonly string remoteName;
+		readonly ModMonoRequestBroker requestBroker;
+		readonly ModMonoWorker worker;
+		readonly string[] headers;
 		int [] headersHash;
-		string[] headerValues;
-		int requestId;
+		readonly string[] headerValues;
+		readonly int requestId;
 		bool gotSecure;
 		bool isSecure;
-		IApplicationHost appHost;
+		readonly IApplicationHost appHost;
 		
 		// client certificate validity support
 		string cert_hash;
 		bool cert_validity;
-		static bool cert_check_apache;
-		static bool cert_check_mono;
+		readonly static bool cert_check_apache;
+		readonly static bool cert_check_mono;
 
 		string [][] unknownHeaders;
 		static string [] indexFiles = { "index.aspx",
@@ -116,7 +114,7 @@ namespace Mono.WebServer
 			if (list == null)
 				return;
 
-			ArrayList files = new ArrayList ();
+			var files = new List<string> ();
 			string [] fs = list.Split (',');
 			foreach (string f in fs) {
 				string trimmed = f.Trim ();
@@ -126,7 +124,7 @@ namespace Mono.WebServer
 				files.Add (trimmed);
 			}
 
-			indexFiles = (string []) files.ToArray (typeof (string));
+			indexFiles = files.ToArray ();
 		}
 
 		public ModMonoWorkerRequest (int requestId, ModMonoRequestBroker requestBroker,
@@ -140,9 +138,9 @@ namespace Mono.WebServer
 			this.requestBroker = requestBroker;
 			this.verb = verb;
 			this.appHost = appHost;
-			this.rawUrl = path;
+			rawUrl = path;
 			if (!String.IsNullOrEmpty (queryString))
-				this.rawUrl += "?" + queryString;
+				rawUrl += "?" + queryString;
 			//this.protocol = protocol;
 			// Don't let System.Web know if it's 1.1. This way apache handles the chunked
 			// encoding for us, without sys.web interfering.
@@ -241,7 +239,7 @@ namespace Mono.WebServer
 		{
 			if (!gotSecure) {
 				string val = GetServerVariable (requestId, "SERVER_PORT_SECURE");
-				isSecure =  (val != null && val != "");
+				isSecure =  !String.IsNullOrEmpty (val);
 				gotSecure = true;
 			}
 
@@ -260,14 +258,14 @@ namespace Mono.WebServer
 		bool IsClientCertificateValidForApache ()
 		{
 			string val = GetServerVariable (requestId, "SSL_CLIENT_VERIFY");
-			if ((val == null) || (val.Length == 0))
+			if (String.IsNullOrEmpty (val))
 				return false;
 			return (val.Trim () == "SUCCESS");
 		}
 
 		bool CheckClientCertificateExtensions (X509Certificate cert)
 		{
-			KeyUsages ku = KeyUsages.digitalSignature | KeyUsages.keyEncipherment | KeyUsages.keyAgreement;
+			const KeyUsages ku = KeyUsages.digitalSignature | KeyUsages.keyEncipherment | KeyUsages.keyAgreement;
 			KeyUsageExtension kux = null;
 			ExtendedKeyUsageExtension eku = null;
 
@@ -285,9 +283,11 @@ namespace Mono.WebServer
 				// be valid
 				return (kux.Support (ku) &&
 					eku.KeyPurpose.Contains ("1.3.6.1.5.5.7.3.2"));
-			} else if (kux != null) {
+			}
+			if (kux != null) {
 				return kux.Support (ku);
-			} else if (eku != null) {
+			}
+			if (eku != null) {
 				// Client Authentication (1.3.6.1.5.5.7.3.2)
 				return eku.KeyPurpose.Contains ("1.3.6.1.5.5.7.3.2");
 			}
@@ -295,7 +295,7 @@ namespace Mono.WebServer
 			// last chance - try with older (deprecated) Netscape extensions
 			xtn = cert.Extensions["2.16.840.1.113730.1.1"];
 			if (xtn != null) {
-				NetscapeCertTypeExtension ct = new NetscapeCertTypeExtension (xtn);
+				var ct = new NetscapeCertTypeExtension (xtn);
 				return ct.Support (NetscapeCertTypeExtension.CertTypes.SslClient);
 			}
 
@@ -310,7 +310,7 @@ namespace Mono.WebServer
 
 		bool IsCertificateValidForMono (byte[] der)
 		{
-			X509Certificate cert = new X509Certificate (der);
+			var cert = new X509Certificate (der);
 			// invalidate cache if the certificate validity period has ended
 			if (cert.ValidUntil > DateTime.UtcNow)
 				cert_hash = null;
@@ -349,17 +349,17 @@ namespace Mono.WebServer
 
 		public override void CloseConnection ()
 		{
-			if (!closed) {
-				if (requestId == -1) {
-					try {
-						worker.Close ();
-					} finally {
-						worker.Dispose ();
-					}
-				} else 
-					requestBroker.Close (requestId);
-				closed = true;
-			}
+			if (closed) 
+				return;
+			if (requestId == -1) {
+				try {
+					worker.Close ();
+				} finally {
+					worker.Dispose ();
+				}
+			} else 
+				requestBroker.Close (requestId);
+			closed = true;
 		}
 
 		public override string GetHttpVerbName ()
@@ -397,7 +397,7 @@ namespace Mono.WebServer
 			return remotePort;
 		}
 
-		Hashtable server_vars = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
+		readonly Hashtable server_vars = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
 							CaseInsensitiveComparer.DefaultInvariant);
 		public override string GetServerVariable (string name)
 		{
@@ -409,7 +409,7 @@ namespace Mono.WebServer
 				return (string) o;
 
 			string result = GetServerVariable (requestId, name);
-			if (result != null && result.Length > 0) {
+			if (!String.IsNullOrEmpty (result)) {
 				server_vars [name] = result;
 				return result;
 			}
@@ -421,7 +421,7 @@ namespace Mono.WebServer
 				break;
 			default:
 				result = base.GetServerVariable (name);
-				if (result == null || result.Length == 0)
+				if (String.IsNullOrEmpty (result))
 					server_vars [name] = false;
 				else
 					server_vars [name] = result;
@@ -437,12 +437,12 @@ namespace Mono.WebServer
 			HttpContext ctx = HttpContext.Current;
 			HttpResponse response = ctx != null ? ctx.Response : null;
 
-			if (response != null) {
-				if (requestId == -1)
-					worker.SetOutputBuffering (response.BufferOutput);
-				else
-					requestBroker.SetOutputBuffering (requestId, response.BufferOutput);
-			}
+			if (response == null)
+				return;
+			if (requestId == -1)
+				worker.SetOutputBuffering (response.BufferOutput);
+			else
+				requestBroker.SetOutputBuffering (requestId, response.BufferOutput);
 		}
 		
 		public override void SendResponseFromMemory (IntPtr data, int length)
@@ -461,7 +461,7 @@ namespace Mono.WebServer
 			
 			if (requestId > -1 && data.Length > length * 2) {
 				// smaller buffer when using remoting
-				byte [] tmpbuffer = new byte [length];
+				var tmpbuffer = new byte [length];
 				Buffer.BlockCopy (data, 0, tmpbuffer, 0, length);
 				requestBroker.Write (requestId, tmpbuffer, 0, length);
 			} else {
@@ -500,7 +500,7 @@ namespace Mono.WebServer
 		public override string GetUriPath ()
 		{
 			string result = path;
-			if (pathInfo != null && pathInfo.Length > 0)
+			if (!String.IsNullOrEmpty (pathInfo))
 				result += pathInfo;
 
 			return result;
@@ -525,18 +525,18 @@ namespace Mono.WebServer
 		{
 			if (unknownHeaders == null) {
 				int count = headers.Length;
-				ArrayList pairs = new ArrayList ();
+				var pairs = new List<string[]> ();
 				for (int i = 0; i < count; i++) {
-					if (HttpWorkerRequest.GetKnownRequestHeaderIndex (headers [i]) != -1)
+					if (GetKnownRequestHeaderIndex (headers [i]) != -1)
 						continue;
 
-					pairs.Add (new string [] { headers [i], headerValues [i]});
+					pairs.Add (new[] { headers [i], headerValues [i]});
 				}
 				
 				if (pairs.Count != 0) {
 					unknownHeaders = new string [pairs.Count][];
 					for (int i = 0; i < pairs.Count; i++)
-						unknownHeaders [i] = (string []) pairs [i];
+						unknownHeaders [i] = pairs [i];
 				}
 			}
 
@@ -585,7 +585,7 @@ namespace Mono.WebServer
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
 			if (offset == 0) {
-				FileInfo info = new FileInfo (filename);
+				var info = new FileInfo (filename);
 				if (info.Length == length) {
 					if (requestId == -1)
 						worker.SendFile (filename);

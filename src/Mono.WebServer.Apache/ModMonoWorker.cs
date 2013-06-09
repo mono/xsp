@@ -212,8 +212,7 @@ namespace Mono.WebServer
 				}
 			}
 
-			string vServerName = rr.Request.GetVirtualServerName ()
-				?? vhost;
+			string vServerName = rr.Request.GetVirtualServerName () ?? vhost;
 
 			VPathToHost vapp;
 			string vpath = rr.GetUriPath ();

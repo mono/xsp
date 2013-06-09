@@ -137,10 +137,10 @@ namespace Mono.WebServer.FastCgi
 			if (!GetRootDirectory (configmanager, out root_dir))
 				return 1;
 
+			CreateAppServer (configmanager, root_dir);
+
 			if (!LoadApplicationsConfig (configmanager))
 				return 1;
-
-			CreateAppServer (configmanager, root_dir);
 
 			Mono.FastCgi.Server server = CreateServer (configmanager,
 				socket);

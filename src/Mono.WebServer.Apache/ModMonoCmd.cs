@@ -34,21 +34,21 @@ namespace Mono.WebServer
 {
 	enum ModMonoCmd
 	{
-		FirstCommand,
-		SendFromMemory = 0,
-		GetServerVariables,
-		SetResponseHeaders,
-		GetLocalPort,
-		Close,
-		ShouldClientBlock,
-		SetupClientBlock,
-		GetClientBlock,
-		SetStatus,
-		DeclineRequest,
-		NotFound,
-		IsConnected,
-		SendFile,
-		SetConfiguration,
-		LastCommand
+		FIRST_COMMAND,
+		SEND_FROM_MEMORY = 0,
+		GET_SERVER_VARIABLES,
+		SET_RESPONSE_HEADERS,
+		GET_LOCAL_PORT,
+		CLOSE,
+		SHOULD_CLIENT_BLOCK,
+		SETUP_CLIENT_BLOCK,
+		GET_CLIENT_BLOCK,
+		SET_STATUS,
+		DECLINE_REQUEST,
+		NOT_FOUND,
+		IS_CONNECTED,
+		SEND_FILE,
+		SET_CONFIGURATION,
+		LAST_COMMAND
 	}
 }

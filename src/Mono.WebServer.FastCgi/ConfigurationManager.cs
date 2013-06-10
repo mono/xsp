@@ -70,22 +70,6 @@ namespace Mono.WebServer
 		public string ConfigFile { get { return GetString ("configfile"); } }
 #endregion
 
-		[Obsolete("Setting the port from code is an hack right now")]
-		public void SetPort(string value) {
-			this ["port"] = value;
-		}
-
-		[Obsolete ("Setting the address from code is an hack right now")]
-		public void SetAddress(string value){
-			this ["address"] = value;
-		}
-
-		[Obsolete ("Setting the filename from code is an hack right now")]
-		public void SetFilename (string value)
-		{
-			this ["filename"] = value;
-		}
-
 		public ConfigurationManager (Assembly asm, string resource)
 		{
 			var doc = new XmlDocument ();

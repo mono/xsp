@@ -292,21 +292,25 @@ namespace Mono.WebServer.FastCgi
 		                             string [] socketParts,
 			                     ref Socket socket)
 		{
-			if (socketParts.Length > 1)
-				configmanager.SetPort(socketParts [socketParts.Length - 1]);
-
-			if (socketParts.Length == 3)
-				configmanager.SetAddress(socketParts [1]);
-
 			ushort port;
 			try {
-				port = configmanager.Port;
+				if (socketParts.Length > 1) {
+					try {
+						port= UInt16.Parse (socketParts [socketParts.Length - 1]);
+					} catch (Exception except) {
+						Logger.Write (LogLevel.Error, "Error parsing port: {0}", except.Message);
+						return false;
+					}
+				} else
+					port = configmanager.Port;
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return false;
 			}
 
-			var address_str = configmanager.Address;
+			string address_str = socketParts.Length == 3
+				? socketParts[1]
+				: configmanager.Address;
 			IPAddress address;
 
 			if (address_str == null)
@@ -339,10 +343,11 @@ namespace Mono.WebServer.FastCgi
 		                              string [] socketParts,
 		                              ref Socket socket)
 		{
-			if (socketParts.Length == 2)
-				configmanager.SetFilename(socketParts [1]);
-
-			var path = configmanager.Filename;
+			string path;
+			if(socketParts.Length == 2)
+				path=socketParts[1];
+			else
+				path = configmanager.Filename;
 
 			try {
 				socket = SocketFactory.CreateUnixSocket (

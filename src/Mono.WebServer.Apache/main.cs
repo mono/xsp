@@ -48,8 +48,6 @@ namespace Mono.WebServer.Apache
 			public string RootDir;
 			public object Oport = 8080;
 			public string IP = "0.0.0.0";
-			// TODO: This field is unused, why is it there?
-			Exception Exception;
 			public bool NonStop;
 			public bool Verbose;
 			public bool Master;
@@ -75,7 +73,6 @@ namespace Mono.WebServer.Apache
 				} catch (Exception ex) {
 					Console.Error.WriteLine ("Exception caught during reading the configuration file:");
 					Console.Error.WriteLine (ex);
-					Exception = ex;
 				}
 			}
 		}

@@ -39,7 +39,7 @@ namespace Mono.WebServer
 		public ModMonoTCPWebSource (IPAddress address, int port, string lockfile)
 			: base (lockfile)
 		{
-			if (Equals (address, IPAddress.Any))
+			if (address == IPAddress.Any)
 				address = IPAddress.Loopback;
 
 			SetListenAddress (address, port);

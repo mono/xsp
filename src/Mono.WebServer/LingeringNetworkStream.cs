@@ -33,8 +33,8 @@ namespace Mono.WebServer
 {
 	public class LingeringNetworkStream : NetworkStream 
 	{
-		const int useconds_to_linger = 2000000;
-		const int max_useconds_to_linger = 30000000;
+		const int USECONDS_TO_LINGER = 2000000;
+		const int MAX_USECONDS_TO_LINGER = 30000000;
 		// We dont actually use the data from this buffer. So we cache it...
 		static byte [] buffer;
 
@@ -58,10 +58,10 @@ namespace Mono.WebServer
 			try {
 				Socket.Shutdown (SocketShutdown.Send);
 				DateTime start = DateTime.UtcNow;
-				while (waited < max_useconds_to_linger) {
+				while (waited < MAX_USECONDS_TO_LINGER) {
 					int nread = 0;
 					try {
-						if (!Socket.Poll (useconds_to_linger, SelectMode.SelectRead))
+						if (!Socket.Poll (USECONDS_TO_LINGER, SelectMode.SelectRead))
 							break;
 
 						if (buffer == null)

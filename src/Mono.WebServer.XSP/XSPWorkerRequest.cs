@@ -459,14 +459,12 @@ namespace Mono.WebServer
 
 			var content_length = (string) headers ["Content-Length"];
 			long length = -1;
-			try {
-				if (!String.IsNullOrEmpty (content_length))
-					length = Int64.Parse (content_length);
-				if (length > Int32.MaxValue)
-					throw new InvalidOperationException ("Content-Length exceeds the maximum accepted size.");
-			} catch {
-				// ignore
-			}
+
+			// If not empty parse, if correctly parsed validate
+			if (!String.IsNullOrEmpty (content_length)
+				&& Int64.TryParse (content_length, out length)
+				&& length > Int32.MaxValue)
+				throw new InvalidOperationException ("Content-Length exceeds the maximum accepted size.");
 
 			int input_data_length = inputLength - position;
 			if (length == -1 || length > input_data_length)
@@ -569,11 +567,8 @@ namespace Mono.WebServer
 
 			var content_length = (string) headers ["Content-Length"];
 			long length;
-			try {
-				length = Int64.Parse (content_length);
-			} catch {
+			if (!Int64.TryParse (content_length, out length))
 				return false;
-			}
 
 			return (length <= inputLength);
 		}

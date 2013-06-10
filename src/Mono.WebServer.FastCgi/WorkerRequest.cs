@@ -253,11 +253,10 @@ namespace Mono.WebServer.FastCgi
 			if (String.IsNullOrEmpty(port))
 				return base.GetRemotePort ();
 			
-			try {
-				return Int32.Parse (port);
-			} catch {
-				return base.GetRemotePort ();
-			}
+			int ret;
+			if (Int32.TryParse (port, out ret))
+				return ret;
+			return base.GetRemotePort ();
 		}
 		
 		public override string GetServerVariable (string name)

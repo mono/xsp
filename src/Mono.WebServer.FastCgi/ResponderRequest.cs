@@ -109,10 +109,8 @@ namespace Mono.FastCgi {
 				// If the length isn't a number, we can't
 				// continue.
 				int length;
-				try {
-					length = Int32.Parse (length_text,
-						CultureInfo.InvariantCulture);
-				} catch {
+				if(!Int32.TryParse (length_text, NumberStyles.Integer,
+					CultureInfo.InvariantCulture, out length)){
 					Abort (Strings.ResponderRequest_NoContentLengthNotNumber);
 					return;
 				}

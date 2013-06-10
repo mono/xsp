@@ -29,10 +29,10 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Xml;
-using System.Collections;
 using System.Text;
 using System.Threading;
 using System.IO;
@@ -82,25 +82,24 @@ namespace Mono.WebServer
 		readonly WebSource webSource;
 		bool started;
 		bool stop;
-		bool verbose;
 		Socket listen_socket;
 		Exception initialException;
 
 		Thread runner;
 
 		// This is much faster than hashtable for typical cases.
-		readonly ArrayList vpathToHost = new ArrayList ();
+		readonly List<VPathToHost> vpathToHost = new List<VPathToHost> ();
 
 		public bool SingleApplication { get; set; }
 
 		public IApplicationHost AppHost {
-			get { return ((VPathToHost) vpathToHost [0]).AppHost; }
-			set { ((VPathToHost) vpathToHost [0]).AppHost = value; }
+			get { return vpathToHost [0].AppHost; }
+			set { vpathToHost [0].AppHost = value; }
 		}
 
 		public IRequestBroker Broker {
-			get { return ((VPathToHost) vpathToHost [0]).RequestBroker; }
-			set { ((VPathToHost) vpathToHost [0]).RequestBroker = value; }
+			get { return vpathToHost [0].RequestBroker; }
+			set { vpathToHost [0].RequestBroker = value; }
 		}
 
 		public int Port {
@@ -118,6 +117,8 @@ namespace Mono.WebServer
 
 		public string PhysicalRoot { get; private set; }
 
+		public bool Verbose { get; set; }
+
 		[Obsolete ("Use the .ctor that takes a 'physicalRoot' argument instead")]
 		public ApplicationServer (WebSource source) : this (source, Environment.CurrentDirectory)
 		{
@@ -132,11 +133,6 @@ namespace Mono.WebServer
 			
 			webSource = source;
 			PhysicalRoot = physicalRoot;
-		} 
-
-		public bool Verbose {
-			get { return verbose; }
-			set { verbose = value; }
 		}
 
 		public void AddApplication (string vhost, int vport, string vpath, string fullPath)
@@ -146,7 +142,7 @@ namespace Mono.WebServer
 				fullPath += dirSepChar;
 			
 			// TODO - check for duplicates, sort, optimize, etc.
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine("Registering application:");
 				Console.WriteLine("    Host:          {0}", vhost ?? "any");
 				Console.WriteLine("    Port:          {0}", (vport != -1) ?
@@ -161,7 +157,7 @@ namespace Mono.WebServer
 
  		public void AddApplicationsFromConfigDirectory (string directoryName)
  		{
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine ("Adding applications from *.webapp files in " +
 						   "directory '{0}'", directoryName);
 			}
@@ -178,7 +174,7 @@ namespace Mono.WebServer
 
  		public void AddApplicationsFromConfigFile (string fileName)
  		{
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine ("Adding applications from config file '{0}'", fileName);
 			}
 
@@ -238,7 +234,7 @@ namespace Mono.WebServer
  			if (applications == "")
 				return;
 
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine("Adding applications '{0}'...", applications);
 			}
 
@@ -289,7 +285,7 @@ namespace Mono.WebServer
  				throw new InvalidOperationException ("SetApplications must be called first.");
 
 			if (SingleApplication) {
-				var v = (VPathToHost) vpathToHost [0];
+				var v = vpathToHost [0];
 				v.AppHost = AppHost;
 				// Link the host in the application domain with a request broker in the *same* domain
 				// Not needed for SingleApplication and mod_mono
@@ -377,25 +373,24 @@ namespace Mono.WebServer
 				Thread.Sleep (1000000);
 		}
 
-		void OnAccept (object sender, EventArgs e)
+		void OnAccept (object sender, SocketAsyncEventArgs e)
 		{
 			if (!started && SingleApplication) {
 				// We are shutting down. Last call...
 				Environment.Exit (0);
 			}
 
-			var args = (SocketAsyncEventArgs) e;
-			Socket accepted = args.AcceptSocket;
-			args.AcceptSocket = null;
+			Socket accepted = e.AcceptSocket;
+			e.AcceptSocket = null;
 
-			if (args.SocketError != SocketError.Success) {
+			if (e.SocketError != SocketError.Success) {
 				CloseSocket(accepted);
 				accepted = null;
 			}
 
 			try {
 				if (started)
-					listen_socket.AcceptAsync (args);
+					listen_socket.AcceptAsync (e);
 			} catch (Exception ex) {
 				if (accepted != null)
 					CloseSocket (accepted);
@@ -506,13 +501,13 @@ namespace Mono.WebServer
 							  bool defaultToRoot)
 		{
 			if (SingleApplication)
-				return (VPathToHost) vpathToHost [0];
+				return vpathToHost [0];
 
 			VPathToHost bestMatch = null;
 			int bestMatchLength = 0;
 
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
-				var v = (VPathToHost) vpathToHost [i];
+				var v = vpathToHost [i];
 				int matchLength = v.vpath.Length;
 				if (matchLength <= bestMatchLength || !v.Match (vhost, port, path))
 					continue;
@@ -532,7 +527,7 @@ namespace Mono.WebServer
 			if (defaultToRoot)
 				return GetApplicationForPath (vhost, port, "/", false);
 
-			if (verbose)
+			if (Verbose)
 				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
 
 			return null;
@@ -541,7 +536,7 @@ namespace Mono.WebServer
 		public VPathToHost GetSingleApp ()
 		{
 			if (vpathToHost.Count == 1)
-				return (VPathToHost) vpathToHost [0];
+				return vpathToHost [0];
 			return null;
 		}
 
@@ -549,7 +544,7 @@ namespace Mono.WebServer
 		{
 			// Called when the host appdomain is being unloaded
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
-				var v = (VPathToHost) vpathToHost [i];
+				var v = vpathToHost [i];
 				if (v.TryClearHost (host))
 					break;
 			}

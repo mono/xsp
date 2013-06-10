@@ -48,7 +48,6 @@ namespace Mono.WebServer.Apache
 			public string RootDir;
 			public object Oport = 8080;
 			public string IP = "0.0.0.0";
-			Exception Exception;
 			public bool NonStop;
 			public bool Verbose;
 			public bool Master;
@@ -56,7 +55,6 @@ namespace Mono.WebServer.Apache
 			
 			public ApplicationSettings ()
 			{
-				Exception = null;
 				try {
 					Apps = AppSettings ["MonoApplications"];
 					AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
@@ -74,13 +72,13 @@ namespace Mono.WebServer.Apache
 				} catch (Exception ex) {
 					Console.Error.WriteLine ("Exception caught during reading the configuration file:");
 					Console.Error.WriteLine (ex);
-					Exception = ex;
 				}
 			}
 		}
 
 		static void ShowVersion ()
 		{
+			// TODO: rewrite in a safer way
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string version = assembly.GetName ().Version.ToString ();
 			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
@@ -389,9 +387,7 @@ namespace Mono.WebServer.Apache
 				return 1;
 			}
 
-			try {
-				ipaddr = IPAddress.Parse (settings.IP);
-			} catch (Exception) {
+			if(!IPAddress.TryParse (settings.IP,out ipaddr)){
 				Console.Error.WriteLine ("The value given for the address is not valid: " + settings.IP);
 				return 1;
 			}
@@ -407,7 +403,7 @@ namespace Mono.WebServer.Apache
 
 			settings.RootDir = Directory.GetCurrentDirectory ();
 			
-			WebSource webSource;
+			ModMonoWebSource webSource;
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
@@ -418,7 +414,7 @@ namespace Mono.WebServer.Apache
 				if (settings.Verbose)
 					Console.Error.WriteLine ("Shutting down running mod-mono-server...");
 				
-				bool res = ((ModMonoWebSource) webSource).GracefulShutdown ();
+				bool res = webSource.GracefulShutdown ();
 				if (settings.Verbose)
 					Console.Error.WriteLine (res ? "Done." : "Failed");
 

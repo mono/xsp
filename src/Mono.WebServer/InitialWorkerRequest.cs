@@ -27,7 +27,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -45,19 +44,17 @@ namespace Mono.WebServer
 
 		int inputLength;
 		int position;
-		const int BSize = 1024 * 32;
+		const int B_SIZE = 1024 * 32;
 		
-		static readonly Stack bufferStack = new Stack ();
+		static readonly Stack<byte[]> bufferStack = new Stack<byte[]> ();
 		static readonly Encoding encoding = Encoding.GetEncoding (28591);
 
 		public bool GotSomeInput { get; private set; }
 
 		public byte [] InputBuffer { get; private set; }
 
-		public RequestData RequestData
-		{
-			get
-			{
+		public RequestData RequestData {
+			get {
 				var rd = new RequestData (verb, path, queryString, protocol);
 				var buffer = new byte [inputLength - position];
 				Buffer.BlockCopy (InputBuffer, position, buffer, 0, inputLength - position);
@@ -70,9 +67,9 @@ namespace Mono.WebServer
 		{
 			lock (bufferStack) {
 				if (bufferStack.Count != 0)
-					return (byte []) bufferStack.Pop ();
+					return bufferStack.Pop ();
 			}
-			return new byte [BSize];
+			return new byte [B_SIZE];
 		}
 		
 		public static void FreeBuffer (byte [] buf)
@@ -111,7 +108,7 @@ namespace Mono.WebServer
 		{
 			position = 0;
 			InputBuffer = AllocateBuffer ();
-			inputLength = stream.Read (InputBuffer, 0, BSize);
+			inputLength = stream.Read (InputBuffer, 0, B_SIZE);
 			if (inputLength == 0) // Socket closed
 				throw new IOException ("socket closed");
 

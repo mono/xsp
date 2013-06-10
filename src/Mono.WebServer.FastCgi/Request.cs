@@ -135,8 +135,7 @@ namespace Mono.FastCgi {
 		}
 
 		public string Path {
-			get
-			{
+			get {
 				if (String.IsNullOrEmpty(path))
 					path = GetParameter ("SCRIPT_NAME");
 

@@ -53,7 +53,7 @@ namespace Mono.WebServer.FastCgi
 			ProcessRequest (worker);
 		}
 		
-		const string content301 =
+		const string CONTENT301 =
 			"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
 			"<html><head>\n<title>301 Moved Permanently</title>\n</head><body>\n" +
 			"<h1>Moved Permanently</h1>\n" +
@@ -69,7 +69,7 @@ namespace Mono.WebServer.FastCgi
 			wr.SendUnknownResponseHeader ("Location", String.Format ("http://{0}{1}", host, location));
 			Encoding enc = Encoding.ASCII;
 			wr.SendUnknownResponseHeader ("Content-Type", "text/html; charset=" + enc.WebName);
-			string content = String.Format (content301, host, location);
+			string content = String.Format (CONTENT301, host, location);
 			byte [] contentBytes = enc.GetBytes (content);
 			wr.SendUnknownResponseHeader ("Content-Length", contentBytes.Length.ToString ());
 			wr.SendResponseFromMemory (contentBytes, contentBytes.Length);

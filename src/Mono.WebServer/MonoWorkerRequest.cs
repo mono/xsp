@@ -411,9 +411,6 @@ namespace Mono.WebServer
 				SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
 				
 				Encoding enc = Encoding.UTF8;
-				// TODO: Check, this looks like a bug
-				if (enc == null)
-					enc = Encoding.ASCII;
 				
 				byte[] bytes = enc.GetBytes (error);
 				
@@ -422,7 +419,9 @@ namespace Mono.WebServer
 				SendResponseFromMemory (bytes, bytes.Length);
 				FlushResponse (true);
 			} catch (Exception ex) { // should "never" happen
-				throw ex; // TODO: This looks like a bug
+				Console.Write("Error while processing a request: ");
+				Console.WriteLine(ex.Message);
+				throw;
 			}
 		}
 

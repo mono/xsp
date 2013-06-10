@@ -82,7 +82,6 @@ namespace Mono.WebServer
 		readonly WebSource webSource;
 		bool started;
 		bool stop;
-		bool verbose;
 		Socket listen_socket;
 		Exception initialException;
 
@@ -118,6 +117,8 @@ namespace Mono.WebServer
 
 		public string PhysicalRoot { get; private set; }
 
+		public bool Verbose { get; set; }
+
 		[Obsolete ("Use the .ctor that takes a 'physicalRoot' argument instead")]
 		public ApplicationServer (WebSource source) : this (source, Environment.CurrentDirectory)
 		{
@@ -132,11 +133,6 @@ namespace Mono.WebServer
 			
 			webSource = source;
 			PhysicalRoot = physicalRoot;
-		} 
-
-		public bool Verbose {
-			get { return verbose; }
-			set { verbose = value; }
 		}
 
 		public void AddApplication (string vhost, int vport, string vpath, string fullPath)
@@ -146,7 +142,7 @@ namespace Mono.WebServer
 				fullPath += dirSepChar;
 			
 			// TODO - check for duplicates, sort, optimize, etc.
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine("Registering application:");
 				Console.WriteLine("    Host:          {0}", vhost ?? "any");
 				Console.WriteLine("    Port:          {0}", (vport != -1) ?
@@ -161,7 +157,7 @@ namespace Mono.WebServer
 
  		public void AddApplicationsFromConfigDirectory (string directoryName)
  		{
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine ("Adding applications from *.webapp files in " +
 						   "directory '{0}'", directoryName);
 			}
@@ -178,7 +174,7 @@ namespace Mono.WebServer
 
  		public void AddApplicationsFromConfigFile (string fileName)
  		{
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine ("Adding applications from config file '{0}'", fileName);
 			}
 
@@ -238,7 +234,7 @@ namespace Mono.WebServer
  			if (applications == "")
 				return;
 
-			if (verbose && !SingleApplication) {
+			if (Verbose && !SingleApplication) {
 				Console.WriteLine("Adding applications '{0}'...", applications);
 			}
 
@@ -532,7 +528,7 @@ namespace Mono.WebServer
 			if (defaultToRoot)
 				return GetApplicationForPath (vhost, port, "/", false);
 
-			if (verbose)
+			if (Verbose)
 				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
 
 			return null;

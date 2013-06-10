@@ -67,13 +67,15 @@ namespace Mono.WebServer
 		bool setupClientBlockCalled;
 		Dictionary <string, string> headers;
 		int clientBlock;
-		bool shutdown;
 		StringBuilder out_headers = new StringBuilder ();
-		bool headers_sent;
 		string physical_path;
 		ModMonoConfig mod_mono_config;
 		readonly Socket client;
 		readonly static bool use_libc;
+
+		public bool HeadersSent { get; private set; }
+
+		public bool ShuttingDown { get; private set; }
 
 		static ModMonoRequest ()
 		{
@@ -97,14 +99,6 @@ namespace Mono.WebServer
 			writer = new BinaryWriter (writer_ms);
 			serverVariables = new Dictionary <string, string> (StringComparer.OrdinalIgnoreCase);
 			GetInitialData ();
-		}
-
-		public bool HeadersSent {
-			get { return headers_sent; }
-		}
-
-		public bool ShuttingDown {
-			get { return shutdown; }
 		}
 
 		static void Dispose (Action disposer, string name)
@@ -198,8 +192,8 @@ namespace Mono.WebServer
 			FillBuffer (5);
 			
 			byte cmd = reader.ReadByte ();
-			shutdown = (cmd == 0);
-			if (shutdown) {
+			ShuttingDown = (cmd == 0);
+			if (ShuttingDown) {
 				Console.Error.WriteLine ("mod-mono-server received a shutdown message");
 				return;
 			}
@@ -378,18 +372,18 @@ namespace Mono.WebServer
 		
 		void BufferHeaders ()
 		{
-			if (headers_sent)
+			if (HeadersSent)
 				return;
 
 			writer.Write ((int) ModMonoCmd.SET_RESPONSE_HEADERS);
 			WriteString (out_headers.ToString ());
 			out_headers = null;
-			headers_sent = true;
+			HeadersSent = true;
 		}
 
 		public void SetResponseHeader (string name, string value)
 		{
-			if (!headers_sent)
+			if (!HeadersSent)
 				out_headers.AppendFormat ("{0}\0{1}\0", name, value);
 		}
 

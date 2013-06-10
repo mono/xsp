@@ -424,9 +424,7 @@ namespace Mono.WebServer.XSP
 				return 1;
 			}
 
-			try {
-				ipaddr = IPAddress.Parse (settings.IP);
-			} catch (Exception) {
+			if(!IPAddress.TryParse (settings.IP, out ipaddr)) {
 				Console.WriteLine ("The value given for the address is not valid: " + settings.IP);
 				return 1;
 			}

@@ -30,36 +30,22 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Web;
-using System.Collections;
-using System.Configuration;
-using System.Globalization;
-using System.IO;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using Mono.Security.X509;
-using Mono.Security.X509.Extensions;
 
 namespace Mono.WebServer
 {
 	public class RequestReader
 	{
-		ModMonoRequest request;
+		public ModMonoRequest Request { get; private set; }
 
-		public ModMonoRequest Request {
-			get { return request; }
-		}
-		
 		public RequestReader (Socket client)
 		{
-			this.request = new ModMonoRequest (client);
+			Request = new ModMonoRequest (client);
 		}
 		
 		public string GetUriPath ()
 		{
-			string path = request.GetUri ();
+			string path = Request.GetUri ();
 
 			int dot = path.LastIndexOf ('.');
 			int slash = (dot != -1) ? path.IndexOf ('/', dot) : 0;
@@ -71,21 +57,21 @@ namespace Mono.WebServer
 
 		public string GetPhysicalPath ()
 		{
-			return request.GetPhysicalPath ();
+			return Request.GetPhysicalPath ();
 		}
 
 		public void Decline ()
 		{
-			request.Decline ();
+			Request.Decline ();
 		}
 
 		public void NotFound ()
 		{
-			request.NotFound ();
+			Request.NotFound ();
 		}
 
 		public bool ShuttingDown {
-			get { return request.ShuttingDown; }
+			get { return Request.ShuttingDown; }
 		}
 	}
 }

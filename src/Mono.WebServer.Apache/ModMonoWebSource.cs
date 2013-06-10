@@ -31,7 +31,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using Mono.Unix;
 
 namespace Mono.WebServer
@@ -45,7 +44,7 @@ namespace Mono.WebServer
 		string filename;
 		bool file_bound;
 		Stream locker;
-		string lockfile;
+		readonly string lockfile;
 
 		protected ModMonoWebSource (string lockfile)
 		{
@@ -71,7 +70,7 @@ namespace Mono.WebServer
 		public virtual bool GracefulShutdown ()
 		{
 			EndPoint ep = new UnixEndPoint (filename);
-			Socket sock = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+			var sock = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 			try {
 				sock.Connect (ep);
 			} catch (Exception e) {
@@ -84,7 +83,7 @@ namespace Mono.WebServer
 
 		protected bool SendShutdownCommandAndClose (Socket sock)
 		{
-			byte [] b = new byte [] {0};
+			var b = new byte [] {0};
 			bool result = true;
 			try {
 				sock.Send (b);
@@ -103,7 +102,7 @@ namespace Mono.WebServer
 
 			EndPoint ep = new UnixEndPoint (filename);
 			if (File.Exists (filename)) {
-				Socket conn = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+				var conn = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 				try {
 					conn.Connect (ep);
 					conn.Close ();
@@ -113,7 +112,7 @@ namespace Mono.WebServer
 				File.Delete (filename);
 			}
 
-			Socket listen_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+			var listen_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (ep);
 			file_bound = true;
 			return listen_socket;

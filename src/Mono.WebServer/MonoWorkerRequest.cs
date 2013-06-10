@@ -91,25 +91,44 @@ namespace Mono.WebServer
 		// Gets the physical path of the application host of the
 		// current instance.
 		string HostPath {
-			get { return hostPath ?? (hostPath = appHostBase.Path); }
+			get {
+				if (hostPath == null)
+					hostPath = appHostBase.Path;
+
+				return hostPath;
+			}
 		}
 
 		// Gets the virtual path of the application host of the
 		// current instance.
 		string HostVPath {
-			get { return hostVPath ?? (hostVPath = appHostBase.VPath); }
+			get {
+				if (hostVPath == null)
+					hostVPath = appHostBase.VPath;
+
+				return hostVPath;
+			}
 		}
 
 		string HostPhysicalRoot {
 			get {
-				return hostPhysicalRoot ??
-					(hostPhysicalRoot = appHostBase.Server.PhysicalRoot);
+				if (hostPhysicalRoot == null)
+					hostPhysicalRoot = appHostBase.Server.PhysicalRoot;
+
+				return hostPhysicalRoot;
 			}
 		}
 		
 		protected virtual Encoding Encoding {
-			get { return encoding ?? (encoding = Encoding.GetEncoding (28591)); }
-			set { encoding = value; }
+			get {
+				if (encoding == null)
+					encoding = Encoding.GetEncoding (28591);
+
+				return encoding;
+			}
+			set {
+				encoding = value;
+			}
 		}
 
 		protected virtual Encoding HeaderEncoding {

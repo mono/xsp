@@ -53,10 +53,8 @@ namespace Mono.WebServer
 
 		public byte [] InputBuffer { get; private set; }
 
-		public RequestData RequestData
-		{
-			get
-			{
+		public RequestData RequestData {
+			get {
 				var rd = new RequestData (verb, path, queryString, protocol);
 				var buffer = new byte [inputLength - position];
 				Buffer.BlockCopy (InputBuffer, position, buffer, 0, inputLength - position);

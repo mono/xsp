@@ -70,15 +70,19 @@ namespace Mono.WebServer
 
 		public string Path {
 			get {
-				return path ??
-					(path = AppDomain.CurrentDomain.GetData (".appPath").ToString ());
+				if (path == null)
+					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
+
+				return path;
 			}
 		}
 
 		public string VPath {
 			get {
-				return vpath ??
-					(vpath = AppDomain.CurrentDomain.GetData (".appVPath").ToString ());
+				if (vpath == null)
+					vpath = AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
+
+				return vpath;
 			}
 		}
 

@@ -64,11 +64,11 @@ namespace Mono.WebServer
 				string name = GetXmlValue (setting, "Name");
 				string value = GetXmlValue (setting, "Value");
 				if (name.Length == 0)
-					throw AppExcept (except_bad_elem,
+					throw AppExcept (EXCEPT_BAD_ELEM,
 						name, value);
 
 				if (collection.ContainsKey (name))
-					throw AppExcept (except_xml_duplicate,
+					throw AppExcept (EXCEPT_XML_DUPLICATE,
 						name);
 
 				if (insertEmptyValue || value.Length > 0)
@@ -123,22 +123,22 @@ namespace Mono.WebServer
 			return GetValue (name, out setting) != null;
 		}
 
-		const string except_unregistered =
+		const string EXCEPT_UNREGISTERED =
 			"Argument \"{0}\" is unknown.";
 
-		const string except_uint16 =
+		const string EXCEPT_UINT16 =
 			"Error in argument \"{0}\". \"{1}\" cannot be converted to an integer.";
 
-		const string except_bool =
+		const string EXCEPT_BOOL =
 			"Error in argument \"{0}\". \"{1}\" should be \"True\" or \"False\".";
 		
-		const string except_directory =
+		const string EXCEPT_DIRECTORY =
 			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
 			
-		const string except_file =
+		const string EXCEPT_FILE =
 			"Error in argument \"{0}\". \"{1}\" does not exist.";
 		
-		const string except_unknown =
+		const string EXCEPT_UNKNOWN =
 			"The Argument \"{0}\" has an invalid type: {1}.";
 		
 		public object this [string name] {
@@ -147,7 +147,7 @@ namespace Mono.WebServer
 				string value = GetValue (name, out setting);
 				
 				if (setting == null)
-					throw AppExcept (except_unregistered,
+					throw AppExcept (EXCEPT_UNREGISTERED,
 						name);
 				
 				string type = GetXmlValue (setting,
@@ -173,7 +173,7 @@ namespace Mono.WebServer
 						return ushort.Parse (value);
 					} catch (Exception except) {
 						throw AppExcept (except,
-							except_uint16,
+							EXCEPT_UINT16,
 							name, value);
 					}
 					
@@ -184,25 +184,25 @@ namespace Mono.WebServer
 					if (value.ToLower () == "false")
 						return false;
 
-					throw AppExcept (except_bool, name,
+					throw AppExcept (EXCEPT_BOOL, name,
 						value);
 					
 				case "directory":
 					if (Directory.Exists (value))
 						return value;
 					
-					throw AppExcept (except_directory, name,
+					throw AppExcept (EXCEPT_DIRECTORY, name,
 						value);
 					
 				case "file":
 					if (File.Exists (value))
 						return value;
 					
-					throw AppExcept (except_file, name,
+					throw AppExcept (EXCEPT_FILE, name,
 						value);
 					
 				default:
-					throw AppExcept (except_unknown, name,
+					throw AppExcept (EXCEPT_UNKNOWN, name,
 						type);
 				}
 			}
@@ -436,10 +436,10 @@ namespace Mono.WebServer
 			}
 		}
 		
-		const string except_bad_elem =
+		const string EXCEPT_BAD_ELEM =
 			"XML setting \"{0}={1}\" is invalid.";
 		
-		const string except_xml_duplicate =
+		const string EXCEPT_XML_DUPLICATE =
 			"XML setting \"{0}\" can only be assigned once.";
 		
 		public void LoadXmlConfig (string filename)

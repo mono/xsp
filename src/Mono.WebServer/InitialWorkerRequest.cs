@@ -44,7 +44,7 @@ namespace Mono.WebServer
 
 		int inputLength;
 		int position;
-		const int BSize = 1024 * 32;
+		const int B_SIZE = 1024 * 32;
 		
 		static readonly Stack<byte[]> bufferStack = new Stack<byte[]> ();
 		static readonly Encoding encoding = Encoding.GetEncoding (28591);
@@ -69,7 +69,7 @@ namespace Mono.WebServer
 				if (bufferStack.Count != 0)
 					return bufferStack.Pop ();
 			}
-			return new byte [BSize];
+			return new byte [B_SIZE];
 		}
 		
 		public static void FreeBuffer (byte [] buf)
@@ -108,7 +108,7 @@ namespace Mono.WebServer
 		{
 			position = 0;
 			InputBuffer = AllocateBuffer ();
-			inputLength = stream.Read (InputBuffer, 0, BSize);
+			inputLength = stream.Read (InputBuffer, 0, B_SIZE);
 			if (inputLength == 0) // Socket closed
 				throw new IOException ("socket closed");
 

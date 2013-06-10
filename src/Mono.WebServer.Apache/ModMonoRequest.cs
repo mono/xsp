@@ -186,7 +186,7 @@ namespace Mono.WebServer
 		}
 
 		// KEEP IN SYNC WITH mod_mono.h!!
-		const byte protocol_version = 9;
+		const byte PROTOCOL_VERSION = 9;
 		void GetInitialData ()
 		{
 			FillBuffer (5);
@@ -198,8 +198,8 @@ namespace Mono.WebServer
 				return;
 			}
 
-			if (cmd != protocol_version) {
-				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}", protocol_version, cmd);
+			if (cmd != PROTOCOL_VERSION) {
+				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}", PROTOCOL_VERSION, cmd);
 				Console.WriteLine (msg);
 				Console.Error.WriteLine (msg);
 				throw new InvalidOperationException (msg);
@@ -273,13 +273,13 @@ namespace Mono.WebServer
 		
 		public void Decline ()
 		{
-			writer.Write ((int) ModMonoCmd.DECLINE_REQUEST);
+			writer.Write ((int) ModMonoCmd.DeclineRequest);
 			Send ();
 		}
 
 		public void NotFound ()
 		{
-			writer.Write ((int) ModMonoCmd.NOT_FOUND);
+			writer.Write ((int) ModMonoCmd.NotFound);
 			Send ();
 		}
 
@@ -297,7 +297,7 @@ namespace Mono.WebServer
 		{
 			BufferConfig ();
 			BufferHeaders ();
-			writer.Write ((int) ModMonoCmd.SEND_FROM_MEMORY);
+			writer.Write ((int) ModMonoCmd.SendFromMemory);
 			writer.Write (length);
 			Send ();
 			if (use_libc) {
@@ -345,7 +345,7 @@ namespace Mono.WebServer
 		{
 			BufferConfig ();
 			BufferHeaders ();
-			writer.Write ((int) ModMonoCmd.SEND_FROM_MEMORY);
+			writer.Write ((int) ModMonoCmd.SendFromMemory);
 			writer.Write (length);
 			Send ();
 			client.Send (data, position, length, SocketFlags.None);
@@ -355,7 +355,7 @@ namespace Mono.WebServer
 		{
 			BufferConfig ();
 			BufferHeaders ();
-			writer.Write ((int) ModMonoCmd.SEND_FILE);
+			writer.Write ((int) ModMonoCmd.SendFile);
 			WriteString (filename);
 			Send ();
 		}
@@ -366,7 +366,7 @@ namespace Mono.WebServer
 				return;
 
 			mod_mono_config.Changed = false;
-			writer.Write ((int) ModMonoCmd.SET_CONFIGURATION);
+			writer.Write ((int) ModMonoCmd.SetConfiguration);
 			writer.Write (Convert.ToByte (mod_mono_config.OutputBuffering));
 		}
 		
@@ -375,7 +375,7 @@ namespace Mono.WebServer
 			if (HeadersSent)
 				return;
 
-			writer.Write ((int) ModMonoCmd.SET_RESPONSE_HEADERS);
+			writer.Write ((int) ModMonoCmd.SetResponseHeaders);
 			WriteString (out_headers.ToString ());
 			out_headers = null;
 			HeadersSent = true;
@@ -417,7 +417,7 @@ namespace Mono.WebServer
 
 		void GetServerVariables ()
 		{
-			writer.Write ((int) ModMonoCmd.GET_SERVER_VARIABLES);
+			writer.Write ((int) ModMonoCmd.GetServerVariables);
 			Send ();
 
 			FillBuffer (4);
@@ -499,7 +499,7 @@ namespace Mono.WebServer
 			if (localPort != 0)
 				return localPort;
 
-			writer.Write ((int) ModMonoCmd.GET_LOCAL_PORT);
+			writer.Write ((int) ModMonoCmd.GetLocalPort);
 			Send ();
 			FillBuffer (4);
 			localPort = reader.ReadInt32 ();
@@ -514,7 +514,7 @@ namespace Mono.WebServer
 		public void Close ()
 		{
 			BufferHeaders ();
-			writer.Write ((int) ModMonoCmd.CLOSE);
+			writer.Write ((int) ModMonoCmd.Close);
 			Send ();
 		}
 
@@ -525,7 +525,7 @@ namespace Mono.WebServer
 
 			BufferConfig ();
 			setupClientBlockCalled = true;
-			writer.Write ((int) ModMonoCmd.SETUP_CLIENT_BLOCK);
+			writer.Write ((int) ModMonoCmd.SetupClientBlock);
 			Send ();
 			FillBuffer (4);
 			int i = reader.ReadInt32 ();
@@ -535,7 +535,7 @@ namespace Mono.WebServer
 
 		public bool IsConnected ()
 		{
-			writer.Write ((int) ModMonoCmd.IS_CONNECTED);
+			writer.Write ((int) ModMonoCmd.IsConnected);
 			Send ();
 			FillBuffer (4);
 			int i = reader.ReadInt32 ();
@@ -544,7 +544,7 @@ namespace Mono.WebServer
 
 		public bool ShouldClientBlock () 
 		{
-			writer.Write ((int) ModMonoCmd.SHOULD_CLIENT_BLOCK);
+			writer.Write ((int) ModMonoCmd.ShouldClientBlock);
 			Send ();
 			FillBuffer (4);
 			int i = reader.ReadInt32 ();
@@ -559,7 +559,7 @@ namespace Mono.WebServer
 			 * turns out that that GET_CLIENT_BLOCK (ap_get_client_block) can
 			 * return -1 if a socket is closed
 			 */
-			writer.Write ((int) ModMonoCmd.GET_CLIENT_BLOCK);
+			writer.Write ((int) ModMonoCmd.GetClientBlock);
 			writer.Write (size);
 			Send ();
 			
@@ -577,7 +577,7 @@ namespace Mono.WebServer
 
 		public void SetStatusCodeLine (int code, string status)
 		{
-			writer.Write ((int) ModMonoCmd.SET_STATUS);
+			writer.Write ((int) ModMonoCmd.SetStatus);
 			writer.Write (code);
 			WriteString (status);
 			Send ();

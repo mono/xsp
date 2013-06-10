@@ -35,7 +35,7 @@ namespace Mono.WebServer.FastCgi
 {
 	public class Responder : MarshalByRefObject, IResponder
 	{
-		const string error500 =
+		const string ERROR500 =
 			"Status: 500 Internal Server Error\r\n" +
 			"Content-Type: text/html; charset=utf-8\r\n" +
 			"Connection: close\r\n\r\n" +
@@ -79,7 +79,7 @@ namespace Mono.WebServer.FastCgi
 			// If the application host is null, the server was
 			// unable to determine a sane plan. Alert the client.
 			if (appHost == null) {
-				request.SendOutputText (String.Format (error500,
+				request.SendOutputText (String.Format (ERROR500,
 					HostName, PortNumber,
 					Path, PhysicalPath));
 				return -1;

@@ -55,7 +55,6 @@ namespace Mono.WebServer.Apache
 			
 			public ApplicationSettings ()
 			{
-				Exception = null;
 				try {
 					Apps = AppSettings ["MonoApplications"];
 					AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];

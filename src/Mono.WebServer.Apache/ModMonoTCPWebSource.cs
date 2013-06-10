@@ -27,7 +27,6 @@
 //
 
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
@@ -67,7 +66,7 @@ namespace Mono.WebServer
 		public override bool GracefulShutdown ()
 		{
 			EndPoint ep = bindAddress;
-			Socket sock = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+			var sock = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			try {
 				sock.Connect (ep);
 			} catch (Exception e) {
@@ -83,8 +82,7 @@ namespace Mono.WebServer
 			if (bindAddress == null)
 				throw new InvalidOperationException ("No address/port to listen");
 
-			Socket listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream,
-							ProtocolType.IP);
+			var listen_socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			listen_socket.Bind (bindAddress);
 			return listen_socket;
 		}

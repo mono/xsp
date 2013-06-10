@@ -29,10 +29,7 @@
 
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
-using Mono.Unix;
 
 namespace Mono.WebServer
 {
@@ -44,12 +41,12 @@ namespace Mono.WebServer
 	{
 		public NetworkStream Stream;
 		
-		ApplicationServer server;
+		readonly ApplicationServer server;
 		ModMonoRequest modRequest;
 		bool closed;
 		int requestId = -1;
 		ModMonoRequestBroker broker;
-		Socket client;
+		readonly Socket client;
 		
 		public ModMonoWorker (Socket client, ApplicationServer server)
 		{
@@ -115,14 +112,14 @@ namespace Mono.WebServer
 
 		VPathToHost GetOrCreateApplication (string vhost, int port, string filepath, string virt)
 		{
-			VPathToHost vapp = null;
 			string vdir = Path.GetDirectoryName (virt);
 			string pdir = Path.GetDirectoryName (filepath);
-			DirectoryInfo vinfo = new DirectoryInfo (vdir);
-			DirectoryInfo pinfo = new DirectoryInfo (pdir);
+			var vinfo = new DirectoryInfo (vdir);
+			var pinfo = new DirectoryInfo (pdir);
 			string final_pdir = null;
 			string final_vdir = null;
 			while (vinfo != null && pinfo != null) {
+				// TODO: Check this code, it's always true!
 				if (final_pdir == null && CheckDirectory (pinfo)) {
 					final_pdir = pinfo.ToString ();
 					final_vdir = vinfo.ToString ();
@@ -148,7 +145,7 @@ namespace Mono.WebServer
 
 
 			//Console.Error.WriteLine ("final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
-			vapp = server.GetApplicationForPath (vhost, port, virt, false);
+			VPathToHost vapp = server.GetApplicationForPath (vhost, port, virt, false);
 			if (vapp == null) {
 				// Don't know why this breaks mod-mono-server2.exe, but not mod-mono-server.exe
 				//final_pdir = "file://" + final_pdir;
@@ -182,7 +179,7 @@ namespace Mono.WebServer
 			requestId = -1;
 			broker = null;
 			
-			RequestReader rr = new RequestReader (client);
+			var rr = new RequestReader (client);
 			if (rr.ShuttingDown) {
 				Close ();
 				server.Stop ();
@@ -191,35 +188,33 @@ namespace Mono.WebServer
 
 			string vhost = rr.Request.GetRequestHeader ("Host");
 			int port = -1;
-      if (vhost != null) {
-        int lead = vhost.IndexOf('[');
-        int follow = lead >= 0 ? vhost.IndexOf(']') : -1;
-        if (follow > lead) {
-          //ipv6 address
-          int colon = vhost.IndexOf("]:", StringComparison.Ordinal);
-          if (colon != -1) {
-            Int32.TryParse (vhost.Substring (colon + 2), out port);
-            vhost = vhost.Substring(0, colon + 1);
-          }
-        } else {
-          //ipv4 or hostname
-          int colon = vhost.IndexOf (':');
-          if (colon != -1) {
-            Int32.TryParse (vhost.Substring (colon + 1), out port);
-            vhost = vhost.Substring (0, colon);
-          }
-        }
-        if (port <= 0 || port > 65535) {
-          //No port specified, Int32.TryParse failed or invalid port number
-          port = 80;
-        }
-      }
+			if (vhost != null) {
+				int lead = vhost.IndexOf('[');
+				int follow = lead >= 0 ? vhost.IndexOf(']') : -1;
+				if (follow > lead) {
+					//ipv6 address
+					int colon = vhost.IndexOf("]:", StringComparison.Ordinal);
+					if (colon != -1) {
+						Int32.TryParse (vhost.Substring (colon + 2), out port);
+						vhost = vhost.Substring(0, colon + 1);
+					}
+				} else {
+					//ipv4 or hostname
+					int colon = vhost.IndexOf (':');
+					if (colon != -1) {
+						Int32.TryParse (vhost.Substring (colon + 1), out port);
+						vhost = vhost.Substring (0, colon);
+					}
+				}
+				if (port <= 0 || port > 65535) {
+					//No port specified, Int32.TryParse failed or invalid port number
+					port = 80;
+				}
+			}
 
-			string vServerName = rr.Request.GetVirtualServerName ();
-			if (vServerName == null)
-				vServerName = vhost;
+			string vServerName = rr.Request.GetVirtualServerName () ?? vhost;
 
-			VPathToHost vapp = null;
+			VPathToHost vapp;
 			string vpath = rr.GetUriPath ();
 			string path = rr.GetPhysicalPath ();
 			if (path == null) {
@@ -235,7 +230,7 @@ namespace Mono.WebServer
 				return;
 			}
 
-			ModMonoApplicationHost host = (ModMonoApplicationHost) vapp.AppHost;
+			var host = (ModMonoApplicationHost) vapp.AppHost;
 			if (host == null) {
 				rr.NotFound ();
 				Stream.Close ();
@@ -246,7 +241,7 @@ namespace Mono.WebServer
 			
 			if (!server.SingleApplication) {
 				broker = (ModMonoRequestBroker) vapp.RequestBroker;
-				broker.UnregisterRequestEvent += new UnregisterRequestEventHandler (OnUnregisterRequest);
+				broker.UnregisterRequestEvent += OnUnregisterRequest;
 				requestId = broker.RegisterRequest (this);
 			}
 			
@@ -267,9 +262,9 @@ namespace Mono.WebServer
 
 		void OnUnregisterRequest (object sender, UnregisterRequestEventArgs args)
 		{
-			BaseRequestBroker broker = sender as BaseRequestBroker;
+			var broker = sender as BaseRequestBroker;
 			if (broker != null)
-				broker.UnregisterRequestEvent -= new UnregisterRequestEventHandler (OnUnregisterRequest);
+				broker.UnregisterRequestEvent -= OnUnregisterRequest;
 
 			if (requestId == -1 || requestId != args.RequestId)
 				return;

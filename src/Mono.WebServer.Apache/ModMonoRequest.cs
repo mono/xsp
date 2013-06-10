@@ -32,13 +32,10 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Collections.Generic;
 
 namespace Mono.WebServer
@@ -49,13 +46,13 @@ namespace Mono.WebServer
 		const int INITIAL_MEMORY_STREAM_SIZE = 1024 * 2;
 		const int MAX_MEMORY_STREAM_SIZE = 1024 * 128;
 		
-		BinaryReader reader;
-		BinaryWriter writer;
-		MemoryStream reader_ms;
-		MemoryStream writer_ms;
+		readonly BinaryReader reader;
+		readonly BinaryWriter writer;
+		readonly MemoryStream reader_ms;
+		readonly MemoryStream writer_ms;
 		byte[] fill_buffer;
 		bool got_server_vars;
-		Dictionary <string, string> serverVariables;
+		readonly Dictionary <string, string> serverVariables;
 		string verb;
 		string queryString;
 		string protocol;
@@ -75,8 +72,8 @@ namespace Mono.WebServer
 		bool headers_sent;
 		string physical_path;
 		ModMonoConfig mod_mono_config;
-		Socket client;
-		static bool use_libc;
+		readonly Socket client;
+		readonly static bool use_libc;
 
 		static ModMonoRequest ()
 		{
@@ -84,9 +81,7 @@ namespace Mono.WebServer
 				return;
 
 			try {
-				string os = "";
-				using (StreamReader sr = new StreamReader (File.OpenRead ("/proc/sys/kernel/ostype")))
-					os = sr.ReadToEnd ();
+				string os = File.ReadAllText ("/proc/sys/kernel/ostype");
 				use_libc = os.StartsWith ("Linux");
 			} catch {
 			}
@@ -112,7 +107,7 @@ namespace Mono.WebServer
 			get { return shutdown; }
 		}
 
-		void Dispose (Action disposer, string name)
+		static void Dispose (Action disposer, string name)
 		{
 			if (disposer == null)
 				return;
@@ -165,7 +160,7 @@ namespace Mono.WebServer
 			reader_ms.SetLength (0);
 			reader_ms.Position = 0;
 
-			int read_count = (int)count;
+			var read_count = (int)count;
 			int fill_buffer_length = fill_buffer == null ? 0 : fill_buffer.Length;
 			if ((uint)fill_buffer_length < count) {
 				if (fill_buffer == null && count <= INITIAL_MEMORY_STREAM_SIZE) {
@@ -255,7 +250,7 @@ namespace Mono.WebServer
 			if (size < 0 || size > MAX_STRING_SIZE)
 				throw new ArgumentOutOfRangeException ("size", "Abnormal string size " + size);
 
-			byte [] buf = new byte [size];
+			var buf = new byte [size];
 			string s;
 			if (size != 0) {
 				int chunk;
@@ -335,10 +330,10 @@ namespace Mono.WebServer
 		unsafe int Send (IntPtr ptr, int len)
 		{
 			int total = 0;
-			byte *bptr = (byte *) ptr.ToPointer ();
+			var bptr = (byte *) ptr.ToPointer ();
 			while (total < len) {
 				// 0x4000 no sigpipe
-				int n = send_libc (client.Handle.ToInt32 (), bptr + total, (IntPtr) (len - total), (int) 0x4000);
+				int n = send_libc (client.Handle.ToInt32 (), bptr + total, (IntPtr) (len - total), 0x4000);
 				if (n >= 0) {
 					total += n;
 				} else if (Marshal.GetLastWin32Error () != 4 /* EINTR */) {
@@ -406,7 +401,7 @@ namespace Mono.WebServer
 		public string [] GetAllHeaders ()
 		{
 			ICollection k = headers.Keys;
-			string [] keys = new string [k.Count];
+			var keys = new string [k.Count];
 			k.CopyTo (keys, 0);
 			return keys;
 		}
@@ -414,7 +409,7 @@ namespace Mono.WebServer
 		public string [] GetAllHeaderValues ()
 		{
 			ICollection v = headers.Values;
-			string [] values = new string [v.Count];
+			var values = new string [v.Count];
 			v.CopyTo (values, 0);
 			return values;
 		}
@@ -422,7 +417,7 @@ namespace Mono.WebServer
 		public string GetRequestHeader (string name)
 		{
 			if (headers.ContainsKey (name))
-				return headers [name] as string;
+				return headers [name];
 			return null;
 		}
 
@@ -458,7 +453,7 @@ namespace Mono.WebServer
 				GetServerVariables ();
 
 			if (serverVariables.ContainsKey (name))
-				return (string) serverVariables [name];
+				return serverVariables [name];
 
 			return null;
 		}

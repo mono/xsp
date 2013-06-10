@@ -27,13 +27,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
-using Mono.Unix;
-
 namespace Mono.WebServer
 {
 	//
@@ -44,16 +37,15 @@ namespace Mono.WebServer
 	{
 		public string GetServerVariable (int requestId, string name)
 		{
-			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			var worker = GetWorker (requestId) as ModMonoWorker;
 			if (worker == null)
 				return null;
-			
 			return worker.GetServerVariable (name);
 		}
 
 		public void SetStatusCodeLine (int requestId, int code, string status)
 		{
-			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			var worker = GetWorker (requestId) as ModMonoWorker;
 			if (worker == null)
 				return;
 			worker.SetStatusCodeLine (code, status);
@@ -61,7 +53,7 @@ namespace Mono.WebServer
 		
 		public void SetResponseHeader (int requestId, string name, string value)
 		{
-			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			var worker = GetWorker (requestId) as ModMonoWorker;
 			if (worker == null)
 				return;
 			worker.SetResponseHeader (name, value);
@@ -69,7 +61,7 @@ namespace Mono.WebServer
 
 		public void SetOutputBuffering (int requestId, bool doBuffer)
 		{
-			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			var worker = GetWorker (requestId) as ModMonoWorker;
 			if (worker == null)
 				return;
 			worker.SetOutputBuffering (doBuffer);
@@ -77,15 +69,15 @@ namespace Mono.WebServer
 		
 		public void SendFile (int requestId, string filename)
 		{
-			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
+			var worker = GetWorker (requestId) as ModMonoWorker;
 			if (worker == null)
 				return;
 			worker.SendFile (filename);
 		}
 
 		public bool GetHeadersSent (int requestId) {
-			ModMonoWorker worker = GetWorker (requestId) as ModMonoWorker;
-			return (worker != null) ? worker.HeadersSent : false;
+			var worker = GetWorker (requestId) as ModMonoWorker;
+			return (worker != null) && worker.HeadersSent;
 		}
 	}
 }

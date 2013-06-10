@@ -373,25 +373,24 @@ namespace Mono.WebServer
 				Thread.Sleep (1000000);
 		}
 
-		void OnAccept (object sender, EventArgs e)
+		void OnAccept (object sender, SocketAsyncEventArgs e)
 		{
 			if (!started && SingleApplication) {
 				// We are shutting down. Last call...
 				Environment.Exit (0);
 			}
 
-			var args = (SocketAsyncEventArgs) e;
-			Socket accepted = args.AcceptSocket;
-			args.AcceptSocket = null;
+			Socket accepted = e.AcceptSocket;
+			e.AcceptSocket = null;
 
-			if (args.SocketError != SocketError.Success) {
+			if (e.SocketError != SocketError.Success) {
 				CloseSocket(accepted);
 				accepted = null;
 			}
 
 			try {
 				if (started)
-					listen_socket.AcceptAsync (args);
+					listen_socket.AcceptAsync (e);
 			} catch (Exception ex) {
 				if (accepted != null)
 					CloseSocket (accepted);

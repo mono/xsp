@@ -78,6 +78,7 @@ namespace Mono.WebServer.Apache
 
 		static void ShowVersion ()
 		{
+			// TODO: rewrite in a safer way
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string version = assembly.GetName ().Version.ToString ();
 			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
@@ -404,7 +405,7 @@ namespace Mono.WebServer.Apache
 
 			settings.RootDir = Directory.GetCurrentDirectory ();
 			
-			WebSource webSource;
+			ModMonoWebSource webSource;
 			if (useTCP) {
 				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
 			} else {
@@ -415,7 +416,7 @@ namespace Mono.WebServer.Apache
 				if (settings.Verbose)
 					Console.Error.WriteLine ("Shutting down running mod-mono-server...");
 				
-				bool res = ((ModMonoWebSource) webSource).GracefulShutdown ();
+				bool res = webSource.GracefulShutdown ();
 				if (settings.Verbose)
 					Console.Error.WriteLine (res ? "Done." : "Failed");
 

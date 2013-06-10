@@ -49,6 +49,22 @@ namespace Mono.WebServer
 		
 		static readonly Stack bufferStack = new Stack ();
 		static readonly Encoding encoding = Encoding.GetEncoding (28591);
+
+		public bool GotSomeInput { get; private set; }
+
+		public byte [] InputBuffer { get; private set; }
+
+		public RequestData RequestData
+		{
+			get
+			{
+				var rd = new RequestData (verb, path, queryString, protocol);
+				var buffer = new byte [inputLength - position];
+				Buffer.BlockCopy (InputBuffer, position, buffer, 0, inputLength - position);
+				rd.InputBuffer = buffer;
+				return rd;
+			}
+		}
 		
 		public static byte [] AllocateBuffer ()
 		{
@@ -256,20 +272,6 @@ namespace Mono.WebServer
 
 			if (protocol == null) {
 				protocol = "HTTP/1.0";
-			}
-		}
-
-		public bool GotSomeInput { get; private set; }
-
-		public byte[] InputBuffer { get; private set; }
-
-		public RequestData RequestData {
-			get {
-				var rd = new RequestData (verb, path, queryString, protocol);
-				var buffer = new byte [inputLength - position];
-				Buffer.BlockCopy (InputBuffer, position, buffer, 0, inputLength - position);
-				rd.InputBuffer = buffer;
-				return rd;
 			}
 		}
 	}

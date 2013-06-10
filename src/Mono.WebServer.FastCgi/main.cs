@@ -290,7 +290,7 @@ namespace Mono.WebServer.FastCgi
 
 		static bool CreateTcpSocket (ConfigurationManager configmanager,
 		                             string [] socketParts,
-			                     ref Socket socket)
+		                             ref Socket socket)
 		{
 			ushort port;
 			try {
@@ -343,15 +343,12 @@ namespace Mono.WebServer.FastCgi
 		                              string [] socketParts,
 		                              ref Socket socket)
 		{
-			string path;
-			if(socketParts.Length == 2)
-				path=socketParts[1];
-			else
-				path = configmanager.Filename;
+			string path = socketParts.Length == 2
+				? socketParts[1]
+				: configmanager.Filename;
 
 			try {
-				socket = SocketFactory.CreateUnixSocket (
-					path);
+				socket = SocketFactory.CreateUnixSocket (path);
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error,
 					"Error creating the socket: {0}",

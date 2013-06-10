@@ -128,7 +128,7 @@ namespace Mono.FastCgi {
 				throw new ArgumentNullException ("asyncResult");
 			
 			var s = asyncResult as SockAccept;
-			if (s == null || s.socket != socket)
+			if (s == null || s.Socket != socket)
 				throw new ArgumentException (
 					"Result was not produced by current instance.",
 					"asyncResult");
@@ -136,10 +136,10 @@ namespace Mono.FastCgi {
 			if (!s.IsCompleted)
 				s.AsyncWaitHandle.WaitOne ();
 			
-			if (s.except != null)
-				throw s.except;
+			if (s.Except != null)
+				throw s.Except;
 			
-			return new UnmanagedSocket (s.accepted) {connected = true};
+			return new UnmanagedSocket (s.Accepted) {connected = true};
 		}
 		
 		public override bool Connected {
@@ -174,14 +174,14 @@ namespace Mono.FastCgi {
 			ManualResetEvent waithandle;
 			readonly AsyncCallback callback;
 			readonly object state;
-			public readonly IntPtr socket;
-			public IntPtr accepted;
-			public sock.SocketException except;
+			public readonly IntPtr Socket;
+			public IntPtr Accepted;
+			public sock.SocketException Except;
 			
 			public SockAccept (IntPtr socket, AsyncCallback callback,
 			                   object state)
 			{
-				this.socket = socket;
+				Socket = socket;
 				this.callback = callback;
 				this.state = state;
 			}
@@ -193,14 +193,14 @@ namespace Mono.FastCgi {
 				Errno errno;
 				fixed (byte* ptr = address)
 					do {
-						accepted = accept (socket, ptr,
+						Accepted = accept (Socket, ptr,
 							ref size);
 						errno = Stdlib.GetLastError ();
-					} while ((int) accepted == -1 &&
+					} while ((int) Accepted == -1 &&
 						errno == Errno.EINTR);
 				
-				if ((int) accepted == -1)
-					except = GetException (errno);
+				if ((int) Accepted == -1)
+					Except = GetException (errno);
 				
 				completed = true;
 				

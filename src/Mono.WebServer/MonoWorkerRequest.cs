@@ -46,7 +46,7 @@ namespace Mono.WebServer
 {	
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
-		const string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
+		const string DEFAULT_EXCEPTION_HTML = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
 		static readonly char[] mapPathTrimStartChars = { '/' };
 
 		static bool checkFileAccess = true;
@@ -396,14 +396,14 @@ namespace Mono.WebServer
 				if (hex != null) // just a precaution
 					error = hex.GetHtmlErrorMessage ();
 				else
-					error = String.Format (defaultExceptionHtml, ex.Message);
+					error = String.Format (DEFAULT_EXCEPTION_HTML, ex.Message);
 			}
 
 			if (!inUnhandledException)
 				return;
 			
 			if (error.Length == 0)
-				error = String.Format (defaultExceptionHtml, "Unknown error");
+				error = String.Format (DEFAULT_EXCEPTION_HTML, "Unknown error");
 
 			try {
 				SendStatus (400, "Bad request");
@@ -411,9 +411,6 @@ namespace Mono.WebServer
 				SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
 				
 				Encoding enc = Encoding.UTF8;
-				// TODO: Check, this looks like a bug
-				if (enc == null)
-					enc = Encoding.ASCII;
 				
 				byte[] bytes = enc.GetBytes (error);
 				
@@ -422,7 +419,9 @@ namespace Mono.WebServer
 				SendResponseFromMemory (bytes, bytes.Length);
 				FlushResponse (true);
 			} catch (Exception ex) { // should "never" happen
-				throw ex;
+				Console.Write("Error while processing a request: ");
+				Console.WriteLine(ex.Message);
+				throw;
 			}
 		}
 

@@ -44,7 +44,7 @@ namespace Mono.WebServer {
 	{
 		IPEndPoint bindAddress;
 		readonly bool secureConnection;
-		readonly SecurityProtocolType SecurityProtocol;
+		readonly SecurityProtocolType securityProtocol;
 		readonly X509Certificate cert;
 		readonly PrivateKeySelectionCallback keyCB;
 		readonly bool allowClientCert;
@@ -56,7 +56,7 @@ namespace Mono.WebServer {
 		{			
 			secureConnection = (cert != null && keyCB != null);
 			bindAddress = new IPEndPoint (address, port);
-			SecurityProtocol = securityProtocol;
+			this.securityProtocol = securityProtocol;
 			this.cert = cert;
 			this.keyCB = keyCB;
 			this.allowClientCert = allowClientCert;
@@ -101,7 +101,7 @@ namespace Mono.WebServer {
 		public override Worker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new XSPWorker (client, client.LocalEndPoint, server,
-				secureConnection, SecurityProtocol, cert, keyCB, allowClientCert, requireClientCert);
+				secureConnection, securityProtocol, cert, keyCB, allowClientCert, requireClientCert);
 		}
 		
 		public override Type GetApplicationHostType ()

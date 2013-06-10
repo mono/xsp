@@ -58,7 +58,7 @@ namespace Mono.WebServer
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
 			bool secureConnection,
-			SecurityProtocolType SecurityProtocol,
+			SecurityProtocolType securityProtocol,
 			X509Certificate cert,
 			PrivateKeySelectionCallback keyCB,
 			bool allowClientCert,

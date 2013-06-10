@@ -30,10 +30,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Net.Sockets;
-
 namespace Mono.WebServer
 {
 	public abstract class Worker
@@ -51,15 +47,15 @@ namespace Mono.WebServer
 			return 0;
 		}
 
-		public abstract void Run (object state);		
+		public abstract void Run (object state);
 
-		public abstract int Read (byte [] buffer, int position, int size);		
+		public abstract int Read (byte [] buffer, int position, int size);
 
 		public abstract void Write (byte [] buffer, int position, int size);
 		
 		public abstract void Close ();
 		
-		public abstract void Flush ();		
+		public abstract void Flush ();
 
 		public abstract bool IsConnected ();
 	}

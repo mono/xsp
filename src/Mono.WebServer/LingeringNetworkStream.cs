@@ -35,25 +35,18 @@ namespace Mono.WebServer
 	{
 		const int useconds_to_linger = 2000000;
 		const int max_useconds_to_linger = 30000000;
-		bool enableLingering = true;
 		// We dont actually use the data from this buffer. So we cache it...
 		static byte [] buffer;
-		bool owns;
 
 		public LingeringNetworkStream (Socket sock, bool owns) : base (sock, owns)
 		{
-			this.owns = owns;
+			EnableLingering = true;
+			OwnsSocket = owns;
 		}
 
-		public bool OwnsSocket {
-			get { return owns; }
-		}
-		
-		public bool EnableLingering
-		{
-			get { return enableLingering; }
-			set { enableLingering = value; }
-		}
+		public bool OwnsSocket { get; private set; }
+
+		public bool EnableLingering { get; set; }
 
 		void LingeringClose ()
 		{
@@ -89,7 +82,7 @@ namespace Mono.WebServer
 
 		public override void Close ()
 		{
-			if (enableLingering) {
+			if (EnableLingering) {
 				try {
 					LingeringClose ();
 				} finally {

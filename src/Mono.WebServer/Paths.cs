@@ -29,18 +29,8 @@
 
 
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Xml;
 using System.Web;
 using System.Web.Hosting;
-using System.Collections;
-using System.Text;
-using System.Threading;
-using System.IO;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
 
 namespace Mono.WebServer
 {
@@ -63,17 +53,15 @@ namespace Mono.WebServer
 			while (uri.Length > 0 && uri [0] == '/')
 				uri = uri.Substring (1);
 
-			int dot, slash;
 			int lastSlash = uri.Length;
-			string partial;
-				
-			for (dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
-				slash = uri.IndexOf ('/', dot);
+
+			for (int dot = uri.LastIndexOf ('.'); dot > 0; dot = uri.LastIndexOf ('.', dot - 1)) {
+				int slash = uri.IndexOf ('/', dot);
 				
 				if (slash == -1)
 					slash = lastSlash;
 				
-				partial = uri.Substring (0, slash);
+				string partial = uri.Substring (0, slash);
 				lastSlash = slash;
 
 				if (!VirtualPathExists (appHost, verb, partial))
@@ -91,10 +79,7 @@ namespace Mono.WebServer
 				return true;
 
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
-			if (vpp != null && vpp.FileExists ("/" + uri))
-				return true;
-
-			return false;
+			return vpp != null && vpp.FileExists ("/" + uri);
 		}
 	}
 }

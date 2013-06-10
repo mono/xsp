@@ -26,14 +26,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-using System;
-using System.Collections;
-using System.Configuration;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
+
 using System.Text;
-using System.Web;
 
 namespace Mono.WebServer
 {
@@ -48,15 +42,15 @@ namespace Mono.WebServer
 
 		public RequestData (string verb, string path, string queryString, string protocol)
 		{
-			this.Verb = verb;
-			this.Path = path;
-			this.QueryString = queryString;
-			this.Protocol = protocol;
+			Verb = verb;
+			Path = path;
+			QueryString = queryString;
+			Protocol = protocol;
 		}
 
 		public override string ToString ()
 		{
-			StringBuilder sb = new StringBuilder ();
+			var sb = new StringBuilder ();
 			sb.AppendFormat ("Verb: {0}\n", Verb);
 			sb.AppendFormat ("Path: {0}\n", Path);
 			sb.AppendFormat ("PathInfo: {0}\n", PathInfo);

@@ -40,9 +40,7 @@ namespace Mono.WebServer
 		{
 			MethodBase mi = sf.GetMethod ();
 
-			if (mi != null)
-				return String.Format ("{0}.{1}(): ", mi.ReflectedType, mi.Name);
-			return null;
+			return mi != null ? String.Format ("{0}.{1}(): ", mi.ReflectedType, mi.Name) : null;
 		}
 
 		static string GetExtraInfo (StackFrame sf)
@@ -50,10 +48,9 @@ namespace Mono.WebServer
 			string threadid = String.Format ("thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
 			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));			
 			string filepath = sf != null ? sf.GetFileName () : null;
-			if (filepath != null && filepath.Length > 0)
+			if (!String.IsNullOrEmpty (filepath))
 				return String.Format (" [{0}, {1}, in {2}:{3}]", domainid, threadid, filepath, sf.GetFileLineNumber ());
-			else
-				return String.Format (" [{0}, {1}]", domainid, threadid);
+			return String.Format (" [{0}, {1}]", domainid, threadid);
 		}
 
 		static string GetExtraInfo ()
@@ -63,7 +60,7 @@ namespace Mono.WebServer
 
 		static void Enter (string format, StackFrame sf, params object[] parms)
 		{
-			StringBuilder sb = new StringBuilder ("Enter: ");
+			var sb = new StringBuilder ("Enter: ");
 					
 			string methodName = GetMethodName (sf);
 			if (methodName != null)
@@ -90,7 +87,7 @@ namespace Mono.WebServer
 
 		static void Leave (string format, StackFrame sf, params object[] parms)
 		{
-			StringBuilder sb = new StringBuilder ("Leave: ");
+			var sb = new StringBuilder ("Leave: ");
 
 			string methodName = GetMethodName (sf);
 			if (methodName != null)
@@ -121,7 +118,7 @@ namespace Mono.WebServer
 			if (format == null)
 				return;
 			
-			StringBuilder sb = new StringBuilder ();
+			var sb = new StringBuilder ();
 			sb.AppendFormat (format, parms);
 			sb.Append (GetExtraInfo ());
 			Trace.WriteLine (sb.ToString ());
@@ -136,7 +133,7 @@ namespace Mono.WebServer
 			if (format == null)
 				return;
 			
-			StringBuilder sb = new StringBuilder ();
+			var sb = new StringBuilder ();
 			sb.AppendFormat (format, parms);
 			sb.Append (GetExtraInfo ());
 			Trace.WriteLine (sb.ToString ());

@@ -25,7 +25,6 @@
  */
 
 
-using System;
 using System.Runtime.Serialization;
 
 namespace System.Threading
@@ -33,8 +32,7 @@ namespace System.Threading
 	[Serializable]
 	class LockRecursionException : Exception
 	{
-		public LockRecursionException () 
-			: base ()
+		public LockRecursionException ()
 		{
 		}
 

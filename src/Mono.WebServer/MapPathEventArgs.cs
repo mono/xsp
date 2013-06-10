@@ -40,33 +40,27 @@ namespace Mono.WebServer
 	public class MapPathEventArgs : EventArgs
 	{
 		// Contains the virtual path, as used in the request.
-		string path;
-		
+
 		// Contains the physical "mapped" path.
 		string mapped;
 		
 		// Indicates whether or not the path has been mapped.
-		bool isMapped;		
 
 		public MapPathEventArgs (string path)
 		{
-			this.path = path;
-			isMapped = false;
+			Path = path;
+			IsMapped = false;
 		}
 
-		public string Path {
-			get { return path; }
-		}
-		
-		public bool IsMapped {
-			get { return isMapped; }
-		}
+		public string Path { get; private set; }
+
+		public bool IsMapped { get; private set; }
 
 		public string MappedPath {
 			get { return mapped; }
 			set {
 				mapped = value;
-				isMapped = (value != null && value != "");
+				IsMapped = !String.IsNullOrEmpty (value);
 			}
 		}
 	}

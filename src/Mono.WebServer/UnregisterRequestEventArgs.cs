@@ -29,21 +29,16 @@
 
 
 using System;
-using System.Collections;
 
 namespace Mono.WebServer
 {
 	public class UnregisterRequestEventArgs : EventArgs
 	{
-		int _requestId;
-
-		public int RequestId {
-			get { return _requestId; }
-		}
+		public int RequestId { get; private set; }
 
 		public UnregisterRequestEventArgs (int requestId)
 		{
-			_requestId = requestId;
+			RequestId = requestId;
 		}
 	}
 }

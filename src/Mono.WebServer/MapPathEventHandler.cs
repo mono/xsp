@@ -33,8 +33,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.WebServer
 {
 	public delegate void MapPathEventHandler (object sender, MapPathEventArgs args);

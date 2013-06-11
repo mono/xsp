@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Net;
 using System.Globalization;
@@ -482,18 +483,7 @@ namespace Mono.WebServer.FastCgi
 			if (list == null)
 				return;
 
-			var files = new List<string> ();
-			
-			string [] fs = list.Split (',');
-			foreach (string f in fs) {
-				string trimmed = f.Trim ();
-				if (trimmed.Length == 0) 
-					continue;
- 
-				files.Add (trimmed);
-			}
-
-			indexFiles = files.ToArray ();
+			indexFiles = SplitAndTrim (list);
 		}
 		
 		#endregion

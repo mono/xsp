@@ -616,6 +616,8 @@ namespace Mono.WebServer
 
 		protected static string[] SplitAndTrim (string list)
 		{
+			if (String.IsNullOrEmpty (list))
+				return new string[0];
 			return (from f in list.Split (',')
 			        let trimmed =  f.Trim ()
 			        where trimmed.Length != 0

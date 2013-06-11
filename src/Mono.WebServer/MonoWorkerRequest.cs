@@ -37,6 +37,7 @@ using System;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Web;
@@ -612,6 +613,16 @@ namespace Mono.WebServer
 		}
 		
 		#endregion
+
+		protected static string[] SplitAndTrim (string list)
+		{
+			if (String.IsNullOrEmpty (list))
+				return new string[0];
+			return (from f in list.Split (',')
+			        let trimmed =  f.Trim ()
+			        where trimmed.Length != 0
+			        select trimmed).ToArray ();
+		}
 	}
 }
 

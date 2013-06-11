@@ -36,6 +36,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -137,19 +138,9 @@ namespace Mono.WebServer
 			if (list == null)
 				return;
 
-			var files = new List<string> ();
-			string [] fs = list.Split (',');
-			foreach (string f in fs) {
-				string trimmed = f.Trim ();
-				if (trimmed == "") 
-					continue;
-
-				files.Add (trimmed);
-			}
-
-			indexFiles = files.ToArray ();
+			indexFiles = SplitAndTrim (list);
 		}
-		
+
 		public XSPWorkerRequest (int requestId,
 		                         XSPRequestBroker requestBroker,
 		                         IApplicationHost appHost,

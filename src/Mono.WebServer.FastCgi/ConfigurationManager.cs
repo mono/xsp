@@ -47,7 +47,32 @@ namespace Mono.WebServer
 		readonly IDictionary<string,string> xml_args = new Dictionary<string,string> ();
 
 		readonly IDictionary<string,string> default_args = new Dictionary<string,string> ();
-		
+
+#region Typesafe properties
+		public bool Help { get { return GetBool ("help") || GetBool ("?"); } }
+		public bool Version { get { return GetBool ("version"); } }
+		public bool Verbose { get { return GetBool ("verbose"); } }
+		public bool PrintLog { get { return GetBool ("printlog"); } }
+		public bool Stoppable { get { return GetBool ("stoppable"); } }
+		// TODO: read those 1024 from the config file
+		public ushort MaxConns { get { return TryGetUInt16 ("maxconns") ?? 1024; } }
+		public ushort MaxReqs { get { return TryGetUInt16 ("maxreqs") ?? 1024; } }
+		public bool Multiplex { get { return GetBool ("multiplex"); } }
+		public string Applications { get { return GetString ("applications"); } }
+		public string AppConfigFile { get { return GetString ("appconfigfile"); } }
+		public string AppConfigDir { get { return GetString ("appconfigdir"); } }
+		// TODO: read this "pipe" from the config file
+		public string Socket { get { return GetString ("socket") ?? "pipe"; } }
+		public string Root { get { return GetString ("root"); } }
+		// TODO: read this 9000 from the config file
+		public ushort Port { get { return TryGetUInt16 ("port") ?? 9000; } }
+		public string Address { get { return GetString ("address"); } }
+		public string Filename { get { return GetString ("filename"); } }
+		public string LogFile { get { return GetString ("logfile"); } }
+		public string LogLevels { get { return GetString ("loglevels"); } }
+		public string ConfigFile { get { return GetString ("configfile"); } }
+#endregion
+
 		public ConfigurationManager (Assembly asm, string resource)
 		{
 			var doc = new XmlDocument ();
@@ -140,6 +165,59 @@ namespace Mono.WebServer
 		
 		const string EXCEPT_UNKNOWN =
 			"The Argument \"{0}\" has an invalid type: {1}.";
+
+		bool TryGetValue (string name, out string value)
+		{
+			XmlElement setting;
+			value = GetValue (name, out setting);
+			return setting != null;
+		}
+		
+		bool GetBool (string name)
+		{
+			return TryGetBool (name) ?? false;
+		}
+
+		bool? TryGetBool (string name)
+		{
+			string str_value;
+			if (!TryGetValue (name, out str_value))
+				return null;
+
+			if (str_value == null)
+				return null;
+
+			switch (str_value.ToLower ()) {
+			case "true":
+				return true;
+			case "false":
+				return false;
+			default:
+				return null;
+			}
+		}
+
+		ushort? TryGetUInt16 (string name)
+		{
+			string value;
+			if (!TryGetValue (name, out value) || value == null)
+				return null;
+
+			try {
+				return UInt16.Parse (value);
+			} catch (Exception except) {
+				throw AppExcept (except, EXCEPT_UINT16, name, value);
+			}
+		}
+
+		string GetString (string name)
+		{
+			string value;
+			if (!TryGetValue (name, out value))
+				throw AppExcept (EXCEPT_UNREGISTERED, name);
+			
+			return value;
+		}
 		
 		public object this [string name] {
 			get {
@@ -170,7 +248,7 @@ namespace Mono.WebServer
 					
 				case "uint16":
 					try {
-						return ushort.Parse (value);
+						return UInt16.Parse (value);
 					} catch (Exception except) {
 						throw AppExcept (except,
 							EXCEPT_UINT16,
@@ -373,12 +451,12 @@ namespace Mono.WebServer
 				builder.Append (' ');
 			return builder;
 		}
-		
+
 		public void LoadCommandLineArgs (string [] args)
 		{
 			if (args == null)
 				throw new ArgumentNullException ("args");
-			
+
 			for (int i = 0; i < args.Length; i ++) {
 				string arg = args [i];
 				int len = PrefixLength (arg);

@@ -54,15 +54,18 @@ namespace Mono.WebServer
 		public bool Verbose { get { return GetBool ("verbose"); } }
 		public bool PrintLog { get { return GetBool ("printlog"); } }
 		public bool Stoppable { get { return GetBool ("stoppable"); } }
-		public ushort MaxConns { get { return GetUInt16 ("maxconns"); } }
-		public ushort MaxReqs { get { return GetUInt16 ("maxreqs"); } }
+		// TODO: read those 1024 from the config file
+		public ushort MaxConns { get { return TryGetUInt16 ("maxconns") ?? 1024; } }
+		public ushort MaxReqs { get { return TryGetUInt16 ("maxreqs") ?? 1024; } }
 		public bool Multiplex { get { return GetBool ("multiplex"); } }
 		public string Applications { get { return GetString ("applications"); } }
 		public string AppConfigFile { get { return GetString ("appconfigfile"); } }
 		public string AppConfigDir { get { return GetString ("appconfigdir"); } }
-		public string Socket { get { return GetString ("socket"); } }
+		// TODO: read this "pipe" from the config file
+		public string Socket { get { return GetString ("socket") ?? "pipe"; } }
 		public string Root { get { return GetString ("root"); } }
-		public ushort Port { get { return GetUInt16 ("port"); } }
+		// TODO: read this 9000 from the config file
+		public ushort Port { get { return TryGetUInt16 ("port") ?? 9000; } }
 		public string Address { get { return GetString ("address"); } }
 		public string Filename { get { return GetString ("filename"); } }
 		public string LogFile { get { return GetString ("logfile"); } }
@@ -169,33 +172,36 @@ namespace Mono.WebServer
 			value = GetValue (name, out setting);
 			return setting != null;
 		}
-
+		
 		bool GetBool (string name)
 		{
-			string value;
-			if(!TryGetValue (name,out value))
-				throw AppExcept (EXCEPT_UNREGISTERED, name);
-
-			if (value == null)
-				return false;
-			
-			if (value.ToLower () == "true")
-				return true;
-
-			if (value.ToLower () == "false")
-				return false;
-
-			throw AppExcept (EXCEPT_BOOL, name, value);
+			return TryGetBool (name) ?? false;
 		}
 
-		UInt16 GetUInt16 (string name)
+		bool? TryGetBool (string name)
+		{
+			string str_value;
+			if (!TryGetValue (name, out str_value))
+				return null;
+
+			if (str_value == null)
+				return null;
+
+			switch (str_value.ToLower ()) {
+			case "true":
+				return true;
+			case "false":
+				return false;
+			default:
+				return null;
+			}
+		}
+
+		ushort? TryGetUInt16 (string name)
 		{
 			string value;
-			if(!TryGetValue (name, out value))
-				throw AppExcept (EXCEPT_UNREGISTERED, name);
-
-			if (value == null)
-				return default (UInt16);
+			if (!TryGetValue (name, out value) || value == null)
+				return null;
 
 			try {
 				return UInt16.Parse (value);
@@ -213,7 +219,6 @@ namespace Mono.WebServer
 			return value;
 		}
 		
-		[Obsolete("Lacks type safety", true)]
 		public object this [string name] {
 			get {
 				XmlElement setting;

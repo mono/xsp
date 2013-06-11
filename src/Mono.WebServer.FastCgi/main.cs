@@ -58,10 +58,10 @@ namespace Mono.WebServer.FastCgi
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			var attributes = assembly.GetCustomAttributes (typeof (T), false);
 			if (attributes.Length == 0)
-				return string.Empty;
+				return String.Empty;
 			var att = attributes [0] as T;
 			if (att == null)
-				return string.Empty;
+				return String.Empty;
 			return func(att);
 		}
 
@@ -240,10 +240,9 @@ namespace Mono.WebServer.FastCgi
 
 			// Socket strings are in the format
 			// "type[:ARG1[:ARG2[:...]]]".
-			var socket_type = configmanager.Socket ?? "pipe";
+			var socket_type = configmanager.Socket;
 
-			string[] socket_parts = socket_type.Split (
-				new[] {':'}, 3);
+			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
 
 			switch (socket_parts [0].ToLower ()) {
 			case "pipe":
@@ -295,14 +294,13 @@ namespace Mono.WebServer.FastCgi
 			ushort port;
 			try {
 				if (socketParts.Length > 1) {
-					try {
-						port= UInt16.Parse (socketParts [socketParts.Length - 1]);
-					} catch (Exception except) {
-						Logger.Write (LogLevel.Error, "Error parsing port: {0}", except.Message);
+					if (!UInt16.TryParse (socketParts [socketParts.Length - 1], out port)) {
+						Logger.Write (LogLevel.Error, "Error parsing port number");
 						return false;
 					}
-				} else
+				} else {
 					port = configmanager.Port;
+				}
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return false;

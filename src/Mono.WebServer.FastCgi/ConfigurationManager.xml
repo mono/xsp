@@ -88,7 +88,7 @@
 	</Setting>
 	
 	<Setting Name="port" AppSetting="MonoServerPort" Type="UInt16"
-		Environment="MONO_FCGI_PORT" ConsoleVisible="True">
+		Environment="MONO_FCGI_PORT" ConsoleVisible="True" Value="9000">
 		<Description>
 			<para>Specifies the TCP port number to listen on.<br />
 			To use this argument, "socket" must be set to "tcp".</para>

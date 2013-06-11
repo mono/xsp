@@ -35,7 +35,6 @@ using System.Globalization;
 using System.Collections.Specialized;
 using System.Text;
 using Mono.WebServer.FastCgi;
-using NDesk.Options;
 
 namespace Mono.WebServer
 {
@@ -48,7 +47,45 @@ namespace Mono.WebServer
 		readonly IDictionary<string,string> xml_args = new Dictionary<string,string> ();
 
 		readonly IDictionary<string,string> default_args = new Dictionary<string,string> ();
-		
+
+#region Typesafe properties
+		public bool Help { get { return GetBool ("help") || GetBool ("?"); } }
+		public bool Version { get { return GetBool ("version"); } }
+		public bool Verbose { get { return GetBool ("verbose"); } }
+		public bool PrintLog { get { return GetBool ("printlog"); } }
+		public bool Stoppable { get { return GetBool ("stoppable"); } }
+		public ushort MaxConns { get { return GetUInt16 ("maxconns"); } }
+		public ushort MaxReqs { get { return GetUInt16 ("maxreqs"); } }
+		public bool Multiplex { get { return GetBool ("multiplex"); } }
+		public string Applications { get { return GetString ("applications"); } }
+		public string AppConfigFile { get { return GetString ("appconfigfile"); } }
+		public string AppConfigDir { get { return GetString ("appconfigdir"); } }
+		public string Socket { get { return GetString ("socket"); } }
+		public string Root { get { return GetString ("root"); } }
+		public ushort Port { get { return GetUInt16 ("port"); } }
+		public string Address { get { return GetString ("address"); } }
+		public string Filename { get { return GetString ("filename"); } }
+		public string LogFile { get { return GetString ("logfile"); } }
+		public string LogLevels { get { return GetString ("loglevels"); } }
+		public string ConfigFile { get { return GetString ("configfile"); } }
+#endregion
+
+		[Obsolete("Setting the port from code is an hack right now")]
+		public void SetPort(string value) {
+			this ["port"] = value;
+		}
+
+		[Obsolete ("Setting the address from code is an hack right now")]
+		public void SetAddress(string value){
+			this ["address"] = value;
+		}
+
+		[Obsolete ("Setting the filename from code is an hack right now")]
+		public void SetFilename (string value)
+		{
+			this ["filename"] = value;
+		}
+
 		public ConfigurationManager (Assembly asm, string resource)
 		{
 			var doc = new XmlDocument ();
@@ -142,14 +179,18 @@ namespace Mono.WebServer
 		const string EXCEPT_UNKNOWN =
 			"The Argument \"{0}\" has an invalid type: {1}.";
 
-		bool GetBool (string name)
+		bool TryGetValue (string name, out string value)
 		{
 			XmlElement setting;
-			string value = GetValue (name, out setting);
+			value = GetValue (name, out setting);
+			return setting != null;
+		}
 
-			if (setting == null)
-				throw AppExcept (EXCEPT_UNREGISTERED,
-					name);
+		bool GetBool (string name)
+		{
+			string value;
+			if(!TryGetValue (name,out value))
+				throw AppExcept (EXCEPT_UNREGISTERED, name);
 
 			if (value == null)
 				return false;
@@ -162,8 +203,33 @@ namespace Mono.WebServer
 
 			throw AppExcept (EXCEPT_BOOL, name, value);
 		}
+
+		UInt16 GetUInt16 (string name)
+		{
+			string value;
+			if(!TryGetValue (name, out value))
+				throw AppExcept (EXCEPT_UNREGISTERED, name);
+
+			if (value == null)
+				return default (UInt16);
+
+			try {
+				return UInt16.Parse (value);
+			} catch (Exception except) {
+				throw AppExcept (except, EXCEPT_UINT16, name, value);
+			}
+		}
+
+		string GetString (string name)
+		{
+			string value;
+			if (!TryGetValue (name, out value))
+				throw AppExcept (EXCEPT_UNREGISTERED, name);
+			
+			return value;
+		}
 		
-		[Obsolete("Lacks type safety")]
+		[Obsolete("Lacks type safety", true)]
 		public object this [string name] {
 			get {
 				XmlElement setting;
@@ -193,7 +259,7 @@ namespace Mono.WebServer
 					
 				case "uint16":
 					try {
-						return ushort.Parse (value);
+						return UInt16.Parse (value);
 					} catch (Exception except) {
 						throw AppExcept (except,
 							EXCEPT_UINT16,
@@ -397,12 +463,6 @@ namespace Mono.WebServer
 			return builder;
 		}
 
-		public bool Help {
-			get {
-				return GetBool ("help") || GetBool ("?");
-			}
-		}
-		
 		public void LoadCommandLineArgs (string [] args)
 		{
 			if (args == null)

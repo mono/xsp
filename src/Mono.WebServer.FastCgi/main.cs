@@ -404,21 +404,26 @@ namespace Mono.WebServer.FastCgi
 			}
 		}
 
-		static void SetLogLevel(ConfigurationManager configmanager)
+		static void SetLogLevel (ConfigurationManager configmanager)
 		{
-			var log_level = configmanager["loglevels"] as string;
+			var log_level = configmanager ["loglevels"] as string;
 
 			if (log_level == null)
 				return;
 
+#if NET_4_0
 			LogLevel level;
 			if (Enum.TryParse(log_level, true, out level)) {
 				Logger.Level = level;
-			}
-			else {
-				Logger.Write(LogLevel.Warning,
+			} else {
+#else
+			try {
+				Logger.Level = (LogLevel)Enum.Parse (typeof (LogLevel), log_level, true);
+			} catch {
+#endif
+				Logger.Write (LogLevel.Warning,
 					"Failed to parse log levels.");
-				Logger.Write(LogLevel.Notice,
+				Logger.Write (LogLevel.Notice,
 					"Using default levels: {0}",
 					Logger.Level);
 			}

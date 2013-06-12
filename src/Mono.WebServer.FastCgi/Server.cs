@@ -31,6 +31,7 @@ using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
 using System.Globalization;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	public class Server

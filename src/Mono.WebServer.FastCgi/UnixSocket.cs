@@ -29,13 +29,12 @@
 //
 
 using System;
+using Mono.FastCgi;
 using Mono.Unix;
 using System.Globalization;
 
-namespace Mono.FastCgi
-{
-	internal class UnixSocket : StandardSocket, IDisposable
-	{
+namespace Mono.WebServer.FastCgi {
+	class UnixSocket : StandardSocket, IDisposable {
 		string path;
 		readonly long inode;
 		

@@ -27,6 +27,7 @@
 //
 
 using System;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	public enum Role : ushort

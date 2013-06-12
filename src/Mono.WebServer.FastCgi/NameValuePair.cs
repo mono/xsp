@@ -29,6 +29,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	public struct NameValuePair

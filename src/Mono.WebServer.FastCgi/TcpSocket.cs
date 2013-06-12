@@ -26,9 +26,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace Mono.FastCgi {
-	internal class TcpSocket : StandardSocket
-	{
+namespace Mono.WebServer.FastCgi {
+	class TcpSocket : StandardSocket {
 		public TcpSocket (System.Net.IPEndPoint localEndPoint)
 			: base (System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream,
 			        System.Net.Sockets.ProtocolType.IP, localEndPoint)

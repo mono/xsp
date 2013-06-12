@@ -29,6 +29,7 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	public class ResponderRequest : Request

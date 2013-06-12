@@ -29,6 +29,7 @@
 using System;
 using System.IO;
 using System.Globalization;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	[Flags]

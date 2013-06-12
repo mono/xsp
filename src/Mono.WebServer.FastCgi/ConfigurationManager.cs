@@ -187,14 +187,10 @@ namespace Mono.WebServer
 			if (str_value == null)
 				return null;
 
-			switch (str_value.ToLower ()) {
-			case "true":
-				return true;
-			case "false":
-				return false;
-			default:
-				return null;
-			}
+			bool value;
+			if (Boolean.TryParse (str_value, out value))
+				return value;
+			return null;
 		}
 
 		ushort? TryGetUInt16 (string name)

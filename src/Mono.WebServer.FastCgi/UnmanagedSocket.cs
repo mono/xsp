@@ -28,15 +28,14 @@
 //
 
 using System;
-using sock=System.Net.Sockets;
 using Mono.Unix.Native;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Socket = Mono.FastCgi.Socket;
 
-namespace Mono.FastCgi {
-	internal class UnmanagedSocket : Socket
-	{
+namespace Mono.WebServer.FastCgi {
+	class UnmanagedSocket : Socket {
 		[DllImport ("libc", SetLastError=true, EntryPoint="close")] 
 		extern static int close (IntPtr s);
 
@@ -66,7 +65,7 @@ namespace Mono.FastCgi {
 		public override void Close ()
 		{
 			connected = false;
-			if (shutdown (socket, (int) sock.SocketShutdown.Both) != 0)
+			if (shutdown (socket, (int) System.Net.Sockets.SocketShutdown.Both) != 0)
 				throw GetException ();
 			/* lighttpd makes the assumption that the FastCGI handler will close the unix socket */
 			close(socket);
@@ -74,7 +73,7 @@ namespace Mono.FastCgi {
 		
 		unsafe public override int Receive (byte [] buffer, int offset,
 		                                    int size,
-		                                    sock.SocketFlags flags)
+		                                    System.Net.Sockets.SocketFlags flags)
 		{
 			if (!connected)
 				return 0;
@@ -92,7 +91,7 @@ namespace Mono.FastCgi {
 		
 		unsafe public override int Send (byte [] data, int offset,
 		                                 int size,
-		                                 sock.SocketFlags flags)
+		                                 System.Net.Sockets.SocketFlags flags)
 		{
 			if (!connected)
 				return 0;
@@ -176,7 +175,7 @@ namespace Mono.FastCgi {
 			readonly object state;
 			public readonly IntPtr Socket;
 			public IntPtr Accepted;
-			public sock.SocketException Except;
+			public System.Net.Sockets.SocketException Except;
 			
 			public SockAccept (IntPtr socket, AsyncCallback callback,
 			                   object state)
@@ -245,28 +244,28 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		static sock.SocketException GetException ()
+		static System.Net.Sockets.SocketException GetException ()
 		{
 			return GetException (Stdlib.GetLastError ());
 		}
 		
-		static sock.SocketException GetException (Errno error)
+		static System.Net.Sockets.SocketException GetException (Errno error)
 		{
 			if (error == Errno.EAGAIN ||
 				error == Errno.EWOULDBLOCK) // WSAEWOULDBLOCK
-				return new sock.SocketException (10035);
+				return new System.Net.Sockets.SocketException (10035);
 			
 			if (error == Errno.EBADF ||
 				error == Errno.ENOTSOCK) // WSAENOTSOCK
-				return new sock.SocketException (10038);
+				return new System.Net.Sockets.SocketException (10038);
 			
 			if (error == Errno.ECONNABORTED) // WSAENETDOWN
-				return new sock.SocketException (10050);
+				return new System.Net.Sockets.SocketException (10050);
 			
 			if (error == Errno.EINVAL) // WSAEINVAL
-				return new sock.SocketException (10022);
+				return new System.Net.Sockets.SocketException (10022);
 			
-			return new sock.SocketException ();
+			return new System.Net.Sockets.SocketException ();
 		}
 	}
 }

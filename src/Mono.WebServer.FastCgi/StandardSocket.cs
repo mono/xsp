@@ -28,10 +28,10 @@
 //
 
 using System;
+using Mono.FastCgi;
 
-namespace Mono.FastCgi {
-	internal class StandardSocket : Socket
-	{
+namespace Mono.WebServer.FastCgi {
+	class StandardSocket : Socket {
 		readonly System.Net.Sockets.Socket socket;
 		
 		public StandardSocket (System.Net.Sockets.Socket socket)

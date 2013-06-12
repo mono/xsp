@@ -188,7 +188,7 @@ namespace Mono.WebServer
 				return null;
 
 			bool value;
-			if (Boolean.TryParse (str_value.ToLower (), out value))
+			if (Boolean.TryParse (str_value, out value))
 				return value;
 			return null;
 		}

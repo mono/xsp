@@ -1,5 +1,5 @@
-namespace Mono.FastCgi {
-	internal static class Strings {
+namespace Mono.WebServer.FastCgi {
+	static class Strings {
 		public static string Server_MaxConnsOutOfRange = "At least one connection must be permitted.";
 		public static string Server_MaxReqsOutOfRange = "At least one request must be permitted.";
 		public static string Server_AlreadyStarted = "The server is already started.";

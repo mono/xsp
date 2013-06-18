@@ -28,6 +28,8 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Xml;
 using System.IO;
 using System.Reflection;
@@ -40,7 +42,7 @@ namespace Mono.WebServer
 {
 	public class ConfigurationManager
 	{
-		XmlNodeList settings;
+		readonly SettingsCollection settings = new SettingsCollection ();
 		
 		readonly IDictionary<string,string> cmd_args = new Dictionary<string,string> ();
 		
@@ -77,15 +79,15 @@ namespace Mono.WebServer
 		{
 			var doc = new XmlDocument ();
 			doc.Load (asm.GetManifestResourceStream (resource));
-			ImportSettings (doc, default_args, false);
+			ImportSettings (doc, default_args, false, true);
 		}
 
 		void ImportSettings (XmlDocument doc,
 		                     IDictionary<string,string> collection,
-		                     bool insertEmptyValue)
+		                     bool insertEmptyValue, bool loadInfo)
 		{
-			settings = doc.GetElementsByTagName ("Setting");
-			foreach (XmlElement setting in settings) {
+			var tags = doc.GetElementsByTagName ("Setting");
+			foreach (XmlElement setting in tags) {
 				string name = GetXmlValue (setting, "Name");
 				string value = GetXmlValue (setting, "Value");
 				if (name.Length == 0)
@@ -98,19 +100,27 @@ namespace Mono.WebServer
 
 				if (insertEmptyValue || value.Length > 0)
 					collection.Add (name, value);
+
+				if (loadInfo && !settings.Contains (name))
+					settings.Add (new SettingInfo (
+						GetXmlValue (setting, "ConsoleVisible"),
+						GetXmlValue (setting,"Type"),
+						name,
+						GetXmlValue (setting,"Environment"),
+						GetXmlValue(setting, "AppSetting"),
+						setting.GetElementsByTagName ("Description")
+					));
 			}
 		}
 		
-		XmlElement GetSetting (string name)
+		SettingInfo GetSetting (string name)
 		{
-			foreach (XmlElement setting in settings)
-				if (GetXmlValue (setting, "Name") == name)
-					return setting;
-			
+			if (settings.Contains (name))
+				return settings [name];
 			return null;
 		}
 
-		string GetValue (string name, out XmlElement setting)
+		string GetValue (string name, out SettingInfo setting)
 		{
 			setting = GetSetting (name);
 			
@@ -123,19 +133,18 @@ namespace Mono.WebServer
 			if (xml_args.TryGetValue(name, out value))
 				return value;
 
-			string env_setting = GetXmlValue (setting, "Environment");
+			string env_setting = setting.Environment;
 			if (env_setting.Length > 0){
 				value = Environment.GetEnvironmentVariable(
 					env_setting);
 				if (value != null)
 					return value;
 			}
-			
-			string app_setting = GetXmlValue (setting,
-				"AppSetting");
 
-			if (app_setting.Length > 0)
-				if ((value = AppSettings [app_setting]) != null)
+			string app_setting = setting.AppSetting;
+
+			if (!String.IsNullOrEmpty (app_setting) &&
+				(value = AppSettings [app_setting]) != null)
 					return value;
 
 			default_args.TryGetValue(name, out value);
@@ -144,7 +153,7 @@ namespace Mono.WebServer
 		
 		public bool Contains (string name)
 		{
-			XmlElement setting;
+			SettingInfo setting;
 			return GetValue (name, out setting) != null;
 		}
 
@@ -168,7 +177,7 @@ namespace Mono.WebServer
 
 		bool TryGetValue (string name, out string value)
 		{
-			XmlElement setting;
+			SettingInfo setting;
 			value = GetValue (name, out setting);
 			return setting != null;
 		}
@@ -217,32 +226,30 @@ namespace Mono.WebServer
 		
 		public object this [string name] {
 			get {
-				XmlElement setting;
+				SettingInfo setting;
 				string value = GetValue (name, out setting);
 				
 				if (setting == null)
 					throw AppExcept (EXCEPT_UNREGISTERED,
 						name);
 				
-				string type = GetXmlValue (setting,
-					"Type").ToLower (
-						CultureInfo.InvariantCulture);
+				SettingType type = setting.Type;
 				
 				if (value == null)
 					switch (type) {
-					case "uint16":
+					case SettingType.UInt16:
 						return default(UInt16);
-					case "bool":
+					case SettingType.Bool:
 						return false;
 					default:
 						return null;
 					}
 				
 				switch (type) {
-				case "string":
+				case SettingType.String:
 					return value;
 					
-				case "uint16":
+				case SettingType.UInt16:
 					try {
 						return UInt16.Parse (value);
 					} catch (Exception except) {
@@ -251,30 +258,29 @@ namespace Mono.WebServer
 							name, value);
 					}
 					
-				case "bool":
-					if (value.ToLower () == "true")
-						return true;
-					
-					if (value.ToLower () == "false")
-						return false;
+				case SettingType.Bool:
+					bool result;
+					if (bool.TryParse (value, out result))
+						return result;
 
 					throw AppExcept (EXCEPT_BOOL, name,
 						value);
 					
-				case "directory":
+				case SettingType.Directory:
 					if (Directory.Exists (value))
 						return value;
 					
 					throw AppExcept (EXCEPT_DIRECTORY, name,
 						value);
 					
-				case "file":
+				case SettingType.File:
 					if (File.Exists (value))
 						return value;
 					
 					throw AppExcept (EXCEPT_FILE, name,
 						value);
-					
+
+				// TODO: Probably not needed anymore
 				default:
 					throw AppExcept (EXCEPT_UNKNOWN, name,
 						type);
@@ -305,54 +311,44 @@ namespace Mono.WebServer
 		public void PrintHelp ()
 		{
 			int left_margin = 0;
-			foreach (XmlElement setting in settings) {
-				string show = GetXmlValue (setting,
-					"ConsoleVisible").ToLower (
-						CultureInfo.InvariantCulture);
+			foreach (var setting in settings) {
+				bool show = setting.ConsoleVisible;
 				
-				if (show != "true")
+				if (!show)
 					continue;
-				
-				string type = GetXmlValue (setting,
-					"Type").ToUpper (
-						CultureInfo.InvariantCulture);
-				
-				int length = 4 +
-					GetXmlValue (setting, "Name").Length +
-					(type == "BOOL" ? 14 : type.Length + 1);
+
+				SettingType type = setting.Type;
+
+				int typelength = type == SettingType.Bool ? 14 : type.ToString ().Length + 1;
+				int length = 4 + setting.Name.Length + typelength;
 				
 				if (length > left_margin)
 					left_margin = length;
 			}
 			
-			foreach (XmlElement setting in settings) {
-				string show = GetXmlValue (setting,
-					"ConsoleVisible").ToLower (
-						CultureInfo.InvariantCulture);
+			foreach (var setting in settings) {
+				bool show = setting.ConsoleVisible;
 				
-				if (show != "true")
+				if (!show)
 					continue;
-				
-				string type = GetXmlValue (setting,
-					"Type").ToUpper (
-						CultureInfo.InvariantCulture);
 
-				string name = GetXmlValue (setting, "Name"); 
+				SettingType type = setting.Type;
+
+				string name = setting.Name;
 				string arg = String.Format (
 					CultureInfo.InvariantCulture,
 					"  /{0}{1}",
 					name,
-					type == "BOOL" ? "[=True|=False]" :
+					type == SettingType.Bool ? "[=True|=False]" :
 						"=" + type);
 				
 				Console.Write (arg);
 				
 				var values = new List<string> ();
-				foreach (XmlElement desc in setting.GetElementsByTagName ("Description"))
+				foreach (XmlElement desc in setting.Description)
 					RenderXml (desc, values, 0, 78 - left_margin);
 				
-				string app_setting = GetXmlValue (setting,
-					"AppSetting");
+				string app_setting = setting.AppSetting;
 				
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
@@ -370,8 +366,7 @@ namespace Mono.WebServer
 					
 				}
 
-				string env_setting = GetXmlValue (setting,
-					"Environment");
+				string env_setting = setting.Environment;
 				
 				if (env_setting.Length > 0)
 					values.Add (" Environment Variable Name: " +
@@ -479,25 +474,25 @@ namespace Mono.WebServer
 					continue;
 				}
 				
-				XmlElement setting = GetSetting (arg);
+				SettingInfo setting = GetSetting (arg);
 				if (setting == null) {
 					Console.WriteLine (
 						"Warning: \"{0}\" is an unknown argument. Ignoring.",
 						args [i]);
 					continue;
 				}
-				
-				string type = GetXmlValue (setting,
-					"Type").ToLower (
-						CultureInfo.InvariantCulture);
+
+				SettingType type = setting.Type;
 				string value;
-				
-				if (type == "bool")
-					value = (i + 1 < args.Length &&
-						(args [i+1].ToLower () == "true" ||
-						args [i+1].ToLower () == "false")) ?
-						args [++ i] : "True";
-				else if (i + 1 < args.Length)
+
+				if (type == SettingType.Bool) {
+					bool parsed;
+					if (i + 1 < args.Length && Boolean.TryParse (args [i + 1], out parsed)) {
+						value = parsed.ToString ();
+						i++;
+					} else
+						value = "True";
+				} else if (i + 1 < args.Length)
 					value = args [++i];
 				else {
 					Console.WriteLine (
@@ -520,7 +515,7 @@ namespace Mono.WebServer
 		{
 			var doc = new XmlDocument ();
 			doc.Load (filename);
-			ImportSettings (doc, xml_args, true);
+			ImportSettings (doc, xml_args, true, false);
 		}
 		
 		int PrefixLength (string arg)
@@ -555,5 +550,54 @@ namespace Mono.WebServer
 			
 			return String.Empty;
 		}
+	}
+
+	class SettingsCollection : KeyedCollection<string, SettingInfo> {
+		protected override string GetKeyForItem (SettingInfo item)
+		{
+			return item.Name;
+		}
+	}
+
+	public enum SettingType {
+		Bool,
+		UInt16,
+		String,
+		Directory,
+		File
+	}
+
+	class SettingInfo {
+		public SettingInfo (string consoleVisible, string type, string name, 
+			string environment, string appSetting, XmlNodeList description)
+		{
+			Description = description.Cast<XmlElement>();
+			AppSetting = appSetting;
+			Environment = environment;
+			Name = name;
+#if NET_4_0
+			SettingType parsed;
+			if (Enum.TryParse(type, true, out parsed)) {
+				Type = parsed;
+			} else {
+#else
+			try {
+				Type = (SettingType)Enum.Parse (typeof (SettingType), type, true);
+			} catch {
+#endif
+				throw new ArgumentException("Couldn't parse " + type + " as a type.");
+			}
+			bool visible;
+			if(!Boolean.TryParse (consoleVisible, out visible))
+				throw new ArgumentException ("Couldn't parse " + consoleVisible + " as a boolean.");
+			ConsoleVisible = visible;
+		}
+
+		public bool ConsoleVisible { get; private set; }
+		public SettingType Type { get; private set; }
+		public string Name { get; private set; }
+		public string Environment { get; private set; }
+		public string AppSetting { get; private set; }
+		public IEnumerable<XmlElement> Description { get; private set; }
 	}
 }

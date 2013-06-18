@@ -28,8 +28,6 @@
 //
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Xml;
 using System.IO;
 using System.Reflection;
@@ -233,23 +231,23 @@ namespace Mono.WebServer
 					throw AppExcept (EXCEPT_UNREGISTERED,
 						name);
 				
-				SettingType type = setting.Type;
+				SettingInfo.SettingType type = setting.Type;
 				
 				if (value == null)
 					switch (type) {
-					case SettingType.UInt16:
+					case SettingInfo.SettingType.UInt16:
 						return default(UInt16);
-					case SettingType.Bool:
+					case SettingInfo.SettingType.Bool:
 						return false;
 					default:
 						return null;
 					}
 				
 				switch (type) {
-				case SettingType.String:
+				case SettingInfo.SettingType.String:
 					return value;
 					
-				case SettingType.UInt16:
+				case SettingInfo.SettingType.UInt16:
 					try {
 						return UInt16.Parse (value);
 					} catch (Exception except) {
@@ -258,7 +256,7 @@ namespace Mono.WebServer
 							name, value);
 					}
 					
-				case SettingType.Bool:
+				case SettingInfo.SettingType.Bool:
 					bool result;
 					if (bool.TryParse (value, out result))
 						return result;
@@ -266,14 +264,14 @@ namespace Mono.WebServer
 					throw AppExcept (EXCEPT_BOOL, name,
 						value);
 					
-				case SettingType.Directory:
+				case SettingInfo.SettingType.Directory:
 					if (Directory.Exists (value))
 						return value;
 					
 					throw AppExcept (EXCEPT_DIRECTORY, name,
 						value);
 					
-				case SettingType.File:
+				case SettingInfo.SettingType.File:
 					if (File.Exists (value))
 						return value;
 					
@@ -317,9 +315,9 @@ namespace Mono.WebServer
 				if (!show)
 					continue;
 
-				SettingType type = setting.Type;
+				SettingInfo.SettingType type = setting.Type;
 
-				int typelength = type == SettingType.Bool ? 14 : type.ToString ().Length + 1;
+				int typelength = type == SettingInfo.SettingType.Bool ? 14 : type.ToString ().Length + 1;
 				int length = 4 + setting.Name.Length + typelength;
 				
 				if (length > left_margin)
@@ -332,14 +330,14 @@ namespace Mono.WebServer
 				if (!show)
 					continue;
 
-				SettingType type = setting.Type;
+				SettingInfo.SettingType type = setting.Type;
 
 				string name = setting.Name;
 				string arg = String.Format (
 					CultureInfo.InvariantCulture,
 					"  /{0}{1}",
 					name,
-					type == SettingType.Bool ? "[=True|=False]" :
+					type == SettingInfo.SettingType.Bool ? "[=True|=False]" :
 						"=" + type);
 				
 				Console.Write (arg);
@@ -482,10 +480,10 @@ namespace Mono.WebServer
 					continue;
 				}
 
-				SettingType type = setting.Type;
+				SettingInfo.SettingType type = setting.Type;
 				string value;
 
-				if (type == SettingType.Bool) {
+				if (type == SettingInfo.SettingType.Bool) {
 					bool parsed;
 					if (i + 1 < args.Length && Boolean.TryParse (args [i + 1], out parsed)) {
 						value = parsed.ToString ();
@@ -550,54 +548,5 @@ namespace Mono.WebServer
 			
 			return String.Empty;
 		}
-	}
-
-	class SettingsCollection : KeyedCollection<string, SettingInfo> {
-		protected override string GetKeyForItem (SettingInfo item)
-		{
-			return item.Name;
-		}
-	}
-
-	public enum SettingType {
-		Bool,
-		UInt16,
-		String,
-		Directory,
-		File
-	}
-
-	class SettingInfo {
-		public SettingInfo (string consoleVisible, string type, string name, 
-			string environment, string appSetting, XmlNodeList description)
-		{
-			Description = description.Cast<XmlElement>();
-			AppSetting = appSetting;
-			Environment = environment;
-			Name = name;
-#if NET_4_0
-			SettingType parsed;
-			if (Enum.TryParse(type, true, out parsed)) {
-				Type = parsed;
-			} else {
-#else
-			try {
-				Type = (SettingType)Enum.Parse (typeof (SettingType), type, true);
-			} catch {
-#endif
-				throw new ArgumentException("Couldn't parse " + type + " as a type.");
-			}
-			bool visible;
-			if(!Boolean.TryParse (consoleVisible, out visible))
-				throw new ArgumentException ("Couldn't parse " + consoleVisible + " as a boolean.");
-			ConsoleVisible = visible;
-		}
-
-		public bool ConsoleVisible { get; private set; }
-		public SettingType Type { get; private set; }
-		public string Name { get; private set; }
-		public string Environment { get; private set; }
-		public string AppSetting { get; private set; }
-		public IEnumerable<XmlElement> Description { get; private set; }
 	}
 }

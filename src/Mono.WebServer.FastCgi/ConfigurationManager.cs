@@ -26,202 +26,161 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 using System;
-using System.Collections.Generic;
 using System.Xml;
-using System.Reflection;
 using System.Globalization;
-using System.Collections.Specialized;
-using Mono.WebServer.FastCgi;
+using Mono.WebServer.FastCgi.Configuration;
+using Mono.FastCgi;
 
-namespace Mono.WebServer
-{
-	public partial class ConfigurationManager
-	{
-		readonly SettingsInfoCollection settingsInfo = new SettingsInfoCollection ();
-		
-		readonly IDictionary<string,string> cmd_args = new Dictionary<string,string> ();
-		readonly IDictionary<string,string> xml_args = new Dictionary<string,string> ();
-		readonly IDictionary<string,string> default_args = new Dictionary<string,string> ();
+namespace Mono.WebServer.FastCgi {
+	public partial class ConfigurationManager {
+		readonly SettingsCollection settings;
 
-		ushort maxConnsDefault;
-		ushort maxReqsDefault;
-		string socketDefault;
-		ushort portDefault;
-
-#region Typesafe properties
-		public bool Help { get { return GetBool ("help") || GetBool ("?"); } }
-		public bool Version { get { return GetBool ("version"); } }
-		public bool Verbose { get { return GetBool ("verbose"); } }
-		public bool PrintLog { get { return GetBool ("printlog"); } }
-		public bool Stoppable { get { return GetBool ("stoppable"); } }
-		public ushort MaxConns { get { return TryGetUInt16 ("maxconns") ?? maxConnsDefault; } }
-		public ushort MaxReqs { get { return TryGetUInt16 ("maxreqs") ?? maxReqsDefault; } }
-		public bool Multiplex { get { return GetBool ("multiplex"); } }
-		public string Applications { get { return GetString ("applications"); } }
-		public string AppConfigFile { get { return GetString ("appconfigfile"); } }
-		public string AppConfigDir { get { return GetString ("appconfigdir"); } }
-		public string Socket { get { return GetString ("socket") ?? socketDefault; } }
-		public string Root { get { return GetString ("root"); } }
-		public ushort Port { get { return TryGetUInt16 ("port") ?? portDefault; } }
-		public string Address { get { return GetString ("address"); } }
-		public string Filename { get { return GetString ("filename"); } }
-		public string LogFile { get { return GetString ("logfile"); } }
-		public string LogLevels { get { return GetString ("loglevels"); } }
-		public string ConfigFile { get { return GetString ("configfile"); } }
-#endregion
-
-		public ConfigurationManager (Assembly asm, string resource)
+		public ConfigurationManager ()
 		{
-			var doc = new XmlDocument ();
-			doc.Load (asm.GetManifestResourceStream (resource));
-			ImportSettings (doc, default_args, false, true);
+			settings = new SettingsCollection {help, version, verbose, printlog, stoppable, multiplex, maxConns, maxReqs, port,
+			address, filename, logFile, configFile, root, appConfigFile, appConfigDir, socket, applications, loglevels};
 		}
 
-		SettingInfo GetSettingInfo (string name)
-		{
-			if (settingsInfo.Contains (name))
-				return settingsInfo [name];
-			return null;
-		}
+		#region Backing fields
+		readonly BoolSetting help = new BoolSetting ("help","Shows this help message and exits.", prototype: "?|h|help");
+		readonly BoolSetting version = new BoolSetting ("version","Displays version information and exits.");
+		readonly BoolSetting verbose = new BoolSetting ("verbose", "Prints extra messages. Mainly useful for debugging.", prototype: "v|verbose");
+		readonly BoolSetting printlog = new BoolSetting ("printlog", "Prints log messages to the console.", environment: "MONO_FCGI_PRINTLOG");
+		readonly BoolSetting stoppable = new BoolSetting ("stoppable", Descriptions.Stoppable);
+		readonly BoolSetting multiplex = new BoolSetting ("multiplex", "Allows multiple requests to be send over a single connection.",
+			"FastCgiMultiplexConnections", "MONO_FCGI_MULTIPLEX");
 
-		string TryGetString (string name, out SettingInfo setting)
-		{
-			setting = GetSettingInfo (name);
-			
-			if (setting == null)
-				return null;
-			
-			string value;
-			if (cmd_args.TryGetValue(name, out value))
-				return value;
-			if (xml_args.TryGetValue(name, out value))
-				return value;
+		readonly UInt16Setting maxConns = new UInt16Setting ("maxconns", Descriptions.MaxConns,
+			"FastCgiMaxConnections", "MONO_FCGI_MAXCONNS", 1024);
+		readonly UInt16Setting maxReqs = new UInt16Setting ("maxreqs", "Specifies the maximum number of concurrent requests the server should accept.",
+			"FastCgiMaxRequests", "MONO_FCGI_MAXREQS", 1024);
+		readonly UInt16Setting port = new UInt16Setting ("port", "Specifies the TCP port number to listen on.\n" +
+			"To use this argument, \"socket\" must be set to \"tcp\".", "MonoServerPort", "MONO_FCGI_PORT", 9000);
 
-			string env_setting = setting.Environment;
-			if (!String.IsNullOrEmpty (env_setting)){
-				value = Environment.GetEnvironmentVariable(
-					env_setting);
-				if (value != null)
-					return value;
+		readonly StringSetting address = new StringSetting ("address", "Specifies the IP address to listen on.\n" +
+			"To use this argument, \"socket\" must be set to \"tcp\".", "MonoServerAddress", "MONO_FCGI_ADDRESS", "127.0.0.1");
+		readonly StringSetting filename = new StringSetting ("filename", "Specifies a unix socket filename to listen on.\n" +
+			"To use this argument, \"socket\" must be set to \"unix\".", "MonoUnixSocket", "MONO_FCGI_FILENAME", "/tmp/fastcgi-mono-server");
+		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_FCGI_LOGFILE");
+		readonly StringSetting configFile = new StringSetting ("configfile", Descriptions.ConfigFile);
+		readonly StringSetting root = new StringSetting ("root", Descriptions.Root, "MonoServerRootDir", "MONO_FCGI_ROOT");
+		readonly StringSetting appConfigFile = new StringSetting ("appconfigfile", Descriptions.AppConfigFile, "MonoApplicationsConfigFile",
+			"MONO_FCGI_APPCONFIGFILE");
+		readonly StringSetting appConfigDir = new StringSetting ("appconfigdir", "Adds application definitions from all XML files" +
+			" found in the specified directory. Files must have the \".webapp\" extension.", "MonoApplicationsConfigDir",
+			"MONO_FCGI_APPCONFIGDIR");
+		readonly StringSetting socket = new StringSetting ("socket", Descriptions.Socket, "MonoSocketType", "MONO_FCGI_SOCKET", "pipe");
+		readonly StringSetting applications = new StringSetting ("applications", Descriptions.Applications, "MonoApplications", "MONO_FCGI_APPLICATIONS");
+
+		readonly Setting<LogLevel> loglevels = new Setting<LogLevel> ("loglevels",
+#if NET_4_0
+			Enum.TryParse,
+#else
+			LogLevelParser,
+#endif
+			Descriptions.LogLevels, "FastCgiLogLevels", "MONO_FCGI_LOGLEVELS");
+
+#if !NET_4_0
+		static bool LogLevelParser (string input, out LogLevel output)
+		{
+			output=LogLevel.Standard;
+			try {
+				output = (LogLevel) Enum.Parse (typeof (LogLevel), input);
+				return true;
+			} catch (ArgumentException) { // TODO: catch more specific type
+				return false;
 			}
-
-			string app_setting = setting.AppSetting;
-
-			if (!String.IsNullOrEmpty (app_setting) &&
-				(value = AppSettings [app_setting]) != null)
-					return value;
-
-			default_args.TryGetValue(name, out value);
-			return value;
 		}
+#endif
+		#endregion
+
+		#region Typesafe properties
+		public bool Help { get { return help; } }
+		public bool Version { get { return version; } }
+		public bool Verbose { get { return verbose; } }
+		public bool PrintLog { get { return printlog; } }
+		public bool Stoppable { get { return stoppable; } }
+		public bool Multiplex { get { return multiplex; } }
+
+		public ushort MaxConns { get { return maxConns; } }
+		public ushort MaxReqs { get { return maxReqs; } }
+		public ushort Port { get { return port; } }
+
+		public string Address { get { return address; } }
+		public string Filename { get { return filename; } }
+		public string LogFile { get { return logFile; } }
+		public string ConfigFile { get { return configFile; } }
+		public string Root { get { return root; } }
+		public string AppConfigFile { get { return appConfigFile; } }
+		public string AppConfigDir { get { return appConfigDir; } }
+		public string Socket { get { return socket; } }
+		public string Applications { get { return applications; } }
+
+		public LogLevel LogLevels { get { return loglevels; } }
+
+		/*
+		 * <Setting Name="automappaths" AppSetting="MonoAutomapPaths"
+		 * Environment="MONO_FCGI_AUTOMAPPATHS" Type="Bool" ConsoleVisible="True" Value="False">
+		 * <Description>
+		 * <para>Automatically registers applications as they are
+		 * encountered, provided pages exist in standard
+		 * locations.</para>
+		 * </Description>
+		 * </Setting>
+		 */
+		#endregion
 		
-		public bool Contains (string name)
-		{
-			string str_value;
-			return TryGetString (name, out str_value);
-		}
-
-		bool TryGetString (string name, out string value)
-		{
-			SettingInfo setting;
-			value = TryGetString (name, out setting);
-			return setting != null;
-		}
-
-		const string EXCEPT_UNREGISTERED =
-			"Argument \"{0}\" is unknown.";
-
-		const string EXCEPT_UINT16 =
-			"Error in argument \"{0}\". \"{1}\" cannot be converted to an integer.";
-
-		const string EXCEPT_BOOL =
-			"Error in argument \"{0}\". \"{1}\" should be \"True\" or \"False\".";
-		
-		const string EXCEPT_DIRECTORY =
-			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
-			
-		const string EXCEPT_FILE =
-			"Error in argument \"{0}\". \"{1}\" does not exist.";
-		
-		const string EXCEPT_UNKNOWN =
-			"The Argument \"{0}\" has an invalid type: {1}.";
-
-		bool GetBool (string name)
-		{
-			return TryGetBool (name) ?? false;
-		}
-
-		bool? TryGetBool (string name)
-		{
-			string str_value = GetString (name);
-
-			if (str_value == null)
-				return null;
-
-			bool value;
-			if (!Boolean.TryParse (str_value, out value))
-				throw AppExcept (EXCEPT_BOOL, name, str_value);
-
-
-			return value;
-		}
-
-		ushort? TryGetUInt16 (string name)
-		{
-			string str_value = GetString (name);
-
-			if (str_value == null)
-				return null;
-
-			ushort value;
-			if(!UInt16.TryParse (str_value, out value))
-				throw AppExcept (EXCEPT_UINT16, name, str_value);
-
-			return value;
-		}
-
-		string GetString (string name)
-		{
-			string str_value;
-			if (!TryGetString (name, out str_value))
-				throw AppExcept (EXCEPT_UNREGISTERED, name);
-			return str_value;
-		}
-
-		static ApplicationException AppExcept (Exception except,
-							string message,
-							params object [] args)
-		{
-			return new ApplicationException (String.Format (
-				CultureInfo.InvariantCulture, message, args),
-				except);
-		}
-		
-		static ApplicationException AppExcept (string message,
+		internal static ApplicationException AppExcept (string message,
 							params object [] args)
 		{
 			return new ApplicationException (String.Format (
 				CultureInfo.InvariantCulture, message, args));
 		}
 
-		static NameValueCollection AppSettings {
-			get { return System.Configuration.ConfigurationManager.AppSettings; }
-		}
-		
 		static string GetXmlValue (XmlElement elem, string name)
 		{
 			string value = elem.GetAttribute (name);
-			if (!String.IsNullOrEmpty(value))
+			if (!String.IsNullOrEmpty (value))
 				return value;
-			
+
 			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
 				value = child.InnerText;
-				if (!String.IsNullOrEmpty(value))
+				if (!String.IsNullOrEmpty (value))
 					return value;
 			}
-			
+
 			return String.Empty;
+		}
+
+		[Obsolete]
+		internal void SetValue (string name, object value)
+		{
+			settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
+		}
+
+		internal const string ExceptUnregistered =
+			"Argument \"{0}\" is unknown.";
+
+		internal const string ExceptDirectory =
+			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
+
+		internal const string ExceptFile =
+			"Error in argument \"{0}\". \"{1}\" does not exist.";
+
+		internal const string ExceptUnknown =
+			"The Argument \"{0}\" has an invalid type: {1}.";
+
+		[Obsolete]
+		internal ISetting GetSetting (string name)
+		{
+			return settings [name];
+		}
+
+		public void PrintHelp ()
+		{
+			CreateOptionSet ().WriteOptionDescriptions (Console.Out);
 		}
 	}
 }

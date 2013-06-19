@@ -70,11 +70,22 @@
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
+    <Compile Include="Configuration\BooleanArg.cs" />
+    <Compile Include="Configuration\BooleanArgList.cs" />
     <Compile Include="ConfigurationManager.cs" />
-    <Compile Include="ConfigurationManager.Help.cs" />
     <Compile Include="ConfigurationManager.Obsolete.cs" />
     <Compile Include="ConfigurationManager.Parsing.cs" />
+    <Compile Include="Configuration\BoolSetting.cs" />
+    <Compile Include="Configuration\ISetting.cs" />
+    <Compile Include="Configuration\Parser.cs" />
+    <Compile Include="Configuration\Setting.cs" />
+    <Compile Include="Configuration\SettingsCollection.cs" />
+    <Compile Include="Configuration\SettingSource.cs" />
+    <Compile Include="Configuration\SettingType.cs" />
+    <Compile Include="Configuration\StringSetting.cs" />
+    <Compile Include="Configuration\UInt16Setting.cs" />
     <Compile Include="Connection.cs" />
+    <Compile Include="Configuration\Descriptions.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
     <Compile Include="Logger.cs" />
@@ -85,8 +96,6 @@
     <Compile Include="Responder.cs" />
     <Compile Include="ResponderRequest.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="SettingInfo.cs" />
-    <Compile Include="SettingsInfoCollection.cs" />
     <Compile Include="SocketFactory.cs" />
     <Compile Include="StandardSocket.cs" />
     <Compile Include="Strings.cs" />
@@ -104,10 +113,5 @@
       <Project>{5339C36C-A524-44CE-93BD-59A79F57B346}</Project>
       <Name>Mono.WebServer</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ConfigurationManager.xml">
-      <LogicalName>ConfigurationManager.xml</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 </Project>

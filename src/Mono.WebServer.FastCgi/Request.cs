@@ -48,6 +48,8 @@ namespace Mono.FastCgi {
 		
 		public Request (ushort requestID, Connection connection)
 		{
+			DataNeeded = true;
+
 			RequestID  = requestID;
 			this.connection = connection;
 		}

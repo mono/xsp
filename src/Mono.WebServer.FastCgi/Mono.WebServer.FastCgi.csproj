@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -71,6 +71,9 @@
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
     <Compile Include="ConfigurationManager.cs" />
+    <Compile Include="ConfigurationManager.Help.cs" />
+    <Compile Include="ConfigurationManager.Obsolete.cs" />
+    <Compile Include="ConfigurationManager.Parsing.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
@@ -82,6 +85,8 @@
     <Compile Include="Responder.cs" />
     <Compile Include="ResponderRequest.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="SettingInfo.cs" />
+    <Compile Include="SettingsInfoCollection.cs" />
     <Compile Include="SocketFactory.cs" />
     <Compile Include="StandardSocket.cs" />
     <Compile Include="Strings.cs" />

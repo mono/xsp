@@ -26,13 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// Compile With:
-//   gmcs -debug+ -r:System.Core Options.cs -o:NDesk.Options.dll
-//   gmcs -debug+ -d:LINQ -r:System.Core Options.cs -o:NDesk.Options.dll
-//
-// The LINQ version just changes the implementation of
-// OptionSet.Parse(IEnumerable<string>), and confers no semantic changes.
-
 //
 // A Getopt::Long-inspired option parsing library for C#.
 //
@@ -118,9 +111,9 @@
 //      var p = new OptionSet () {
 //        { "a", s => a = s },
 //      };
-//      p.Parse (new string[]{"-a"});   // sets v != null
-//      p.Parse (new string[]{"-a+"});  // sets v != null
-//      p.Parse (new string[]{"-a-"});  // sets v == null
+//      p.Parse (new string[]{"-a"});   // sets a != null
+//      p.Parse (new string[]{"-a+"});  // sets a != null
+//      p.Parse (new string[]{"-a-"});  // sets a == null
 //
 
 using System;
@@ -134,19 +127,15 @@ using System.Security.Permissions;
 using System.Text;
 using System.Text.RegularExpressions;
 
-#if LINQ
-using System.Linq;
-#endif
-
 namespace NDesk.Options {
 
 	public class OptionValueCollection : IList<string> {
 		readonly List<string> values = new List<string> ();
-		readonly OptionContext c;
+		readonly OptionContext context;
 
-		internal OptionValueCollection (OptionContext c)
+		internal OptionValueCollection (OptionContext context)
 		{
-			this.c = c;
+			this.context = context;
 		}
 
 		#region ICollection<T>
@@ -172,17 +161,17 @@ namespace NDesk.Options {
 		public void Insert (int index, string item) {values.Insert (index, item);}
 		public void RemoveAt (int index)            {values.RemoveAt (index);}
 
-		private void AssertValid (int index)
+		void AssertValid (int index)
 		{
-			if (c.Option == null)
+			if (context.Option == null)
 				throw new InvalidOperationException ("OptionContext.Option is null.");
-			if (index >= c.Option.MaxValueCount)
+			if (index >= context.Option.MaxValueCount)
 				throw new ArgumentOutOfRangeException ("index");
-			if (c.Option.OptionValueType == OptionValueType.Required &&
+			if (context.Option.OptionValueType == OptionValueType.Required &&
 					index >= values.Count)
-				throw new OptionException (string.Format (
-							c.OptionSet.MessageLocalizer ("Missing required value for option '{0}'."), c.OptionName), 
-						c.OptionName);
+				throw new OptionException (String.Format (
+							context.OptionSet.MessageLocalizer ("Missing required value for option '{0}'."), context.OptionName), 
+						context.OptionName);
 		}
 
 		public string this [int index] {
@@ -208,7 +197,7 @@ namespace NDesk.Options {
 
 		public override string ToString ()
 		{
-			return string.Join (", ", values.ToArray ());
+			return String.Join (", ", values.ToArray ());
 		}
 	}
 
@@ -216,7 +205,7 @@ namespace NDesk.Options {
 		public OptionContext (OptionSet set)
 		{
 			OptionSet = set;
-			OptionValues   = new OptionValueCollection (this);
+			OptionValues = new OptionValueCollection (this);
 		}
 
 		public Option Option { get; set; }
@@ -237,9 +226,6 @@ namespace NDesk.Options {
 	}
 
 	public abstract class Option {
-		readonly string[] names;
-		string[] separators;
-
 		protected Option (string prototype, string description)
 			: this (prototype, description, 1)
 		{
@@ -256,7 +242,7 @@ namespace NDesk.Options {
 
 			Prototype       = prototype;
 			Description     = description;
-			names           = prototype.Split ('|');
+			Names           = prototype.Split ('|');
 			MaxValueCount   = maxValueCount;
 			OptionValueType = ParsePrototype ();
 
@@ -267,11 +253,11 @@ namespace NDesk.Options {
 						"maxValueCount");
 			if (OptionValueType == OptionValueType.None && maxValueCount > 1)
 				throw new ArgumentException (
-						string.Format ("Cannot provide maxValueCount of {0} for OptionValueType.None.", maxValueCount),
+						String.Format ("Cannot provide maxValueCount of {0} for OptionValueType.None.", maxValueCount),
 						"maxValueCount");
-			if (Array.IndexOf (names, "<>") >= 0 && 
-					((names.Length == 1 && OptionValueType != OptionValueType.None) ||
-					 (names.Length > 1 && MaxValueCount > 1)))
+			if (Array.IndexOf (Names, "<>") >= 0 && 
+					((Names.Length == 1 && OptionValueType != OptionValueType.None) ||
+					 (Names.Length > 1 && MaxValueCount > 1)))
 				throw new ArgumentException (
 						"The default option handler '<>' cannot require values.",
 						"prototype");
@@ -284,14 +270,14 @@ namespace NDesk.Options {
 
 		public string[] GetNames ()
 		{
-			return (string[]) names.Clone ();
+			return (string[]) Names.Clone ();
 		}
 
 		public string[] GetValueSeparators ()
 		{
-			if (separators == null)
+			if (ValueSeparators == null)
 				return new string [0];
-			return (string[]) separators.Clone ();
+			return (string[]) ValueSeparators.Clone ();
 		}
 
 		protected static T Parse<T> (string value, OptionContext c)
@@ -304,7 +290,7 @@ namespace NDesk.Options {
 			}
 			catch (Exception e) {
 				throw new OptionException (
-						string.Format (
+						String.Format (
 							c.OptionSet.MessageLocalizer ("Could not convert string `{0}' to type {1} for option `{2}'."),
 							value, typeof (T).Name, c.OptionName),
 						c.OptionName, e);
@@ -312,30 +298,29 @@ namespace NDesk.Options {
 			return t;
 		}
 
-		internal string[] Names           {get {return names;}}
-		internal string[] ValueSeparators {get {return separators;}}
+		internal string[] Names { get; private set; }
+		internal string[] ValueSeparators { get; private set; }
 
-		static readonly char[] NameTerminator = new[]{'=', ':'};
+		static readonly char[] nameTerminator = new[]{'=', ':'};
 
-		private OptionValueType ParsePrototype ()
+		OptionValueType ParsePrototype ()
 		{
 			char type = '\0';
 			var seps = new List<string> ();
-			for (int i = 0; i < names.Length; ++i) {
-				string name = names [i];
+			for (int i = 0; i < Names.Length; ++i) {
+				string name = Names [i];
 				if (name.Length == 0)
-					throw new ArgumentException ("Empty option names are not supported.", "prototype");
+					throw new ArgumentException ("Empty option names are not supported.");
 
-				int end = name.IndexOfAny (NameTerminator);
+				int end = name.IndexOfAny (nameTerminator);
 				if (end == -1)
 					continue;
-				names [i] = name.Substring (0, end);
+				Names [i] = name.Substring (0, end);
 				if (type == '\0' || type == name [end])
 					type = name [end];
 				else 
 					throw new ArgumentException (
-							string.Format ("Conflicting option types: '{0}' vs. '{1}'.", type, name [end]),
-							"prototype");
+							String.Format ("Conflicting option types: '{0}' vs. '{1}'.", type, name [end]));
 				AddSeparators (name, end, seps);
 			}
 
@@ -344,21 +329,20 @@ namespace NDesk.Options {
 
 			if (MaxValueCount <= 1 && seps.Count != 0)
 				throw new ArgumentException (
-						string.Format ("Cannot provide key/value separators for Options taking {0} value(s).", MaxValueCount),
-						"prototype");
+						String.Format ("Cannot provide key/value separators for Options taking {0} value(s).", MaxValueCount));
 			if (MaxValueCount > 1) {
 				if (seps.Count == 0)
-					separators = new[]{":", "="};
+					ValueSeparators = new[]{":", "="};
 				else if (seps.Count == 1 && seps [0].Length == 0)
-					separators = null;
+					ValueSeparators = null;
 				else
-					separators = seps.ToArray ();
+					ValueSeparators = seps.ToArray ();
 			}
 
 			return type == '=' ? OptionValueType.Required : OptionValueType.Optional;
 		}
 
-		private static void AddSeparators (string name, int end, ICollection<string> seps)
+		static void AddSeparators (string name, int end, ICollection<string> seps)
 		{
 			int start = -1;
 			for (int i = end+1; i < name.Length; ++i) {
@@ -366,15 +350,15 @@ namespace NDesk.Options {
 					case '{':
 						if (start != -1)
 							throw new ArgumentException (
-									string.Format ("Ill-formed name/value separator found in \"{0}\".", name),
-									"prototype");
+									String.Format ("Ill-formed name/value separator found in \"{0}\".", name),
+									"name");
 						start = i+1;
 						break;
 					case '}':
 						if (start == -1)
 							throw new ArgumentException (
-									string.Format ("Ill-formed name/value separator found in \"{0}\".", name),
-									"prototype");
+									String.Format ("Ill-formed name/value separator found in \"{0}\".", name),
+									"name");
 						seps.Add (name.Substring (start, i-start));
 						start = -1;
 						break;
@@ -386,8 +370,8 @@ namespace NDesk.Options {
 			}
 			if (start != -1)
 				throw new ArgumentException (
-						string.Format ("Ill-formed name/value separator found in \"{0}\".", name),
-						"prototype");
+						String.Format ("Ill-formed name/value separator found in \"{0}\".", name),
+						"name");
 		}
 
 		public void Invoke (OptionContext c)
@@ -459,7 +443,7 @@ namespace NDesk.Options {
 		protected override string GetKeyForItem (Option item)
 		{
 			if (item == null)
-				throw new ArgumentNullException ("option");
+				throw new ArgumentNullException ("item");
 			if (item.Names != null && item.Names.Length > 0)
 				return item.Names [0];
 			// This should never happen, as it's invalid for Option to be
@@ -503,7 +487,7 @@ namespace NDesk.Options {
 			AddImpl (item);
 		}
 
-		private void AddImpl (Option option)
+		void AddImpl (Option option)
 		{
 			if (option == null)
 				throw new ArgumentNullException ("option");
@@ -636,35 +620,6 @@ namespace NDesk.Options {
 			return new OptionContext (this);
 		}
 
-#if LINQ
-		public List<string> Parse (IEnumerable<string> arguments)
-		{
-			bool process = true;
-			OptionContext c = CreateOptionContext ();
-			c.OptionIndex = -1;
-			var def = GetOptionForName ("<>");
-			var unprocessed = 
-				from argument in arguments
-				where ++c.OptionIndex < 0
-				|| (!process && def == null)
-				|| (process
-					? argument == "--" 
-						? (process = false)
-						: (
-							!Parse (argument, c)
-							&& (
-								def == null
-								|| Unprocessed (null, def, c, argument)
-							)
-						)
-					: def == null || Unprocessed (null, def, c, argument))
-				select argument;
-			List<string> r = unprocessed.ToList ();
-			if (c.Option != null)
-				c.Option.Invoke (c);
-			return r;
-		}
-#else
 		public List<string> Parse (IEnumerable<string> arguments)
 		{
 			OptionContext c = CreateOptionContext ();
@@ -689,21 +644,19 @@ namespace NDesk.Options {
 				c.Option.Invoke (c);
 			return unprocessed;
 		}
-#endif
 
-		private static bool Unprocessed (ICollection<string> extra, Option def, OptionContext c, string argument)
+		static void Unprocessed (ICollection<string> extra, Option def, OptionContext c, string argument)
 		{
 			if (def == null) {
 				extra.Add (argument);
-				return false;
+				return;
 			}
 			c.OptionValues.Add (argument);
 			c.Option = def;
 			c.Option.Invoke (c);
-			return false;
 		}
 
-		private readonly Regex ValueOption = new Regex (
+		readonly Regex valueOption = new Regex (
 			@"^(?<flag>--|-|/)(?<name>[^:=]+)((?<sep>[:=])(?<value>.*))?$");
 
 		protected bool GetOptionParts (string argument, out string flag, out string name, out string sep, out string value)
@@ -712,7 +665,7 @@ namespace NDesk.Options {
 				throw new ArgumentNullException ("argument");
 
 			flag = name = sep = value = null;
-			Match m = ValueOption.Match (argument);
+			Match m = valueOption.Match (argument);
 			if (!m.Success) {
 				return false;
 			}
@@ -756,13 +709,13 @@ namespace NDesk.Options {
 			if (ParseBool (argument, n, c))
 				return true;
 			// is it a bundled option?
-			if (ParseBundledValue (f, string.Concat (n, s, v), c))
+			if (ParseBundledValue (f, String.Concat (n, s, v), c))
 				return true;
 
 			return false;
 		}
 
-		private void ParseValue (string option, OptionContext c)
+		void ParseValue (string option, OptionContext c)
 		{
 			if (option != null)
 				foreach (string o in c.Option.ValueSeparators != null 
@@ -774,14 +727,14 @@ namespace NDesk.Options {
 					c.Option.OptionValueType == OptionValueType.Optional)
 				c.Option.Invoke (c);
 			else if (c.OptionValues.Count > c.Option.MaxValueCount) {
-				throw new OptionException (MessageLocalizer (string.Format (
+				throw new OptionException (MessageLocalizer (String.Format (
 								"Error: Found {0} option values when expecting {1}.", 
 								c.OptionValues.Count, c.Option.MaxValueCount)),
 						c.OptionName);
 			}
 		}
 
-		private bool ParseBool (string option, string n, OptionContext c)
+		bool ParseBool (string option, string n, OptionContext c)
 		{
 			string rn;
 			if (n.Length >= 1 && (n [n.Length-1] == '+' || n [n.Length-1] == '-') &&
@@ -797,7 +750,7 @@ namespace NDesk.Options {
 			return false;
 		}
 
-		private bool ParseBundledValue (string f, string n, OptionContext c)
+		bool ParseBundledValue (string f, string n, OptionContext c)
 		{
 			if (f != "-")
 				return false;
@@ -807,7 +760,7 @@ namespace NDesk.Options {
 				if (!Contains (rn)) {
 					if (i == 0)
 						return false;
-					throw new OptionException (string.Format (MessageLocalizer (
+					throw new OptionException (String.Format (MessageLocalizer (
 									"Cannot bundle unregistered option '{0}'."), opt), opt);
 				}
 				Option p = this [rn];
@@ -830,7 +783,7 @@ namespace NDesk.Options {
 			return true;
 		}
 
-		private static void Invoke (OptionContext c, string name, string value, Option option)
+		static void Invoke (OptionContext c, string name, string value, Option option)
 		{
 			c.OptionName  = name;
 			c.Option      = option;
@@ -838,7 +791,7 @@ namespace NDesk.Options {
 			option.Invoke (c);
 		}
 
-		private const int OptionWidth = 29;
+		const int OPTION_WIDTH = 29;
 
 		public void WriteOptionDescriptions (TextWriter o)
 		{
@@ -847,16 +800,16 @@ namespace NDesk.Options {
 				if (!WriteOptionPrototype (o, p, ref written))
 					continue;
 
-				if (written < OptionWidth)
-					o.Write (new string (' ', OptionWidth - written));
+				if (written < OPTION_WIDTH)
+					o.Write (new string (' ', OPTION_WIDTH - written));
 				else {
 					o.WriteLine ();
-					o.Write (new string (' ', OptionWidth));
+					o.Write (new string (' ', OPTION_WIDTH));
 				}
 
 				List<string> lines = GetLines (MessageLocalizer (GetDescription (p.Description)));
 				o.WriteLine (lines [0]);
-				var prefix = new string (' ', OptionWidth+2);
+				var prefix = new string (' ', OPTION_WIDTH+2);
 				for (int i = 1; i < lines.Count; ++i) {
 					o.Write (prefix);
 					o.WriteLine (lines [i]);
@@ -921,7 +874,7 @@ namespace NDesk.Options {
 			o.Write (s);
 		}
 
-		private static string GetArgumentName (int index, int maxIndex, string description)
+		static string GetArgumentName (int index, int maxIndex, string description)
 		{
 			if (description == null)
 				return maxIndex == 1 ? "VALUE" : "VALUE" + (index + 1);
@@ -943,10 +896,10 @@ namespace NDesk.Options {
 			return maxIndex == 1 ? "VALUE" : "VALUE" + (index + 1);
 		}
 
-		private static string GetDescription (string description)
+		static string GetDescription (string description)
 		{
 			if (description == null)
-				return string.Empty;
+				return String.Empty;
 			var sb = new StringBuilder (description.Length);
 			int start = -1;
 			for (int i = 0; i < description.Length; ++i) {
@@ -985,14 +938,14 @@ namespace NDesk.Options {
 			return sb.ToString ();
 		}
 
-		private static List<string> GetLines (string description)
+		static List<string> GetLines (string description)
 		{
 			var lines = new List<string> ();
-			if (string.IsNullOrEmpty (description)) {
-				lines.Add (string.Empty);
+			if (String.IsNullOrEmpty (description)) {
+				lines.Add (String.Empty);
 				return lines;
 			}
-			const int length = 80 - OptionWidth - 2;
+			const int length = 80 - OPTION_WIDTH - 2;
 			int start = 0, end;
 			do {
 				end = GetLineEnd (start, length, description);
@@ -1017,7 +970,7 @@ namespace NDesk.Options {
 			return lines;
 		}
 
-		private static int GetLineEnd (int start, int length, string description)
+		static int GetLineEnd (int start, int length, string description)
 		{
 			int end = Math.Min (start + length, description.Length);
 			int sep = -1;

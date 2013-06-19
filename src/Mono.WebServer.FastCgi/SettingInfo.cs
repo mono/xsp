@@ -13,9 +13,10 @@ namespace Mono.WebServer.FastCgi {
 			File
 		}
 
-		public SettingInfo (string consoleVisible, string type, string name,
-		                    string environment, string appSetting, XmlNodeList description)
+		public SettingInfo (string consoleVisible, string type, string name, string environment,
+			string appSetting, XmlNodeList description, string value)
 		{
+			Value = value;
 			Description = description.Cast<XmlElement>();
 			AppSetting = appSetting;
 			Environment = environment;
@@ -33,8 +34,11 @@ namespace Mono.WebServer.FastCgi {
 				throw new ArgumentException("Couldn't parse " + type + " as a type.");
 			}
 			bool visible;
-			if(!Boolean.TryParse (consoleVisible, out visible))
-				throw new ArgumentException ("Couldn't parse " + consoleVisible + " as a boolean.");
+			if (consoleVisible.Length == 0)
+				visible = false;
+			else
+				if(!Boolean.TryParse (consoleVisible, out visible))
+					throw new ArgumentException ("Couldn't parse " + consoleVisible + " as a boolean.");
 			ConsoleVisible = visible;
 		}
 
@@ -44,5 +48,6 @@ namespace Mono.WebServer.FastCgi {
 		public string Environment { get; private set; }
 		public string AppSetting { get; private set; }
 		public IEnumerable<XmlElement> Description { get; private set; }
+		public string Value { get; private set; }
 	}
 }

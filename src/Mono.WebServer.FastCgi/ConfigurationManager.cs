@@ -47,6 +47,10 @@ namespace Mono.WebServer
 		readonly IDictionary<string,string> xml_args = new Dictionary<string,string> ();
 
 		readonly IDictionary<string,string> default_args = new Dictionary<string,string> ();
+		ushort maxConnsDefault;
+		ushort maxReqsDefault;
+		string socketDefault;
+		ushort portDefault;
 
 #region Typesafe properties
 		public bool Help { get { return GetBool ("help") || GetBool ("?"); } }
@@ -54,18 +58,15 @@ namespace Mono.WebServer
 		public bool Verbose { get { return GetBool ("verbose"); } }
 		public bool PrintLog { get { return GetBool ("printlog"); } }
 		public bool Stoppable { get { return GetBool ("stoppable"); } }
-		// TODO: read those 1024 from the config file
-		public ushort MaxConns { get { return TryGetUInt16 ("maxconns") ?? 1024; } }
-		public ushort MaxReqs { get { return TryGetUInt16 ("maxreqs") ?? 1024; } }
+		public ushort MaxConns { get { return TryGetUInt16 ("maxconns") ?? maxConnsDefault; } }
+		public ushort MaxReqs { get { return TryGetUInt16 ("maxreqs") ?? maxReqsDefault; } }
 		public bool Multiplex { get { return GetBool ("multiplex"); } }
 		public string Applications { get { return GetString ("applications"); } }
 		public string AppConfigFile { get { return GetString ("appconfigfile"); } }
 		public string AppConfigDir { get { return GetString ("appconfigdir"); } }
-		// TODO: read this "pipe" from the config file
-		public string Socket { get { return GetString ("socket") ?? "pipe"; } }
+		public string Socket { get { return GetString ("socket") ?? socketDefault; } }
 		public string Root { get { return GetString ("root"); } }
-		// TODO: read this 9000 from the config file
-		public ushort Port { get { return TryGetUInt16 ("port") ?? 9000; } }
+		public ushort Port { get { return TryGetUInt16 ("port") ?? portDefault; } }
 		public string Address { get { return GetString ("address"); } }
 		public string Filename { get { return GetString ("filename"); } }
 		public string LogFile { get { return GetString ("logfile"); } }
@@ -106,9 +107,16 @@ namespace Mono.WebServer
 						name,
 						GetXmlValue (setting,"Environment"),
 						GetXmlValue(setting, "AppSetting"),
-						setting.GetElementsByTagName ("Description")
+						setting.GetElementsByTagName ("Description"),
+						value
 					));
 			}
+			if (!loadInfo)
+				return;
+			maxConnsDefault = UInt16.Parse(settings ["maxconns"].Value);
+			maxReqsDefault = UInt16.Parse (settings ["maxreqs"].Value);
+			socketDefault = settings ["socket"].Value;
+			portDefault = UInt16.Parse (settings ["port"].Value);
 		}
 		
 		SettingInfo GetSetting (string name)
@@ -118,6 +126,7 @@ namespace Mono.WebServer
 			return null;
 		}
 
+		// TODO: the out parameter is only used in obsolete code paths
 		string GetValue (string name, out SettingInfo setting)
 		{
 			setting = GetSetting (name);
@@ -151,8 +160,13 @@ namespace Mono.WebServer
 		
 		public bool Contains (string name)
 		{
+			return GetValue (name) != null;
+		}
+
+		private string GetValue (string name)
+		{
 			SettingInfo setting;
-			return GetValue (name, out setting) != null;
+			return GetValue (name, out setting);
 		}
 
 		const string EXCEPT_UNREGISTERED =
@@ -175,9 +189,8 @@ namespace Mono.WebServer
 
 		bool TryGetValue (string name, out string value)
 		{
-			SettingInfo setting;
-			value = GetValue (name, out setting);
-			return setting != null;
+			value= GetValue (name);
+			return value != null;
 		}
 		
 		bool GetBool (string name)

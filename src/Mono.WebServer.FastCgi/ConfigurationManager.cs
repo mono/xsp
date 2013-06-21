@@ -5,6 +5,7 @@ using System.Xml;
 using Mono.WebServer.FastCgi.Configuration;
 
 namespace Mono.WebServer {
+	[Obsolete]
 	public class ConfigurationManager {
 		readonly FastCgi.ConfigurationManager configurationManager = new FastCgi.ConfigurationManager ();
 
@@ -15,6 +16,11 @@ namespace Mono.WebServer {
 			if (stream != null)
 				doc.Load (stream);
 			configurationManager.ImportSettings (doc, false, SettingSource.Xml);
+		}
+
+		public bool Contains (string name)
+		{
+			return configurationManager.Contains (name);
 		}
 
 		[Obsolete]

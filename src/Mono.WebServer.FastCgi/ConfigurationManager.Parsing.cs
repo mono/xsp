@@ -12,7 +12,7 @@ namespace Mono.WebServer.FastCgi {
 		const string EXCEPT_XML_DUPLICATE =
 			"XML setting \"{0}\" can only be assigned once.";
 
-		void ImportSettings (XmlDocument doc, bool insertEmptyValue,
+		internal void ImportSettings (XmlDocument doc, bool insertEmptyValue,
 			SettingSource source)
 		{
 			var tags = doc.GetElementsByTagName ("Setting");

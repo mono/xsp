@@ -70,22 +70,17 @@
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
-    <Compile Include="Configuration\BooleanArg.cs" />
-    <Compile Include="Configuration\BooleanArgList.cs" />
+    <Compile Include="ConfigurationManager.Modern.cs" />
     <Compile Include="ConfigurationManager.cs" />
-    <Compile Include="ConfigurationManager.Obsolete.cs" />
     <Compile Include="ConfigurationManager.Parsing.cs" />
-    <Compile Include="Configuration\BoolSetting.cs" />
     <Compile Include="Configuration\ISetting.cs" />
     <Compile Include="Configuration\Parser.cs" />
-    <Compile Include="Configuration\Setting.cs" />
+    <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Configuration\SettingsCollection.cs" />
     <Compile Include="Configuration\SettingSource.cs" />
-    <Compile Include="Configuration\SettingType.cs" />
-    <Compile Include="Configuration\StringSetting.cs" />
-    <Compile Include="Configuration\UInt16Setting.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="Configuration\Descriptions.cs" />
+    <Compile Include="ConfigurationManager.Fields.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
     <Compile Include="Logger.cs" />

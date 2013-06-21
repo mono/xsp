@@ -1,5 +1,5 @@
-namespace Mono.WebServer.FastCgi.Configuration {
-	static class Descriptions {
+namespace Mono.WebServer.FastCgi {
+	static class SettingsDescriptions {
 		internal const string MaxConns =
 			"Specifies the maximum number of concurrent connections the server should accept.";
 

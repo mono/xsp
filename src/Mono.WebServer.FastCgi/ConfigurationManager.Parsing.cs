@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
-using Mono.WebServer.FastCgi.Configuration;
 using NDesk.Options;
 
 namespace Mono.WebServer.FastCgi {

@@ -33,5 +33,20 @@ namespace Mono.WebServer {
 				configurationManager.SetValue (name, value);
 			}
 		}
+
+		public void PrintHelp ()
+		{
+			configurationManager.PrintHelp ();
+		}
+
+		public void LoadCommandLineArgs (string[] args)
+		{
+			configurationManager.LoadCommandLineArgs (args);
+		}
+
+		public void LoadXmlConfig (string filename)
+		{
+			configurationManager.LoadXmlConfig (filename);
+		}
 	}
 }

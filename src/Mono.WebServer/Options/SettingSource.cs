@@ -1,5 +1,5 @@
-namespace Mono.WebServer.FastCgi {
-	enum SettingSource 
+namespace Mono.WebServer.Options {
+	public enum SettingSource 
 	{
 		Default,
 		AppSettings,

@@ -32,7 +32,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using Mono.WebServer.FastCgi;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer {
 	[Obsolete]

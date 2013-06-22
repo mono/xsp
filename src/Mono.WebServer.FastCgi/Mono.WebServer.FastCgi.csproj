@@ -85,9 +85,6 @@
     <Compile Include="Responder.cs" />
     <Compile Include="ResponderRequest.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="SettingsCollection.cs" />
-    <Compile Include="SettingsDescriptions.cs" />
     <Compile Include="SocketFactory.cs" />
     <Compile Include="StandardSocket.cs" />
     <Compile Include="Strings.cs" />

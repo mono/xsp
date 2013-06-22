@@ -30,6 +30,7 @@
 using System;
 using System.Xml;
 using System.Globalization;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
 	public partial class ConfigurationManager

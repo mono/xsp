@@ -70,11 +70,10 @@
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
-    <Compile Include="ConfigurationManager.Modern.cs" />
     <Compile Include="ConfigurationManager.cs" />
-    <Compile Include="ConfigurationManager.Parsing.cs" />
-    <Compile Include="Connection.cs" />
     <Compile Include="ConfigurationManager.Fields.cs" />
+    <Compile Include="ConfigurationManager.Modern.cs" />
+    <Compile Include="Connection.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
     <Compile Include="Logger.cs" />

@@ -60,5 +60,7 @@ namespace Mono.WebServer.FastCgi {
 				throw new ArgumentNullException ("name");
 			return Settings.Contains (name);
 		}
+
+		protected override string Name { get { return "mono-fastcgi"; } }
 	}
 }

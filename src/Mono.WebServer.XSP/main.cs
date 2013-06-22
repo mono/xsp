@@ -75,21 +75,7 @@ namespace Mono.WebServer.XSP
 		}
 		
 		static RSA key;
-		
-		static void ShowVersion ()
-		{
-			Assembly assembly = Assembly.GetExecutingAssembly ();
-			string version = assembly.GetName ().Version.ToString ();
-			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
-			//string title = ((AssemblyTitleAttribute) att [0]).Title;
-			att = assembly.GetCustomAttributes (typeof (AssemblyCopyrightAttribute), false);
-			string copyright = ((AssemblyCopyrightAttribute) att [0]).Copyright;
-			att = assembly.GetCustomAttributes (typeof (AssemblyDescriptionAttribute), false);
-			string description = ((AssemblyDescriptionAttribute) att [0]).Description;
-			Console.WriteLine ("{0} {1}\nCopyright {2}\n{3}",
-					Path.GetFileName (assembly.Location), version, copyright, description);
-		}
-		
+
 		static void ShowHelp ()
 		{
 			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
@@ -520,7 +506,7 @@ namespace Mono.WebServer.XSP
 					quiet = true;
 					break;
 				case "--version":
-					ShowVersion ();
+					Version.Show ();
 					return true;
 				case "--verbose":
 					settings.Verbose = true;

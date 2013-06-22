@@ -74,6 +74,8 @@
     <Compile Include="MonoWorkerRequest.cs" />
     <Compile Include="Options\BoolSetting.cs" />
     <Compile Include="Options\ISetting.cs" />
+    <Compile Include="Options\ConfigurationManager.Fields.cs" />
+    <Compile Include="Options\ConfigurationManager.cs" />
     <Compile Include="Options\Options.cs" />
     <Compile Include="Options\Parser.cs" />
     <Compile Include="Options\Settings.cs" />

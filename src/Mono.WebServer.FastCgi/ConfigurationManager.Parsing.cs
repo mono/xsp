@@ -12,6 +12,27 @@ namespace Mono.WebServer.FastCgi {
 
 		const string EXCEPT_XML_DUPLICATE = "XML setting \"{0}\" can only be assigned once.";
 
+		static ApplicationException AppExcept (string message, params object [] args)
+		{
+			return new ApplicationException (String.Format (CultureInfo.InvariantCulture, message, args));
+		}
+
+		static string GetXmlValue (XmlElement elem, string name)
+		{
+			string value = elem.GetAttribute (name);
+			if (!String.IsNullOrEmpty (value))
+				return value;
+
+			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
+				value = child.InnerText;
+				if (!String.IsNullOrEmpty (value))
+					return value;
+			}
+
+			return String.Empty;
+		}
+
+
 		internal void ImportSettings (XmlDocument doc, bool insertEmptyValue, SettingSource source)
 		{
 			if (doc == null)
@@ -23,11 +44,11 @@ namespace Mono.WebServer.FastCgi {
 				if (name.Length == 0)
 					throw AppExcept (EXCEPT_BAD_ELEM, name, value);
 
-				if (settings.Contains (name))
+				if (Settings.Contains (name))
 					throw AppExcept (EXCEPT_XML_DUPLICATE, name);
 
 				if (insertEmptyValue || value.Length > 0)
-					settings[name].MaybeParseUpdate (source, value);
+					Settings[name].MaybeParseUpdate (source, value);
 			}
 		}
 
@@ -60,7 +81,7 @@ namespace Mono.WebServer.FastCgi {
 		OptionSet CreateOptionSet ()
 		{
 			var p = new OptionSet ();
-			foreach (ISetting setting in settings) {
+			foreach (ISetting setting in Settings) {
 				var boolSetting = setting as Setting<bool>;
 				if (boolSetting != null) {
 					p.Add (setting.Prototype, setting.Description,

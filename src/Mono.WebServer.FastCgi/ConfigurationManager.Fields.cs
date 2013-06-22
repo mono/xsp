@@ -31,20 +31,15 @@ using Mono.FastCgi;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager
+	public partial class ConfigurationManager : Options.ConfigurationManager
 	{
-		readonly SettingsCollection settings;
-
 		public ConfigurationManager ()
 		{
-			settings = new SettingsCollection {help, version, verbose, printlog, stoppable, multiplex, maxConns, maxReqs, port,
-			address, filename, logFile, configFile, root, appConfigFile, appConfigDir, socket, applications, loglevels};
+			Add(printlog, stoppable, multiplex, maxConns, maxReqs, port,
+			address, filename, logFile, configFile, appConfigFile, appConfigDir, socket, loglevels);
 		}
 
 		#region Backing fields
-		readonly BoolSetting help = new BoolSetting ("help","Shows this help message and exits.", prototype: "?|h|help");
-		readonly BoolSetting version = new BoolSetting ("version","Displays version information and exits.");
-		readonly BoolSetting verbose = new BoolSetting ("verbose", "Prints extra messages. Mainly useful for debugging.", prototype: "v|verbose");
 		readonly BoolSetting printlog = new BoolSetting ("printlog", "Prints log messages to the console.", environment: "MONO_FCGI_PRINTLOG");
 		readonly BoolSetting stoppable = new BoolSetting ("stoppable", Descriptions.Stoppable);
 		readonly BoolSetting multiplex = new BoolSetting ("multiplex", "Allows multiple requests to be send over a single connection.",
@@ -63,14 +58,12 @@ namespace Mono.WebServer.FastCgi {
 			"To use this argument, \"socket\" must be set to \"unix\".", "MonoUnixSocket", "MONO_FCGI_FILENAME", "/tmp/fastcgi-mono-server");
 		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_FCGI_LOGFILE");
 		readonly StringSetting configFile = new StringSetting ("configfile", Descriptions.ConfigFile);
-		readonly StringSetting root = new StringSetting ("root", Descriptions.Root, "MonoServerRootDir", "MONO_FCGI_ROOT");
 		readonly StringSetting appConfigFile = new StringSetting ("appconfigfile", Descriptions.AppConfigFile, "MonoApplicationsConfigFile",
 			"MONO_FCGI_APPCONFIGFILE");
 		readonly StringSetting appConfigDir = new StringSetting ("appconfigdir", "Adds application definitions from all XML files" +
 			" found in the specified directory. Files must have the \".webapp\" extension.", "MonoApplicationsConfigDir",
 			"MONO_FCGI_APPCONFIGDIR");
 		readonly StringSetting socket = new StringSetting ("socket", Descriptions.Socket, "MonoSocketType", "MONO_FCGI_SOCKET", "pipe");
-		readonly StringSetting applications = new StringSetting ("applications", Descriptions.Applications, "MonoApplications", "MONO_FCGI_APPLICATIONS");
 
 		readonly Setting<LogLevel> loglevels = new Setting<LogLevel> ("loglevels",
 #if NET_4_0
@@ -95,15 +88,6 @@ namespace Mono.WebServer.FastCgi {
 		#endregion
 
 		#region Typesafe properties
-		public bool Help {
-			get { return help; }
-		}
-		public bool Version {
-			get { return version; }
-		}
-		public bool Verbose {
-			get { return verbose; }
-		}
 		public bool PrintLog {
 			get { return printlog; }
 		}
@@ -113,6 +97,7 @@ namespace Mono.WebServer.FastCgi {
 		public bool Multiplex {
 			get { return multiplex; }
 		}
+
 		public ushort MaxConns {
 			get { return maxConns; }
 		}
@@ -135,9 +120,6 @@ namespace Mono.WebServer.FastCgi {
 		public string ConfigFile {
 			get { return configFile; }
 		}
-		public string Root {
-			get { return root; }
-		}
 		public string AppConfigFile {
 			get { return appConfigFile; }
 		}
@@ -146,9 +128,6 @@ namespace Mono.WebServer.FastCgi {
 		}
 		public string Socket {
 			get { return socket; }
-		}
-		public string Applications {
-			get { return applications; }
 		}
 
 		public LogLevel LogLevels {

@@ -28,46 +28,24 @@
 //
 
 using System;
-using System.Globalization;
-using System.Xml;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager
-	{
-		internal static ApplicationException AppExcept (string message,
-							params object [] args)
-		{
-			return new ApplicationException (String.Format (CultureInfo.InvariantCulture, message, args));
-		}
-
-		static string GetXmlValue (XmlElement elem, string name)
-		{
-			string value = elem.GetAttribute (name);
-			if (!String.IsNullOrEmpty (value))
-				return value;
-
-			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
-				value = child.InnerText;
-				if (!String.IsNullOrEmpty (value))
-					return value;
-			}
-
-			return String.Empty;
-		}
-
+	public partial class ConfigurationManager {
 		[Obsolete]
 		internal void SetValue (string name, object value)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
-			settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
+			Settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
 		}
 
 		[Obsolete]
 		internal ISetting GetSetting (string name)
 		{
-			return settings [name];
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			return Settings [name];
 		}
 
 		public void PrintHelp ()
@@ -78,7 +56,9 @@ namespace Mono.WebServer.FastCgi {
 		[Obsolete]
 		public bool Contains (string name)
 		{
-			return settings.Contains (name);
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			return Settings.Contains (name);
 		}
 	}
 }

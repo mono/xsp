@@ -289,130 +289,9 @@ namespace Mono.WebServer.XSP
 			if (settings.Oport == null)
 				settings.Oport = 8080;
 
-			Options options = 0;
-			int backlog = 500;
-			for (int i = 0; i < args.Length; i++){
-				string a = args [i];
-
-				switch (a){
-				case "--https":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					break;
-				case "--https-client-accept":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					security.AcceptClientCertificates = true;
-					security.RequireClientCertificates = false;
-					break;
-				case "--https-client-require":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					security.AcceptClientCertificates = true;
-					security.RequireClientCertificates = true;
-					break;
-				case "--p12file":
-					security.Pkcs12File = args [++i];
-					break;
-				case "--cert":
-					security.CertificateFile = args [++i];
-					break;
-				case "--pkfile":
-					security.PvkFile = args [++i];
-					break;
-				case "--pkpwd":
-					security.Password = args [++i];
-					break;
-				case "--protocols":
-					security.SetProtocol (args [++i]);
-					break;
-				case "--port":
-					CheckAndSetOptions (a, Options.Port, ref options);
-					settings.Oport = args [++i];
-					break;
-				case "--random-port":
-					CheckAndSetOptions (a, Options.RandomPort, ref options);
-					settings.Oport = 0;
-					break;
-				case "--address":
-					CheckAndSetOptions (a, Options.Address, ref options);
-					settings.IP = args [++i];
-					break;
-				case "--backlog":
-					string backlogstr = args [++i];
-					try {
-						backlog = Convert.ToInt32 (backlogstr);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for backlog is not valid {0}", backlogstr);
-						return 1;
-					}
-					break;
-				case "--root":
-					CheckAndSetOptions (a, Options.Root, ref options);
-					settings.RootDir = args [++i];
-					break;
-				case "--applications":
-					CheckAndSetOptions (a, Options.Applications, ref options);
-					settings.Apps = args [++i];
-					break;
-				case "--appconfigfile":
-					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
-					settings.AppConfigFile = args [++i];
-					break;
-				case "--appconfigdir":
-					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
-					settings.AppConfigDir = args [++i];
-					break;
-				case "--minThreads":
-					string mtstr = args [++i];
-					int minThreads;
-					try {
-						minThreads = Convert.ToInt32 (mtstr);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
-						return 1;
-					}
-
-					if (minThreads > 0)
-						ThreadPool.SetMinThreads(minThreads, minThreads);
-
-					break;
-				case "--nonstop":
-					settings.NonStop = true;
-					break;
-				case "--help":
-					ShowHelp ();
-					return 0;
-				case "--quiet":
-					quiet = true;
-					break;
-				case "--version":
-					ShowVersion ();
-					return 0;
-				case "--verbose":
-					settings.Verbose = true;
-					break;
-				case "--pidfile": {
-					string pidfile = args[++i];
-					if (!String.IsNullOrEmpty (pidfile)) {
-						try {
-							using (StreamWriter sw = File.CreateText (pidfile))
-								sw.Write (Process.GetCurrentProcess ().Id);
-						} catch (Exception ex) {
-							Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", pidfile, ex.Message);
-						}
-					}
-					break;
-				}
-				case "--no-hidden":
-					MonoWorkerRequest.CheckFileAccess = false;
-					break;
-					
-				default:
-					ShowHelp ();
-					return 1;
-				}
-			}
+			int backlog;
+			if (!ParseOptions (args, security, settings, ref quiet, out backlog))
+				return 1;
 
 			IPAddress ipaddr;
 			ushort port;
@@ -536,6 +415,140 @@ namespace Mono.WebServer.XSP
 			}
 
 			return 0;
+		}
+
+		static bool ParseOptions (string[] args, SecurityConfiguration security,
+		                          ApplicationSettings settings, ref bool quiet,
+		                          out int backlog)
+		{
+			backlog = 500;
+			Options options = 0;
+			for (int i = 0; i < args.Length; i++) {
+				string a = args [i];
+
+				switch (a) {
+				case "--https":
+					CheckAndSetOptions (a, Options.Https, ref options);
+					security.Enabled = true;
+					break;
+				case "--https-client-accept":
+					CheckAndSetOptions (a, Options.Https, ref options);
+					security.Enabled = true;
+					security.AcceptClientCertificates = true;
+					security.RequireClientCertificates = false;
+					break;
+				case "--https-client-require":
+					CheckAndSetOptions (a, Options.Https, ref options);
+					security.Enabled = true;
+					security.AcceptClientCertificates = true;
+					security.RequireClientCertificates = true;
+					break;
+				case "--p12file":
+					security.Pkcs12File = args [++i];
+					break;
+				case "--cert":
+					security.CertificateFile = args [++i];
+					break;
+				case "--pkfile":
+					security.PvkFile = args [++i];
+					break;
+				case "--pkpwd":
+					security.Password = args [++i];
+					break;
+				case "--protocols":
+					security.SetProtocol (args [++i]);
+					break;
+				case "--port":
+					CheckAndSetOptions (a, Options.Port, ref options);
+					settings.Oport = args [++i];
+					break;
+				case "--random-port":
+					CheckAndSetOptions (a, Options.RandomPort, ref options);
+					settings.Oport = 0;
+					break;
+				case "--address":
+					CheckAndSetOptions (a, Options.Address, ref options);
+					settings.IP = args [++i];
+					break;
+				case "--backlog":
+					string backlogstr = args [++i];
+					try {
+						backlog = Convert.ToInt32 (backlogstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for backlog is not valid {0}",
+						                   backlogstr);
+						return false;
+					}
+					break;
+				case "--root":
+					CheckAndSetOptions (a, Options.Root, ref options);
+					settings.RootDir = args [++i];
+					break;
+				case "--applications":
+					CheckAndSetOptions (a, Options.Applications, ref options);
+					settings.Apps = args [++i];
+					break;
+				case "--appconfigfile":
+					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
+					settings.AppConfigFile = args [++i];
+					break;
+				case "--appconfigdir":
+					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
+					settings.AppConfigDir = args [++i];
+					break;
+				case "--minThreads":
+					string mtstr = args [++i];
+					int minThreads;
+					try {
+						minThreads = Convert.ToInt32 (mtstr);
+					} catch (Exception) {
+						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
+						return false;
+					}
+
+					if (minThreads > 0)
+						ThreadPool.SetMinThreads (minThreads, minThreads);
+
+					break;
+				case "--nonstop":
+					settings.NonStop = true;
+					break;
+				case "--help":
+					ShowHelp ();
+					return true;
+				case "--quiet":
+					quiet = true;
+					break;
+				case "--version":
+					ShowVersion ();
+					return true;
+				case "--verbose":
+					settings.Verbose = true;
+					break;
+				case "--pidfile": {
+					string pidfile = args [++i];
+					if (!String.IsNullOrEmpty (pidfile)) {
+						try {
+							using (StreamWriter sw = File.CreateText (pidfile)) {
+								sw.Write (Process.GetCurrentProcess ().Id);
+							}
+						} catch (Exception ex) {
+							Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", pidfile,
+							                         ex.Message);
+						}
+					}
+					break;
+				}
+				case "--no-hidden":
+					MonoWorkerRequest.CheckFileAccess = false;
+					break;
+
+				default:
+					ShowHelp ();
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public override object InitializeLifetimeService ()

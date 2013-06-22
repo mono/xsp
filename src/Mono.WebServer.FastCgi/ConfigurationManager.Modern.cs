@@ -28,8 +28,8 @@
 //
 
 using System;
-using System.Xml;
 using System.Globalization;
+using System.Xml;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
@@ -75,6 +75,7 @@ namespace Mono.WebServer.FastCgi {
 			CreateOptionSet ().WriteOptionDescriptions (Console.Out);
 		}
 
+		[Obsolete]
 		public bool Contains (string name)
 		{
 			return settings.Contains (name);

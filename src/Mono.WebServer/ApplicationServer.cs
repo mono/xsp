@@ -83,7 +83,6 @@ namespace Mono.WebServer
 		bool started;
 		bool stop;
 		Socket listen_socket;
-		Exception initialException;
 
 		Thread runner;
 
@@ -270,9 +269,9 @@ namespace Mono.WebServer
  			}
  		}
 
+		[Obsolete]
 		public bool Start (bool bgThread, Exception initialException, int backlog)
 		{
-			this.initialException = initialException;
 			return Start (bgThread, backlog);
 		}
 		
@@ -460,13 +459,6 @@ namespace Mono.WebServer
 		void StartRequest (Socket accepted, int reuses)
 		{
 			try {
-				if (initialException != null) {
-					SendException (accepted, initialException);
-					initialException = null;
-					accepted.Close ();
-					return;
-				}
-				
 				// The next line can throw (reusing and the client closed)
 				Worker worker = webSource.CreateWorker (accepted, this);
 				worker.SetReuseCount (reuses);

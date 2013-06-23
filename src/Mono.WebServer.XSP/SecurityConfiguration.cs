@@ -125,6 +125,7 @@ namespace Mono.WebServer.XSP {
 			return sb.ToString ();
 		}
 
+		[Obsolete("Use the typesafe Protocol property")]
 		public void SetProtocol (string protocol)
 		{
 			if (protocol != null) {

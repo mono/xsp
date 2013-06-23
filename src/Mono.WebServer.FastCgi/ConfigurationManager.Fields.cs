@@ -34,8 +34,10 @@ namespace Mono.WebServer.FastCgi {
 	public partial class ConfigurationManager : Options.ConfigurationManager{
 		public ConfigurationManager ()
 		{
-			Add(printlog, stoppable, multiplex, maxConns, maxReqs, filename,
-				logFile, configFile, socket, loglevels);
+			Add(printlog, stoppable, multiplex,
+				maxConns, maxReqs,
+				filename, logFile, configFile, socket,
+				loglevels);
 		}
 
 		#region Backing fields
@@ -56,62 +58,23 @@ namespace Mono.WebServer.FastCgi {
 
 		readonly StringSetting socket = new StringSetting ("socket", Descriptions.Socket, "MonoSocketType", "MONO_FCGI_SOCKET", "pipe");
 
-		readonly Setting<LogLevel> loglevels = new Setting<LogLevel> ("loglevels",
-#if NET_4_0
-			Enum.TryParse,
-#else
-			LogLevelParser,
-#endif
-			Descriptions.LogLevels, "FastCgiLogLevels", "MONO_FCGI_LOGLEVELS");
-
-#if !NET_4_0
-		static bool LogLevelParser (string input, out LogLevel output)
-		{
-			output=LogLevel.Standard;
-			try {
-				output = (LogLevel) Enum.Parse (typeof (LogLevel), input);
-				return true;
-			} catch (ArgumentException) { // TODO: catch more specific type
-				return false;
-			}
-		}
-#endif
+		readonly EnumSetting<LogLevel> loglevels = new EnumSetting<LogLevel> ("loglevels", Descriptions.LogLevels, "FastCgiLogLevels", "MONO_FCGI_LOGLEVELS", LogLevel.Standard);
 		#endregion
 
 		#region Typesafe properties
-		public bool PrintLog {
-			get { return printlog; }
-		}
-		public bool Stoppable {
-			get { return stoppable; }
-		}
-		public bool Multiplex {
-			get { return multiplex; }
-		}
+		public bool PrintLog { get { return printlog; } }
+		public bool Stoppable { get { return stoppable; } }
+		public bool Multiplex { get { return multiplex; } }
 
-		public ushort MaxConns {
-			get { return maxConns; }
-		}
-		public ushort MaxReqs {
-			get { return maxReqs; }
-		}
+		public ushort MaxConns { get { return maxConns; } }
+		public ushort MaxReqs { get { return maxReqs; } }
 
-		public string Filename {
-			get { return filename; }
-		}
-		public string LogFile {
-			get { return logFile; }
-		}
-		public string ConfigFile {
-			get { return configFile; }
-		}
-		public string Socket {
-			get { return socket; }
-		}
+		public string Filename { get { return filename; } }
+		public string LogFile { get { return logFile; } }
+		public string ConfigFile { get { return configFile; } }
+		public string Socket { get { return socket; } }
 
-		public LogLevel LogLevels {
-			get { return loglevels; }
-		}
+		public LogLevel LogLevels { get { return loglevels; } }
 
 		/*
 		 * <Setting Name="automappaths" AppSetting="MonoAutomapPaths"

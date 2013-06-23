@@ -31,36 +31,31 @@ using System;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager {
+	public partial class ConfigurationManager : Options.ConfigurationManager {
 		[Obsolete]
 		internal void SetValue (string name, object value)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
 			Settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
 		}
 
 		[Obsolete]
 		internal ISetting GetSetting (string name)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
 			return Settings [name];
 		}
 
-		public void PrintHelp ()
-		{
-			CreateOptionSet ().WriteOptionDescriptions (Console.Out);
-		}
-
 		[Obsolete]
-		public bool Contains (string name)
+		internal bool Contains (string name)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
 			return Settings.Contains (name);
 		}
 
 		protected override string Name { get { return "mono-fastcgi"; } }
+
+		protected override string Description {
+			get {
+				return "A FastCgi interface for ASP.NET applications.";
+			}
+		}
 	}
 }

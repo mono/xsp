@@ -28,11 +28,8 @@
 //
 
 using System;
-using System.Configuration;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Security.Cryptography;
@@ -42,190 +39,11 @@ namespace Mono.WebServer.XSP
 {
 	public class Server : MarshalByRefObject
 	{
-		// TODO: Rewrite this using "Haskell's Either"
-		class ApplicationSettings
-		{
-			public string Apps;
-			public string AppConfigDir;
-			public string AppConfigFile;
-			public string RootDir;
-			public object Oport = 8080;
-			public string IP = "0.0.0.0";
-			public readonly Exception Exception;
-			public bool NonStop;
-			public bool Verbose;
-			//public bool Master; This field is not used for XSP
-			
-			public ApplicationSettings ()
-			{
-				Exception = null;
-				try {
-					Apps = AppSettings ["MonoApplications"];
-					AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
-					AppConfigFile = AppSettings ["MonoApplicationsConfigFile"];
-					RootDir = AppSettings ["MonoServerRootDir"];
-					IP = AppSettings ["MonoServerAddress"];
-					Oport = AppSettings ["MonoServerPort"];
-				} catch (Exception ex) {
-					Console.WriteLine ("Exception caught while reading the configuration file:");
-					Console.WriteLine (ex);
-					Exception = ex;
-				}
-			}
-		}
-		
 		static RSA key;
-
-		static void ShowHelp ()
-		{
-			Console.WriteLine ("XSP server is a sample server that hosts the ASP.NET runtime in a");
-			Console.WriteLine ("minimalistic HTTP server\n");
-			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    xsp.exe [...]");
-			Console.WriteLine ();
-			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
-			Console.WriteLine ("                    Default value: 8080");
-			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
-			Console.WriteLine ("    --random-port: listen on a randomly assigned port. The port numer");
-			Console.WriteLine ("                    will be reported to the caller via a text file.");
-			Console.WriteLine ();
-			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
-			Console.WriteLine ("                    Default value: 0.0.0.0");
-			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
-			Console.WriteLine ();
-			Console.WriteLine ("    --minThreads N:    the minimum number of threads the thread pool creates on startup.");
-			Console.WriteLine ("                       Increase this value to handle a sudden inflow of connections.");
-			Console.WriteLine ("                       Default value: (runtime default)");
-			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
-			Console.WriteLine ("    --https:        enable SSL for the server");
-			Console.WriteLine ("                    Default value: false.");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --https-client-accept: enable SSL for the server with optional client certificates");
-			Console.WriteLine ("                    Default value: false (non-ssl).");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --https-client-require: enable SSL for the server with mandatory client certificates");
-			Console.WriteLine ("                    Default value: false (non-ssl).");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --cert FILENAME: path to X.509 certificate file (cer)");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --pkfile FILENAME: path to private key file (pvk)");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --p12file FILENAME: path to a PKCS#12 file containing the certificate and the private");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --pkpwd PASSWORD: password to decrypt the private key");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --protocol:     specify which protocols are available for SSL");
-			Console.WriteLine ("                    Possible values: Default, Tls, Ssl2, Ssl3");
-			Console.WriteLine ("                    Default value: Default (all)");
-			Console.WriteLine ("                    AppSettings key name: ");
-			Console.WriteLine ();
-			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
-			Console.WriteLine ("                    anything else.");
-			Console.WriteLine ("                    Default value: current directory.");
-			Console.WriteLine ("                    AppSettings key name: MonoServerRootDir");
-			Console.WriteLine ();
-			Console.WriteLine ("    --appconfigfile FILENAME: adds application definitions from the XML");
-			Console.WriteLine ("                    configuration file. See sample configuration file that");
-			Console.WriteLine ("                    comes with the server.");
-			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigFile");
-			Console.WriteLine ();
-			Console.WriteLine ("    --appconfigdir DIR: adds application definitions from all XML files");
-			Console.WriteLine ("                    found in the specified directory DIR. Files must have");
-			Console.WriteLine ("                    '.webapp' extension");
-			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigDir");
-			Console.WriteLine ();
-			Console.WriteLine ("    --applications APPS:");
-			Console.WriteLine ("                    a comma separated list of virtual directory and");
-			Console.WriteLine ("                    real directory for all the applications we want to manage");
-			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
-			Console.WriteLine ("                    by a colon. Optionally you may specify virtual host name");
-			Console.WriteLine ("                    and a port.");
-			Console.WriteLine ();
-			Console.WriteLine ("                           [[hostname:]port:]VPath:realpath,...");
-			Console.WriteLine ();
-			Console.WriteLine ("                    Samples: /:.");
-			Console.WriteLine ("                           the virtual / is mapped to the current directory.");
-			Console.WriteLine ();
-			Console.WriteLine ("                            /blog:../myblog");
-			Console.WriteLine ("                           the virtual /blog is mapped to ../myblog");
-			Console.WriteLine ();
-			Console.WriteLine ("                            myhost.someprovider.net:/blog:../myblog");
-			Console.WriteLine ("                           the virtual /blog at myhost.someprovider.net is mapped to ../myblog");
-			Console.WriteLine ();
-			Console.WriteLine ("                            /:.,/blog:../myblog");
-			Console.WriteLine ("                           Two applications like the above ones are handled.");
-			Console.WriteLine ("                    Default value: /:.");
-			Console.WriteLine ("                    AppSettings key name: MonoApplications");
-			Console.WriteLine ();
-			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
-			Console.WriteLine ("               when the server has no controlling terminal.");
-			Console.WriteLine ();
-			Console.WriteLine ("    --no-hidden: allow access to hidden files (see 'man xsp' for details)");
-			Console.WriteLine ();
-			Console.WriteLine ("    --quiet: disables the initial start up information");
-			Console.WriteLine ();
-			Console.WriteLine ("    --version: displays version information and exits.");
-			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
-			Console.WriteLine ("    --pidfile file: write the process PID to the specified file.");
-
-			Console.WriteLine ();
-		}
-
-		[Flags]
-		enum Options {
-			NonStop = 1,
-			Verbose = 1 << 1,
-			Applications = 1 << 2,
-			AppConfigDir = 1 << 3,
-			AppConfigFile = 1 << 4,
-			Root = 1 << 5,
-			FileName = 1 << 6,
-			Address = 1 << 7,
-			Port = 1 << 8,
-			Terminate = 1 << 9,
-			Https = 1 << 10,
-			Master = 1 << 11,
-			RandomPort = 1 << 12
-		}
-
-		static void CheckAndSetOptions (string name, Options value, ref Options options)
-		{
-			if ((options & value) != 0) {
-				ShowHelp ();
-				Console.WriteLine ();
-				Console.WriteLine ("ERROR: Option '{0}' duplicated.", name);
-				Environment.Exit (1);
-			}
-
-			options |= value;
-			if ((options & Options.FileName) != 0 &&
-			    ((options & Options.Port) != 0 || (options & Options.Address) != 0)) {
-				ShowHelp ();
-				Console.WriteLine ();
-				Console.WriteLine ("ERROR: --port/--address and --filename are mutually exclusive");
-				Environment.Exit (1);
-			}
-
-			if ((options & Options.Port) != 0 && value == Options.RandomPort) {
-				Console.WriteLine ("ERROR: --port and --random-port are mutually exclusive");
-				Environment.Exit (1);
-			}
-		}
 
 		static AsymmetricAlgorithm GetPrivateKey (X509Certificate certificate, string targetHost) 
 		{ 
-			return key; 
-		}
-
-		static NameValueCollection AppSettings {
-			get { return ConfigurationManager.AppSettings; }
+			return key;
 		}
 
 		public static void CurrentDomain_UnhandledException (object sender, UnhandledExceptionEventArgs e)
@@ -266,51 +84,34 @@ namespace Mono.WebServer.XSP
 		//
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
+			var configurationManager = new ConfigurationManager (quiet);
 			var security = new SecurityConfiguration ();
-			var settings = new ApplicationSettings ();
 			
-			if (String.IsNullOrEmpty (settings.IP))
-				settings.IP = "0.0.0.0";
-			
-			if (settings.Oport == null)
-				settings.Oport = 8080;
-
-			int backlog;
-			if (!ParseOptions (args, security, settings, ref quiet, out backlog))
+			if (!ParseOptions (configurationManager, args, security))
 				return 1;
 
-			IPAddress ipaddr;
-			ushort port;
-			try {
-				
-				port = Convert.ToUInt16 (settings.Oport);
-			} catch (Exception) {
-				Console.WriteLine ("The value given for the listen port is not valid: " + settings.Oport);
-				return 1;
+			// Show the help and exit.
+			if (configurationManager.Help) {
+				configurationManager.PrintHelp ();
+#if DEBUG
+				Console.WriteLine ("Press any key...");
+				Console.ReadKey ();
+#endif
+				return 0;
 			}
 
-			if(!IPAddress.TryParse (settings.IP, out ipaddr)) {
-				Console.WriteLine ("The value given for the address is not valid: " + settings.IP);
-				return 1;
+			// Show the version and exit.
+			if (configurationManager.Version) {
+				Version.Show ();
+				return 0;
 			}
 
-			if (!String.IsNullOrEmpty (settings.RootDir)) {
-				try {
-					Environment.CurrentDirectory = settings.RootDir;
-				} catch (Exception e) {
-					Console.WriteLine ("Error: {0}", e.Message);
-					return 1;
-				}
-			}
-
-			settings.RootDir = Directory.GetCurrentDirectory ();
-			
 			WebSource webSource;
 			if (security.Enabled) {
 				try {
 					key = security.KeyPair;
-					webSource = new XSPWebSource (ipaddr,
-						port, security.Protocol, 
+					webSource = new XSPWebSource (configurationManager.Address,
+						configurationManager.Port, security.Protocol, 
 						security.ServerCertificate, 
 						GetPrivateKey, 
 						security.AcceptClientCertificates,
@@ -322,24 +123,24 @@ namespace Mono.WebServer.XSP
 					return 1;
 				}
 			} else {
-				webSource = new XSPWebSource (ipaddr, port, !root);
+				webSource = new XSPWebSource (configurationManager.Address, configurationManager.Port, !root);
 			}
 
-			var server = new ApplicationServer (webSource, settings.RootDir) {
-				Verbose = settings.Verbose,
+			var server = new ApplicationServer (webSource, configurationManager.Root) {
+				Verbose = configurationManager.Verbose,
 				SingleApplication = !root
 			};
 
-			if (settings.Apps != null)
-				server.AddApplicationsFromCommandLine (settings.Apps);
+			if (configurationManager.Applications != null)
+				server.AddApplicationsFromCommandLine (configurationManager.Applications);
 
-			if (settings.AppConfigFile != null)
-				server.AddApplicationsFromConfigFile (settings.AppConfigFile);
+			if (configurationManager.AppConfigFile != null)
+				server.AddApplicationsFromConfigFile (configurationManager.AppConfigFile);
 
-			if (settings.AppConfigDir != null)
-				server.AddApplicationsFromConfigDirectory (settings.AppConfigDir);
+			if (configurationManager.AppConfigDir != null)
+				server.AddApplicationsFromConfigDirectory (configurationManager.AppConfigDir);
 
-			if (settings.Apps == null && settings.AppConfigDir == null && settings.AppConfigFile == null)
+			if (configurationManager.Applications == null && configurationManager.AppConfigDir == null && configurationManager.AppConfigFile == null)
 				server.AddApplicationsFromCommandLine ("/:.");
 
 
@@ -349,29 +150,29 @@ namespace Mono.WebServer.XSP
 				vh.CreateHost (server, webSource);
 				var svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
-				return svr.RealMain (args, false, vh.AppHost, quiet);
+				return svr.RealMain (args, false, vh.AppHost, configurationManager.Quiet);
 			}
 			server.AppHost = ext_apphost;
 
-			if (!quiet) {
+			if (!configurationManager.Quiet) {
 				Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
-				Console.WriteLine ("Listening on address: {0}", settings.IP);
-				Console.WriteLine ("Root directory: {0}", settings.RootDir);
+				Console.WriteLine ("Listening on address: {0}", configurationManager.Address);
+				Console.WriteLine ("Root directory: {0}", configurationManager.Root);
 			}
 
 			try {
-				if (server.Start (!settings.NonStop, settings.Exception, backlog) == false)
+				if (server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog) == false)
 					return 2;
-				
-				if (!quiet) {
+
+				if (!configurationManager.Quiet) {
 					// MonoDevelop depends on this string. If you change it, let them know.
 					Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
 				}
-				if (port == 0 && !quiet)
+				if (configurationManager.Port == 0 && !configurationManager.Quiet)
 					Console.Error.WriteLine ("Random port: {0}", server.Port);
 				
-				if (!settings.NonStop) {
-					if (!quiet)
+				if (!configurationManager.NonStop) {
+					if (!configurationManager.Quiet)
 						Console.WriteLine ("Hit Return to stop the server.");
 
 					while (true) {
@@ -403,137 +204,58 @@ namespace Mono.WebServer.XSP
 			return 0;
 		}
 
-		static bool ParseOptions (string[] args, SecurityConfiguration security,
-		                          ApplicationSettings settings, ref bool quiet,
-		                          out int backlog)
+		static bool ParseOptions (ConfigurationManager manager, string[] args, SecurityConfiguration security)
 		{
-			backlog = 500;
-			Options options = 0;
-			for (int i = 0; i < args.Length; i++) {
-				string a = args [i];
+			if (!manager.LoadCommandLineArgs (args))
+				return false;
+			
+			// TODO: add mutual exclusivity rules
+			if(manager.Https)
+				security.Enabled = true;
 
-				switch (a) {
-				case "--https":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					break;
-				case "--https-client-accept":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					security.AcceptClientCertificates = true;
-					security.RequireClientCertificates = false;
-					break;
-				case "--https-client-require":
-					CheckAndSetOptions (a, Options.Https, ref options);
-					security.Enabled = true;
-					security.AcceptClientCertificates = true;
-					security.RequireClientCertificates = true;
-					break;
-				case "--p12file":
-					security.Pkcs12File = args [++i];
-					break;
-				case "--cert":
-					security.CertificateFile = args [++i];
-					break;
-				case "--pkfile":
-					security.PvkFile = args [++i];
-					break;
-				case "--pkpwd":
-					security.Password = args [++i];
-					break;
-				case "--protocols":
-					security.SetProtocol (args [++i]);
-					break;
-				case "--port":
-					CheckAndSetOptions (a, Options.Port, ref options);
-					settings.Oport = args [++i];
-					break;
-				case "--random-port":
-					CheckAndSetOptions (a, Options.RandomPort, ref options);
-					settings.Oport = 0;
-					break;
-				case "--address":
-					CheckAndSetOptions (a, Options.Address, ref options);
-					settings.IP = args [++i];
-					break;
-				case "--backlog":
-					string backlogstr = args [++i];
-					try {
-						backlog = Convert.ToInt32 (backlogstr);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for backlog is not valid {0}",
-						                   backlogstr);
-						return false;
-					}
-					break;
-				case "--root":
-					CheckAndSetOptions (a, Options.Root, ref options);
-					settings.RootDir = args [++i];
-					break;
-				case "--applications":
-					CheckAndSetOptions (a, Options.Applications, ref options);
-					settings.Apps = args [++i];
-					break;
-				case "--appconfigfile":
-					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
-					settings.AppConfigFile = args [++i];
-					break;
-				case "--appconfigdir":
-					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
-					settings.AppConfigDir = args [++i];
-					break;
-				case "--minThreads":
-					string mtstr = args [++i];
-					int minThreads;
-					try {
-						minThreads = Convert.ToInt32 (mtstr);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
-						return false;
-					}
-
-					if (minThreads > 0)
-						ThreadPool.SetMinThreads (minThreads, minThreads);
-
-					break;
-				case "--nonstop":
-					settings.NonStop = true;
-					break;
-				case "--help":
-					ShowHelp ();
-					return true;
-				case "--quiet":
-					quiet = true;
-					break;
-				case "--version":
-					Version.Show ();
-					return true;
-				case "--verbose":
-					settings.Verbose = true;
-					break;
-				case "--pidfile": {
-					string pidfile = args [++i];
-					if (!String.IsNullOrEmpty (pidfile)) {
-						try {
-							using (StreamWriter sw = File.CreateText (pidfile)) {
-								sw.Write (Process.GetCurrentProcess ().Id);
-							}
-						} catch (Exception ex) {
-							Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", pidfile,
-							                         ex.Message);
-						}
-					}
-					break;
-				}
-				case "--no-hidden":
-					MonoWorkerRequest.CheckFileAccess = false;
-					break;
-
-				default:
-					ShowHelp ();
-					return false;
-				}
+			if (manager.HttpsClientAccept) {
+				security.Enabled = true;
+				security.AcceptClientCertificates = true;
+				security.RequireClientCertificates = false;
 			}
+
+			if (manager.HttpsClientRequire) {
+				security.Enabled = true;
+				security.AcceptClientCertificates = true;
+				security.RequireClientCertificates = true;
+			}
+
+			if (manager.P12File != null)
+				security.Pkcs12File = manager.P12File;
+
+			if(manager.Cert != null)
+				security.CertificateFile = manager.Cert;
+
+			if (manager.PkFile != null)
+				security.PvkFile = manager.PkFile;
+
+			if (manager.PkPwd != null)
+				security.Password = manager.PkPwd;
+
+			security.Protocol = manager.Protocols;
+
+			int minThreads = manager.MinThreads ?? 0;
+			if(minThreads > 0)
+				ThreadPool.SetMinThreads (minThreads, minThreads);
+
+			if(!String.IsNullOrEmpty(manager.PidFile))
+				try {
+					using (StreamWriter sw = File.CreateText (manager.PidFile)) {
+						sw.Write (Process.GetCurrentProcess ().Id);
+					}
+				} catch (Exception ex) {
+					Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", manager.PidFile,
+						ex.Message);
+				}
+				
+			if(manager.NoHidden)
+				MonoWorkerRequest.CheckFileAccess = false;
+				
 			return true;
 		}
 

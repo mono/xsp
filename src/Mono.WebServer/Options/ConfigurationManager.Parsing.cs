@@ -82,7 +82,7 @@ namespace Mono.WebServer.Options {
 			return String.Empty;
 		}
 
-		public void LoadCommandLineArgs (string [] cmd_args)
+		public bool LoadCommandLineArgs (string [] cmd_args)
 		{
 			if (cmd_args == null)
 				throw new ArgumentNullException ("cmd_args");
@@ -95,18 +95,21 @@ namespace Mono.WebServer.Options {
 			} catch (OptionException e) {
 				Console.WriteLine ("{0}: {1}", Name, e.Message);
 				Console.WriteLine ("Try `{0} --help' for more information.", Name);
-				return;
+				return false;
 			}
 
 			if (extra.Count > 0) {
-				Console.Write("Unparsed command line arguments: ");
+				Console.Write("Warning: unparsed command line arguments: ");
 				foreach (string s in extra) {
 					Console.Write ("{0} ", s);
 				}
 				Console.WriteLine();
 			}
+
+			return true;
 		}
 
 		protected abstract string Name { get; }
+		protected abstract string Description { get; }
 	}
 }

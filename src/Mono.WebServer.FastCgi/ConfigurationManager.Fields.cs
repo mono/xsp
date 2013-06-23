@@ -31,12 +31,11 @@ using Mono.FastCgi;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager : Options.ConfigurationManager
-	{
+	public partial class ConfigurationManager : Options.ConfigurationManager{
 		public ConfigurationManager ()
 		{
-			Add(printlog, stoppable, multiplex, maxConns, maxReqs, port,
-			address, filename, logFile, configFile, appConfigFile, appConfigDir, socket, loglevels);
+			Add(printlog, stoppable, multiplex, maxConns, maxReqs, filename,
+				logFile, configFile, socket, loglevels);
 		}
 
 		#region Backing fields
@@ -49,20 +48,12 @@ namespace Mono.WebServer.FastCgi {
 			"FastCgiMaxConnections", "MONO_FCGI_MAXCONNS", 1024);
 		readonly UInt16Setting maxReqs = new UInt16Setting ("maxreqs", "Specifies the maximum number of concurrent requests the server should accept.",
 			"FastCgiMaxRequests", "MONO_FCGI_MAXREQS", 1024);
-		readonly UInt16Setting port = new UInt16Setting ("port", "Specifies the TCP port number to listen on.\n" +
-			"To use this argument, \"socket\" must be set to \"tcp\".", "MonoServerPort", "MONO_FCGI_PORT", 9000);
 
-		readonly StringSetting address = new StringSetting ("address", "Specifies the IP address to listen on.\n" +
-			"To use this argument, \"socket\" must be set to \"tcp\".", "MonoServerAddress", "MONO_FCGI_ADDRESS", "127.0.0.1");
 		readonly StringSetting filename = new StringSetting ("filename", "Specifies a unix socket filename to listen on.\n" +
 			"To use this argument, \"socket\" must be set to \"unix\".", "MonoUnixSocket", "MONO_FCGI_FILENAME", "/tmp/fastcgi-mono-server");
 		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_FCGI_LOGFILE");
 		readonly StringSetting configFile = new StringSetting ("configfile", Descriptions.ConfigFile);
-		readonly StringSetting appConfigFile = new StringSetting ("appconfigfile", Descriptions.AppConfigFile, "MonoApplicationsConfigFile",
-			"MONO_FCGI_APPCONFIGFILE");
-		readonly StringSetting appConfigDir = new StringSetting ("appconfigdir", "Adds application definitions from all XML files" +
-			" found in the specified directory. Files must have the \".webapp\" extension.", "MonoApplicationsConfigDir",
-			"MONO_FCGI_APPCONFIGDIR");
+
 		readonly StringSetting socket = new StringSetting ("socket", Descriptions.Socket, "MonoSocketType", "MONO_FCGI_SOCKET", "pipe");
 
 		readonly Setting<LogLevel> loglevels = new Setting<LogLevel> ("loglevels",
@@ -104,13 +95,7 @@ namespace Mono.WebServer.FastCgi {
 		public ushort MaxReqs {
 			get { return maxReqs; }
 		}
-		public ushort Port {
-			get { return port; }
-		}
 
-		public string Address {
-			get { return address; }
-		}
 		public string Filename {
 			get { return filename; }
 		}
@@ -119,12 +104,6 @@ namespace Mono.WebServer.FastCgi {
 		}
 		public string ConfigFile {
 			get { return configFile; }
-		}
-		public string AppConfigFile {
-			get { return appConfigFile; }
-		}
-		public string AppConfigDir {
-			get { return appConfigDir; }
 		}
 		public string Socket {
 			get { return socket; }

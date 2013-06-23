@@ -9,13 +9,15 @@ namespace Mono.WebServer.Options {
 		const string EXCEPT_BAD_ELEM =
 			"XML setting \"{0}={1}\" is invalid.";
 
-		const string EXCEPT_XML_DUPLICATE = "XML setting \"{0}\" can only be assigned once.";
+		const string EXCEPT_XML_DUPLICATE =
+			"XML setting \"{0}\" can only be assigned once.";
 
 		[Obsolete("Not to be used by external classes, will be private")]
 		public void ImportSettings (XmlDocument doc, bool insertEmptyValue, SettingSource source)
 		{
 			if (doc == null)
 				throw new ArgumentNullException ("doc");
+
 			var tags = doc.GetElementsByTagName ("Setting");
 			foreach (XmlElement setting in tags) {
 				string name = GetXmlValue (setting, "Name");
@@ -52,8 +54,6 @@ namespace Mono.WebServer.Options {
 
 		public void LoadXmlConfig (string file)
 		{
-			if (String.IsNullOrEmpty (file))
-				throw new ArgumentNullException ("file");
 			var doc = new XmlDocument ();
 			doc.Load (file);
 #pragma warning disable 612,618
@@ -93,9 +93,8 @@ namespace Mono.WebServer.Options {
 			try {
 				extra = optionSet.Parse (cmd_args);
 			} catch (OptionException e) {
-				Console.Write (Name);
-				Console.WriteLine (e.Message);
-				Console.WriteLine ((string) "Try `{0} --help' for more information.", (object) Name);
+				Console.WriteLine ("{0}: {1}", Name, e.Message);
+				Console.WriteLine ("Try `{0} --help' for more information.", Name);
 				return;
 			}
 

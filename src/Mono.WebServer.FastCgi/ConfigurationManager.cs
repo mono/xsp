@@ -56,7 +56,7 @@ namespace Mono.WebServer {
 		[Obsolete]
 		public object this [string name] {
 			get {
-				return configurationManager.GetSetting (name).ObjectValue;
+				return configurationManager.GetSetting (name).Value;
 			}
 			
 			set {

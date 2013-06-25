@@ -30,7 +30,6 @@ using System;
 
 namespace Mono.WebServer.FastCgi {
 	enum SettingSource {
-		Unset,
 		Default,
 		AppSettings,
 		Environment,
@@ -45,11 +44,10 @@ namespace Mono.WebServer.FastCgi {
 		string AppSetting { get; }
 		string Environment { get; }
 		string Prototype { get; }
+		[Obsolete]
+		object Value { get; }
 
 		void MaybeParseUpdate (SettingSource settingSource, string value);
-
-		[Obsolete]
-		object ObjectValue { get; }
 	}
 
 	delegate bool Parser<T> (string input, out T output);
@@ -69,7 +67,7 @@ namespace Mono.WebServer.FastCgi {
 			ConsoleVisible = consoleVisible;
 			DefaultValue = defaultValue;
 			this.parser = parser;
-			Value = new Tuple<SettingSource, T> (SettingSource.Unset, defaultValue);
+			Value = defaultValue;
 			if (!String.IsNullOrEmpty (Environment)) {
 				string value = System.Environment.GetEnvironmentVariable (Environment);
 				MaybeParseUpdate (SettingSource.Environment, value);
@@ -92,17 +90,19 @@ namespace Mono.WebServer.FastCgi {
 
 		public bool MaybeUpdate (SettingSource source, T value)
 		{
-			if (source < Value.Item1)
+			if (source < this.source)
 				return false;
-			Value = new Tuple<SettingSource, T> (source, value);
+			Value = value;
+			this.source = source;
 			return true;
 		}
 
 		public static implicit operator T (Setting<T> setting)
 		{
-			return setting.Value.Item2;
+			return setting.Value;
 		}
 
+		SettingSource source = SettingSource.Default;
 		public bool ConsoleVisible { get; private set; }
 		public string Name { get; private set; }
 		public string Prototype { get; private set; }
@@ -110,8 +110,8 @@ namespace Mono.WebServer.FastCgi {
 		public string AppSetting { get; private set; }
 		public string Description { get; private set; }
 		public T DefaultValue { get; private set; }
-		public Tuple<SettingSource, T> Value { get; private set; }
-		public object ObjectValue { get { return Value.Item2; } }
+		public T Value { get; private set; }
+		object ISetting.Value { get { return Value; } }
 	}
 
 	class BoolSetting : Setting<bool> {

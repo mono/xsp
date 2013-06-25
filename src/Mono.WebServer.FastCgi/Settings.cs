@@ -29,30 +29,8 @@
 using System;
 
 namespace Mono.WebServer.FastCgi {
-	enum SettingSource {
-		Default,
-		AppSettings,
-		Environment,
-		Xml,
-		CommandLine
-	}
-
-	interface ISetting {
-		string Name { get; }
-		bool ConsoleVisible { get; }
-		string Description { get; }
-		string AppSetting { get; }
-		string Environment { get; }
-		string Prototype { get; }
-		[Obsolete]
-		object Value { get; }
-
-		void MaybeParseUpdate (SettingSource settingSource, string value);
-	}
-
-	delegate bool Parser<T> (string input, out T output);
-
-	class Setting<T> : ISetting {
+	class Setting<T> : ISetting
+	{
 		// TODO: Find a clean way to make this static
 		readonly Parser<T> parser;
 
@@ -69,12 +47,12 @@ namespace Mono.WebServer.FastCgi {
 			this.parser = parser;
 			Value = defaultValue;
 			if (!String.IsNullOrEmpty (Environment)) {
-				string value = System.Environment.GetEnvironmentVariable (Environment);
+				string value = System.Environment.GetEnvironmentVariable (environment);
 				MaybeParseUpdate (SettingSource.Environment, value);
 			}
 
 			if (!String.IsNullOrEmpty (AppSetting)) {
-				string value = System.Configuration.ConfigurationManager.AppSettings [AppSetting];
+				string value = System.Configuration.ConfigurationManager.AppSettings [appSetting];
 				MaybeParseUpdate (SettingSource.AppSettings, value);
 			}
 		}
@@ -111,33 +89,9 @@ namespace Mono.WebServer.FastCgi {
 		public string Description { get; private set; }
 		public T DefaultValue { get; private set; }
 		public T Value { get; private set; }
-		object ISetting.Value { get { return Value; } }
-	}
-
-	class BoolSetting : Setting<bool> {
-		public BoolSetting (string name, string description, string appSetting = null, string environment = null, bool defaultValue = false, bool consoleVisible = true, string prototype = null)
-			: base (name, Boolean.TryParse, description, appSetting, environment, defaultValue, consoleVisible, prototype)
-		{
-		}
-	}
-
-	class UInt16Setting : Setting<ushort> {
-		public UInt16Setting (string name, string description, string appSetting = null, string environment = null, ushort defaultValue = default(UInt16), bool consoleVisible = true, string prototype = null)
-			: base (name, UInt16.TryParse, description, appSetting, environment, defaultValue, consoleVisible, prototype)
-		{
-		}
-	}
-
-	class StringSetting : Setting<string> {
-		public StringSetting (string name, string description, string appSetting = null, string environment = null, string defaultValue = null, bool consoleVisible = true, string prototype = null)
-			: base (name, FakeParse, description, appSetting, environment, defaultValue, consoleVisible, prototype)
-		{
-		}
-
-		static bool FakeParse (string value, out string result)
-		{
-			result = value;
-			return !String.IsNullOrEmpty (value);
+		[Obsolete]
+		object ISetting.Value {
+			get { return Value; }
 		}
 	}
 }

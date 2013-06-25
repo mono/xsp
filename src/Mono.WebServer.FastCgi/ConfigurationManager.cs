@@ -36,11 +36,17 @@ using Mono.WebServer.FastCgi;
 
 namespace Mono.WebServer {
 	[Obsolete]
-	public class ConfigurationManager {
+	public class ConfigurationManager
+	{
 		readonly FastCgi.ConfigurationManager configurationManager = new FastCgi.ConfigurationManager ();
 
 		public ConfigurationManager (Assembly asm, string resource)
 		{
+			if (asm == null)
+				throw new ArgumentNullException ("asm");
+			if (resource == null)
+				throw new ArgumentNullException ("resource");
+
 			var doc = new XmlDocument ();
 			Stream stream = asm.GetManifestResourceStream (resource);
 			if (stream != null)

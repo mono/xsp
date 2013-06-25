@@ -39,6 +39,8 @@ namespace Mono.WebServer.FastCgi
 {
 	public class Server
 	{
+		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socket_parts, out Socket socket);
+
 		static void ShowVersion ()
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -226,8 +228,6 @@ namespace Mono.WebServer.FastCgi
 			}
 			return true;
 		}
-
-		delegate bool SocketCreator (ConfigurationManager configmanager, string[] socket_parts, out Socket socket);
 
 		static bool CreateSocket (ConfigurationManager configmanager,
 		                          out Socket socket)

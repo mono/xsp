@@ -27,18 +27,11 @@
 //
 
 using System;
-using System.Collections.ObjectModel;
 using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi {
-	sealed class SettingsCollection : KeyedCollection<string, ISetting> {
-		protected override string GetKeyForItem (ISetting item)
-		{
-			return item.Name;
-		}
-	}
-
-	public partial class ConfigurationManager {
+	public partial class ConfigurationManager
+	{
 		readonly SettingsCollection settings;
 
 		public ConfigurationManager ()
@@ -101,28 +94,65 @@ namespace Mono.WebServer.FastCgi {
 		#endregion
 
 		#region Typesafe properties
-		public bool Help { get { return help; } }
-		public bool Version { get { return version; } }
-		public bool Verbose { get { return verbose; } }
-		public bool PrintLog { get { return printlog; } }
-		public bool Stoppable { get { return stoppable; } }
-		public bool Multiplex { get { return multiplex; } }
+		public bool Help {
+			get { return help; }
+		}
+		public bool Version {
+			get { return version; }
+		}
+		public bool Verbose {
+			get { return verbose; }
+		}
+		public bool PrintLog {
+			get { return printlog; }
+		}
+		public bool Stoppable {
+			get { return stoppable; }
+		}
+		public bool Multiplex {
+			get { return multiplex; }
+		}
+		public ushort MaxConns {
+			get { return maxConns; }
+		}
+		public ushort MaxReqs {
+			get { return maxReqs; }
+		}
+		public ushort Port {
+			get { return port; }
+		}
 
-		public ushort MaxConns { get { return maxConns; } }
-		public ushort MaxReqs { get { return maxReqs; } }
-		public ushort Port { get { return port; } }
+		public string Address {
+			get { return address; }
+		}
+		public string Filename {
+			get { return filename; }
+		}
+		public string LogFile {
+			get { return logFile; }
+		}
+		public string ConfigFile {
+			get { return configFile; }
+		}
+		public string Root {
+			get { return root; }
+		}
+		public string AppConfigFile {
+			get { return appConfigFile; }
+		}
+		public string AppConfigDir {
+			get { return appConfigDir; }
+		}
+		public string Socket {
+			get { return socket; }
+		}
+		public string Applications {
+			get { return applications; }
+		}
 
-		public string Address { get { return address; } }
-		public string Filename { get { return filename; } }
-		public string LogFile { get { return logFile; } }
-		public string ConfigFile { get { return configFile; } }
-		public string Root { get { return root; } }
-		public string AppConfigFile { get { return appConfigFile; } }
-		public string AppConfigDir { get { return appConfigDir; } }
-		public string Socket { get { return socket; } }
-		public string Applications { get { return applications; } }
-
-		public LogLevel LogLevels { get { return loglevels; } }
+		public LogLevel LogLevels {
+			get { return loglevels; }
+		}
 
 		/*
 		 * <Setting Name="automappaths" AppSetting="MonoAutomapPaths"

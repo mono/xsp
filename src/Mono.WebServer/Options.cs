@@ -876,7 +876,7 @@ namespace NDesk.Options {
 
 		static string GetArgumentName (int index, int maxIndex, string description)
 		{
-			if (description == null)
+			if (String.IsNullOrEmpty (description))
 				return maxIndex == 1 ? "VALUE" : "VALUE" + (index + 1);
 			string[] nameStart = maxIndex == 1
 				? new[]{"{0:", "{"} 
@@ -898,7 +898,7 @@ namespace NDesk.Options {
 
 		static string GetDescription (string description)
 		{
-			if (description == null)
+			if (String.IsNullOrEmpty (description))
 				return String.Empty;
 			var sb = new StringBuilder (description.Length);
 			int start = -1;

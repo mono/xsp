@@ -4,16 +4,16 @@ using System.Xml;
 using NDesk.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager {
-		const string EXCEPT_BAD_ELEM =
-			"XML setting \"{0}={1}\" is invalid.";
+	public partial class ConfigurationManager
+	{
+		const string EXCEPT_BAD_ELEM = "XML setting \"{0}={1}\" is invalid.";
 
-		const string EXCEPT_XML_DUPLICATE =
-			"XML setting \"{0}\" can only be assigned once.";
+		const string EXCEPT_XML_DUPLICATE = "XML setting \"{0}\" can only be assigned once.";
 
-		internal void ImportSettings (XmlDocument doc, bool insertEmptyValue,
-			SettingSource source)
+		internal void ImportSettings (XmlDocument doc, bool insertEmptyValue, SettingSource source)
 		{
+			if (doc == null)
+				throw new ArgumentNullException ("doc");
 			var tags = doc.GetElementsByTagName ("Setting");
 			foreach (XmlElement setting in tags) {
 				string name = GetXmlValue (setting, "Name");
@@ -76,6 +76,8 @@ namespace Mono.WebServer.FastCgi {
 
 		public void LoadXmlConfig (string file)
 		{
+			if (String.IsNullOrEmpty (file))
+				throw new ArgumentNullException ("file");
 			var doc = new XmlDocument ();
 			doc.Load (file);
 			ImportSettings (doc, true, SettingSource.Xml);

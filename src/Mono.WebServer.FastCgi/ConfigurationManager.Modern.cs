@@ -32,12 +32,12 @@ using System.Xml;
 using System.Globalization;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager {
+	public partial class ConfigurationManager
+	{
 		internal static ApplicationException AppExcept (string message,
 							params object [] args)
 		{
-			return new ApplicationException (String.Format (
-				CultureInfo.InvariantCulture, message, args));
+			return new ApplicationException (String.Format (CultureInfo.InvariantCulture, message, args));
 		}
 
 		static string GetXmlValue (XmlElement elem, string name)
@@ -58,20 +58,10 @@ namespace Mono.WebServer.FastCgi {
 		[Obsolete]
 		internal void SetValue (string name, object value)
 		{
+			if (name == null)
+				throw new ArgumentNullException ("name");
 			settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
 		}
-
-		internal const string ExceptUnregistered =
-			"Argument \"{0}\" is unknown.";
-
-		internal const string ExceptDirectory =
-			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
-
-		internal const string ExceptFile =
-			"Error in argument \"{0}\". \"{1}\" does not exist.";
-
-		internal const string ExceptUnknown =
-			"The Argument \"{0}\" has an invalid type: {1}.";
 
 		[Obsolete]
 		internal ISetting GetSetting (string name)

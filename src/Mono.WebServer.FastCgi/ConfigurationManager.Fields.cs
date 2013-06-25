@@ -31,7 +31,7 @@ using Mono.FastCgi;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager : Options.ConfigurationManager{
+	public partial class ConfigurationManager {
 		public ConfigurationManager ()
 		{
 			Add(printlog, stoppable, multiplex,
@@ -62,19 +62,39 @@ namespace Mono.WebServer.FastCgi {
 		#endregion
 
 		#region Typesafe properties
-		public bool PrintLog { get { return printlog; } }
-		public bool Stoppable { get { return stoppable; } }
-		public bool Multiplex { get { return multiplex; } }
+		public bool PrintLog {
+			get { return printlog; }
+		}
+		public bool Stoppable {
+			get { return stoppable; }
+		}
+		public bool Multiplex {
+			get { return multiplex; }
+		}
 
-		public ushort MaxConns { get { return maxConns; } }
-		public ushort MaxReqs { get { return maxReqs; } }
+		public ushort MaxConns {
+			get { return maxConns; }
+		}
+		public ushort MaxReqs {
+			get { return maxReqs; }
+		}
 
-		public string Filename { get { return filename; } }
-		public string LogFile { get { return logFile; } }
-		public string ConfigFile { get { return configFile; } }
-		public string Socket { get { return socket; } }
+		public string Filename {
+			get { return filename; }
+		}
+		public string LogFile {
+			get { return logFile; }
+		}
+		public string ConfigFile {
+			get { return configFile; }
+		}
+		public string Socket {
+			get { return socket; }
+		}
 
-		public LogLevel LogLevels { get { return loglevels; } }
+		public LogLevel LogLevels {
+			get { return loglevels; }
+		}
 
 		/*
 		 * <Setting Name="automappaths" AppSetting="MonoAutomapPaths"

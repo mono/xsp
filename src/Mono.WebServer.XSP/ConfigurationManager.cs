@@ -8,7 +8,7 @@ namespace Mono.WebServer.XSP {
 		public ConfigurationManager (bool quietDefault)
 		{
 			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
-				backlog, minThreads,
+				backlog, minThreads, port,
 				p12File, cert, pkFile, pkPwd, pidFile,
 				protocols);
 			address.MaybeUpdate (SettingSource.Default, IPAddress.Any);
@@ -26,6 +26,7 @@ namespace Mono.WebServer.XSP {
 
 		readonly UInt32Setting backlog = new UInt32Setting ("backlog", "The listen backlog.", defaultValue: 500);
 		readonly NullableInt32Setting minThreads = new NullableInt32Setting ("minThreads", "The minimum number of threads the thread pool creates on startup. Increase this value to handle a sudden inflow of connections.");
+		readonly UInt16Setting port = new UInt16Setting ("port", Descriptions.Port, "MonoServerPort", "MONO_FCGI_PORT", 9000);
 
 		readonly StringSetting p12File = new StringSetting ("p12file", "Path to a PKCS#12 file containing the certificate and the private.");
 		readonly StringSetting cert = new StringSetting ("cert", "Path to X.509 certificate file (cer).");
@@ -64,6 +65,9 @@ namespace Mono.WebServer.XSP {
 		}
 		public int? MinThreads {
 			get { return minThreads; }
+		}
+		public ushort Port {
+			get { return port; }
 		}
 
 		public string P12File {

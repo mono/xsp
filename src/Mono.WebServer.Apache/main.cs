@@ -28,12 +28,9 @@
 //
 
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 
 namespace Mono.WebServer.Apache {
 	public class Server : MarshalByRefObject {

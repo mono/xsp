@@ -3,7 +3,8 @@ using Mono.WebServer.Options;
 using TP = Mono.Security.Protocol.Tls;
 
 namespace Mono.WebServer.XSP {
-	class ConfigurationManager : Options.ConfigurationManager {
+	class ConfigurationManager : Options.ConfigurationManager
+	{
 		public ConfigurationManager (bool quietDefault)
 		{
 			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
@@ -36,27 +37,59 @@ namespace Mono.WebServer.XSP {
 		#endregion
 
 		#region Typesafe properties
-		public bool NonStop { get { return nonstop; } }
-		public bool Quiet { get { return quiet; } }
-		public bool RandomPort { get { return randomPort; } }
-		public bool Https { get { return https; } }
-		public bool HttpsClientAccept { get { return httpsClientAccept; } }
-		public bool HttpsClientRequire { get { return httpsClientRequire; } }
-		public bool NoHidden { get { return noHidden; } }
+		public bool NonStop {
+			get { return nonstop; }
+		}
+		public bool Quiet {
+			get { return quiet; }
+		}
+		public bool RandomPort {
+			get { return randomPort; }
+		}
+		public bool Https {
+			get { return https; }
+		}
+		public bool HttpsClientAccept {
+			get { return httpsClientAccept; }
+		}
+		public bool HttpsClientRequire {
+			get { return httpsClientRequire; }
+		}
+		public bool NoHidden {
+			get { return noHidden; }
+		}
 
-		public uint Backlog { get { return backlog; } }
-		public int? MinThreads { get { return minThreads; } }
+		public uint Backlog {
+			get { return backlog; }
+		}
+		public int? MinThreads {
+			get { return minThreads; }
+		}
 
-		public string P12File { get { return p12File; } }
-		public string Cert { get { return cert; } }
-		public string PkFile { get { return pkFile; } }
-		public string PkPwd { get { return pkPwd; } }
-		public string PidFile { get { return pidFile; } }
+		public string P12File {
+			get { return p12File; }
+		}
+		public string Cert {
+			get { return cert; }
+		}
+		public string PkFile {
+			get { return pkFile; }
+		}
+		public string PkPwd {
+			get { return pkPwd; }
+		}
+		public string PidFile {
+			get { return pidFile; }
+		}
 
-		public TP.SecurityProtocolType Protocols { get { return protocols; } }
+		public TP.SecurityProtocolType Protocols {
+			get { return protocols; }
+		}
 		#endregion
 
-		protected override string Name { get { return "xsp"; } }
+		protected override string Name {
+			get { return "xsp"; }
+		}
 
 		protected override string Description {
 			get {

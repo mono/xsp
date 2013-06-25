@@ -23,28 +23,33 @@ namespace Mono.WebServer.Test
 				Directory.CreateDirectory (binpath);
 
 			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies ();
-			foreach (Assembly assembly in assemblies) {
-				if (assembly.GlobalAssemblyCache || assembly.CodeBase == null)
-					continue;
-
-				var platform = Environment.OSVersion.Platform;
-				string cut;
-				// TODO: Write this in a portable way
-				switch (platform) {
-					case PlatformID.Unix:
-						cut = assembly.CodeBase.Substring (7);
-						break;
-					default:
-						cut = assembly.CodeBase.Substring (8);
-						break;
-				}
-				string filename = Path.GetFileName (cut);
-				string target = Path.Combine (binpath, filename);
-				File.Copy (cut, target, true);
-			}
+			foreach (Assembly assembly in assemblies)
+				MaybeCopyAssembly (assembly, binpath);
 		}
-		
-		[Test()]
+
+		static void MaybeCopyAssembly (Assembly assembly, string binpath)
+		{
+			if (assembly.GlobalAssemblyCache || assembly.CodeBase == null)
+				return;
+
+			var platform = Environment.OSVersion.Platform;
+			string cut;
+			// TODO: Write this in a portable way
+			switch (platform) {
+			case PlatformID.Unix:
+				cut = assembly.CodeBase.Substring (7);
+				break;
+			default:
+				cut = assembly.CodeBase.Substring (8);
+				break;
+			}
+			string filename = Path.GetFileName (cut);
+
+			string target = Path.Combine (binpath, filename);
+			File.Copy (cut, target, true);
+		}
+
+		[Test]
 		public void TestCase ()
 		{
 			var result = Server.Main (new []{"--applications", "/:.","--port", "9000","--nonstop"});

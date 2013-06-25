@@ -28,21 +28,20 @@
 
 using System;
 
-namespace Mono.WebServer.FastCgi {
-	class Setting<T> : ISetting
+namespace Mono.WebServer.Options {
+	public class Setting<T> : ISetting
 	{
 		// TODO: Find a clean way to make this static
 		readonly Parser<T> parser;
 
 		public Setting (string name, Parser<T> parser, string description, string appSetting = null,
-			string environment = null, T defaultValue = default (T), bool consoleVisible = true, string prototype = null)
+			string environment = null, T defaultValue = default (T), string prototype = null)
 		{
 			Prototype = prototype ?? name;
 			Description = description;
 			AppSetting = appSetting;
 			Environment = environment;
 			Name = name;
-			ConsoleVisible = consoleVisible;
 			DefaultValue = defaultValue;
 			this.parser = parser;
 			Value = defaultValue;

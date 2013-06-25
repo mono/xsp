@@ -1,4 +1,4 @@
-AssemblyInfo.cs
+ConfigurationManager.cs
 SecurityConfiguration.cs
 SslInformation.cs
 XSPApplicationHost.cs

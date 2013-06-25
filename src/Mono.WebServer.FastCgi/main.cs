@@ -30,7 +30,6 @@
 //
 
 using System;
-using System.IO;
 using System.Net;
 using System.Reflection;
 using Mono.FastCgi;
@@ -39,46 +38,7 @@ namespace Mono.WebServer.FastCgi
 {
 	public class Server
 	{
-		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socket_parts, out Socket socket);
-
-		static void ShowVersion ()
-		{
-			Assembly assembly = Assembly.GetExecutingAssembly ();
-			string version = assembly.GetName ().Version.ToString ();
-			
-			// string title = GetAttribute<AssemblyTitleAttribute> (a => a.Title);
-			string copyright = GetAttribute<AssemblyCopyrightAttribute> (a => a.Copyright);
-			string description = GetAttribute<AssemblyDescriptionAttribute> (a => a.Description);
-			
-			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
-				Path.GetFileName (assembly.Location), version,
-				copyright, description);
-		}
-
-		static string GetAttribute<T> (Func<T, string> func) where T : class
-		{
-			Assembly assembly = Assembly.GetExecutingAssembly ();
-			var attributes = assembly.GetCustomAttributes (typeof (T), false);
-			if (attributes.Length == 0)
-				return String.Empty;
-			var att = attributes [0] as T;
-			if (att == null)
-				return String.Empty;
-			return func(att);
-		}
-
-		static void ShowHelp (ConfigurationManager configmanager)
-		{
-			string name = Path.GetFileName (
-				Assembly.GetExecutingAssembly ().Location);
-			
-			ShowVersion ();
-			Console.WriteLine ();
-			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    {0} [...]", name);
-			Console.WriteLine ();
-			configmanager.PrintHelp ();
-		}
+		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socketParts, out Socket socket);
 
 		static ApplicationServer appserver;
 
@@ -92,12 +52,13 @@ namespace Mono.WebServer.FastCgi
 
 		public static int Main (string [] args)
 		{
-			var configmanager = new ConfigurationManager ();
-			configmanager.LoadCommandLineArgs (args);
+			var configurationManager = new ConfigurationManager ();
+			if (!configurationManager.LoadCommandLineArgs (args))
+				return 1;
 			
 			// Show the help and exit.
-			if (configmanager.Help) {
-				ShowHelp (configmanager);
+			if (configurationManager.Help) {
+				configurationManager.PrintHelp ();
 #if DEBUG
 				Console.WriteLine("Press any key...");
 				Console.ReadKey ();
@@ -106,15 +67,15 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			// Show the version and exit.
-			if (configmanager.Version) {
-				ShowVersion ();
+			if (configurationManager.Version) {
+				Version.Show ();
 				return 0;
 			}
 
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
 
-			if (!LoadConfigFile(configmanager))
+			if (!LoadConfigFile(configurationManager))
 				return 1;
 
 #if DEBUG
@@ -122,32 +83,32 @@ namespace Mono.WebServer.FastCgi
 			Logger.Level = LogLevel.All;
 #endif
 
-			SetLogLevel(configmanager);
+			SetLogLevel(configurationManager);
 
-			OpenLogFile (configmanager);
+			OpenLogFile (configurationManager);
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
 
 			Socket socket;
-			if (!CreateSocket (configmanager, out socket))
+			if (!CreateSocket (configurationManager, out socket))
 				return 1;
 
 			string root_dir;
-			if (!GetRootDirectory (configmanager, out root_dir))
+			if (!GetRootDirectory (configurationManager, out root_dir))
 				return 1;
 
-			CreateAppServer (configmanager, root_dir);
+			CreateAppServer (configurationManager, root_dir);
 
-			if (!LoadApplicationsConfig (configmanager))
+			if (!LoadApplicationsConfig (configurationManager))
 				return 1;
 
-			Mono.FastCgi.Server server = CreateServer (configmanager, socket);
+			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
 
-			Logger.WriteToConsole = configmanager.PrintLog;
+			Logger.WriteToConsole = configurationManager.PrintLog;
 
-			var stoppable = configmanager.Stoppable;
+			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable);
 			
 			if (stoppable) {
@@ -160,16 +121,16 @@ namespace Mono.WebServer.FastCgi
 			return 0;
 		}
 
-		static Mono.FastCgi.Server CreateServer (ConfigurationManager configmanager,
+		static Mono.FastCgi.Server CreateServer (ConfigurationManager configurationManager,
 		                                         Socket socket)
 		{
 			var server = new Mono.FastCgi.Server (socket);
 
 			server.SetResponder (typeof (Responder));
 
-			server.MaxConnections = configmanager.MaxConns;
-			server.MaxRequests = configmanager.MaxReqs;
-			server.MultiplexConnections = configmanager.Multiplex;
+			server.MaxConnections = configurationManager.MaxConns;
+			server.MaxRequests = configurationManager.MaxReqs;
+			server.MultiplexConnections = configurationManager.Multiplex;
 
 			Logger.Write (LogLevel.Debug, "Max connections: {0}",
 				server.MaxConnections);
@@ -181,20 +142,20 @@ namespace Mono.WebServer.FastCgi
 			return server;
 		}
 
-		static void CreateAppServer (ConfigurationManager configmanager,
+		static void CreateAppServer (ConfigurationManager configurationManager,
 		                             string rootDir)
 		{
 			var webSource = new WebSource ();
 			appserver = new ApplicationServer (webSource, rootDir) {
-				Verbose = configmanager.Verbose
+				Verbose = configurationManager.Verbose
 			};
 		}
 
-		static bool LoadApplicationsConfig (ConfigurationManager configmanager)
+		static bool LoadApplicationsConfig (ConfigurationManager configurationManager)
 		{
-			bool autoMap = false; //(bool) configmanager ["automappaths"];
+			bool autoMap = false; //(bool) configurationManager ["automappaths"];
 
-			var applications = configmanager.Applications;
+			var applications = configurationManager.Applications;
 			if (applications != null)
 				appserver.AddApplicationsFromCommandLine (applications);
 
@@ -202,8 +163,8 @@ namespace Mono.WebServer.FastCgi
 			string app_config_dir;
 
 			try {
-				app_config_file = configmanager.AppConfigFile;
-				app_config_dir = configmanager.AppConfigDir;
+				app_config_file = configurationManager.AppConfigFile;
+				app_config_dir = configurationManager.AppConfigDir;
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return false;
@@ -229,19 +190,18 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateSocket (ConfigurationManager configmanager,
-		                          out Socket socket)
+		static bool CreateSocket (ConfigurationManager configurationManager, out Socket socket)
 		{
 			socket = null;
 
 			// Socket strings are in the format
 			// "type[:ARG1[:ARG2[:...]]]".
-			var socket_type = configmanager.Socket;
+			var socket_type = configurationManager.Socket;
 
 			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
 
 			SocketCreator creator = GetSocketCreator (socket_parts);
-			return creator != null && creator (configmanager, socket_parts, out socket);
+			return creator != null && creator (configurationManager, socket_parts, out socket);
 		}
 
 		static SocketCreator GetSocketCreator (string[] socket_parts)
@@ -266,10 +226,10 @@ namespace Mono.WebServer.FastCgi
 			}
 		}
 
-		static bool GetRootDirectory (ConfigurationManager configmanager,
+		static bool GetRootDirectory (ConfigurationManager configurationManager,
 		                              out string rootDir)
 		{
-			rootDir = configmanager.Root;
+			rootDir = configurationManager.Root;
 			if (!String.IsNullOrEmpty (rootDir)) {
 				try {
 					Environment.CurrentDirectory = rootDir;
@@ -284,7 +244,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateTcpSocket (ConfigurationManager configmanager, string[] socketParts, out Socket socket)
+		static bool CreateTcpSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			socket = null;
 			ushort port;
@@ -295,25 +255,25 @@ namespace Mono.WebServer.FastCgi
 						return false;
 					}
 				} else {
-					port = configmanager.Port;
+					port = configurationManager.Port;
 				}
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return false;
 			}
+			
+			IPAddress address = configurationManager.Address;
+			if (socketParts.Length == 3) {
+				string address_str = socketParts [1];
 
-			string address_str = socketParts.Length == 3
-				? socketParts[1]
-				: configmanager.Address;
-			IPAddress address;
-
-			if (address_str == null)
-				address = IPAddress.Loopback;
-			else if(!IPAddress.TryParse (address_str,out address)) {
-				Logger.Write (LogLevel.Error,
-					"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
-					address_str);
-				return false;
+				if (address_str == null)
+					address = IPAddress.Loopback;
+				else if (!IPAddress.TryParse (address_str, out address)) {
+					Logger.Write (LogLevel.Error,
+					              "Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
+					              address_str);
+					return false;
+				}
 			}
 
 			try {
@@ -327,17 +287,17 @@ namespace Mono.WebServer.FastCgi
 			}
 
 			Logger.Write (LogLevel.Debug,
-				"Listening on port: {0}", address_str);
+				"Listening on port: {0}", port);
 			Logger.Write (LogLevel.Debug,
-				"Listening on address: {0}", port);
+				"Listening on address: {0}", address.ToString ());
 			return true;
 		}
 
-		static bool CreateUnixSocket (ConfigurationManager configmanager, string[] socketParts, out Socket socket)
+		static bool CreateUnixSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			string path = socketParts.Length == 2
 				? socketParts[1]
-				: configmanager.Filename;
+				: configurationManager.Filename;
 
 			socket = null;
 
@@ -355,7 +315,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreatePipe (ConfigurationManager configmanager, string[] socketParts, out Socket socket)
+		static bool CreatePipe (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			socket = null;
 			try {
@@ -377,10 +337,10 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static void OpenLogFile (ConfigurationManager configmanager)
+		static void OpenLogFile (ConfigurationManager configurationManager)
 		{
 			try {
-				var log_file = configmanager.LogFile;
+				var log_file = configurationManager.LogFile;
 
 				if (log_file != null)
 					Logger.Open (log_file);
@@ -393,9 +353,9 @@ namespace Mono.WebServer.FastCgi
 			}
 		}
 
-		static void SetLogLevel (ConfigurationManager configmanager)
+		static void SetLogLevel (ConfigurationManager configurationManager)
 		{
-			Logger.Level = configmanager.LogLevels;
+			Logger.Level = configurationManager.LogLevels;
 		}
 
 		/// <summary>
@@ -404,12 +364,12 @@ namespace Mono.WebServer.FastCgi
 		/// </summary>
 		/// <returns>false on failure, true on success or
 		/// option not present</returns>
-		static bool LoadConfigFile(ConfigurationManager configmanager)
+		static bool LoadConfigFile(ConfigurationManager configurationManager)
 		{
 			try {
-				var config_file = configmanager.ConfigFile;
+				var config_file = configurationManager.ConfigFile;
 				if (config_file != null)
-					configmanager.LoadXmlConfig(config_file);
+					configurationManager.LoadXmlConfig(config_file);
 			}
 			catch (ApplicationException e) {
 				Logger.Write(LogLevel.Error, e.Message);

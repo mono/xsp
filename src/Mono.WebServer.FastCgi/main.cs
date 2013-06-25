@@ -39,6 +39,8 @@ namespace Mono.WebServer.FastCgi
 {
 	public class Server
 	{
+		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socket_parts, out Socket socket);
+
 		static void ShowVersion ()
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -90,12 +92,7 @@ namespace Mono.WebServer.FastCgi
 
 		public static int Main (string [] args)
 		{
-			// Load the configuration file stored in the
-			// executable's resources.
-			var configmanager = new ConfigurationManager (
-				typeof (Server).Assembly,
-				"ConfigurationManager.xml");
-			
+			var configmanager = new ConfigurationManager ();
 			configmanager.LoadCommandLineArgs (args);
 			
 			// Show the help and exit.
@@ -146,8 +143,7 @@ namespace Mono.WebServer.FastCgi
 			if (!LoadApplicationsConfig (configmanager))
 				return 1;
 
-			Mono.FastCgi.Server server = CreateServer (configmanager,
-				socket);
+			Mono.FastCgi.Server server = CreateServer (configmanager, socket);
 
 			Logger.WriteToConsole = configmanager.PrintLog;
 
@@ -244,28 +240,29 @@ namespace Mono.WebServer.FastCgi
 
 			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
 
+			SocketCreator creator = GetSocketCreator (socket_parts);
+			return creator != null && creator (configmanager, socket_parts, out socket);
+		}
+
+		static SocketCreator GetSocketCreator (string[] socket_parts)
+		{
 			switch (socket_parts [0].ToLower ()) {
 			case "pipe":
-				return CreatePipe (ref socket);
-
-			// The FILE sockets is of the format
-			// "file[:PATH]".
+				return CreatePipe;
+				// The FILE sockets is of the format
+				// "file[:PATH]".
 			case "unix":
 			case "file":
-				return CreateUnixSocket (configmanager, 
-					socket_parts, ref socket);
-
-			// The TCP socket is of the format
-			// "tcp[[:ADDRESS]:PORT]".
+				return CreateUnixSocket;
+				// The TCP socket is of the format
+				// "tcp[[:ADDRESS]:PORT]".
 			case "tcp":
-				return CreateTcpSocket (configmanager,
-					socket_parts, ref socket);
-
+				return CreateTcpSocket;
 			default:
 				Logger.Write (LogLevel.Error,
-					"Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
-					socket_parts [0]);
-				return false;
+				              "Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
+				              socket_parts [0]);
+				return null;
 			}
 		}
 
@@ -287,10 +284,9 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateTcpSocket (ConfigurationManager configmanager,
-		                             string [] socketParts,
-		                             ref Socket socket)
+		static bool CreateTcpSocket (ConfigurationManager configmanager, string[] socketParts, out Socket socket)
 		{
+			socket = null;
 			ushort port;
 			try {
 				if (socketParts.Length > 1) {
@@ -337,13 +333,13 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateUnixSocket (ConfigurationManager configmanager,
-		                              string [] socketParts,
-		                              ref Socket socket)
+		static bool CreateUnixSocket (ConfigurationManager configmanager, string[] socketParts, out Socket socket)
 		{
 			string path = socketParts.Length == 2
 				? socketParts[1]
 				: configmanager.Filename;
+
+			socket = null;
 
 			try {
 				socket = SocketFactory.CreateUnixSocket (path);
@@ -359,8 +355,9 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreatePipe (ref Socket socket)
+		static bool CreatePipe (ConfigurationManager configmanager, string[] socketParts, out Socket socket)
 		{
+			socket = null;
 			try {
 				socket = SocketFactory.CreatePipeSocket (
 					IntPtr.Zero);
@@ -398,27 +395,7 @@ namespace Mono.WebServer.FastCgi
 
 		static void SetLogLevel (ConfigurationManager configmanager)
 		{
-			var log_level = configmanager.LogLevels;
-
-			if (log_level == null)
-				return;
-
-#if NET_4_0
-			LogLevel level;
-			if (Enum.TryParse(log_level, true, out level)) {
-				Logger.Level = level;
-			} else {
-#else
-			try {
-				Logger.Level = (LogLevel)Enum.Parse (typeof (LogLevel), log_level, true);
-			} catch {
-#endif
-				Logger.Write (LogLevel.Warning,
-					"Failed to parse log levels.");
-				Logger.Write (LogLevel.Notice,
-					"Using default levels: {0}",
-					Logger.Level);
-			}
+			Logger.Level = configmanager.LogLevels;
 		}
 
 		/// <summary>
@@ -432,8 +409,7 @@ namespace Mono.WebServer.FastCgi
 			try {
 				var config_file = configmanager.ConfigFile;
 				if (config_file != null)
-					configmanager.LoadXmlConfig(
-						config_file);
+					configmanager.LoadXmlConfig(config_file);
 			}
 			catch (ApplicationException e) {
 				Logger.Write(LogLevel.Error, e.Message);

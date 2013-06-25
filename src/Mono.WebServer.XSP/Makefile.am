@@ -27,11 +27,7 @@ if NET_4_0
 pkgconfig_DATA += xsp-4.pc
 endif
 
-sources = \
-	main.cs \
-	SecurityConfiguration.cs \
-	XSPWorker.cs
-
+sources = $(shell cat $(srcdir)/Mono.WebServer.XSP.sources)
 build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 
 EXTRA_DIST = $(sources) AssemblyInfo.cs.in

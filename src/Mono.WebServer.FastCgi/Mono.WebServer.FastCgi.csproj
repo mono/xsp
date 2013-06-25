@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -70,8 +70,11 @@
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
+    <Compile Include="ConfigurationManager.Modern.cs" />
     <Compile Include="ConfigurationManager.cs" />
+    <Compile Include="ConfigurationManager.Parsing.cs" />
     <Compile Include="Connection.cs" />
+    <Compile Include="ConfigurationManager.Fields.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
     <Compile Include="Logger.cs" />
@@ -82,6 +85,9 @@
     <Compile Include="Responder.cs" />
     <Compile Include="ResponderRequest.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="SettingsCollection.cs" />
+    <Compile Include="SettingsDescriptions.cs" />
     <Compile Include="SocketFactory.cs" />
     <Compile Include="StandardSocket.cs" />
     <Compile Include="Strings.cs" />
@@ -99,10 +105,5 @@
       <Project>{5339C36C-A524-44CE-93BD-59A79F57B346}</Project>
       <Name>Mono.WebServer</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ConfigurationManager.xml">
-      <LogicalName>ConfigurationManager.xml</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 </Project>

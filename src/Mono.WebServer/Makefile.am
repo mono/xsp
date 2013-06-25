@@ -20,42 +20,12 @@ noinst_SCRIPTS= $(monowebserver2_install) $(monowebserver4_install)
 CLEANFILES = 2.0/Mono.WebServer2.dll* 4.0/Mono.WebServer2.dll*
 EXTRA_DIST = $(monowebserver2_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in AssemblyInfo4.cs.in
 
-monowebserver2_sources  = \
-			ApplicationServer.cs \
-			BaseApplicationHost.cs \
-			BaseRequestBroker.cs \
-			IApplicationHost.cs \
-			InitialWorkerRequest.cs \
-			WebSource.cs \
-			Worker.cs \
-			LingeringNetworkStream.cs \
-			MonoWorkerRequest.cs \
-			HttpErrors.cs \
-			Paths.cs \
-			VPathToHost.cs \
-			WebTrace.cs \
-			SearchPattern.cs \
-			LockRecursionException.cs \
-			LockRecursionPolicy.cs \
-			UnregisterRequestEventArgs.cs \
-			IRequestBroker.cs \
-			RequestData.cs \
-			RequestLineException.cs \
-			MapPathEventArgs.cs \
-			MapPathEventHandler.cs \
-			EndOfRequestHandler.cs \
-			UnregisterRequestEventHandler.cs \
-			../Mono.WebServer.XSP/XSPApplicationHost.cs \
-			../Mono.WebServer.XSP/XSPWorkerRequest.cs \
-			../Mono.WebServer.XSP/XSPRequestBroker.cs \
-			../Mono.WebServer.XSP/XSPWebSource.cs \
-			../Mono.WebServer.XSP/XSPWorker.cs \
-			../Mono.WebServer.XSP/SslInformation.cs
+sources = $(shell cat $(srcdir)/Mono.WebServer.sources)
 
-monowebserver2_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
+monowebserver2_build_sources = $(addprefix $(srcdir)/, $(sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo2.cs)
 
 if NET_4_0
-monowebserver4_build_sources = $(addprefix $(srcdir)/, $(monowebserver2_sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo4.cs)
+monowebserver4_build_sources = $(addprefix $(srcdir)/, $(sources)) $(addprefix $(top_builddir)/src/Mono.WebServer/, AssemblyInfo4.cs)
 endif
 
 2.0/Mono.WebServer2.dll: $(monowebserver2_build_sources)

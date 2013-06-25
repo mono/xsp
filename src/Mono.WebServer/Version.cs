@@ -3,7 +3,8 @@ using System.IO;
 using System.Reflection;
 
 namespace Mono.WebServer {
-	public class Version {
+	public class Version
+	{
 		public static void Show ()
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly ();

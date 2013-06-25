@@ -31,7 +31,8 @@ using System;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager : Options.ConfigurationManager {
+	public partial class ConfigurationManager : Options.ConfigurationManager 
+	{
 		[Obsolete]
 		internal void SetValue (string name, object value)
 		{
@@ -50,12 +51,12 @@ namespace Mono.WebServer.FastCgi {
 			return Settings.Contains (name);
 		}
 
-		protected override string Name { get { return "mono-fastcgi"; } }
+		protected override string Name {
+			get { return "mono-fastcgi"; }
+		}
 
 		protected override string Description {
-			get {
-				return "A FastCgi interface for ASP.NET applications.";
-			}
+			get { return "A FastCgi interface for ASP.NET applications."; }
 		}
 	}
 }

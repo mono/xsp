@@ -31,7 +31,8 @@ using Mono.FastCgi;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager {
+	public partial class ConfigurationManager
+	{
 		public ConfigurationManager ()
 		{
 			Add(printlog, stoppable, multiplex,

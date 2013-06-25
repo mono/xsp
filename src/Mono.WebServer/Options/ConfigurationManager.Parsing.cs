@@ -5,12 +5,14 @@ using System.Xml;
 using NDesk.Options;
 
 namespace Mono.WebServer.Options {
-	public abstract partial class ConfigurationManager {
-		const string EXCEPT_BAD_ELEM =
-			"XML setting \"{0}={1}\" is invalid.";
+	public abstract partial class ConfigurationManager 
+	{
+		const string EXCEPT_BAD_ELEM = "XML setting \"{0}={1}\" is invalid.";
 
-		const string EXCEPT_XML_DUPLICATE =
-			"XML setting \"{0}\" can only be assigned once.";
+		const string EXCEPT_XML_DUPLICATE = "XML setting \"{0}\" can only be assigned once.";
+
+		protected abstract string Name { get; }
+		protected abstract string Description { get; }
 
 		[Obsolete("Not to be used by external classes, will be private")]
 		public void ImportSettings (XmlDocument doc, bool insertEmptyValue, SettingSource source)
@@ -54,6 +56,8 @@ namespace Mono.WebServer.Options {
 
 		public void LoadXmlConfig (string file)
 		{
+			if (String.IsNullOrEmpty (file))
+				throw new ArgumentNullException ("file");
 			var doc = new XmlDocument ();
 			doc.Load (file);
 #pragma warning disable 612,618
@@ -108,8 +112,5 @@ namespace Mono.WebServer.Options {
 
 			return true;
 		}
-
-		protected abstract string Name { get; }
-		protected abstract string Description { get; }
 	}
 }

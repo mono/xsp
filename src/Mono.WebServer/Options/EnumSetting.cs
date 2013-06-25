@@ -1,7 +1,8 @@
 ﻿using System;
 
 namespace Mono.WebServer.Options {
-	public class EnumSetting<T> : Setting<T> where T : struct {
+	public class EnumSetting<T> : Setting<T> where T : struct 
+	{
 #if !NET_4_0
 		static bool EnumParser<TEnum> (string input, out TEnum output)
 		{

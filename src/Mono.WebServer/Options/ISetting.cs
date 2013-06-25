@@ -1,7 +1,7 @@
 using System;
 
-namespace Mono.WebServer.FastCgi {
-	interface ISetting
+namespace Mono.WebServer.Options {
+	public interface ISetting
 	{
 		string Name { get; }
 		bool ConsoleVisible { get; }

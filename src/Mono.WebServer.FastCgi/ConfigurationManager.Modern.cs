@@ -28,55 +28,35 @@
 //
 
 using System;
-using System.Xml;
-using System.Globalization;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager
+	public partial class ConfigurationManager : Options.ConfigurationManager 
 	{
-		internal static ApplicationException AppExcept (string message,
-							params object [] args)
-		{
-			return new ApplicationException (String.Format (CultureInfo.InvariantCulture, message, args));
-		}
-
-		static string GetXmlValue (XmlElement elem, string name)
-		{
-			string value = elem.GetAttribute (name);
-			if (!String.IsNullOrEmpty (value))
-				return value;
-
-			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
-				value = child.InnerText;
-				if (!String.IsNullOrEmpty (value))
-					return value;
-			}
-
-			return String.Empty;
-		}
-
 		[Obsolete]
 		internal void SetValue (string name, object value)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
-			settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
+			Settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
 		}
 
 		[Obsolete]
 		internal ISetting GetSetting (string name)
 		{
-			return settings [name];
+			return Settings [name];
 		}
 
-		public void PrintHelp ()
+		[Obsolete]
+		internal bool Contains (string name)
 		{
-			CreateOptionSet ().WriteOptionDescriptions (Console.Out);
+			return Settings.Contains (name);
 		}
 
-		public bool Contains (string name)
-		{
-			return settings.Contains (name);
+		protected override string Name {
+			get { return "mono-fastcgi"; }
+		}
+
+		protected override string Description {
+			get { return "A FastCgi interface for ASP.NET applications."; }
 		}
 	}
 }

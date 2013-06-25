@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -72,13 +72,31 @@
     <Compile Include="MapPathEventArgs.cs" />
     <Compile Include="MapPathEventHandler.cs" />
     <Compile Include="MonoWorkerRequest.cs" />
-    <Compile Include="Options.cs" />
+    <Compile Include="Options\BoolSetting.cs" />
+    <Compile Include="Options\EnumSetting.cs" />
+    <Compile Include="Options\NullableInt32Setting.cs" />
+    <Compile Include="Options\NullableSetting.cs" />
+    <Compile Include="Options\UInt32Setting.cs" />
+    <Compile Include="Options\Int32Setting.cs" />
+    <Compile Include="Options\ISetting.cs" />
+    <Compile Include="Options\ConfigurationManager.Fields.cs" />
+    <Compile Include="Options\ConfigurationManager.cs" />
+    <Compile Include="Options\ConfigurationManager.Parsing.cs" />
+    <Compile Include="Options\Options.cs" />
+    <Compile Include="Options\Parser.cs" />
+    <Compile Include="Options\Settings.cs" />
+    <Compile Include="Options\SettingsCollection.cs" />
+    <Compile Include="Options\SettingSource.cs" />
+    <Compile Include="Options\StringSetting.cs" />
+    <Compile Include="Options\UInt16Setting.cs" />
+    <Compile Include="Options\Descriptions.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="RequestData.cs" />
     <Compile Include="RequestLineException.cs" />
     <Compile Include="SearchPattern.cs" />
     <Compile Include="UnregisterRequestEventArgs.cs" />
     <Compile Include="UnregisterRequestEventHandler.cs" />
+    <Compile Include="Version.cs" />
     <Compile Include="VPathToHost.cs" />
     <Compile Include="WebSource.cs" />
     <Compile Include="Worker.cs" />

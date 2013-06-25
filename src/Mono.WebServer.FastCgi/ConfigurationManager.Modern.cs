@@ -1,10 +1,9 @@
-﻿//
+//
 // ConfigurationManager.cs: Generic multi-source configuration manager.
 //
 // Author:
 //   Brian Nickel (brian.nickel@gmail.com)
 //   Robert Jordan <robertj@gmx.net>
-//   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
 //
 // Copyright (C) 2007 Brian Nickel
 // 
@@ -29,60 +28,55 @@
 //
 
 using System;
-using System.IO;
-using System.Reflection;
 using System.Xml;
-using Mono.WebServer.FastCgi;
+using System.Globalization;
 
-namespace Mono.WebServer {
-	[Obsolete]
-	public class ConfigurationManager
+namespace Mono.WebServer.FastCgi {
+	public partial class ConfigurationManager
 	{
-		readonly FastCgi.ConfigurationManager configurationManager = new FastCgi.ConfigurationManager ();
-
-		public ConfigurationManager (Assembly asm, string resource)
+		internal static ApplicationException AppExcept (string message,
+							params object [] args)
 		{
-			if (asm == null)
-				throw new ArgumentNullException ("asm");
-			if (resource == null)
-				throw new ArgumentNullException ("resource");
-
-			var doc = new XmlDocument ();
-			Stream stream = asm.GetManifestResourceStream (resource);
-			if (stream != null)
-				doc.Load (stream);
-			configurationManager.ImportSettings (doc, false, SettingSource.Xml);
+			return new ApplicationException (String.Format (CultureInfo.InvariantCulture, message, args));
 		}
 
-		public bool Contains (string name)
+		static string GetXmlValue (XmlElement elem, string name)
 		{
-			return configurationManager.Contains (name);
+			string value = elem.GetAttribute (name);
+			if (!String.IsNullOrEmpty (value))
+				return value;
+
+			foreach (XmlElement child in elem.GetElementsByTagName (name)) {
+				value = child.InnerText;
+				if (!String.IsNullOrEmpty (value))
+					return value;
+			}
+
+			return String.Empty;
 		}
 
 		[Obsolete]
-		public object this [string name] {
-			get {
-				return configurationManager.GetSetting (name).Value;
-			}
-			
-			set {
-				configurationManager.SetValue (name, value);
-			}
+		internal void SetValue (string name, object value)
+		{
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			settings[name].MaybeParseUpdate (SettingSource.CommandLine, value.ToString ());
+		}
+
+		[Obsolete]
+		internal ISetting GetSetting (string name)
+		{
+			return settings [name];
 		}
 
 		public void PrintHelp ()
 		{
-			configurationManager.PrintHelp ();
+			CreateOptionSet ().WriteOptionDescriptions (Console.Out);
 		}
 
-		public void LoadCommandLineArgs (string[] args)
+		public bool Contains (string name)
 		{
-			configurationManager.LoadCommandLineArgs (args);
-		}
-
-		public void LoadXmlConfig (string filename)
-		{
-			configurationManager.LoadXmlConfig (filename);
+			return settings.Contains (name);
 		}
 	}
 }

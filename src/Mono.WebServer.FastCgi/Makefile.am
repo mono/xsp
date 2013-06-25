@@ -24,20 +24,17 @@ endif
 sources = $(shell cat $(srcdir)/Mono.WebServer.FastCgi.sources)
 build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 
-resources = ConfigurationManager.xml
-build_resources = $(addprefix $(srcdir)/, $(resources))
-
 EXTRA_DIST = $(sources) AssemblyInfo.cs.in $(resources) Mono.WebServer.FastCgi.sources
 
-fastcgi-mono-server2.exe: $(build_sources) $(build_resources)
+fastcgi-mono-server2.exe: $(build_sources)
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ \
-		$(build_resources:%=-resource:%) $(build_sources)
+		$(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 if NET_4_0
-fastcgi-mono-server4.exe: $(build_sources) $(build_resources)
+fastcgi-mono-server4.exe: $(build_sources)
 	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(references4) /out:$@ \
-		$(build_resources:%=-resource:%) $(build_sources)
+		$(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 endif
 

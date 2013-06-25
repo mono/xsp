@@ -1,5 +1,4 @@
 ApplicationHost.cs
-AssemblyInfo.cs
 BeginRequestBody.cs
 ConfigurationManager.Fields.cs
 ConfigurationManager.Modern.cs

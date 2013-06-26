@@ -2,14 +2,13 @@
 using System.Net;
 
 namespace Mono.WebServer.Options {
-	public abstract partial class ConfigurationManager {
-		protected SettingsCollection Settings { get; private set; }
-
-		protected ConfigurationManager ()
+	public abstract class ServerConfigurationManager : ConfigurationManager
+	{
+		protected ServerConfigurationManager ()
 		{
-			Settings = new SettingsCollection { help, version, verbose,
+			Add (help, version, verbose,
 				root, applications, appConfigFile, appConfigDir,
-				address};
+				address);
 		}
 
 		#region Backing fields

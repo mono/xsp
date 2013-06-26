@@ -2,7 +2,7 @@
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Apache {
-	class ConfigurationManager : Options.ConfigurationManager
+	class ConfigurationManager : ServerConfigurationManager
 	{
 		public ConfigurationManager (bool quietDefault, string rootDefault)
 		{

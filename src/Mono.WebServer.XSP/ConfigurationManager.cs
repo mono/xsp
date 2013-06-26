@@ -3,7 +3,7 @@ using Mono.WebServer.Options;
 using TP = Mono.Security.Protocol.Tls;
 
 namespace Mono.WebServer.XSP {
-	class ConfigurationManager : Options.ConfigurationManager
+	class ConfigurationManager : ServerConfigurationManager
 	{
 		public ConfigurationManager (bool quietDefault)
 		{

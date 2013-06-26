@@ -80,9 +80,8 @@
     <Compile Include="Options\UInt32Setting.cs" />
     <Compile Include="Options\Int32Setting.cs" />
     <Compile Include="Options\ISetting.cs" />
-    <Compile Include="Options\ConfigurationManager.Fields.cs" />
+    <Compile Include="Options\ServerConfigurationManager.Fields.cs" />
     <Compile Include="Options\ConfigurationManager.cs" />
-    <Compile Include="Options\ConfigurationManager.Parsing.cs" />
     <Compile Include="Options\Options.cs" />
     <Compile Include="Options\Parser.cs" />
     <Compile Include="Options\Settings.cs" />

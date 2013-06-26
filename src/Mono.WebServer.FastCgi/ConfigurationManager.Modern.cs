@@ -31,7 +31,7 @@ using System;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
-	public partial class ConfigurationManager : Options.ConfigurationManager 
+	public partial class ConfigurationManager : ServerConfigurationManager 
 	{
 		[Obsolete]
 		internal void SetValue (string name, object value)

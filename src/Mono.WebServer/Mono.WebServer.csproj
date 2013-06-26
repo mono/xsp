@@ -69,10 +69,13 @@
     <Compile Include="LingeringNetworkStream.cs" />
     <Compile Include="LockRecursionException.cs" />
     <Compile Include="LockRecursionPolicy.cs" />
+    <Compile Include="Log\Logger.cs" />
+    <Compile Include="Log\LogLevel.cs" />
     <Compile Include="MapPathEventArgs.cs" />
     <Compile Include="MapPathEventHandler.cs" />
     <Compile Include="MonoWorkerRequest.cs" />
     <Compile Include="Options\BoolSetting.cs" />
+    <Compile Include="Options\ConfigurationManager.Fields.cs" />
     <Compile Include="Options\NullableUInt16Setting.cs" />
     <Compile Include="Options\EnumSetting.cs" />
     <Compile Include="Options\NullableInt32Setting.cs" />
@@ -80,7 +83,7 @@
     <Compile Include="Options\UInt32Setting.cs" />
     <Compile Include="Options\Int32Setting.cs" />
     <Compile Include="Options\ISetting.cs" />
-    <Compile Include="Options\ServerConfigurationManager.Fields.cs" />
+    <Compile Include="Options\ServerConfigurationManager.cs" />
     <Compile Include="Options\ConfigurationManager.cs" />
     <Compile Include="Options\Options.cs" />
     <Compile Include="Options\Parser.cs" />

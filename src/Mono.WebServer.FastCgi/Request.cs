@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using Mono.WebServer.Log;
 using IOPath = System.IO.Path;
 using Mono.WebServer;
 using Mono.WebServer.FastCgi;

@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using Mono.WebServer.FastCgi;
+using Mono.WebServer.Log;
 
 namespace Mono.FastCgi {
 	public class Connection

@@ -45,15 +45,17 @@ namespace Mono.WebServer.Options {
 			DefaultValue = defaultValue;
 			this.parser = parser;
 			Value = defaultValue;
-			if (!String.IsNullOrEmpty (Environment)) {
-				string value = System.Environment.GetEnvironmentVariable (environment);
-				MaybeParseUpdate (SettingSource.Environment, value);
-			}
+			if (!String.IsNullOrEmpty (environment))
+				foreach (string envVar in environment.Split ('|')) {
+					string value = System.Environment.GetEnvironmentVariable (envVar);
+					MaybeParseUpdate (SettingSource.Environment, value);
+				}
 
-			if (!String.IsNullOrEmpty (AppSetting)) {
-				string value = System.Configuration.ConfigurationManager.AppSettings [appSetting];
-				MaybeParseUpdate (SettingSource.AppSettings, value);
-			}
+			if (!String.IsNullOrEmpty (appSetting))
+				foreach (var appSett in appSetting.Split ('|')) {
+					string value = System.Configuration.ConfigurationManager.AppSettings [appSett];
+					MaybeParseUpdate (SettingSource.AppSettings, value);
+				}
 		}
 
 		public void MaybeParseUpdate (SettingSource settingSource, string value)

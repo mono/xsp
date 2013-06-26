@@ -29,6 +29,7 @@
 using System;
 using System.Globalization;
 using Mono.WebServer.FastCgi;
+using Mono.WebServer.Log;
 
 namespace Mono.FastCgi {
 	public enum RecordType : byte {

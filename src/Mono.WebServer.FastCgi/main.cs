@@ -33,10 +33,11 @@ using System;
 using System.Net;
 using System.Reflection;
 using Mono.FastCgi;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer.FastCgi
 {
-	public class Server
+	public static class Server
 	{
 		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socketParts, out Socket socket);
 
@@ -60,7 +61,7 @@ namespace Mono.WebServer.FastCgi
 			if (configurationManager.Help) {
 				configurationManager.PrintHelp ();
 #if DEBUG
-				Console.WriteLine("Press any key...");
+				Console.WriteLine ("Press any key...");
 				Console.ReadKey ();
 #endif
 				return 0;
@@ -75,7 +76,7 @@ namespace Mono.WebServer.FastCgi
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
 
-			if (!LoadConfigFile(configurationManager))
+			if (!configurationManager.LoadConfigFile ())
 				return 1;
 
 #if DEBUG
@@ -83,9 +84,7 @@ namespace Mono.WebServer.FastCgi
 			Logger.Level = LogLevel.All;
 #endif
 
-			SetLogLevel(configurationManager);
-
-			OpenLogFile (configurationManager);
+			configurationManager.SetupLogger ();
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
@@ -105,8 +104,6 @@ namespace Mono.WebServer.FastCgi
 				return 1;
 
 			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
-
-			Logger.WriteToConsole = configurationManager.PrintLog;
 
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable);
@@ -332,54 +329,6 @@ namespace Mono.WebServer.FastCgi
 			} catch (NotSupportedException) {
 				Logger.Write (LogLevel.Error,
 					"Error: Pipe sockets are not supported on this system.");
-				return false;
-			}
-			return true;
-		}
-
-		static void OpenLogFile (ConfigurationManager configurationManager)
-		{
-			try {
-				var log_file = configurationManager.LogFile;
-
-				if (log_file != null)
-					Logger.Open (log_file);
-			} catch (Exception e) {
-				Logger.Write (LogLevel.Error,
-					"Error opening log file: {0}",
-					e.Message);
-				Logger.Write (LogLevel.Warning,
-					"Events will not be logged to file.");
-			}
-		}
-
-		static void SetLogLevel (ConfigurationManager configurationManager)
-		{
-			Logger.Level = configurationManager.LogLevels;
-		}
-
-		/// <summary>
-		/// If a configfile option was specified, tries to load
-		/// the configuration file
-		/// </summary>
-		/// <returns>false on failure, true on success or
-		/// option not present</returns>
-		static bool LoadConfigFile(ConfigurationManager configurationManager)
-		{
-			try {
-				var config_file = configurationManager.ConfigFile;
-				if (config_file != null)
-					configurationManager.LoadXmlConfig(config_file);
-			}
-			catch (ApplicationException e) {
-				Logger.Write(LogLevel.Error, e.Message);
-				return false;
-			}
-			catch (System.Xml.XmlException e)
-			{
-				Logger.Write(LogLevel.Error,
-					"Error reading XML configuration: {0}",
-					e.Message);
 				return false;
 			}
 			return true;

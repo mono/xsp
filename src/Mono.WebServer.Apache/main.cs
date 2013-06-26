@@ -109,6 +109,9 @@ namespace Mono.WebServer.Apache {
 				return 1;
 			}
 
+			if (!configurationManager.LoadConfigFile ())
+				return 1;
+
 			ushort port = configurationManager.Port ?? 0;
 			bool useTCP = port != 0;
 			string lockfile = useTCP ? Path.Combine (Path.GetTempPath (), "mod_mono_TCP_") : configurationManager.Filename;

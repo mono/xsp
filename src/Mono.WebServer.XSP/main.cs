@@ -111,7 +111,7 @@ namespace Mono.WebServer.XSP
 				try {
 					key = security.KeyPair;
 					webSource = new XSPWebSource (configurationManager.Address,
-						configurationManager.RandomPort ? 0 : configurationManager.Port,
+						configurationManager.RandomPort ? default(ushort) : configurationManager.Port,
 						security.Protocol, security.ServerCertificate,
 						GetPrivateKey, security.AcceptClientCertificates,
 						security.RequireClientCertificates, !root);

@@ -22,6 +22,7 @@ Options/ISetting.cs
 Options/Int32Setting.cs
 Options/NullableInt32Setting.cs
 Options/NullableSetting.cs
+Options/NullableUInt16Setting.cs
 Options/Options.cs
 Options/Parser.cs
 Options/SettingSource.cs

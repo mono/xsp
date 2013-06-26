@@ -5,7 +5,7 @@ using System.Xml;
 using NDesk.Options;
 
 namespace Mono.WebServer.Options {
-	public abstract class ConfigurationManager {
+	public abstract partial class ConfigurationManager {
 		const string EXCEPT_BAD_ELEM = "XML setting \"{0}={1}\" is invalid.";
 
 		const string EXCEPT_XML_DUPLICATE = "XML setting \"{0}\" can only be assigned once.";
@@ -13,14 +13,13 @@ namespace Mono.WebServer.Options {
 		protected abstract string Name { get; }
 		protected abstract string Description { get; }
 
-		[Obsolete ("Not to be used by external classes, will be private")]
-		protected SettingsCollection Settings { get; private set; }
-
-		protected ConfigurationManager ()
-		{
-			Settings = new SettingsCollection ();
+		[Obsolete]
+		protected SettingsCollection Settings {
+			get { return settings; }
 		}
 
+		readonly SettingsCollection settings;
+		
 		[Obsolete("Not to be used by external classes, will be private")]
 		public void ImportSettings (XmlDocument doc, bool insertEmptyValue, SettingSource source)
 		{
@@ -45,7 +44,7 @@ namespace Mono.WebServer.Options {
 		protected OptionSet CreateOptionSet ()
 		{
 			var p = new OptionSet ();
-			foreach (ISetting setting in Settings) {
+			foreach (ISetting setting in settings) {
 				var boolSetting = setting as Setting<bool>;
 				if (boolSetting != null) {
 					p.Add (setting.Prototype, setting.Description,
@@ -116,12 +115,6 @@ namespace Mono.WebServer.Options {
 			}
 
 			return true;
-		}
-
-		protected void Add (params ISetting[] settings)
-		{
-			foreach (ISetting setting in settings)
-				Settings.Add (setting);
 		}
 	}
 }

@@ -28,7 +28,9 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -197,43 +199,12 @@ namespace Mono.WebServer.Apache {
 			return 0;
 		}
 
-		static int GetHash (string [] args)
+		static int GetHash (IEnumerable<string> args)
 		{
-			int hash = 0;
-			for (int i = 0; i < args.Length; i++) {
-				string a = args [i];
-				int idx = (i + 1 < args.Length) ? i + 1 : i;
-				hash ^= args [idx].GetHashCode () + i;
-
-				switch (a) {
-				case "--filename":
-				case "--port":
-				case "--address":
-				case "--backlog":
-				case "--root":
-				case "--applications":
-				case "--appconfigfile":
-				case "--appconfigdir":
-				case "--minThreads":
-				case "--pidfile":
-					++i;
-					break;
-				case "--terminate":
-				case "--master":
-				case "--nonstop":
-				case "--verbose":
-				case "--no-hidden":
-					break;
-				case "--help":
-				case "--version":
-					return -1;
-				default:
-					return -2;
-				}
-			}
+			int hash = args.Aggregate (23, (current, arg) => current * 37 + arg.GetHashCode ());
 
 			if (hash < 0)
-				hash = -hash;
+				return -hash;
 			return hash;
 		}
 

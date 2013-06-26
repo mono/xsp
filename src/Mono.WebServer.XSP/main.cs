@@ -111,12 +111,10 @@ namespace Mono.WebServer.XSP
 				try {
 					key = security.KeyPair;
 					webSource = new XSPWebSource (configurationManager.Address,
-						configurationManager.Port, security.Protocol, 
-						security.ServerCertificate, 
-						GetPrivateKey, 
-						security.AcceptClientCertificates,
-						security.RequireClientCertificates,
-						!root);
+						configurationManager.RandomPort ? 0 : configurationManager.Port,
+						security.Protocol, security.ServerCertificate,
+						GetPrivateKey, security.AcceptClientCertificates,
+						security.RequireClientCertificates, !root);
 				}
 				catch (CryptographicException ce) {
 					Console.WriteLine (ce.Message);

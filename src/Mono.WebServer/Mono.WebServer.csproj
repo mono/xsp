@@ -73,6 +73,7 @@
     <Compile Include="MapPathEventHandler.cs" />
     <Compile Include="MonoWorkerRequest.cs" />
     <Compile Include="Options\BoolSetting.cs" />
+    <Compile Include="Options\NullableUInt16Setting.cs" />
     <Compile Include="Options\EnumSetting.cs" />
     <Compile Include="Options\NullableInt32Setting.cs" />
     <Compile Include="Options\NullableSetting.cs" />

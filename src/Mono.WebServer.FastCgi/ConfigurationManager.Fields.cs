@@ -36,7 +36,7 @@ namespace Mono.WebServer.FastCgi {
 		public ConfigurationManager ()
 		{
 			Add(printlog, stoppable, multiplex,
-				maxConns, maxReqs,
+				maxConns, maxReqs, port,
 				filename, logFile, configFile, socket,
 				loglevels);
 		}
@@ -51,6 +51,7 @@ namespace Mono.WebServer.FastCgi {
 			"FastCgiMaxConnections", "MONO_FCGI_MAXCONNS", 1024);
 		readonly UInt16Setting maxReqs = new UInt16Setting ("maxreqs", "Specifies the maximum number of concurrent requests the server should accept.",
 			"FastCgiMaxRequests", "MONO_FCGI_MAXREQS", 1024);
+		readonly UInt16Setting port = new UInt16Setting ("port", Descriptions.Port, "MonoServerPort", "MONO_FCGI_PORT", 9000);
 
 		readonly StringSetting filename = new StringSetting ("filename", "Specifies a unix socket filename to listen on.\n" +
 			"To use this argument, \"socket\" must be set to \"unix\".", "MonoUnixSocket", "MONO_FCGI_FILENAME", "/tmp/fastcgi-mono-server");
@@ -78,6 +79,9 @@ namespace Mono.WebServer.FastCgi {
 		}
 		public ushort MaxReqs {
 			get { return maxReqs; }
+		}
+		public ushort Port {
+			get { return port; }
 		}
 
 		public string Filename {

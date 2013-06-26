@@ -34,11 +34,10 @@ namespace Mono.WebServer.Options {
 
 		internal const string Address = "Specifies the IP address to listen on.";
 
-		internal const string Port = "Specifies the TCP port number to listen on.";
+		public const string Port = "Specifies the TCP port number to listen on.";
 
 		internal const string Root = "Specifies the root directory the server changes to before doing performing any operations.\n" +
 			"This value is only used when \"appconfigfile\", \"appconfigdir\", or \"applications\" is set, to provide a relative base path.";
-
 
 		// TODO: use markup (sigh) for better formatting
 		public const string Applications = "Adds applications from a comma separated list of virtual and physical directory pairs. " +
@@ -56,5 +55,11 @@ namespace Mono.WebServer.Options {
 			"    Two applications like the above ones are handled.\n" +
 			"    *:80:/:standard,*:433:/:secure\n" +
 			"    The server uses different applications on the unsecure and secure ports.";
+
+		public const string Terminate = "Gracefully terminates a running mod-mono-server instance. " +
+			"All other options but --filename or --address and --port are ignored if this option is provided.";
+
+		public const string Master = "This instance will be used to by mod_mono to create ASP.NET applications on demand. " +
+			"If this option is provided, there is no need to provide a list of applications to start.";
 	}
 }

@@ -28,188 +28,14 @@
 //
 
 using System;
-using System.Configuration;
-using System.Collections.Specialized;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace Mono.WebServer.Apache
-{
-	public class Server : MarshalByRefObject
-	{
-		sealed class ApplicationSettings
-		{
-			public string Apps;
-			public string AppConfigDir;
-			public string AppConfigFile;
-			public string RootDir;
-			public object Oport = 8080;
-			public string IP = "0.0.0.0";
-			public bool NonStop;
-			public bool Verbose;
-			public bool Master;
-			public string FileName;
-			
-			public ApplicationSettings ()
-			{
-				try {
-					Apps = AppSettings ["MonoApplications"];
-					AppConfigDir = AppSettings ["MonoApplicationsConfigDir"];
-					AppConfigFile = AppSettings ["MonoApplicationsConfigFile"];
-					RootDir = AppSettings ["MonoServerRootDir"];
-					IP = AppSettings ["MonoServerAddress"];
-					Oport = AppSettings ["MonoServerPort"];
-					FileName = AppSettings ["MonoUnixSocket"];
-
-					// TODO: Fix for IPv6
-					if (String.IsNullOrEmpty (IP))
-						IP = "0.0.0.0";
-					if (Oport == null)
-						Oport = 8080;
-				} catch (Exception ex) {
-					Console.Error.WriteLine ("Exception caught during reading the configuration file:");
-					Console.Error.WriteLine (ex);
-				}
-			}
-		}
-
-		static void ShowVersion ()
-		{
-			// TODO: rewrite in a safer way
-			Assembly assembly = Assembly.GetExecutingAssembly ();
-			string version = assembly.GetName ().Version.ToString ();
-			object [] att = assembly.GetCustomAttributes (typeof (AssemblyTitleAttribute), false);
-			//string title = ((AssemblyTitleAttribute) att [0]).Title;
-			att = assembly.GetCustomAttributes (typeof (AssemblyCopyrightAttribute), false);
-			string copyright = ((AssemblyCopyrightAttribute) att [0]).Copyright;
-			att = assembly.GetCustomAttributes (typeof (AssemblyDescriptionAttribute), false);
-			string description = ((AssemblyDescriptionAttribute) att [0]).Description;
-			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
-					Path.GetFileName (assembly.Location), version, copyright, description);
-		}
-
-		static void ShowHelp ()
-		{
-			Console.WriteLine ("mod-mono-server.exe is a ASP.NET server used from mod_mono.");
-			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    mod-mono-server.exe [...]");
-			Console.WriteLine ();
-			Console.WriteLine ("    The arguments --filename and --port are mutually exlusive.");
-			Console.WriteLine ("    --filename file: a unix socket filename to listen on.");
-			Console.WriteLine ("                    Default value: /tmp/mod_mono_server");
-			Console.WriteLine ("                    AppSettings key name: MonoUnixSocket");
-			Console.WriteLine ();
-			Console.WriteLine ("    --port N: n is the tcp port to listen on.");
-			Console.WriteLine ("                    Default value: none");
-			Console.WriteLine ("                    AppSettings key name: MonoServerPort");
-			Console.WriteLine ();
-			Console.WriteLine ("    --address addr: addr is the ip address to listen on.");
-			Console.WriteLine ("                    Default value: 127.0.0.1");
-			Console.WriteLine ("                    AppSettings key name: MonoServerAddress");
-			Console.WriteLine ();
-			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
-			Console.WriteLine ("    --root rootdir: the server changes to this directory before");
-			Console.WriteLine ("                    anything else.");
-			Console.WriteLine ("                    Default value: current directory.");
-			Console.WriteLine ("                    AppSettings key name: MonoServerRootDir");
-			Console.WriteLine ();
-			Console.WriteLine ("    --appconfigfile FILENAME: adds application definitions from the XML");
-			Console.WriteLine ("                    configuration file. See sample configuration file that");
-			Console.WriteLine ("                    comes with the server.");
-			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigFile");
-			Console.WriteLine ();
-			Console.WriteLine ("    --appconfigdir DIR: adds application definitions from all XML files");
-			Console.WriteLine ("                    found in the specified directory DIR. Files must have");
-			Console.WriteLine ("                    '.webapp' extension");
-			Console.WriteLine ("                    AppSettings key name: MonoApplicationsConfigDir");
-			Console.WriteLine ();
-			Console.WriteLine ("    --applications APPS:");
-			Console.WriteLine ("                    a comma separated list of virtual directory and");
-			Console.WriteLine ("                    real directory for all the applications we want to manage");
-			Console.WriteLine ("                    with this server. The virtual and real dirs. are separated");
-			Console.WriteLine ("                    by a colon. Optionally you may specify virtual host name");
-			Console.WriteLine ("                    and a port.");
-			Console.WriteLine ();
-			Console.WriteLine ("                           [[hostname:]port:]VPath:realpath,...");
-			Console.WriteLine ();
-			Console.WriteLine ("                    Samples: /:.");
-			Console.WriteLine ("                           the virtual / is mapped to the current directory.");
-			Console.WriteLine ();
-			Console.WriteLine ("                            /blog:../myblog");
-			Console.WriteLine ("                           the virtual /blog is mapped to ../myblog");
-			Console.WriteLine ();
-			Console.WriteLine ("                            myhost.someprovider.net:/blog:../myblog");
-			Console.WriteLine ("                           the virtual /blog at myhost.someprovider.net is mapped to ../myblog");
-			Console.WriteLine ();
-			Console.WriteLine ("                            /:.,/blog:../myblog");
-			Console.WriteLine ("                           Two applications like the above ones are handled.");
-			Console.WriteLine ("                    Default value: /:.");
-			Console.WriteLine ("                    AppSettings key name: MonoApplications");
-			Console.WriteLine ();
-			Console.WriteLine ("    --minThreads N:    the minimum number of threads the thread pool creates on startup.");
-			Console.WriteLine ("                       Increase this value to handle a sudden inflow of connections.");
-			Console.WriteLine ("                       Default value: (runtime default)");
-			Console.WriteLine ("    --backlog N:    the listen backlog. Default value: 500");
-			Console.WriteLine ("    --terminate: gracefully terminates a running mod-mono-server instance.");
-			Console.WriteLine ("                 All other options but --filename or --address and --port");
-			Console.WriteLine ("                 are ignored if this option is provided.");
-			Console.WriteLine ("    --master: this instance will be used to by mod_mono to create ASP.NET");
-			Console.WriteLine ("              applications on demand. If this option is provided, there is no");
-			Console.WriteLine ("              need to provide a list of applications to start.");
-			Console.WriteLine ("    --nonstop: don't stop the server by pressing enter. Must be used");
-			Console.WriteLine ("               when the server has no controlling terminal.");
-			Console.WriteLine ();
-			Console.WriteLine ("    --no-hidden: allow access to hidden files (see 'man xsp' for details)");
-			Console.WriteLine ();
-			Console.WriteLine ("    --version: displays version information and exits.");
-			Console.WriteLine ("    --verbose: prints extra messages. Mainly useful for debugging.");
-			Console.WriteLine ("    --pidfile file: write the process PID to the specified file.");
-
-			Console.WriteLine ();
-		}
-
-		[Flags]
-		enum Options {
-			NonStop = 1,
-			Verbose = 1 << 1,
-			Applications = 1 << 2,
-			AppConfigDir = 1 << 3,
-			AppConfigFile = 1 << 4,
-			Root = 1 << 5,
-			FileName = 1 << 6,
-			Address = 1 << 7,
-			Port = 1 << 8,
-			Terminate = 1 << 9,
-			Https = 1 << 10,
-			Master = 1 << 11
-		}
-
-		static void CheckAndSetOptions (string name, Options value, ref Options options)
-		{
-			if ((options & value) != 0) {
-				ShowHelp ();
-				Console.Error.WriteLine ();
-				Console.Error.WriteLine ("ERROR: Option '{0}' duplicated.", name);
-				Environment.Exit (1);
-			}
-
-			options |= value;
-			if ((options & Options.FileName) == 0 ||
-				((options & Options.Port) == 0 && (options & Options.Address) == 0))
-				return;
-			ShowHelp ();
-			Console.Error.WriteLine ();
-			Console.Error.WriteLine ("ERROR: --port/--address and --filename are mutually exclusive");
-			Environment.Exit (1);
-		}
-
-		static NameValueCollection AppSettings {
-			get { return ConfigurationManager.AppSettings; }
-		}
-
+namespace Mono.WebServer.Apache {
+	public class Server : MarshalByRefObject {
 		public static void CurrentDomain_UnhandledException (object sender, UnhandledExceptionEventArgs e)
 		{
 			var ex = (Exception)e.ExceptionObject;
@@ -221,21 +47,21 @@ namespace Mono.WebServer.Apache
 				Console.Error.WriteLine (ex);
 		}
 
-		
+
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 			bool quiet = false;
 			// TODO: Understand why the while is here but commented
 			//while (true) {
-				try {
-					var svr = new Server ();
-					return svr.RealMain (args, true, null, quiet);
-				} catch (ThreadAbortException) {
-					// Single-app mode and ASP.NET appdomain unloaded
-					Thread.ResetAbort ();
-					quiet = true; // hush 'RealMain'
-				}
+			try {
+				var svr = new Server ();
+				return svr.RealMain (args, true, null, quiet);
+			} catch (ThreadAbortException) {
+				// Single-app mode and ASP.NET appdomain unloaded
+				Thread.ResetAbort ();
+				quiet = true; // hush 'RealMain'
+			}
 			//}
 			return 1;
 		}
@@ -249,223 +75,106 @@ namespace Mono.WebServer.Apache
 		//        RealMain from the single app domain
 		//   quiet - don't show messages. Used to avoid double printing of the banner
 		//
-		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
+		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool v_quiet)
 		{
-			var settings = new ApplicationSettings ();
-			if (ext_apphost != null)
-				settings.RootDir = ext_apphost.Path;
+			var configurationManager = new ConfigurationManager (v_quiet,
+				ext_apphost == null ? null : ext_apphost.Path);
 
-			Options options = 0;
-			int backlog = 500;
-			int hash = 0;
-			for (int i = 0; i < args.Length; i++){
-				string a = args [i];
-				int idx = (i + 1 < args.Length) ? i + 1 : i;
-				hash ^= args [idx].GetHashCode () + i;
-				
-				switch (a){
-				case "--filename":
-					CheckAndSetOptions (a, Options.FileName, ref options);
-					settings.FileName = args [++i];
-					break;
-				case "--terminate":
-					CheckAndSetOptions (a, Options.Terminate, ref options);
-					break;
-				case "--master":
-					CheckAndSetOptions (a, Options.Master, ref options);
-					settings.Master = true;
-					break;
-				case "--port":
-					CheckAndSetOptions (a, Options.Port, ref options);
-					settings.Oport = args [++i];
-					break;
-				case "--address":
-					CheckAndSetOptions (a, Options.Address, ref options);
-					settings.IP = args [++i];
-					break;
-				case "--backlog":
-					string backlogstr = args [++i];
-					try {
-						backlog = Convert.ToInt32 (backlogstr);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for backlog is not valid {0}", backlogstr);
-						return 1;
-					}
-					break;
-				case "--root":
-					CheckAndSetOptions (a, Options.Root, ref options);
-					settings.RootDir = args [++i];
-					break;
-				case "--applications":
-					CheckAndSetOptions (a, Options.Applications, ref options);
-					settings.Apps = args [++i];
-					break;
-				case "--appconfigfile":
-					CheckAndSetOptions (a, Options.AppConfigFile, ref options);
-					settings.AppConfigFile = args [++i];
-					break;
-				case "--appconfigdir":
-					CheckAndSetOptions (a, Options.AppConfigDir, ref options);
-					settings.AppConfigDir = args [++i];
-					break;
-				case "--minThreads":
-					string mtstr = args [++i];
-					int minThreads;
-					try {
-						minThreads = Convert.ToInt32 (mtstr);
-					} catch (Exception) {
-						Console.WriteLine ("The value given for minThreads is not valid {0}", mtstr);
-						return 1;
-					}
-
-					if (minThreads > 0)
-						ThreadPool.SetMinThreads(minThreads, minThreads);
-
-					break;
-				case "--nonstop":
-					settings.NonStop = true;
-					break;
-				case "--help":
-					ShowHelp ();
-					return 0;
-				case "--version":
-					ShowVersion ();
-					return 0;
-				case "--verbose":
-					settings.Verbose = true;
-					break;
-				case "--pidfile": {
-					string pidfile = args[++i];
-					if (!String.IsNullOrEmpty (pidfile)) {
-						try {
-							using (StreamWriter sw = File.CreateText (pidfile))
-								sw.Write (Process.GetCurrentProcess ().Id);
-						} catch (Exception ex) {
-							Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", pidfile, ex.Message);
-						}
-					}
-					break;
-				}
-				case "--no-hidden":
-					MonoWorkerRequest.CheckFileAccess = false;
-					break;
-				default:
-					Console.Error.WriteLine ("Unknown argument: {0}", a);
-					ShowHelp ();
-					return 1;
-				}
-			}
-
-			if (hash < 0)
-				hash = -hash;
-
-			string lockfile;
-			bool useTCP = ((options & Options.Port) != 0);
-			if (!useTCP) {
-				if (String.IsNullOrEmpty (settings.FileName))
-					settings.FileName = "/tmp/mod_mono_server";
-
-				if ((options & Options.Address) != 0) {
-					ShowHelp ();
-					Console.Error.WriteLine ();
-					Console.Error.WriteLine ("ERROR: --address without --port");
-					Environment.Exit (1);
-				}
-				lockfile = Path.Combine (Path.GetTempPath (), Path.GetFileName (settings.FileName));
-				lockfile = String.Format ("{0}_{1}", lockfile, hash);
-			} else {
-				lockfile = Path.Combine (Path.GetTempPath (), "mod_mono_TCP_");
-				lockfile = String.Format ("{0}_{1}", lockfile, hash);
-			}
-
-			IPAddress ipaddr;
-			ushort port;
-			try {
-				port = Convert.ToUInt16 (settings.Oport);
-			} catch (Exception) {
-				Console.Error.WriteLine ("The value given for the listen port is not valid: " + settings.Oport);
+			if (!configurationManager.LoadCommandLineArgs (args))
 				return 1;
-			}
 
-			if(!IPAddress.TryParse (settings.IP,out ipaddr)){
-				Console.Error.WriteLine ("The value given for the address is not valid: " + settings.IP);
-				return 1;
+			// Show the help and exit.
+			if (configurationManager.Help) {
+				configurationManager.PrintHelp ();
+#if DEBUG
+				Console.WriteLine("Press any key...");
+				Console.ReadKey ();
+#endif
+				return 0;
 			}
-
-			if (!String.IsNullOrEmpty (settings.RootDir)) {
-				try {
-					Environment.CurrentDirectory = settings.RootDir;
-				} catch (Exception e) {
-					Console.Error.WriteLine ("Error: {0}", e.Message);
-					return 1;
-				}
-			}
-
-			settings.RootDir = Directory.GetCurrentDirectory ();
 			
-			ModMonoWebSource webSource;
-			if (useTCP) {
-				webSource = new ModMonoTCPWebSource (ipaddr, port, lockfile);
-			} else {
-				webSource = new ModMonoWebSource (settings.FileName, lockfile);
+			// Show the version and exit.
+			if (configurationManager.Version) {
+				Version.Show ();
+				return 0;
 			}
 
-			if ((options & Options.Terminate) != 0) {
-				if (settings.Verbose)
+			var hash = GetHash (args);
+			if (hash == -1) {
+				Console.WriteLine ("Couldn't calculate hash - should have left earlier - something is really wrong");
+				return 1;
+			}
+			if (hash == -2) {
+				Console.WriteLine ("Couldn't calculate hash - unrecognized parameter");
+				return 1;
+			}
+
+			ushort port = configurationManager.Port ?? 0;
+			bool useTCP = port != 0;
+			string lockfile = useTCP ? Path.Combine (Path.GetTempPath (), "mod_mono_TCP_") : configurationManager.Filename;
+			lockfile = String.Format ("{0}_{1}", lockfile, hash);
+
+			ModMonoWebSource webSource = useTCP
+				? new ModMonoTCPWebSource (configurationManager.Address, port, lockfile)
+				: new ModMonoWebSource (configurationManager.Filename, lockfile);
+
+			if(configurationManager.Terminate) {
+				if (configurationManager.Verbose)
 					Console.Error.WriteLine ("Shutting down running mod-mono-server...");
-				
-				bool res = webSource.GracefulShutdown ();
-				if (settings.Verbose)
-					Console.Error.WriteLine (res ? "Done." : "Failed");
 
-				return (res) ? 0 : 1;
+				bool res = webSource.GracefulShutdown ();
+				if (configurationManager.Verbose)
+					Console.Error.WriteLine (res ? "Done." : "Failed.");
+
+				return res ? 0 : 1;
 			}
 
-			var server = new ApplicationServer (webSource, settings.RootDir) {
-				Verbose = settings.Verbose,
+			var server = new ApplicationServer (webSource, configurationManager.Root) {
+				Verbose = configurationManager.Verbose,
 				SingleApplication = !root
 			};
 
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
-			if (settings.Apps != null)
-				server.AddApplicationsFromCommandLine (settings.Apps);
+			if (configurationManager.Applications != null)
+				server.AddApplicationsFromCommandLine (configurationManager.Applications);
 
-			if (settings.AppConfigFile != null)
-				server.AddApplicationsFromConfigFile (settings.AppConfigFile);
+			if (configurationManager.AppConfigFile != null)
+				server.AddApplicationsFromConfigFile (configurationManager.AppConfigFile);
 
-			if (settings.AppConfigDir != null)
-				server.AddApplicationsFromConfigDirectory (settings.AppConfigDir);
+			if (configurationManager.AppConfigDir != null)
+				server.AddApplicationsFromConfigDirectory (configurationManager.AppConfigDir);
 
-			if (!settings.Master && settings.Apps == null && settings.AppConfigDir == null && settings.AppConfigFile == null)
-				server.AddApplicationsFromCommandLine ("/:.");
+			if (!configurationManager.Master && configurationManager.Applications == null
+				&& configurationManager.AppConfigDir == null && configurationManager.AppConfigFile == null)
+				server.AddApplicationsFromCommandLine ("/:."); // TODO: do we really want this?
 
 			VPathToHost vh = server.GetSingleApp ();
 			if (root && vh != null) {
 				// Redo in new domain
 				vh.CreateHost (server, webSource);
-				var svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
+				var svr = (Server)vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
-				return svr.RealMain (args, false, vh.AppHost, quiet);
+				return svr.RealMain (args, false, vh.AppHost, configurationManager.Quiet);
 			}
 			if (ext_apphost != null) {
 				ext_apphost.Server = server;
 				server.AppHost = ext_apphost;
 			}
-			if (!useTCP && !quiet) {
-				Console.Error.WriteLine ("Listening on: {0}", settings.FileName);
-			} else if (!quiet) {
-				Console.Error.WriteLine ("Listening on port: {0}", port);
-				Console.Error.WriteLine ("Listening on address: {0}", settings.IP);
+			if (!configurationManager.Quiet) {
+				if (!useTCP)
+					Console.Error.WriteLine ("Listening on: {0}", configurationManager.Filename);
+				else {
+					Console.Error.WriteLine ("Listening on port: {0}", port);
+					Console.Error.WriteLine ("Listening on address: {0}", configurationManager.Address);
+				}
+				Console.Error.WriteLine ("Root directory: {0}", configurationManager.Root);
 			}
 
-			if (!quiet)
-				Console.Error.WriteLine ("Root directory: {0}", settings.RootDir);
-
 			try {
-				if (server.Start (!settings.NonStop, backlog) == false)
+				if (server.Start (!configurationManager.NonStop, configurationManager.Backlog) == false)
 					return 2;
 
-				if (!settings.NonStop) {
+				if (!configurationManager.NonStop) {
 					Console.Error.WriteLine ("Hit Return to stop the server.");
 					while (true) {
 						try {
@@ -490,10 +199,18 @@ namespace Mono.WebServer.Apache
 			return 0;
 		}
 
+		static int GetHash (IEnumerable<string> args)
+		{
+			int hash = args.Aggregate (23, (current, arg) => current * 37 + arg.GetHashCode ());
+
+			if (hash < 0)
+				return -hash;
+			return hash;
+		}
+
 		public override object InitializeLifetimeService ()
 		{
 			return null;
 		}
 	}
 }
-

@@ -8,7 +8,6 @@ namespace Mono.WebServer.Options {
 		protected ConfigurationManager ()
 		{
 			Settings = new SettingsCollection { help, version, verbose,
-				port,
 				root, applications, appConfigFile, appConfigDir,
 				address};
 		}
@@ -18,9 +17,7 @@ namespace Mono.WebServer.Options {
 		readonly BoolSetting version = new BoolSetting ("version", "Displays version information and exits.");
 		readonly BoolSetting verbose = new BoolSetting ("verbose", "Prints extra messages. Mainly useful for debugging.", prototype: "v|verbose");
 
-		readonly UInt16Setting port = new UInt16Setting ("port", Descriptions.Port, "MonoServerPort", "MONO_FCGI_PORT", 9000);
-
-		readonly StringSetting root = new StringSetting ("root", Descriptions.Root, "MonoServerRootDir", "MONO_FCGI_ROOT", Environment.CurrentDirectory);
+		protected readonly StringSetting root = new StringSetting ("root", Descriptions.Root, "MonoServerRootDir", "MONO_FCGI_ROOT", Environment.CurrentDirectory);
 		readonly StringSetting applications = new StringSetting ("applications", Descriptions.Applications, "MonoApplications", "MONO_FCGI_APPLICATIONS");
 		readonly StringSetting appConfigFile = new StringSetting ("appconfigfile", Descriptions.AppConfigFile, "MonoApplicationsConfigFile", "MONO_FCGI_APPCONFIGFILE");
 		readonly StringSetting appConfigDir = new StringSetting ("appconfigdir", Descriptions.AppConfigDir, "MonoApplicationsConfigDir", "MONO_FCGI_APPCONFIGDIR");
@@ -32,8 +29,6 @@ namespace Mono.WebServer.Options {
 		public bool Help { get { return help; } }
 		public bool Version { get { return version; } }
 		public bool Verbose { get { return verbose; } }
-
-		public ushort Port { get { return port; } }
 
 		public string Root { get { return root; } }
 		public string Applications { get { return applications; } }

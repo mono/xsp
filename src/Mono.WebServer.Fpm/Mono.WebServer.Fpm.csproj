@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,8 +38,12 @@
     <Reference Include="System" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="Mono.Posix, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChildConfigurationManager.cs" />
     <Compile Include="ChildInfo.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="main.cs" />
@@ -45,11 +51,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">
-      <Project>{6a65ee42-6b11-40f4-8e3c-b40e4ab21001}</Project>
+      <Project>{6A65EE42-6B11-40F4-8E3C-B40E4AB21001}</Project>
       <Name>Mono.WebServer.FastCgi</Name>
     </ProjectReference>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">
-      <Project>{5339c36c-a524-44ce-93bd-59a79f57b346}</Project>
+      <Project>{5339C36C-A524-44CE-93BD-59A79F57B346}</Project>
       <Name>Mono.WebServer</Name>
     </ProjectReference>
   </ItemGroup>

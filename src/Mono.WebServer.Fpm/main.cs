@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Principal;
+using Mono.Unix;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 
@@ -47,7 +49,7 @@ namespace Mono.WebServer.Fpm {
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
-
+			
 			string configDir = configurationManager.ConfigDir;
 			if (String.IsNullOrEmpty (configDir)) {
 				Logger.Write (LogLevel.Error, "You MUST provide a configuration directory with the --config-dir parameter");
@@ -61,10 +63,26 @@ namespace Mono.WebServer.Fpm {
 			}
 
 			foreach (var fileInfo in configDirInfo.EnumerateFiles("*.xml")) {
-				ChildConfigurationManager childConfigurationManager = new ChildConfigurationManager();
-				using (WindowsIdentity newId = new WindowsIdentity("minibill"))
-				using (WindowsImpersonationContext impersonatedUser = newId.Impersonate ()) {
-					
+				
+				var childConfigurationManager = new ChildConfigurationManager();
+				childConfigurationManager.LoadXmlConfig (fileInfo.FullName);
+				string user = childConfigurationManager.User;
+				if (String.IsNullOrEmpty (user)) {
+					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner");
+					user = UnixFileSystemInfo.GetFileSystemEntry (fileInfo.FullName).OwnerUser.UserName;
+				}
+				using (var identity = new WindowsIdentity(user))
+				using (identity.Impersonate ()) {
+					var info = new ChildInfo {
+						Process = new Process {
+							StartInfo = new ProcessStartInfo {
+								FileName = configurationManager.FastCgiCommand,
+								Arguments = String.Format ("--config-file {0}", fileInfo.FullName)
+							}
+						}
+					};
+					info.Process.Start ();
+					children.Add (info);
 				}
 			}
 
@@ -87,9 +105,5 @@ namespace Mono.WebServer.Fpm {
 			*/
 			return 0;
 		}
-	}
-
-	class ChildConfigurationManager : FastCgi.ConfigurationManager{
-		
 	}
 }

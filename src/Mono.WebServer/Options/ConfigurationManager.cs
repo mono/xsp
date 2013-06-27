@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Xml;
+using Mono.Unix;
+using Mono.WebServer.Log;
 using NDesk.Options;
 
 namespace Mono.WebServer.Options {
 	public abstract partial class ConfigurationManager {
 		const string EXCEPT_BAD_ELEM = "XML setting \"{0}={1}\" is invalid.";
-
-		const string EXCEPT_XML_DUPLICATE = "XML setting \"{0}\" can only be assigned once.";
 
 		protected abstract string Name { get; }
 		protected abstract string Description { get; }
@@ -19,9 +20,46 @@ namespace Mono.WebServer.Options {
 		}
 
 		readonly SettingsCollection settings;
+
+		public bool LoadCommandLineArgs (string [] cmd_args)
+		{
+			if (cmd_args == null)
+				throw new ArgumentNullException ("cmd_args");
+
+			OptionSet optionSet = CreateOptionSet ();
+
+			List<string> extra;
+			try {
+				extra = optionSet.Parse (cmd_args);
+			} catch (OptionException e) {
+				Console.WriteLine ("{0}: {1}", Name, e.Message);
+				Console.WriteLine ("Try `{0} --help' for more information.", Name);
+				return false;
+			}
+
+			if (extra.Count > 0) {
+				Console.Write ("Warning: unparsed command line arguments: ");
+				foreach (string s in extra) {
+					Console.Write ("{0} ", s);
+				}
+				Console.WriteLine ();
+			}
+
+			return true;
+		}
+
+		public void LoadXmlConfig (string file)
+		{
+			if (String.IsNullOrEmpty (file))
+				throw new ArgumentNullException ("file");
+			var fileInfo = new UnixFileInfo (file);
+			var doc = new XmlDocument ();
+			doc.Load (file);
+			ImportSettings (doc, true, fileInfo);
+		}
 		
 		[Obsolete("Not to be used by external classes, will be private")]
-		public void ImportSettings (XmlDocument doc, bool insertEmptyValue, SettingSource source)
+		public void ImportSettings (XmlDocument doc, bool insertEmptyValue, UnixFileInfo file)
 		{
 			if (doc == null)
 				throw new ArgumentNullException ("doc");
@@ -29,16 +67,25 @@ namespace Mono.WebServer.Options {
 			var tags = doc.GetElementsByTagName ("Setting");
 			foreach (XmlElement setting in tags) {
 				string name = GetXmlValue (setting, "Name");
-				string value = GetXmlValue (setting, "Value");
+				string value = Parse (GetXmlValue (setting, "Value"), file);
 				if (name.Length == 0)
 					throw AppExcept (EXCEPT_BAD_ELEM, name, value);
 
-				if (Settings.Contains (name))
-					throw AppExcept (EXCEPT_XML_DUPLICATE, name);
-
-				if (insertEmptyValue || value.Length > 0)
-					Settings[name].MaybeParseUpdate (source, value);
+				if (settings.Contains (name)) {
+					if (insertEmptyValue || value.Length > 0)
+						settings [name].MaybeParseUpdate (SettingSource.Xml, value);
+				} else
+					Logger.Write (LogLevel.Warning, "Unrecognized xml setting: {0} with value {1}", name, value);
 			}
+		}
+
+		string Parse (string value, UnixFileInfo file)
+		{
+			if (file == null)
+				return value;
+			return value.Replace ("$(user)", file.OwnerUser.UserName)
+			            .Replace ("$(group)", file.OwnerGroup.GroupName)
+			            .Replace ("$(filename)", Path.GetFileNameWithoutExtension(file.Name));
 		}
 
 		protected OptionSet CreateOptionSet ()
@@ -52,21 +99,10 @@ namespace Mono.WebServer.Options {
 				} else {
 					ISetting setting1 = setting; // Used in closure, must copy
 					p.Add (setting.Prototype, setting.Description,
-					       v =>
-					       { if (v != null) setting1.MaybeParseUpdate (SettingSource.CommandLine, v);
-					       });
+					       v => { if (v != null) setting1.MaybeParseUpdate (SettingSource.CommandLine, v); } );
 				}
 			}
 			return p;
-		}
-
-		public void LoadXmlConfig (string file)
-		{
-			if (String.IsNullOrEmpty (file))
-				throw new ArgumentNullException ("file");
-			var doc = new XmlDocument ();
-			doc.Load (file);
-			ImportSettings (doc, true, SettingSource.Xml);
 		}
 
 		static ApplicationException AppExcept (string message, params object [] args)
@@ -88,33 +124,6 @@ namespace Mono.WebServer.Options {
 			}
 
 			return String.Empty;
-		}
-
-		public bool LoadCommandLineArgs (string [] cmd_args)
-		{
-			if (cmd_args == null)
-				throw new ArgumentNullException ("cmd_args");
-
-			OptionSet optionSet = CreateOptionSet ();
-
-			List<string> extra;
-			try {
-				extra = optionSet.Parse (cmd_args);
-			} catch (OptionException e) {
-				Console.WriteLine ("{0}: {1}", Name, e.Message);
-				Console.WriteLine ("Try `{0} --help' for more information.", Name);
-				return false;
-			}
-
-			if (extra.Count > 0) {
-				Console.Write("Warning: unparsed command line arguments: ");
-				foreach (string s in extra) {
-					Console.Write ("{0} ", s);
-				}
-				Console.WriteLine();
-			}
-
-			return true;
 		}
 	}
 }

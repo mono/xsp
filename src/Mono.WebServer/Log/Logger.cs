@@ -27,54 +27,23 @@
 //
 
 using System;
-using System.IO;
 using System.Globalization;
 
 namespace Mono.WebServer.Log {
-	public class Logger
+	public static class Logger
 	{
-		#region Private Fields
-		
-		StreamWriter writer;
-		
-		bool write_to_console;
-		
-		LogLevel level = LogLevel.Standard;
-		
-		readonly object write_lock = new object ();
-		
-		static readonly Logger logger = new Logger ();
-		
-		#endregion
-		
-		
-		
-		#region Private Methods
+		static readonly LoggerImpl logger = new LoggerImpl ();
 
-		Logger ()
-		{
-			
-		}
-
-		~Logger ()
-		{
-			Close ();
-		}
-
-		#endregion
-		
-		
-		
 		#region Public Static Properties
 		
 		public static LogLevel Level {
-			get {return logger.level;}
-			set {logger.level = value;}
+			get {return logger.Level;}
+			set {logger.Level = value;}
 		}
 		
 		public static bool WriteToConsole {
-			get {return logger.write_to_console;}
-			set {logger.write_to_console = value;}
+			get {return logger.WriteToConsole;}
+			set {logger.WriteToConsole = value;}
 		}
 		
 		#endregion
@@ -85,17 +54,7 @@ namespace Mono.WebServer.Log {
 		
 		public static void Open (string path)
 		{
-			if (path == null)
-				throw new ArgumentNullException ("path");
-			
-			lock (logger.write_lock) {
-				Close ();
-				Stream stream = File.Open (path,
-					FileMode.Append, FileAccess.Write,
-					FileShare.ReadWrite);
-				stream.Seek (0, SeekOrigin.End);
-				logger.writer = new StreamWriter (stream);
-			}
+			logger.Open (path);
 		}
 		
 		public static void Write (LogLevel level,
@@ -120,43 +79,12 @@ namespace Mono.WebServer.Log {
 
 		public static void Write (LogLevel level, string message)
 		{
-			if (logger.writer == null && !logger.write_to_console)
-				return;
-			
-			if ((Level & level) == LogLevel.None)
-				return;
-			
-			string text = String.Format (CultureInfo.CurrentCulture,
-				"[{0:u}] {1,-7} {2}",
-				DateTime.Now,
-				level,
-				message);
-			
-			lock (logger.write_lock) {
-				if (logger.write_to_console)
-					Console.WriteLine (text);
-				
-				if (logger.writer != null) {
-					logger.writer.WriteLine (text);
-					logger.writer.Flush ();
-				}
-			}
+			logger.Write (level, message);
 		}
 		
-		static void Close ()
+		public static void Close ()
 		{
-			lock (logger.write_lock) {
-				if (logger.writer == null)
-					return;
-				
-				try {
-					logger.writer.Flush ();
-					logger.writer.Close ();
-				} catch (ObjectDisposedException) {
-					// Already done
-				}
-				logger.writer = null;
-			}
+			logger.Close ();
 		}
 		
 		#endregion

@@ -55,6 +55,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Web" />
     <Reference Include="System.Configuration" />
+    <Reference Include="Mono.Posix, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -70,6 +73,7 @@
     <Compile Include="LockRecursionException.cs" />
     <Compile Include="LockRecursionPolicy.cs" />
     <Compile Include="Log\Logger.cs" />
+    <Compile Include="Log\LoggerImpl.cs" />
     <Compile Include="Log\LogLevel.cs" />
     <Compile Include="MapPathEventArgs.cs" />
     <Compile Include="MapPathEventHandler.cs" />

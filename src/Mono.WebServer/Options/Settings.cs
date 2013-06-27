@@ -42,7 +42,6 @@ namespace Mono.WebServer.Options {
 			AppSetting = appSetting;
 			Environment = environment;
 			Name = name;
-			DefaultValue = defaultValue;
 			this.parser = parser;
 			Value = defaultValue;
 			if (!String.IsNullOrEmpty (environment))
@@ -88,7 +87,6 @@ namespace Mono.WebServer.Options {
 		public string Environment { get; private set; }
 		public string AppSetting { get; private set; }
 		public string Description { get; private set; }
-		public T DefaultValue { get; private set; }
 		public T Value { get; private set; }
 		[Obsolete]
 		object ISetting.Value {

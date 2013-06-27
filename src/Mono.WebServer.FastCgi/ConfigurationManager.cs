@@ -51,7 +51,7 @@ namespace Mono.WebServer {
 			Stream stream = asm.GetManifestResourceStream (resource);
 			if (stream != null)
 				doc.Load (stream);
-			configurationManager.ImportSettings (doc, false, SettingSource.Xml);
+			configurationManager.ImportSettings (doc, false, null);
 		}
 
 		public bool Contains (string name)

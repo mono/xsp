@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Sockets;
+using System.IO;
 using System.Reflection;
 using Mono.WebServer.Log;
 
@@ -43,20 +43,28 @@ namespace Mono.WebServer.Fpm {
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
-			/*Socket socket;
-			if (!CreateSocket (configurationManager, out socket))
+			string configDir = configurationManager.ConfigDir;
+			if (String.IsNullOrEmpty (configDir)) {
+				Logger.Write (LogLevel.Error, "You MUST provide a configuration directory with the --config-dir parameter");
 				return 1;
+			}
 
-			string root_dir;
+			var configDirInfo = new DirectoryInfo (configDir);
+			if (!configDirInfo.Exists) {
+				Logger.Write (LogLevel.Error, "The configuration directory \"{0}\" does not exist!", configDir);
+				return 1;
+			}
+
+			foreach (var fileInfo in configDirInfo.EnumerateFiles("*.xml")) {
+				
+			}
+
+			/*string root_dir;
 			if (!GetRootDirectory (configurationManager, out root_dir))
 				return 1;
 
-			CreateAppServer (configurationManager, root_dir);
-
 			if (!LoadApplicationsConfig (configurationManager))
 				return 1;
-
-			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
 
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable);

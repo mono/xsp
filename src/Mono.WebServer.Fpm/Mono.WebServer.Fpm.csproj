@@ -38,11 +38,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChildInfo.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="main.cs" />
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">
+      <Project>{6a65ee42-6b11-40f4-8e3c-b40e4ab21001}</Project>
+      <Name>Mono.WebServer.FastCgi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">
       <Project>{5339c36c-a524-44ce-93bd-59a79f57b346}</Project>
       <Name>Mono.WebServer</Name>

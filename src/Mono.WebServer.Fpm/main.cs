@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Security.Principal;
 using Mono.WebServer.Log;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
-	class Server {
+	public static class Server {
+		static List<ChildInfo> children = new List<ChildInfo> ();
+
 		public static int Main (string [] args)
 		{
 			var configurationManager = new ConfigurationManager ();
@@ -56,7 +61,11 @@ namespace Mono.WebServer.Fpm {
 			}
 
 			foreach (var fileInfo in configDirInfo.EnumerateFiles("*.xml")) {
-				
+				ChildConfigurationManager childConfigurationManager = new ChildConfigurationManager();
+				using (WindowsIdentity newId = new WindowsIdentity("minibill"))
+				using (WindowsImpersonationContext impersonatedUser = newId.Impersonate ()) {
+					
+				}
 			}
 
 			/*string root_dir;
@@ -78,5 +87,9 @@ namespace Mono.WebServer.Fpm {
 			*/
 			return 0;
 		}
+	}
+
+	class ChildConfigurationManager : FastCgi.ConfigurationManager{
+		
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
-	class ConfigurationManager : Options.ConfigurationManager
+	class ConfigurationManager : Options.ConfigurationManager, IHelpConfigurationManager
 	{
 		public ConfigurationManager ()
 		{
@@ -18,11 +18,11 @@ namespace Mono.WebServer.Fpm {
 		}
 		#endregion
 
-		protected override string Name {
+		public string Name {
 			get { return "mono-fpm"; }
 		}
 
-		protected override string Description
+		public string Description
 		{
 			get { return "mono-fpm is a FastCgi process manager."; }
 		}

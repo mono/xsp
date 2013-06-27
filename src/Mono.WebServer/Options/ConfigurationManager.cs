@@ -11,42 +11,12 @@ namespace Mono.WebServer.Options {
 	public abstract partial class ConfigurationManager {
 		const string EXCEPT_BAD_ELEM = "XML setting \"{0}={1}\" is invalid.";
 
-		protected abstract string Name { get; }
-		protected abstract string Description { get; }
-
 		[Obsolete]
 		protected SettingsCollection Settings {
 			get { return settings; }
 		}
 
 		readonly SettingsCollection settings;
-
-		public bool LoadCommandLineArgs (string [] cmd_args)
-		{
-			if (cmd_args == null)
-				throw new ArgumentNullException ("cmd_args");
-
-			OptionSet optionSet = CreateOptionSet ();
-
-			List<string> extra;
-			try {
-				extra = optionSet.Parse (cmd_args);
-			} catch (OptionException e) {
-				Console.WriteLine ("{0}: {1}", Name, e.Message);
-				Console.WriteLine ("Try `{0} --help' for more information.", Name);
-				return false;
-			}
-
-			if (extra.Count > 0) {
-				Console.Write ("Warning: unparsed command line arguments: ");
-				foreach (string s in extra) {
-					Console.Write ("{0} ", s);
-				}
-				Console.WriteLine ();
-			}
-
-			return true;
-		}
 
 		public void LoadXmlConfig (string file)
 		{
@@ -88,7 +58,7 @@ namespace Mono.WebServer.Options {
 			            .Replace ("$(filename)", Path.GetFileNameWithoutExtension(file.Name));
 		}
 
-		protected OptionSet CreateOptionSet ()
+		public OptionSet CreateOptionSet ()
 		{
 			var p = new OptionSet ();
 			foreach (ISetting setting in settings) {

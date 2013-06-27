@@ -48,16 +48,6 @@ namespace Mono.WebServer.Options {
 		}
 		#endregion
 
-		public void PrintHelp ()
-		{
-			WebServer.Version.Show ();
-			Console.WriteLine (Description);
-			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    {0} [...]", Name);
-			Console.WriteLine ();
-			CreateOptionSet ().WriteOptionDescriptions (Console.Out);
-		}
-
 		protected void Add (params ISetting[] settings)
 		{
 			foreach (ISetting setting in settings)

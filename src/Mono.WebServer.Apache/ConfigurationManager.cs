@@ -64,11 +64,11 @@ namespace Mono.WebServer.Apache {
 		}
 		#endregion
 
-		protected override string Name {
+		public override string Name {
 			get { return "mod-mono-server.exe"; }
 		}
 
-		protected override string Description {
+		public override string Description {
 			get { return "mod-mono-server.exe is a ASP.NET server used from mod_mono."; }
 		}
 	}

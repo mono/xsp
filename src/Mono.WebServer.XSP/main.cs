@@ -34,6 +34,7 @@ using System.Reflection;
 using System.Threading;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.XSP
 {

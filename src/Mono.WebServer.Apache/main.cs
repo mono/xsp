@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Apache {
 	public class Server : MarshalByRefObject {

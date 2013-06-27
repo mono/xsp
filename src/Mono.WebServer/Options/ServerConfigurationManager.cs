@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Net;
+using NDesk.Options;
 
 namespace Mono.WebServer.Options {
-	public abstract class ServerConfigurationManager : ConfigurationManager
+	public abstract class ServerConfigurationManager : ConfigurationManager, IHelpConfigurationManager
 	{
 		protected ServerConfigurationManager ()
 		{
@@ -35,5 +36,8 @@ namespace Mono.WebServer.Options {
 
 		public IPAddress Address { get { return address; } }
 		#endregion
+
+		public abstract string Name { get; }
+		public abstract string Description { get; }
 	}
 }

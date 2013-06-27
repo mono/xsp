@@ -91,11 +91,11 @@ namespace Mono.WebServer.XSP {
 		}
 		#endregion
 
-		protected override string Name {
+		public override string Name {
 			get { return "xsp"; }
 		}
 
-		protected override string Description {
+		public override string Description {
 			get {
 				return "XSP server is a sample server that hosts the ASP.NET runtime in a minimalistic HTTP server";
 			}

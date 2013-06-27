@@ -51,11 +51,11 @@ namespace Mono.WebServer.FastCgi {
 			return Settings.Contains (name);
 		}
 
-		protected override string Name {
+		public override string Name {
 			get { return "mono-fastcgi"; }
 		}
 
-		protected override string Description {
+		public override string Description {
 			get { return "A FastCgi interface for ASP.NET applications."; }
 		}
 	}

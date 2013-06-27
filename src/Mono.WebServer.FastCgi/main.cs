@@ -34,6 +34,7 @@ using System.Net;
 using System.Reflection;
 using Mono.FastCgi;
 using Mono.WebServer.Log;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi
 {

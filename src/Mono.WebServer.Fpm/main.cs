@@ -44,9 +44,8 @@ namespace Mono.WebServer.Fpm {
 			Logger.Level = LogLevel.All;
 #endif
 
-			Logger.Write (LogLevel.Debug,
-				Assembly.GetExecutingAssembly ().GetName ().Name);
-			
+			Logger.Write (LogLevel.Debug, Assembly.GetExecutingAssembly ().GetName ().Name);
+
 			string configDir = configurationManager.ConfigDir;
 			if (String.IsNullOrEmpty (configDir)) {
 				Logger.Write (LogLevel.Error, "You MUST provide a configuration directory with the --config-dir parameter");
@@ -59,37 +58,27 @@ namespace Mono.WebServer.Fpm {
 				return 1;
 			}
 
-			foreach (var fileInfo in configDirInfo.EnumerateFiles("*.xml")) {
-				
-				var childConfigurationManager = new ChildConfigurationManager();
+			foreach (var fileInfo in configDirInfo.EnumerateFiles ("*.xml")) {
+				var childConfigurationManager = new ChildConfigurationManager ();
 				childConfigurationManager.LoadXmlConfig (fileInfo.FullName);
 				string user = childConfigurationManager.User;
-				if (String.IsNullOrEmpty (user)) {
-					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner");
-					user = UnixFileSystemInfo.GetFileSystemEntry (fileInfo.FullName).OwnerUser.UserName;
-				}
-				using (var identity = new WindowsIdentity(user))
-				using (identity.Impersonate ()) {
-					var info = new ChildInfo {
-						Process = new Process {
-							StartInfo = new ProcessStartInfo {
-								FileName = configurationManager.FastCgiCommand,
-								Arguments = String.Format ("--config-file {0}", fileInfo.FullName)
-							}
-						}
-					};
-					info.Process.Start ();
-					children.Add (info);
+
+				if (Platform.IsUnix) {
+					if (String.IsNullOrEmpty (user)) {
+						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner");
+						user = UnixFileSystemInfo.GetFileSystemEntry (fileInfo.FullName).OwnerUser.UserName;
+					}
+
+					using (var identity = new WindowsIdentity (user))
+					using (identity.Impersonate ())
+						SpawnChild (configurationManager, fileInfo);
+				} else {
+					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one");
+					SpawnChild (configurationManager, fileInfo);
 				}
 			}
 
-			/*string root_dir;
-			if (!GetRootDirectory (configurationManager, out root_dir))
-				return 1;
-
-			if (!LoadApplicationsConfig (configurationManager))
-				return 1;
-
+			/*
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable);
 
@@ -101,6 +90,21 @@ namespace Mono.WebServer.Fpm {
 			}
 			*/
 			return 0;
+		}
+
+		static void SpawnChild (ConfigurationManager configurationManager, FileInfo fileInfo)
+		{
+			var info = new ChildInfo {
+				Process = new Process {
+					StartInfo = new ProcessStartInfo {
+						FileName = configurationManager.FastCgiCommand,
+						Arguments = String.Format ("--config-file {0}", fileInfo.FullName),
+						UseShellExecute = true
+					}
+				}
+			};
+			info.Process.Start ();
+			children.Add (info);
 		}
 	}
 }

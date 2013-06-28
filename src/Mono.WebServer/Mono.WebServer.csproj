@@ -99,6 +99,7 @@
     <Compile Include="Options\UInt16Setting.cs" />
     <Compile Include="Options\Descriptions.cs" />
     <Compile Include="Paths.cs" />
+    <Compile Include="Platform.cs" />
     <Compile Include="RequestData.cs" />
     <Compile Include="RequestLineException.cs" />
     <Compile Include="SearchPattern.cs" />

@@ -21,14 +21,22 @@ namespace Mono.WebServer.Options {
 		{
 			if (String.IsNullOrEmpty (file))
 				throw new ArgumentNullException ("file");
-			var fileInfo = new UnixFileInfo (file);
 			var doc = new XmlDocument ();
 			doc.Load (file);
-			ImportSettings (doc, true, fileInfo);
+			if (Platform.IsUnix) {
+				var fileInfo = new UnixFileInfo (file);
+				ImportSettings (doc, true, file, fileInfo.OwnerUser.UserName, fileInfo.OwnerGroup.GroupName);
+			} else
+				ImportSettings (doc, true, file);
 		}
 		
-		[Obsolete("Not to be used by external classes, will be private")]
-		public void ImportSettings (XmlDocument doc, bool insertEmptyValue, UnixFileInfo file)
+		[Obsolete]
+		public void ImportSettings (XmlDocument doc, bool insertEmptyValue)
+		{
+			ImportSettings (doc, insertEmptyValue, null);
+		}
+
+		void ImportSettings (XmlDocument doc, bool insertEmptyValue, string filename , string user = null, string group = null)
 		{
 			if (doc == null)
 				throw new ArgumentNullException ("doc");
@@ -36,7 +44,7 @@ namespace Mono.WebServer.Options {
 			var tags = doc.GetElementsByTagName ("Setting");
 			foreach (XmlElement setting in tags) {
 				string name = GetXmlValue (setting, "Name");
-				string value = Parse (GetXmlValue (setting, "Value"), file);
+				string value = Parse (GetXmlValue (setting, "Value"), filename, user, group);
 				if (name.Length == 0)
 					throw AppExcept (EXCEPT_BAD_ELEM, name, value);
 
@@ -48,13 +56,15 @@ namespace Mono.WebServer.Options {
 			}
 		}
 
-		string Parse (string value, UnixFileInfo file)
+		string Parse (string value, string filename, string user, string group)
 		{
-			if (file == null)
-				return value;
-			return value.Replace ("$(user)", file.OwnerUser.UserName)
-			            .Replace ("$(group)", file.OwnerGroup.GroupName)
-			            .Replace ("$(filename)", Path.GetFileNameWithoutExtension(file.Name));
+			if (!String.IsNullOrEmpty (filename))
+				value = value.Replace ("$(filename)", Path.GetFileNameWithoutExtension (filename));
+			if (!String.IsNullOrEmpty (user))
+				value = value.Replace ("$(user)", user);
+			if (!String.IsNullOrEmpty (group))
+				value = value.Replace ("$(group)", group);
+			return value;
 		}
 
 		public OptionSet CreateOptionSet ()
@@ -68,7 +78,7 @@ namespace Mono.WebServer.Options {
 				} else {
 					ISetting setting1 = setting; // Used in closure, must copy
 					p.Add (setting.Prototype + "=", setting.Description,
-						(v) => { if (v != null) setting1.MaybeParseUpdate (SettingSource.CommandLine, v); } );
+						v => { if (v != null) setting1.MaybeParseUpdate (SettingSource.CommandLine, v); } );
 				}
 			}
 			return p;

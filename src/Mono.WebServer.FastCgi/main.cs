@@ -74,22 +74,18 @@ namespace Mono.WebServer.FastCgi
 				return 0;
 			}
 
-			// Enable console logging during Main ().
-			Logger.WriteToConsole = true;
-
 			if (!configurationManager.LoadConfigFile ())
 				return 1;
+
+			configurationManager.SetupLogger ();
 
 #if DEBUG
 			// Log everything while debugging
 			Logger.Level = LogLevel.All;
 #endif
 
-			configurationManager.SetupLogger ();
-
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
-
 
 			Socket socket;
 			if (!CreateSocket (configurationManager, out socket))

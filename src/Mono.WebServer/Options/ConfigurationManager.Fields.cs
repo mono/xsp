@@ -14,7 +14,11 @@ namespace Mono.WebServer.Options {
 		readonly BoolSetting help = new BoolSetting ("help", "Shows this help message and exits.", prototype: "?|h|help");
 		readonly BoolSetting version = new BoolSetting ("version", "Displays version information and exits.", "V|version");
 		readonly BoolSetting verbose = new BoolSetting ("verbose", "Prints extra messages. Mainly useful for debugging.", prototype: "v|verbose");
+#if DEBUG
+		readonly BoolSetting printlog = new BoolSetting ("printlog", "Prints log messages to the console.", environment: "MONO_PRINTLOG|MONO_FCGI_PRINTLOG", defaultValue: true);
+#else
 		readonly BoolSetting printlog = new BoolSetting ("printlog", "Prints log messages to the console.", environment: "MONO_PRINTLOG|MONO_FCGI_PRINTLOG");
+#endif
 
 		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_LOGFILE|MONO_FCGI_LOGFILE");
 		readonly StringSetting configFile = new StringSetting ("configfile", Descriptions.ConfigFile);

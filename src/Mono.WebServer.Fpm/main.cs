@@ -34,18 +34,15 @@ namespace Mono.WebServer.Fpm {
 				return 0;
 			}
 
-			// Enable console logging during Main ().
-			Logger.WriteToConsole = true;
-
 			if (!configurationManager.LoadConfigFile ())
 				return 1;
+
+			configurationManager.SetupLogger ();
 
 #if DEBUG
 			// Log everything while debugging
 			Logger.Level = LogLevel.All;
 #endif
-
-			configurationManager.SetupLogger ();
 
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);

@@ -10,7 +10,7 @@ using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
 	public static class Server {
-		static List<ChildInfo> children = new List<ChildInfo> ();
+		static readonly List<ChildInfo> children = new List<ChildInfo> ();
 
 		public static int Main (string [] args)
 		{

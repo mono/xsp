@@ -81,7 +81,6 @@ namespace Mono.WebServer.Options {
 		}
 
 		SettingSource source = SettingSource.Default;
-		public bool ConsoleVisible { get; private set; }
 		public string Name { get; private set; }
 		public string Prototype { get; private set; }
 		public string Environment { get; private set; }

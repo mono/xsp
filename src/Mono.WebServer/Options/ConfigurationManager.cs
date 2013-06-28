@@ -67,8 +67,10 @@ namespace Mono.WebServer.Options {
 					       v => boolSetting.MaybeUpdate (SettingSource.CommandLine, v != null));
 				} else {
 					ISetting setting1 = setting; // Used in closure, must copy
-					p.Add (setting.Prototype, setting.Description,
-					       v => { if (v != null) setting1.MaybeParseUpdate (SettingSource.CommandLine, v); } );
+					p.Add (setting.Prototype + "=", setting.Description,
+						(v,k) => {
+							if (k != null)
+								setting1.MaybeParseUpdate (SettingSource.CommandLine, v); } );
 				}
 			}
 			return p;

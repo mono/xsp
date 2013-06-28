@@ -58,7 +58,10 @@ namespace Mono.WebServer.Fpm {
 				return 1;
 			}
 
+			Logger.Write (LogLevel.Debug, "Configuration directory exists, loading configuration files");
+
 			foreach (var fileInfo in configDirInfo.EnumerateFiles ("*.xml")) {
+				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
 				var childConfigurationManager = new ChildConfigurationManager ();
 				childConfigurationManager.LoadXmlConfig (fileInfo.FullName);
 				string user = childConfigurationManager.User;

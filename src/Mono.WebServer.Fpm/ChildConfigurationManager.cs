@@ -2,7 +2,8 @@
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
-	class ChildConfigurationManager : FastCgi.ConfigurationManager{
+	class ChildConfigurationManager : FastCgi.ConfigurationManager
+	{
 		public ChildConfigurationManager ()
 		{
 			Add (user);

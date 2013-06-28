@@ -9,7 +9,8 @@ using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
-	public static class Server {
+	public static class Server 
+	{
 		static readonly List<ChildInfo> children = new List<ChildInfo> ();
 
 		public static int Main (string [] args)

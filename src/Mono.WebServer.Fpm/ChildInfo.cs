@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 
 namespace Mono.WebServer.Fpm {
-	class ChildInfo {
+	class ChildInfo 
+	{
 		public ChildInfo (Process process = null)
 		{
 			Process = process;

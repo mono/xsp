@@ -82,17 +82,20 @@ namespace Mono.WebServer.Fpm {
 				}
 			}
 
-			/*
-			var stoppable = configurationManager.Stoppable;
-			server.Start (stoppable);
-
-			if (stoppable) {
+			if (configurationManager.Stoppable) {
 				Console.WriteLine (
 					"Hit Return to stop the server.");
 				Console.ReadLine ();
-				server.Stop ();
+				foreach (ChildInfo child in children) {
+					// TODO: this is a bit brutal, be nicer
+					try {
+						if (!child.Process.HasExited)
+							child.Process.Kill ();
+					} catch (InvalidOperationException) {
+						// Died between the if and the kill
+					}
+				}
 			}
-			*/
 			return 0;
 		}
 

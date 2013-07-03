@@ -37,11 +37,5 @@ namespace Mono.WebServer {
 				return platform == 4 || platform == 6 || platform == 128;
 			}
 		}
-
-		enum FinePlatformID {
-			Windows,
-			Linux,
-			MacOSX
-		}
 	}
 }

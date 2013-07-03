@@ -54,6 +54,8 @@ namespace Mono.WebServer.Options {
 
 		protected void Add (params ISetting[] settings)
 		{
+			if (settings == null) 
+				throw new ArgumentNullException ("settings");
 			foreach (ISetting setting in settings)
 				this.settings.Add (setting);
 		}

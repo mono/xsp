@@ -3,12 +3,6 @@
 namespace Mono.WebServer.Fpm {
 	class ConfigurationManager : Options.ConfigurationManager, IHelpConfigurationManager
 	{
-		public ConfigurationManager ()
-		{
-			Add (stoppable,
-				configDir, fastCgiCommand);
-		}
-
 		#region Backing fields
 		readonly BoolSetting stoppable = new BoolSetting ("stoppable", Descriptions.Stoppable);
 
@@ -33,9 +27,14 @@ namespace Mono.WebServer.Fpm {
 			get { return "mono-fpm"; }
 		}
 
-		public string Description
-		{
+		public string Description {
 			get { return "mono-fpm is a FastCgi process manager."; }
+		}
+
+		public ConfigurationManager ()
+		{
+			Add (stoppable,
+				configDir, fastCgiCommand);
 		}
 	}
 }

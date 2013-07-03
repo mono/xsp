@@ -10,12 +10,12 @@ namespace Mono.WebServer.Options {
 	public abstract partial class ConfigurationManager {
 		const string EXCEPT_BAD_ELEM = "XML setting \"{0}={1}\" is invalid.";
 
+		readonly SettingsCollection settings;
+
 		[Obsolete]
 		protected SettingsCollection Settings {
 			get { return settings; }
 		}
-
-		readonly SettingsCollection settings;
 
 		public void LoadXmlConfig (string file)
 		{
@@ -56,7 +56,7 @@ namespace Mono.WebServer.Options {
 			}
 		}
 
-		string Parse (string value, string filename, string user, string group)
+		static string Parse (string value, string filename, string user, string group)
 		{
 			if (!String.IsNullOrEmpty (filename))
 				value = value.Replace ("$(filename)", Path.GetFileNameWithoutExtension (filename));

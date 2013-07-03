@@ -65,6 +65,7 @@
     <Compile Include="BaseApplicationHost.cs" />
     <Compile Include="BaseRequestBroker.cs" />
     <Compile Include="EndOfRequestHandler.cs" />
+    <Compile Include="FinePlatformID.cs" />
     <Compile Include="HttpErrors.cs" />
     <Compile Include="IApplicationHost.cs" />
     <Compile Include="InitialWorkerRequest.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Options\BoolSetting.cs" />
     <Compile Include="Options\ConfigurationManagerExtensions.cs" />
     <Compile Include="Options\ConfigurationManager.Fields.cs" />
+    <Compile Include="Options\IHelpConfigurationManager.cs" />
     <Compile Include="Options\NullableUInt16Setting.cs" />
     <Compile Include="Options\EnumSetting.cs" />
     <Compile Include="Options\NullableInt32Setting.cs" />

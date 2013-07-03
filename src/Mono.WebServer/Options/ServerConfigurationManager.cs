@@ -4,13 +4,6 @@ using System.Net;
 namespace Mono.WebServer.Options {
 	public abstract class ServerConfigurationManager : ConfigurationManager, IHelpConfigurationManager
 	{
-		protected ServerConfigurationManager ()
-		{
-			Add (root, applications, appConfigFile, appConfigDir,
-				backlog,
-				address);
-		}
-
 		#region Backing fields
 		protected readonly StringSetting root = new StringSetting ("root", Descriptions.Root, "MonoServerRootDir", "MONO_ROOT|MONO_FCGI_ROOT", Environment.CurrentDirectory);
 		readonly StringSetting applications = new StringSetting ("applications", Descriptions.Applications, "MonoApplications", "MONO_APPLICATIONS|MONO_FCGI_APPLICATIONS");
@@ -45,5 +38,12 @@ namespace Mono.WebServer.Options {
 
 		public abstract string Name { get; }
 		public abstract string Description { get; }
+
+		protected ServerConfigurationManager ()
+		{
+			Add (root, applications, appConfigFile, appConfigDir,
+				backlog,
+				address);
+		}
 	}
 }

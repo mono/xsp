@@ -42,10 +42,4 @@ namespace Mono.WebServer.Options {
 			return true;
 		}
 	}
-
-	public interface IHelpConfigurationManager {
-		string Name { get; }
-		string Description { get; }
-		OptionSet CreateOptionSet ();
-	}
 }

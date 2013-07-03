@@ -51,8 +51,6 @@ namespace Mono.FastCgi {
 		
 		readonly object accept_lock = new object ();
 		
-		AsyncCallback accept_cb;
-		
 		int max_connections = Int32.MaxValue;
 		
 		int max_requests = Int32.MaxValue;
@@ -148,18 +146,25 @@ namespace Mono.FastCgi {
 		
 		#region Public Methods
 		
+		[Obsolete]
 		public void Start (bool background)
 		{
-			if (started)
+			Start (background, 500);
+		}
+
+		public void Start (bool background, int backlog)
+		{
+			if (started) {
 				throw new InvalidOperationException (
 					Strings.Server_AlreadyStarted);
-			
-			listen_socket.Listen (500);
-			
+			}
+
+			listen_socket.Listen (backlog);
+
 			runner = new Thread (RunServer) {IsBackground = background};
 			runner.Start ();
 		}
-		
+
 		public void Stop ()
 		{
 			if (!started)
@@ -318,8 +323,7 @@ namespace Mono.FastCgi {
 		void RunServer ()
 		{
 			started = true;
-			accept_cb = OnAccept;
-			listen_socket.BeginAccept (accept_cb, null);
+			listen_socket.BeginAccept (OnAccept, null);
 			if (runner.IsBackground)
 				return;
 
@@ -389,7 +393,7 @@ namespace Mono.FastCgi {
 					return;
 				
 				accepting = true;
-				listen_socket.BeginAccept (accept_cb, null);
+				listen_socket.BeginAccept (OnAccept, null);
 			}
 		}
 		

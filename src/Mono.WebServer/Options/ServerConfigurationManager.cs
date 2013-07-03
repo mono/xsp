@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using NDesk.Options;
 
 namespace Mono.WebServer.Options {
 	public abstract class ServerConfigurationManager : ConfigurationManager, IHelpConfigurationManager
@@ -8,6 +7,7 @@ namespace Mono.WebServer.Options {
 		protected ServerConfigurationManager ()
 		{
 			Add (root, applications, appConfigFile, appConfigDir,
+				backlog,
 				address);
 		}
 
@@ -16,6 +16,8 @@ namespace Mono.WebServer.Options {
 		readonly StringSetting applications = new StringSetting ("applications", Descriptions.Applications, "MonoApplications", "MONO_APPLICATIONS|MONO_FCGI_APPLICATIONS");
 		readonly StringSetting appConfigFile = new StringSetting ("appconfigfile", Descriptions.AppConfigFile, "MonoApplicationsConfigFile", "MONO_APPCONFIGFILE|MONO_FCGI_APPCONFIGFILE");
 		readonly StringSetting appConfigDir = new StringSetting ("appconfigdir", Descriptions.AppConfigDir, "MonoApplicationsConfigDir", "MONO_APPCONFIGDIR|MONO_FCGI_APPCONFIGDIR");
+
+		readonly UInt32Setting backlog = new UInt32Setting ("backlog", "The listen backlog.", defaultValue: 500);
 
 		protected readonly Setting<IPAddress> address = new Setting<IPAddress> ("address", IPAddress.TryParse, Descriptions.Address, "MonoServerAddress", "MONO_ADDRESS|MONO_FCGI_ADDRESS", IPAddress.Loopback);
 		#endregion
@@ -32,6 +34,10 @@ namespace Mono.WebServer.Options {
 		}
 		public string AppConfigDir {
 			get { return appConfigDir; }
+		}
+
+		public uint Backlog {
+			get { return backlog; }
 		}
 
 		public IPAddress Address { get { return address; } }

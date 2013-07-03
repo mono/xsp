@@ -7,7 +7,7 @@ namespace Mono.WebServer.Apache {
 		public ConfigurationManager (bool quietDefault, string rootDefault)
 		{
 			Add (nonstop, quiet, noHidden, terminate, master,
-				port, backlog, minThreads,
+				port, minThreads,
 				filename, pidFile);
 			quiet.MaybeUpdate (SettingSource.Default, quietDefault);
 			if (rootDefault != null)
@@ -22,7 +22,6 @@ namespace Mono.WebServer.Apache {
 		readonly BoolSetting master = new BoolSetting ("master", Descriptions.Master);
 
 		readonly NullableUInt16Setting port = new NullableUInt16Setting ("port", Descriptions.Port, "MonoServerPort", "MONO_FCGI_PORT");
-		readonly Int32Setting backlog = new Int32Setting ("backlog", "The listen backlog.", defaultValue: 500);
 		readonly NullableInt32Setting minThreads = new NullableInt32Setting ("minThreads", "The minimum number of threads the thread pool creates on startup. Increase this value to handle a sudden inflow of connections.");
 
 		readonly StringSetting filename = new StringSetting ("filename", "A unix socket filename to listen on.", "MonoUnixSocket", "MONO_UNIX_SOCKET", Path.Combine (Path.GetTempPath (), "mod_mono_server"));
@@ -48,9 +47,6 @@ namespace Mono.WebServer.Apache {
 
 		public ushort? Port {
 			get { return port; }
-		}
-		public int Backlog {
-			get { return backlog; }
 		}
 		public int? MinThreads {
 			get { return minThreads; }

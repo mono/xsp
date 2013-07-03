@@ -103,7 +103,7 @@ namespace Mono.WebServer.FastCgi
 			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
 
 			var stoppable = configurationManager.Stoppable;
-			server.Start (stoppable);
+			server.Start (stoppable, (int)configurationManager.Backlog);
 			
 			if (stoppable) {
 				Console.WriteLine (

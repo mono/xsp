@@ -61,26 +61,7 @@ namespace Mono.WebServer.Fpm {
 
 			Logger.Write (LogLevel.Debug, "Configuration directory exists, loading configuration files");
 
-			foreach (var fileInfo in configDirInfo.GetFiles("*.xml")) {
-				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
-				var childConfigurationManager = new ChildConfigurationManager ();
-				childConfigurationManager.LoadXmlConfig (fileInfo.FullName);
-				string user = childConfigurationManager.User;
-
-				if (Platform.IsUnix) {
-					if (String.IsNullOrEmpty (user)) {
-						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						user = UnixFileSystemInfo.GetFileSystemEntry (fileInfo.FullName).OwnerUser.UserName;
-					}
-
-					using (var identity = new WindowsIdentity (user))
-					using (identity.Impersonate ())
-						SpawnChild (configurationManager, fileInfo);
-				} else {
-					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					SpawnChild (configurationManager, fileInfo);
-				}
-			}
+			StartChildren (configDirInfo, configurationManager);
 
 			if (configurationManager.Stoppable) {
 				Console.WriteLine (
@@ -97,6 +78,32 @@ namespace Mono.WebServer.Fpm {
 				}
 			}
 			return 0;
+		}
+
+		static void StartChildren (DirectoryInfo configDirInfo, ConfigurationManager configurationManager)
+		{
+			foreach (var fileInfo in configDirInfo.GetFiles ("*.xml")) {
+				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
+				var childConfigurationManager = new ChildConfigurationManager ();
+				childConfigurationManager.LoadXmlConfig (fileInfo.FullName);
+				string user = childConfigurationManager.User;
+
+				if (Platform.IsUnix) {
+					if (String.IsNullOrEmpty (user)) {
+						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
+						user = UnixFileSystemInfo.GetFileSystemEntry (fileInfo.FullName).OwnerUser.UserName;
+					}
+
+					using (var identity = new WindowsIdentity (user)) {
+						using (identity.Impersonate ()) {
+							SpawnChild (configurationManager, fileInfo);
+						}
+					}
+				} else {
+					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
+					SpawnChild (configurationManager, fileInfo);
+				}
+			}
 		}
 
 		static void SpawnChild (ConfigurationManager configurationManager, FileInfo fileInfo)

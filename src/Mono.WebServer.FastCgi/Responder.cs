@@ -30,6 +30,7 @@
 using System;
 using System.Collections.Generic;
 using Mono.FastCgi;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer.FastCgi
 {

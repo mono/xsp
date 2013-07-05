@@ -387,8 +387,7 @@ namespace Mono.WebServer
 			return remotePort;
 		}
 
-		readonly Hashtable server_vars = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
-							CaseInsensitiveComparer.DefaultInvariant);
+		readonly Hashtable server_vars = new Hashtable (StringComparer.InvariantCultureIgnoreCase);
 		public override string GetServerVariable (string name)
 		{
 			object o = server_vars [name];
@@ -540,7 +539,7 @@ namespace Mono.WebServer
 		
 		string GetRequestHeader (string name)
 		{
-			IHashCodeProvider hp = CaseInsensitiveHashCodeProvider.DefaultInvariant;
+			StringComparer hp = StringComparer.InvariantCultureIgnoreCase;
 			if (headersHash == null) {
 				headersHash = new int [headers.Length];
 				for (int i = 0; i < headers.Length; i++) {

@@ -20,3 +20,4 @@ xsp.userprefs
 src/*/bin
 src/*/obj
 xsp.v11.suo
+src/Mono.WebServer.Test/test-results/

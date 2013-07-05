@@ -34,6 +34,7 @@ using System.Reflection;
 using System.Threading;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.XSP
 {
@@ -105,6 +106,9 @@ namespace Mono.WebServer.XSP
 				Version.Show ();
 				return 0;
 			}
+
+			if (!configurationManager.LoadConfigFile ())
+				return 1;
 
 			WebSource webSource;
 			if (security.Enabled) {

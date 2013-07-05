@@ -1,0 +1,92 @@
+//
+// Logger.cs: Logs server events.
+//
+// Author:
+//   Brian Nickel (brian.nickel@gmail.com)
+//
+// Copyright (C) 2007 Brian Nickel
+// 
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+using System;
+using System.Globalization;
+
+namespace Mono.WebServer.Log {
+	public static class Logger
+	{
+		static readonly LoggerImpl logger = new LoggerImpl ();
+
+		#region Public Static Properties
+		
+		public static LogLevel Level {
+			get {return logger.Level;}
+			set {logger.Level = value;}
+		}
+		
+		public static bool WriteToConsole {
+			get {return logger.WriteToConsole;}
+			set {logger.WriteToConsole = value;}
+		}
+		
+		#endregion
+		
+		
+		
+		#region Public Static Methods
+		
+		public static void Open (string path)
+		{
+			logger.Open (path);
+		}
+		
+		public static void Write (LogLevel level,
+		                          IFormatProvider provider,
+		                          string format, params object [] args)
+		{
+			Write (level, String.Format (provider, format, args));
+		}
+				
+		public static void Write (LogLevel level, string format,
+		                          params object [] args)
+		{
+			Write (level, CultureInfo.CurrentCulture, format, args);
+		}
+
+		public static void Write (Exception e)
+		{
+			Write (LogLevel.Error, e.Message);
+			if(e.StackTrace != null)
+				Write (LogLevel.Error, e.StackTrace);
+		}
+
+		public static void Write (LogLevel level, string message)
+		{
+			logger.Write (level, message);
+		}
+		
+		public static void Close ()
+		{
+			logger.Close ();
+		}
+		
+		#endregion
+	}
+}

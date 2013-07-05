@@ -42,18 +42,19 @@ namespace Mono.WebServer.Options {
 			AppSetting = appSetting;
 			Environment = environment;
 			Name = name;
-			DefaultValue = defaultValue;
 			this.parser = parser;
 			Value = defaultValue;
-			if (!String.IsNullOrEmpty (Environment)) {
-				string value = System.Environment.GetEnvironmentVariable (environment);
-				MaybeParseUpdate (SettingSource.Environment, value);
-			}
+			if (!String.IsNullOrEmpty (environment))
+				foreach (string envVar in environment.Split ('|')) {
+					string value = System.Environment.GetEnvironmentVariable (envVar);
+					MaybeParseUpdate (SettingSource.Environment, value);
+				}
 
-			if (!String.IsNullOrEmpty (AppSetting)) {
-				string value = System.Configuration.ConfigurationManager.AppSettings [appSetting];
-				MaybeParseUpdate (SettingSource.AppSettings, value);
-			}
+			if (!String.IsNullOrEmpty (appSetting))
+				foreach (var appSett in appSetting.Split ('|')) {
+					string value = System.Configuration.ConfigurationManager.AppSettings [appSett];
+					MaybeParseUpdate (SettingSource.AppSettings, value);
+				}
 		}
 
 		public void MaybeParseUpdate (SettingSource settingSource, string value)
@@ -80,13 +81,11 @@ namespace Mono.WebServer.Options {
 		}
 
 		SettingSource source = SettingSource.Default;
-		public bool ConsoleVisible { get; private set; }
 		public string Name { get; private set; }
 		public string Prototype { get; private set; }
 		public string Environment { get; private set; }
 		public string AppSetting { get; private set; }
 		public string Description { get; private set; }
-		public T DefaultValue { get; private set; }
 		public T Value { get; private set; }
 		[Obsolete]
 		object ISetting.Value {

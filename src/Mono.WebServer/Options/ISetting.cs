@@ -4,7 +4,6 @@ namespace Mono.WebServer.Options {
 	public interface ISetting
 	{
 		string Name { get; }
-		bool ConsoleVisible { get; }
 		string Description { get; }
 		string AppSetting { get; }
 		string Environment { get; }

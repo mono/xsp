@@ -12,7 +12,6 @@ namespace Mono.WebServer.FastCgi {
 		public static string Server_ResponderDoesNotImplement = "Responder must implement the FastCgi.IResponder interface.";
 		public static string Server_ResponderLacksProperConstructor = "Responder must contain public constructor {0}(ResponderRequest)";
 		public static string Server_ResponderNotSupported = "Responder role is not supported.";
-		public static string Logger_Format = "[{0:u}] {1,-7} {2}";
 		public static string Connection_BeginningRun = "Beginning to receive records on connection.";
 		public static string Connection_EndingRun = "Finished receiving records on connection.";
 		public static string Connection_RecordNotReceived = "Failed to receive record.";

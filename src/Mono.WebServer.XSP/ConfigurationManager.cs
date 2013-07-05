@@ -3,12 +3,12 @@ using Mono.WebServer.Options;
 using TP = Mono.Security.Protocol.Tls;
 
 namespace Mono.WebServer.XSP {
-	class ConfigurationManager : Options.ConfigurationManager
+	class ConfigurationManager : ServerConfigurationManager
 	{
 		public ConfigurationManager (bool quietDefault)
 		{
 			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
-				backlog, minThreads, port,
+				minThreads, port,
 				p12File, cert, pkFile, pkPwd, pidFile,
 				protocols);
 			address.MaybeUpdate (SettingSource.Default, IPAddress.Any);
@@ -24,7 +24,6 @@ namespace Mono.WebServer.XSP {
 		readonly BoolSetting httpsClientRequire = new BoolSetting ("https-client-require", "Enable SSL for the server with mandatory client certificates.");
 		readonly BoolSetting noHidden = new BoolSetting ("no-hidden", "Allow access to hidden files (see 'man xsp' for details).");
 
-		readonly UInt32Setting backlog = new UInt32Setting ("backlog", "The listen backlog.", defaultValue: 500);
 		readonly NullableInt32Setting minThreads = new NullableInt32Setting ("minThreads", "The minimum number of threads the thread pool creates on startup. Increase this value to handle a sudden inflow of connections.");
 		readonly UInt16Setting port = new UInt16Setting ("port", Descriptions.Port, "MonoServerPort", "MONO_FCGI_PORT", 9000);
 
@@ -60,9 +59,6 @@ namespace Mono.WebServer.XSP {
 			get { return noHidden; }
 		}
 
-		public uint Backlog {
-			get { return backlog; }
-		}
 		public int? MinThreads {
 			get { return minThreads; }
 		}
@@ -91,11 +87,11 @@ namespace Mono.WebServer.XSP {
 		}
 		#endregion
 
-		protected override string Name {
+		public override string Name {
 			get { return "xsp"; }
 		}
 
-		protected override string Description {
+		public override string Description {
 			get {
 				return "XSP server is a sample server that hosts the ASP.NET runtime in a minimalistic HTTP server";
 			}

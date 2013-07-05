@@ -76,7 +76,6 @@
     <Compile Include="Connection.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="main.cs" />
     <Compile Include="NameValuePair.cs" />
     <Compile Include="Record.cs" />

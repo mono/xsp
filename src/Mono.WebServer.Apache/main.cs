@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Apache {
 	public class Server : MarshalByRefObject {
@@ -109,6 +110,9 @@ namespace Mono.WebServer.Apache {
 				return 1;
 			}
 
+			if (!configurationManager.LoadConfigFile ())
+				return 1;
+
 			ushort port = configurationManager.Port ?? 0;
 			bool useTCP = port != 0;
 			string lockfile = useTCP ? Path.Combine (Path.GetTempPath (), "mod_mono_TCP_") : configurationManager.Filename;
@@ -171,7 +175,7 @@ namespace Mono.WebServer.Apache {
 			}
 
 			try {
-				if (server.Start (!configurationManager.NonStop, configurationManager.Backlog) == false)
+				if (server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog) == false)
 					return 2;
 
 				if (!configurationManager.NonStop) {

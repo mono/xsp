@@ -26,8 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using Mono.FastCgi;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {
@@ -35,14 +33,12 @@ namespace Mono.WebServer.FastCgi {
 	{
 		public ConfigurationManager ()
 		{
-			Add(printlog, stoppable, multiplex,
+			Add(stoppable, multiplex,
 				maxConns, maxReqs, port,
-				filename, logFile, configFile, socket,
-				loglevels);
+				filename, socket);
 		}
 
 		#region Backing fields
-		readonly BoolSetting printlog = new BoolSetting ("printlog", "Prints log messages to the console.", environment: "MONO_FCGI_PRINTLOG");
 		readonly BoolSetting stoppable = new BoolSetting ("stoppable", Descriptions.Stoppable);
 		readonly BoolSetting multiplex = new BoolSetting ("multiplex", "Allows multiple requests to be send over a single connection.",
 			"FastCgiMultiplexConnections", "MONO_FCGI_MULTIPLEX");
@@ -55,18 +51,10 @@ namespace Mono.WebServer.FastCgi {
 
 		readonly StringSetting filename = new StringSetting ("filename", "Specifies a unix socket filename to listen on.\n" +
 			"To use this argument, \"socket\" must be set to \"unix\".", "MonoUnixSocket", "MONO_FCGI_FILENAME", "/tmp/fastcgi-mono-server");
-		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_FCGI_LOGFILE");
-		readonly StringSetting configFile = new StringSetting ("configfile", Descriptions.ConfigFile);
-
 		readonly StringSetting socket = new StringSetting ("socket", Descriptions.Socket, "MonoSocketType", "MONO_FCGI_SOCKET", "pipe");
-
-		readonly EnumSetting<LogLevel> loglevels = new EnumSetting<LogLevel> ("loglevels", Descriptions.LogLevels, "FastCgiLogLevels", "MONO_FCGI_LOGLEVELS", LogLevel.Standard);
 		#endregion
 
 		#region Typesafe properties
-		public bool PrintLog {
-			get { return printlog; }
-		}
 		public bool Stoppable {
 			get { return stoppable; }
 		}
@@ -87,18 +75,8 @@ namespace Mono.WebServer.FastCgi {
 		public string Filename {
 			get { return filename; }
 		}
-		public string LogFile {
-			get { return logFile; }
-		}
-		public string ConfigFile {
-			get { return configFile; }
-		}
 		public string Socket {
 			get { return socket; }
-		}
-
-		public LogLevel LogLevels {
-			get { return loglevels; }
 		}
 
 		/*

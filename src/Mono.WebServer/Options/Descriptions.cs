@@ -27,7 +27,7 @@ namespace Mono.WebServer.Options {
 		public const string AppConfigDir = "Adds application definitions from all XML files found in the specified directory. " +
 			"Files must have the \".webapp\" extension.";
 
-		public const string ConfigFile = "Specifies a file containing configuration options, identical to those available in he command line.";
+		public const string ConfigFile = "Specifies a file containing configuration options, identical to those available in the command line.";
 
 		public const string Stoppable = "Allows the user to stop the server by pressing \"Enter\". " +
 			"This should not be used when the server has no controlling terminal.";

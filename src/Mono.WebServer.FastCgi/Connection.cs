@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using Mono.WebServer.FastCgi;
+using Mono.WebServer.Log;
 
 namespace Mono.FastCgi {
 	public class Connection
@@ -122,145 +123,7 @@ namespace Mono.FastCgi {
 				
 				Request request = GetRequest (record.RequestID);
 				
-				switch (record.Type) {
-					
-				// Creates a new request.
-				case RecordType.BeginRequest:
-					
-					// If a request with the given ID
-					// already exists, there's a bug in the
-					// client. Abort.
-					if (request != null) {
-						StopRun (Strings.Connection_RequestAlreadyExists);
-						break;
-					}
-					
-					// If there are unfinished requests
-					// and multiplexing is disabled, inform
-					// the client and don't begin the
-					// request.
-					if (!server.MultiplexConnections &&
-						UnfinishedRequests) {
-						EndRequest (record.RequestID, 0,
-							ProtocolStatus.CantMultiplexConnections);
-						break;
-					}
-					
-					// If the maximum number of requests is
-					// reached, inform the client and don't
-					// begin the request.
-					if (!server.CanRequest) {
-						EndRequest (record.RequestID, 0,
-							ProtocolStatus.Overloaded);
-						break;
-					}
-					
-					var body = new BeginRequestBody (record);
-						
-					// If the role is "Responder", and it is
-					// supported, create a ResponderRequest.
-					if (body.Role == Role.Responder &&
-						server.SupportsResponder)
-						request = new ResponderRequest
-							(record.RequestID, this);
-						
-					// If the request is null, the role is
-					// not supported. Inform the client and
-					// don't begin the request.
-					if (request == null) {
-						Logger.Write (LogLevel.Warning,
-							Strings.Connection_RoleNotSupported,
-							body.Role);
-						EndRequest (record.RequestID, 0,
-							ProtocolStatus.UnknownRole);
-						break;
-					}
-					
-					lock (request_lock) {
-						requests.Add (request);
-					}
-					
-					keep_alive = (body.Flags &
-						BeginRequestFlags.KeepAlive) != 0;
-					
-				break;
-				
-				// Gets server values.
-				case RecordType.GetValues:
-					byte [] response_data;
-					
-					// Look up the data from the server.
-					try {
-						IDictionary<string,string> pairs_in = NameValuePair.FromData (record.GetBody ());
-						IDictionary<string,string> pairs_out = server.GetValues (pairs_in.Keys);
-						response_data = NameValuePair.GetData (pairs_out);
-					} catch {
-						response_data = new byte [0];
-					}
-					
-					SendRecord (RecordType.GetValuesResult,
-						record.RequestID, response_data);
-				break;
-				
-				// Sends params to the request.
-				case RecordType.Params:
-					if (request == null) {
-						StopRun (Strings.Connection_RequestDoesNotExist,
-							record.RequestID);
-						break;
-					}
-					
-					request.AddParameterData (record.GetBody ());
-				
-				break;
-					
-				// Sends standard input to the request.
-				case RecordType.StandardInput:
-					if (request == null) {
-						StopRun (Strings.Connection_RequestDoesNotExist,
-							record.RequestID);
-						break;
-					}
-					
-					request.AddInputData (record);
-				
-				break;
-				
-				// Sends file data to the request.
-				case RecordType.Data:
-					if (request == null) {
-						StopRun (Strings.Connection_RequestDoesNotExist,
-							record.RequestID);
-						break;
-					}
-					
-					request.AddFileData (record);
-				
-				break;
-				
-				// Aborts a request when the server aborts.
-				case RecordType.AbortRequest:
-					if (request == null)
-						break;
-					
-					request.Abort (
-						Strings.Connection_AbortRecordReceived);
-				
-				break;
-				
-				// Informs the client that the record type is
-				// unknown.
-				default:
-					Logger.Write (LogLevel.Warning,
-						Strings.Connection_UnknownRecordType,
-						record.Type);
-					SendRecord (RecordType.UnknownType,
-						record.RequestID,
-						new UnknownTypeBody (
-							record.Type).GetData ());
-				
-				break;
-				}
+				HandleRequest (record, request);
 			}
 			while (!stop && (UnfinishedRequests || keep_alive));
 			
@@ -290,7 +153,159 @@ namespace Mono.FastCgi {
 			Logger.Write (LogLevel.Notice,
 				Strings.Connection_EndingRun);
 		}
-		
+
+		void HandleRequest (Record record, Request request)
+		{
+			switch (record.Type) {
+				// Creates a new request.
+			case RecordType.BeginRequest:
+				HandleBeginRequest (request, record);
+				break;
+
+				// Gets server values.
+			case RecordType.GetValues:
+				HandleGetValues (record);
+				break;
+
+				// Sends params to the request.
+			case RecordType.Params:
+				HandleParams (request, record);
+				break;
+
+				// Sends standard input to the request.
+			case RecordType.StandardInput:
+				HandleStandardInput (request, record);
+				break;
+
+				// Sends file data to the request.
+			case RecordType.Data:
+				HandleData (request, record);
+				break;
+
+				// Aborts a request when the server aborts.
+			case RecordType.AbortRequest:
+				HandleAbortRequest (request);
+				break;
+
+				// Informs the client that the record type is
+				// unknown.
+			default:
+				HandleUnknown (record);
+				break;
+			}
+		}
+
+		void HandleUnknown (Record record)
+		{
+			Logger.Write (LogLevel.Warning, Strings.Connection_UnknownRecordType, record.Type);
+			SendRecord (RecordType.UnknownType, record.RequestID, new UnknownTypeBody (record.Type).GetData ());
+		}
+
+		static void HandleAbortRequest (Request request)
+		{
+			if (request == null)
+				return;
+
+			request.Abort (Strings.Connection_AbortRecordReceived);
+		}
+
+		void HandleData (Request request, Record record)
+		{
+			if (request == null) {
+				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
+				return;
+			}
+
+			request.AddFileData (record);
+		}
+
+		void HandleStandardInput (Request request, Record record)
+		{
+			if (request == null) {
+				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
+				return;
+			}
+
+			request.AddInputData (record);
+		}
+
+		void HandleParams (Request request, Record record)
+		{
+			if (request == null) {
+				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
+				return;
+			}
+
+			request.AddParameterData (record.GetBody ());
+		}
+
+		void HandleGetValues (Record record)
+		{
+			byte[] response_data;
+
+			// Look up the data from the server.
+			try {
+				IDictionary<string, string> pairs_in = NameValuePair.FromData (record.GetBody ());
+				IDictionary<string, string> pairs_out = server.GetValues (pairs_in.Keys);
+				response_data = NameValuePair.GetData (pairs_out);
+			} catch {
+				response_data = new byte[0];
+			}
+
+			SendRecord (RecordType.GetValuesResult, record.RequestID, response_data);
+		}
+
+		void HandleBeginRequest (Request request, Record record)
+		{
+			// If a request with the given ID
+			// already exists, there's a bug in the
+			// client. Abort.
+			if (request != null) {
+				StopRun (Strings.Connection_RequestAlreadyExists);
+				return;
+			}
+
+			// If there are unfinished requests
+			// and multiplexing is disabled, inform
+			// the client and don't begin the
+			// request.
+			if (!server.MultiplexConnections && UnfinishedRequests) {
+				EndRequest (record.RequestID, 0, ProtocolStatus.CantMultiplexConnections);
+				return;
+			}
+
+			// If the maximum number of requests is
+			// reached, inform the client and don't
+			// begin the request.
+			if (!server.CanRequest) {
+				EndRequest (record.RequestID, 0, ProtocolStatus.Overloaded);
+				return;
+			}
+
+			var body = new BeginRequestBody (record);
+
+			// If the role is "Responder", and it is
+			// supported, create a ResponderRequest.
+			if (body.Role == Role.Responder && server.SupportsResponder) {
+				request = new ResponderRequest(record.RequestID, this);
+			}
+
+			// If the request is null, the role is
+			// not supported. Inform the client and
+			// don't begin the request.
+			if (request == null) {
+				Logger.Write (LogLevel.Warning, Strings.Connection_RoleNotSupported, body.Role);
+				EndRequest (record.RequestID, 0, ProtocolStatus.UnknownRole);
+				return;
+			}
+
+			lock (request_lock) {
+				requests.Add (request);
+			}
+
+			keep_alive = (body.Flags & BeginRequestFlags.KeepAlive) != 0;
+		}
+
 		public void SendRecord (RecordType type, ushort requestID,
 		                        byte [] bodyData)
 		{

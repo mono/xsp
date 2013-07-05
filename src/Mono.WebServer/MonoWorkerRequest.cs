@@ -522,7 +522,7 @@ namespace Mono.WebServer
 	 					if (client == null)
 	 						cert_issuer = String.Empty;
 	 					else
-	 						cert_issuer = client.GetIssuerName ();
+							cert_issuer = client.Issuer;
 	 				}
 	 				return cert_issuer;
 	 			case "CERT_SERIALNUMBER":
@@ -538,7 +538,7 @@ namespace Mono.WebServer
 	 					if (client == null)
 	 						cert_subject = String.Empty;
 	 					else
-	 						cert_subject = client.GetName ();
+							cert_subject = client.Subject;
 	 				}
 					return cert_subject;
 	 			}

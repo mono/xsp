@@ -36,11 +36,12 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Collections;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using Mono.Security.X509;
 using Mono.Security.X509.Extensions;
+using Mono.WebServer.Apache;
+using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace Mono.WebServer
 {

@@ -31,13 +31,13 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 
-namespace Mono.WebServer
+namespace Mono.WebServer.Apache
 {
 	//
 	// ModMonoWorker: The worker that does the initial processing of mod_mono
 	// requests.
 	//
-	internal class ModMonoWorker: Worker, IDisposable
+	class ModMonoWorker: Worker, IDisposable
 	{
 		public NetworkStream Stream;
 		

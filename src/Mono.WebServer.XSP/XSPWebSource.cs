@@ -31,6 +31,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Mono.Security.Protocol.Tls;
+using Mono.WebServer.XSP;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 

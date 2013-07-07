@@ -28,6 +28,7 @@
 //
 
 using System;
+using Mono.WebServer.XSP;
 
 namespace Mono.WebServer
 {	

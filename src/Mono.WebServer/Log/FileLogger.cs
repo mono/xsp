@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 
 namespace Mono.WebServer.Log {
@@ -7,10 +6,6 @@ namespace Mono.WebServer.Log {
 		StreamWriter writer;
 
 		readonly object write_lock = new object ();
-
-		internal FileLogger ()
-		{
-		}
 
 		~FileLogger ()
 		{

@@ -31,12 +31,12 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Mono.Security.Protocol.Tls;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
-using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
-namespace Mono.WebServer 
+namespace Mono.WebServer.XSP
 {
 	//
 	// XSPWorker: The worker that do the initial processing of XSP

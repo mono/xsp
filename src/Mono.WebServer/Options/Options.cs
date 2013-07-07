@@ -301,7 +301,7 @@ namespace NDesk.Options {
 		internal string[] Names { get; private set; }
 		internal string[] ValueSeparators { get; private set; }
 
-		static readonly char[] nameTerminator = new[]{'=', ':'};
+		static readonly char[] nameTerminator = {'=', ':'};
 
 		OptionValueType ParsePrototype ()
 		{

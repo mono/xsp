@@ -32,6 +32,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Mono.Unix;
+using Mono.WebServer.Apache;
 
 namespace Mono.WebServer
 {

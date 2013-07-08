@@ -40,7 +40,6 @@ namespace Mono.WebServer
 	//
 	// XSPApplicationHost: The application host for XSP.
 	//
-	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPApplicationHost : BaseApplicationHost
 	{
 		// This method is only compatible with IPv4, please use IPEndPoint based overload.
@@ -92,8 +91,8 @@ namespace Mono.WebServer
 
 				if (ssl.RawServerCertificate != null) {
 					X509Certificate server = ssl.GetServerCertificate ();
-					mwr.AddServerVariable ("CERT_SERVER_ISSUER", server.GetIssuerName ());
-					mwr.AddServerVariable ("CERT_SERVER_SUBJECT", server.GetName ());
+					mwr.AddServerVariable ("CERT_SERVER_ISSUER", server.Issuer);
+					mwr.AddServerVariable ("CERT_SERVER_SUBJECT", server.Subject);
 				}
 			}
 

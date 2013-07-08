@@ -473,6 +473,7 @@ namespace Mono.WebServer
 			while (length > 0 && (count = stream.Read (fileContent, 0, count)) != 0) {
 				SendResponseFromMemory (fileContent, count);
 				length -= count;
+				// Keep the System. prefix
 				count = (int) System.Math.Min (length, fileContent.Length);
 			}
 		}

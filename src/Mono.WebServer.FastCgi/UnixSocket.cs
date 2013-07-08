@@ -29,7 +29,6 @@
 //
 
 using System;
-using Mono.FastCgi;
 using Mono.Unix;
 using System.Globalization;
 

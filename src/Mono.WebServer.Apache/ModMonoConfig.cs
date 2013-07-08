@@ -30,7 +30,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace Mono.WebServer
+namespace Mono.WebServer.Apache
 {
 	struct ModMonoConfig
 	{

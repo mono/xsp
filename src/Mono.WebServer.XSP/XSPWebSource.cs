@@ -31,6 +31,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Mono.Security.Protocol.Tls;
+using Mono.WebServer.XSP;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
@@ -39,7 +40,6 @@ namespace Mono.WebServer {
 	// XSPWebSource: Provides methods to get objects and types specific
 	// to XSP.
 	//
-	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPWebSource: WebSource
 	{
 		IPEndPoint bindAddress;

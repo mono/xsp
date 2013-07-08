@@ -7,10 +7,10 @@ using System.Net;
 
 namespace Mono.WebServer.Test
 {
-	[TestFixture()]
+	[TestFixture]
 	public class HelloWorld
 	{
-		[SetUp()]
+		[SetUp]
 		public void Init ()
 		{
 			// Force loading of the XSP assembly

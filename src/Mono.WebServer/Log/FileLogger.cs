@@ -1,26 +1,16 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 
 namespace Mono.WebServer.Log {
-	class LoggerImpl {
+	class FileLogger {
 		StreamWriter writer;
 
 		readonly object write_lock = new object ();
 
-		internal LoggerImpl ()
-		{
-			Level = LogLevel.Standard;
-		}
-
-		~LoggerImpl ()
+		~FileLogger ()
 		{
 			Close ();
 		}
-
-		public LogLevel Level { get; set; }
-
-		public bool WriteToConsole { get; set; }
 
 		public void Open (string path)
 		{
@@ -35,24 +25,12 @@ namespace Mono.WebServer.Log {
 			}
 		}
 
-		public void Write (LogLevel level, string message)
+		public void Write (LogLevel level, string text)
 		{
-			if (writer == null && !WriteToConsole)
+			if (writer == null)
 				return;
-
-			if ((Level & level) == LogLevel.None)
-				return;
-
-			string text = String.Format (CultureInfo.CurrentCulture,
-				"[{0:u}] {1,-7} {2}",
-				DateTime.Now,
-				level,
-				message);
 
 			lock (write_lock) {
-				if (WriteToConsole)
-					Console.WriteLine (text);
-
 				if (writer == null)
 					return;
 

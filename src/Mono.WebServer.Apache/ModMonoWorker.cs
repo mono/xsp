@@ -30,14 +30,15 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
+using Mono.WebServer.Log;
 
-namespace Mono.WebServer
+namespace Mono.WebServer.Apache
 {
 	//
 	// ModMonoWorker: The worker that does the initial processing of mod_mono
 	// requests.
 	//
-	internal class ModMonoWorker: Worker, IDisposable
+	class ModMonoWorker: Worker, IDisposable
 	{
 		public NetworkStream Stream;
 		
@@ -63,8 +64,8 @@ namespace Mono.WebServer
 			try {
 				disposer ();
 			} catch (Exception ex) {
-				Console.Error.WriteLine ("While disposing ModMonoWorker. {0} disposing failed with exception:", name);
-				Console.Error.WriteLine (ex);
+				Logger.Write (LogLevel.Error, "While disposing ModMonoWorker. {0} disposing failed with exception:", name);
+				Logger.Write (ex);
 			}
 		}
 		
@@ -94,7 +95,7 @@ namespace Mono.WebServer
 				// IOException, like EndOfStreamException, might be ok.
 
 				if (!(e is EndOfStreamException))
-					Console.Error.WriteLine (e);
+					Logger.Write (e);
 
 				try {
 					// Closing is enough for mod_mono. the module will return a 50x
@@ -144,7 +145,7 @@ namespace Mono.WebServer
 			}
 
 
-			//Console.Error.WriteLine ("final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
+			//Logger.Write (LogLevel.Error, "final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
 			VPathToHost vapp = server.GetApplicationForPath (vhost, port, virt, false);
 			if (vapp == null) {
 				// Don't know why this breaks mod-mono-server2.exe, but not mod-mono-server.exe

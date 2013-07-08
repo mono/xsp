@@ -37,6 +37,8 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Collections.Generic;
+using Mono.WebServer.Apache;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer
 {
@@ -109,8 +111,8 @@ namespace Mono.WebServer
 			try {
 				disposer ();
 			} catch (Exception ex) {
-				Console.Error.WriteLine ("While disposing ModMonoRequest. {0} disposing failed with exception:", name);
-				Console.Error.WriteLine (ex);
+				Logger.Write (LogLevel.Error, "While disposing ModMonoRequest. {0} disposing failed with exception:", name);
+				Logger.Write (ex);
 			}
 		}
 		
@@ -194,14 +196,14 @@ namespace Mono.WebServer
 			byte cmd = reader.ReadByte ();
 			ShuttingDown = (cmd == 0);
 			if (ShuttingDown) {
-				Console.Error.WriteLine ("mod-mono-server received a shutdown message");
+				Logger.Write (LogLevel.Notice, "mod-mono-server received a shutdown message");
 				return;
 			}
 
 			if (cmd != PROTOCOL_VERSION) {
 				string msg = String.Format ("mod_mono and xsp have different versions. Expected '{0}', got {1}", PROTOCOL_VERSION, cmd);
 				Console.WriteLine (msg);
-				Console.Error.WriteLine (msg);
+				Logger.Write (LogLevel.Error, msg);
 				throw new InvalidOperationException (msg);
 			}
 

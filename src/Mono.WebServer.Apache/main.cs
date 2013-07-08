@@ -129,7 +129,7 @@ namespace Mono.WebServer.Apache {
 
 				bool res = webSource.GracefulShutdown ();
 				if (configurationManager.Verbose)
-					if(res)
+					if (res)
 						Logger.Write (LogLevel.Notice, "Done");
 					else
 						Logger.Write (LogLevel.Error, "Failed.");

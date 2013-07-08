@@ -41,6 +41,7 @@ using System.IO;
 using Mono.Security.X509;
 using Mono.Security.X509.Extensions;
 using Mono.WebServer.Apache;
+using Mono.WebServer.Log;
 using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace Mono.WebServer
@@ -88,7 +89,7 @@ namespace Mono.WebServer
 				string indexes = ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"];
 				SetDefaultIndexFiles (indexes);
 			} catch (Exception ex) {
-				Console.Error.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
+				Logger.Write (LogLevel.Error, "Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
 			}
 
 			// by default the client certificate validity (CCV) checks are done by both Apache and Mono

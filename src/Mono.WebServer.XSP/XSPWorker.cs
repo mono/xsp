@@ -34,6 +34,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Mono.Security.Protocol.Tls;
+using Mono.WebServer.Log;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 
 namespace Mono.WebServer.XSP
@@ -159,7 +160,7 @@ namespace Mono.WebServer.XSP
 				// This happens if the assembly is not in the GAC, so we report this
 				// error here.
 				//
-				Console.Error.WriteLine (e);
+				Logger.Write (e);
 				return;
 			}
 			
@@ -193,11 +194,11 @@ namespace Mono.WebServer.XSP
 			} catch (FileNotFoundException fnf) {
 				// We print this one, as it might be a sign of a bad deployment
 				// once we require the .exe and Mono.WebServer in bin or the GAC.
-				Console.Error.WriteLine (fnf);
+				Logger.Write (fnf);
 			} catch (IOException) {
 				// This is ok (including EndOfStreamException)
 			} catch (Exception e) {
-				Console.Error.WriteLine (e);
+				Logger.Write (e);
 			}
 		}
 

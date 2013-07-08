@@ -36,7 +36,6 @@ namespace Mono.WebServer
 	// XSPRequestBroker: The request broker for XSP. Provides some
 	// additional methods to the BaseRequestBroker from which inherits.
 	//
-	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPRequestBroker: BaseRequestBroker
 	{
 		public int GetReuseCount (int requestId)

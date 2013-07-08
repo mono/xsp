@@ -32,7 +32,6 @@ using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certif
 
 namespace Mono.WebServer {
 	[Serializable]
-	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class SslInformation {
 		public bool AllowClientCertificate { get; set; }
 

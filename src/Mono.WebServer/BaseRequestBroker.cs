@@ -137,7 +137,7 @@ namespace Mono.WebServer
 
 		public int RegisterRequest (Worker worker)
 		{
-			int result = -1;
+			int result;
 			
 			lock (reqlock) {
 				result = IdToIndex (GetNextRequestId ());

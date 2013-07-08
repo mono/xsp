@@ -29,6 +29,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer
 {
@@ -70,7 +71,7 @@ namespace Mono.WebServer
 			try {
 				sock.Connect (ep);
 			} catch (Exception e) {
-				Console.Error.WriteLine ("Cannot connect to {0}: {1}", ep, e.Message);
+				Logger.Write (LogLevel.Error, "Cannot connect to {0}: {1}", ep, e.Message);
 				return false;
 			}
 

@@ -31,12 +31,13 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Mono.Security.Protocol.Tls;
+using Mono.WebServer.Log;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
-using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
-namespace Mono.WebServer 
+namespace Mono.WebServer.XSP
 {
 	//
 	// XSPWorker: The worker that do the initial processing of XSP
@@ -159,7 +160,7 @@ namespace Mono.WebServer
 				// This happens if the assembly is not in the GAC, so we report this
 				// error here.
 				//
-				Console.Error.WriteLine (e);
+				Logger.Write (e);
 				return;
 			}
 			
@@ -193,11 +194,11 @@ namespace Mono.WebServer
 			} catch (FileNotFoundException fnf) {
 				// We print this one, as it might be a sign of a bad deployment
 				// once we require the .exe and Mono.WebServer in bin or the GAC.
-				Console.Error.WriteLine (fnf);
+				Logger.Write (fnf);
 			} catch (IOException) {
 				// This is ok (including EndOfStreamException)
 			} catch (Exception e) {
-				Console.Error.WriteLine (e);
+				Logger.Write (e);
 			}
 		}
 

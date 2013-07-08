@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Apache {
@@ -41,11 +42,11 @@ namespace Mono.WebServer.Apache {
 		{
 			var ex = (Exception)e.ExceptionObject;
 
-			Console.Error.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
-			Console.Error.WriteLine ("Message is {0}", ex.Message);
-			Console.Error.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
+			Logger.Write (LogLevel.Error, "Handling exception type {0}", ex.GetType ().Name);
+			Logger.Write (LogLevel.Error, "Message is {0}", ex.Message);
+			Logger.Write (LogLevel.Error, "IsTerminating is set to {0}", e.IsTerminating);
 			if (e.IsTerminating)
-				Console.Error.WriteLine (ex);
+				Logger.Write (ex);
 		}
 
 
@@ -124,11 +125,14 @@ namespace Mono.WebServer.Apache {
 
 			if(configurationManager.Terminate) {
 				if (configurationManager.Verbose)
-					Console.Error.WriteLine ("Shutting down running mod-mono-server...");
+					Logger.Write (LogLevel.Notice, "Shutting down running mod-mono-server...");
 
 				bool res = webSource.GracefulShutdown ();
 				if (configurationManager.Verbose)
-					Console.Error.WriteLine (res ? "Done." : "Failed.");
+					if (res)
+						Logger.Write (LogLevel.Notice, "Done");
+					else
+						Logger.Write (LogLevel.Error, "Failed.");
 
 				return res ? 0 : 1;
 			}
@@ -166,12 +170,12 @@ namespace Mono.WebServer.Apache {
 			}
 			if (!configurationManager.Quiet) {
 				if (!useTCP)
-					Console.Error.WriteLine ("Listening on: {0}", configurationManager.Filename);
+					Logger.Write (LogLevel.Notice, "Listening on: {0}", configurationManager.Filename);
 				else {
-					Console.Error.WriteLine ("Listening on port: {0}", port);
-					Console.Error.WriteLine ("Listening on address: {0}", configurationManager.Address);
+					Logger.Write (LogLevel.Notice, "Listening on port: {0}", port);
+					Logger.Write (LogLevel.Notice, "Listening on address: {0}", configurationManager.Address);
 				}
-				Console.Error.WriteLine ("Root directory: {0}", configurationManager.Root);
+				Logger.Write (LogLevel.Notice, "Root directory: {0}", configurationManager.Root);
 			}
 
 			try {
@@ -179,7 +183,7 @@ namespace Mono.WebServer.Apache {
 					return 2;
 
 				if (!configurationManager.NonStop) {
-					Console.Error.WriteLine ("Hit Return to stop the server.");
+					Logger.Write (LogLevel.Notice, "Hit Return to stop the server.");
 					while (true) {
 						try {
 							Console.ReadLine ();
@@ -194,7 +198,7 @@ namespace Mono.WebServer.Apache {
 				}
 			} catch (Exception e) {
 				if (!(e is ThreadAbortException))
-					Console.Error.WriteLine ("Error: {0}", e.Message);
+					Logger.Write (e);
 				else
 					server.ShutdownSockets ();
 				return 1;

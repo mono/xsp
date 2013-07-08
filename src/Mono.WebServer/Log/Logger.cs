@@ -32,23 +32,22 @@ using System.Globalization;
 namespace Mono.WebServer.Log {
 	public static class Logger
 	{
-		static readonly LoggerImpl logger = new LoggerImpl ();
+		static readonly FileLogger logger = new FileLogger ();
+
+		static readonly object write_lock = new object ();
 
 		#region Public Static Properties
-		
-		public static LogLevel Level {
-			get {return logger.Level;}
-			set {logger.Level = value;}
-		}
-		
-		public static bool WriteToConsole {
-			get {return logger.WriteToConsole;}
-			set {logger.WriteToConsole = value;}
-		}
-		
+
+		public static LogLevel Level { get; set; }
+
+		public static bool WriteToConsole { get; set; }
+
 		#endregion
 		
-		
+		static Logger ()
+		{
+			Level = LogLevel.Standard;
+		}
 		
 		#region Public Static Methods
 		
@@ -79,6 +78,17 @@ namespace Mono.WebServer.Log {
 
 		public static void Write (LogLevel level, string message)
 		{
+			if ((Level & level) == LogLevel.None)
+				return;
+
+			string text = String.Format (CultureInfo.CurrentCulture,
+				"[{0:u}] {1,-7} {2}", DateTime.Now,
+				level, message);
+
+			if (WriteToConsole)
+				lock(write_lock)
+					Console.WriteLine (text);
+
 			logger.Write (level, message);
 		}
 		

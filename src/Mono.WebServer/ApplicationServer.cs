@@ -36,6 +36,7 @@ using System.Xml;
 using System.Text;
 using System.Threading;
 using System.IO;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer
 {
@@ -163,7 +164,7 @@ namespace Mono.WebServer
 
 			var di = new DirectoryInfo (directoryName);
 			if (!di.Exists) {
-				Console.Error.WriteLine ("Directory {0} does not exist.", directoryName);
+				Logger.Write (LogLevel.Error, "Directory {0} does not exist.", directoryName);
 				return;
 			}
 			
@@ -395,7 +396,7 @@ namespace Mono.WebServer
 					CloseSocket (accepted);
 
 				// not much we can do. fast fail by killing the process.
-				Console.Error.WriteLine ("Unable to accept socket. Exiting the process. {0}", ex);
+				Logger.Write (LogLevel.Error, "Unable to accept socket. Exiting the process. {0}", ex);
 				Environment.Exit (1);
 			}
 

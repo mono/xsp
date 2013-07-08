@@ -36,7 +36,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -45,7 +44,6 @@ using System.Runtime.InteropServices;
 
 namespace Mono.WebServer
 {
-	[Obsolete ("This class should not be used. It will be removed from Mono.WebServer.dll")]
 	public class XSPWorkerRequest : MonoWorkerRequest
 	{
 		readonly string verb;
@@ -269,8 +267,7 @@ namespace Mono.WebServer
 		{
 			try {
 				string line;
-				headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
-							CaseInsensitiveComparer.DefaultInvariant);
+				headers = new Hashtable (StringComparer.InvariantCultureIgnoreCase);
 				while ((line = ReadLine ()) != null && line.Length > 0) {
 					int colon = line.IndexOf (':');
 					if (colon == -1 || line.Length < colon + 2)
@@ -489,7 +486,7 @@ namespace Mono.WebServer
 			string ip = GetRemoteAddress ();
 			string name;
 			try {
-				IPHostEntry entry = Dns.GetHostByName (ip);
+				IPHostEntry entry = Dns.GetHostEntry (ip);
 				name = entry.HostName;
 			} catch {
 				name = ip;

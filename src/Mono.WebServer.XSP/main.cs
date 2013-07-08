@@ -34,6 +34,7 @@ using System.Reflection;
 using System.Threading;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.XSP
@@ -170,8 +171,8 @@ namespace Mono.WebServer.XSP
 					// MonoDevelop depends on this string. If you change it, let them know.
 					Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
 				}
-				if (configurationManager.Port == 0 && !configurationManager.Quiet)
-					Console.Error.WriteLine ("Random port: {0}", server.Port);
+				if (configurationManager.RandomPort && !configurationManager.Quiet)
+					Logger.Write (LogLevel.Notice, "Random port: {0}", server.Port);
 				
 				if (!configurationManager.NonStop) {
 					if (!configurationManager.Quiet)
@@ -251,7 +252,7 @@ namespace Mono.WebServer.XSP
 						sw.Write (Process.GetCurrentProcess ().Id);
 					}
 				} catch (Exception ex) {
-					Console.Error.WriteLine ("Failed to write pidfile {0}: {1}", manager.PidFile,
+					Logger.Write (LogLevel.Error, "Failed to write pidfile {0}: {1}", manager.PidFile,
 						ex.Message);
 				}
 				

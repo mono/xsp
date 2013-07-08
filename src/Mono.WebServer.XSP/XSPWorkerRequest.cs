@@ -267,8 +267,7 @@ namespace Mono.WebServer
 		{
 			try {
 				string line;
-				headers = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
-							CaseInsensitiveComparer.DefaultInvariant);
+				headers = new Hashtable (StringComparer.InvariantCultureIgnoreCase);
 				while ((line = ReadLine ()) != null && line.Length > 0) {
 					int colon = line.IndexOf (':');
 					if (colon == -1 || line.Length < colon + 2)
@@ -487,7 +486,7 @@ namespace Mono.WebServer
 			string ip = GetRemoteAddress ();
 			string name;
 			try {
-				IPHostEntry entry = Dns.GetHostByName (ip);
+				IPHostEntry entry = Dns.GetHostEntry (ip);
 				name = entry.HostName;
 			} catch {
 				name = ip;

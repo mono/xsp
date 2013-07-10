@@ -32,6 +32,7 @@ using System.Threading;
 using System.Web;
 using System.Web.Configuration;
 using System.Collections.Generic;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer
 {
@@ -114,7 +115,7 @@ namespace Mono.WebServer
 				// we don't know what the request state is,
 				// better write the exception to the console
 				// than forget it.
-				Console.WriteLine ("Unhandled exception: {0}", ex);
+				Logger.Write(LogLevel.Error, "Unhandled exception: {0}", ex);
 				EndOfRequest (mwr);
 			}
 		}

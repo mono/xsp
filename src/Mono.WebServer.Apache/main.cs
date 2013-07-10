@@ -103,11 +103,11 @@ namespace Mono.WebServer.Apache {
 
 			var hash = GetHash (args);
 			if (hash == -1) {
-				Console.WriteLine ("Couldn't calculate hash - should have left earlier - something is really wrong");
+				Logger.Write(LogLevel.Error, "Couldn't calculate hash - should have left earlier - something is really wrong");
 				return 1;
 			}
 			if (hash == -2) {
-				Console.WriteLine ("Couldn't calculate hash - unrecognized parameter");
+				Logger.Write(LogLevel.Error, "Couldn't calculate hash - unrecognized parameter");
 				return 1;
 			}
 
@@ -142,7 +142,9 @@ namespace Mono.WebServer.Apache {
 				SingleApplication = !root
 			};
 
+#if DEBUG
 			Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
+#endif
 			if (configurationManager.Applications != null)
 				server.AddApplicationsFromCommandLine (configurationManager.Applications);
 

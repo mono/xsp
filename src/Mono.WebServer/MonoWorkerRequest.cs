@@ -42,6 +42,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Web;
 using System.Web.Hosting;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer
 {	
@@ -420,8 +421,8 @@ namespace Mono.WebServer
 				SendResponseFromMemory (bytes, bytes.Length);
 				FlushResponse (true);
 			} catch (Exception ex) { // should "never" happen
-				Console.Write("Error while processing a request: ");
-				Console.WriteLine(ex.Message);
+				Logger.Write (LogLevel.Error, "Error while processing a request: ");
+				Logger.Write (ex);
 				throw;
 			}
 		}

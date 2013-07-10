@@ -52,11 +52,11 @@ namespace Mono.WebServer.XSP
 		{
 			var ex = (Exception)e.ExceptionObject;
 
-			Console.WriteLine ("Handling exception type {0}", ex.GetType ().Name);
-			Console.WriteLine ("Message is {0}", ex.Message);
-			Console.WriteLine ("IsTerminating is set to {0}", e.IsTerminating);
+			Logger.Write (LogLevel.Error, "Handling exception type {0}", ex.GetType ().Name);
+			Logger.Write (LogLevel.Error, "Message is {0}", ex.Message);
+			Logger.Write (LogLevel.Error, "IsTerminating is set to {0}", e.IsTerminating);
 			if (e.IsTerminating)
-				Console.WriteLine (ex);
+				Logger.Write(ex);
 		}
 
 		public static int Main (string [] args)
@@ -67,7 +67,7 @@ namespace Mono.WebServer.XSP
 				try {
 					return new Server ().RealMain (args, true, null, quiet);
 				} catch (ThreadAbortException ex) {
-					Console.WriteLine (ex);
+					Logger.Write (ex);
 					// Single-app mode and ASP.NET appdomain unloaded
 					Thread.ResetAbort ();
 					quiet = true; // hush 'RealMain'
@@ -122,7 +122,7 @@ namespace Mono.WebServer.XSP
 						security.RequireClientCertificates, !root);
 				}
 				catch (CryptographicException ce) {
-					Console.WriteLine (ce.Message);
+					Logger.Write (ce);
 					return 1;
 				}
 			} else {
@@ -158,9 +158,9 @@ namespace Mono.WebServer.XSP
 			server.AppHost = ext_apphost;
 
 			if (!configurationManager.Quiet) {
-				Console.WriteLine (Assembly.GetExecutingAssembly ().GetName ().Name);
-				Console.WriteLine ("Listening on address: {0}", configurationManager.Address);
-				Console.WriteLine ("Root directory: {0}", configurationManager.Root);
+				Logger.Write(LogLevel.Notice, Assembly.GetExecutingAssembly().GetName().Name);
+				Logger.Write(LogLevel.Notice, "Listening on address: {0}", configurationManager.Address);
+				Logger.Write(LogLevel.Notice, "Root directory: {0}", configurationManager.Root);
 			}
 
 			try {
@@ -169,7 +169,7 @@ namespace Mono.WebServer.XSP
 
 				if (!configurationManager.Quiet) {
 					// MonoDevelop depends on this string. If you change it, let them know.
-					Console.WriteLine ("Listening on port: {0} {1}", server.Port, security);
+					Logger.Write(LogLevel.Notice, "Listening on port: {0} {1}", server.Port, security);
 				}
 				if (configurationManager.RandomPort && !configurationManager.Quiet)
 					Logger.Write (LogLevel.Notice, "Random port: {0}", server.Port);
@@ -198,7 +198,7 @@ namespace Mono.WebServer.XSP
 				}
 			} catch (Exception e) {
 				if (!(e is ThreadAbortException))
-					Console.WriteLine ("Error: {0}", e);
+					Logger.Write (e);
 				else
 					server.ShutdownSockets ();
 				return 1;

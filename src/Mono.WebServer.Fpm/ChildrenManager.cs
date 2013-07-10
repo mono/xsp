@@ -16,11 +16,11 @@ namespace Mono.WebServer.Fpm
 				try {
 					if (!child.Process.HasExited)
 						child.Process.Kill();
-				}
-				catch (InvalidOperationException) {
+				} catch (InvalidOperationException) {
 					// Died between the if and the kill
 				}
 			}
+			children.RemoveAll(child => child.Process.HasExited);
 		}
 
 		public static void TermChildren()
@@ -33,14 +33,20 @@ namespace Mono.WebServer.Fpm
 					// Died between the if and the kill
 				}
 			}
+			children.RemoveAll (child => child.Process.HasExited);
 		}
 
 		public static void StartChildren(FileInfo[] configFiles, ConfigurationManager configurationManager)
 		{
+			if (configFiles == null)
+				throw new ArgumentNullException ("configFiles");
+			if (configurationManager == null)
+				throw new ArgumentNullException ("configurationManager");
 			foreach (var fileInfo in configFiles) {
 				Logger.Write(LogLevel.Debug, "Loading {0}", fileInfo.Name);
 				var childConfigurationManager = new ChildConfigurationManager();
-				childConfigurationManager.LoadXmlConfig(fileInfo.FullName);
+				string fullName = fileInfo.FullName;
+				childConfigurationManager.LoadXmlConfig(fullName);
 				string user = childConfigurationManager.User;
 				string fastCgiCommand = configurationManager.FastCgiCommand;
 
@@ -48,13 +54,13 @@ namespace Mono.WebServer.Fpm
 				if (Platform.IsUnix) {
 					if (String.IsNullOrEmpty(user)) {
 						Logger.Write(LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						user = UnixFileSystemInfo.GetFileSystemEntry(fileInfo.FullName).OwnerUser.UserName;
+						user = UnixFileSystemInfo.GetFileSystemEntry(fullName).OwnerUser.UserName;
 					}
 
-					child = Spawner.RunAs(user, Spawner.SpawnChild, fileInfo, fastCgiCommand);
+					child = Spawner.RunAs(user, Spawner.SpawnChild, fullName, fastCgiCommand);
 				} else {
 					Logger.Write(LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					child = Spawner.SpawnChild(fileInfo, fastCgiCommand);
+					child = Spawner.SpawnChild(fullName, fastCgiCommand);
 				}
 				children.Add(child);
 			}

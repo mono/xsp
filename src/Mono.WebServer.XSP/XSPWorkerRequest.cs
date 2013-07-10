@@ -41,6 +41,7 @@ using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Runtime.InteropServices;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer
 {
@@ -105,7 +106,8 @@ namespace Mono.WebServer
 
 				SetDefaultIndexFiles (indexes);
 			} catch (Exception ex) {
-				Console.WriteLine ("Worker initialization exception occurred. Continuing anyway:\n{0}", ex);
+				Logger.Write (LogLevel.Error, "Worker initialization exception occurred. Continuing anyway:");
+				Logger.Write (ex);
 			}
 		}
 

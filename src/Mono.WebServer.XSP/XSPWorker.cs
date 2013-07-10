@@ -213,7 +213,8 @@ namespace Mono.WebServer.XSP
 			try {
 				stream.Write (buffer, position, size);
 			} catch (Exception ex) {
-				Console.WriteLine ("Peer unexpectedly closed the connection on write. Closing our end.\n{0}", ex);
+				Logger.Write (LogLevel.Error, "Peer unexpectedly closed the connection on write. Closing our end.");
+				Logger.Write (ex);
 				Close ();
 			}
 		}

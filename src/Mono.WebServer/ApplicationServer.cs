@@ -143,13 +143,12 @@ namespace Mono.WebServer
 			
 			// TODO - check for duplicates, sort, optimize, etc.
 			if (Verbose && !SingleApplication) {
-				Console.WriteLine("Registering application:");
-				Console.WriteLine("    Host:          {0}", vhost ?? "any");
-				Console.WriteLine("    Port:          {0}", (vport != -1) ?
-						  vport.ToString () : "any");
+				Logger.Write (LogLevel.Notice, "Registering application:");
+				Logger.Write(LogLevel.Notice, "    Host:          {0}", vhost ?? "any");
+				Logger.Write(LogLevel.Notice, "    Port:          {0}", (vport != -1) ? vport.ToString () : "any");
 
-				Console.WriteLine("    Virtual path:  {0}", vpath);
-				Console.WriteLine("    Physical path: {0}", fullPath);
+				Logger.Write(LogLevel.Notice, "    Virtual path:  {0}", vpath);
+				Logger.Write(LogLevel.Notice, "    Physical path: {0}", fullPath);
 			}
 
 			vpathToHost.Add (new VPathToHost (vhost, vport, vpath, fullPath));
@@ -158,8 +157,7 @@ namespace Mono.WebServer
  		public void AddApplicationsFromConfigDirectory (string directoryName)
  		{
 			if (Verbose && !SingleApplication) {
-				Console.WriteLine ("Adding applications from *.webapp files in " +
-						   "directory '{0}'", directoryName);
+				Logger.Write(LogLevel.Notice, "Adding applications from *.webapp files in directory '{0}'", directoryName);
 			}
 
 			var di = new DirectoryInfo (directoryName);
@@ -175,7 +173,7 @@ namespace Mono.WebServer
  		public void AddApplicationsFromConfigFile (string fileName)
  		{
 			if (Verbose && !SingleApplication) {
-				Console.WriteLine ("Adding applications from config file '{0}'", fileName);
+				Logger.Write(LogLevel.Notice, "Adding applications from config file '{0}'", fileName);
 			}
 
 			try {
@@ -186,7 +184,7 @@ namespace Mono.WebServer
 					AddApplicationFromElement (el);
 				}
 			} catch {
-				Console.WriteLine ("Error loading '{0}'", fileName);
+				Logger.Write(LogLevel.Error, "Error loading '{0}'", fileName);
 				throw;
 			}
 		}
@@ -209,7 +207,7 @@ namespace Mono.WebServer
 			// TODO: support vhosts in xsp.exe
 			string name = el.SelectSingleNode ("name").InnerText;
 			if (verbose && !single_app)
-				Console.WriteLine ("Ignoring vhost {0} for {1}", n.InnerText, name);
+				Logger.Write (LogLevel.Warning, ("Ignoring vhost {0} for {1}", n.InnerText, name);
 #endif
 
 			int vport = -1;
@@ -220,7 +218,7 @@ namespace Mono.WebServer
 #else
 			// TODO: Listen on different ports
 			if (verbose && !single_app)
-				Console.WriteLine ("Ignoring vport {0} for {1}", n.InnerText, name);
+				Logger.Write (LogLevel.Warning, ("Ignoring vport {0} for {1}", n.InnerText, name);
 #endif
 
 			AddApplication (vhost, vport, vpath, path);
@@ -235,7 +233,7 @@ namespace Mono.WebServer
 				return;
 
 			if (Verbose && !SingleApplication) {
-				Console.WriteLine("Adding applications '{0}'...", applications);
+				Logger.Write(LogLevel.Notice, "Adding applications '{0}'...", applications);
 			}
 
  			string [] apps = applications.Split (',');
@@ -449,11 +447,10 @@ namespace Mono.WebServer
 			try {
 				socket.Send (data);
 			} catch (Exception ex2) {
-				Console.WriteLine ("Failed to send exception:");
-				Console.WriteLine (ex);
-				Console.WriteLine ();
-				Console.WriteLine ("Exception ocurred while sending:");
-				Console.WriteLine (ex2);
+				Logger.Write(LogLevel.Error, "Failed to send exception:");
+				Logger.Write(ex);
+				Logger.Write(LogLevel.Error, "Exception ocurred while sending:");
+				Logger.Write(ex2);
 			}	
 		}
 		
@@ -521,7 +518,7 @@ namespace Mono.WebServer
 				return GetApplicationForPath (vhost, port, "/", false);
 
 			if (Verbose)
-				Console.WriteLine ("No application defined for: {0}:{1}{2}", vhost, port, path);
+				Logger.Write(LogLevel.Error, "No application defined for: {0}:{1}{2}", vhost, port, path);
 
 			return null;
 		}

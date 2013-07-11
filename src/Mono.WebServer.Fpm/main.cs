@@ -27,20 +27,14 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Security.Principal;
-using Mono.Unix;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
-	public static class Server 
+	public static class Server
 	{
-		static readonly List<ChildInfo> children = new List<ChildInfo> ();
-
 		public static int Main (string [] args)
 		{
 			var configurationManager = new ConfigurationManager ();
@@ -89,64 +83,17 @@ namespace Mono.WebServer.Fpm {
 
 			Logger.Write (LogLevel.Debug, "Configuration directory exists, loading configuration files");
 
-			StartChildren (configDirInfo, configurationManager);
+			ChildrenManager.StartChildren (configDirInfo.GetFiles("*.xml"), configurationManager);
 
-			if (configurationManager.Stoppable) {
-				Console.WriteLine (
-					"Hit Return to stop the server.");
-				Console.ReadLine ();
-				foreach (ChildInfo child in children) {
-					// TODO: this is a bit brutal, be nicer
-					try {
-						if (!child.Process.HasExited)
-							child.Process.Kill ();
-					} catch (InvalidOperationException) {
-						// Died between the if and the kill
-					}
-				}
-			}
+			if (!configurationManager.Stoppable)
+				return 0;
+
+			Console.WriteLine ("Hit Return to stop the server.");
+			Console.ReadLine ();
+
+			ChildrenManager.TermChildren();
+			ChildrenManager.KillChildren();
 			return 0;
-		}
-
-		static void StartChildren (DirectoryInfo configDirInfo, ConfigurationManager configurationManager)
-		{
-			foreach (var fileInfo in configDirInfo.GetFiles ("*.xml")) {
-				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
-				var childConfigurationManager = new ChildConfigurationManager ();
-				childConfigurationManager.LoadXmlConfig (fileInfo.FullName);
-				string user = childConfigurationManager.User;
-
-				if (Platform.IsUnix) {
-					if (String.IsNullOrEmpty (user)) {
-						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						user = UnixFileSystemInfo.GetFileSystemEntry (fileInfo.FullName).OwnerUser.UserName;
-					}
-
-					using (var identity = new WindowsIdentity (user)) {
-						using (identity.Impersonate ()) {
-							SpawnChild (configurationManager, fileInfo);
-						}
-					}
-				} else {
-					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					SpawnChild (configurationManager, fileInfo);
-				}
-			}
-		}
-
-		static void SpawnChild (ConfigurationManager configurationManager, FileInfo fileInfo)
-		{
-			var info = new ChildInfo {
-				Process = new Process {
-					StartInfo = new ProcessStartInfo {
-						FileName = configurationManager.FastCgiCommand,
-						Arguments = String.Format ("--config-file {0}", fileInfo.FullName),
-						UseShellExecute = true
-					}
-				}
-			};
-			info.Process.Start ();
-			children.Add (info);
 		}
 	}
 }

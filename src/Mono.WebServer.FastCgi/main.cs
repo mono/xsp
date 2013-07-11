@@ -88,16 +88,16 @@ namespace Mono.WebServer.FastCgi
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
 			Socket socket;
-			if (!CreateSocket (configurationManager, out socket))
+			if (!TryCreateSocket (configurationManager, out socket))
 				return 1;
 
 			string root_dir;
-			if (!GetRootDirectory (configurationManager, out root_dir))
+			if (!TryGetRootDirectory (configurationManager, out root_dir))
 				return 1;
 
 			CreateAppServer (configurationManager, root_dir);
 
-			if (!LoadApplicationsConfig (configurationManager))
+			if (!TryLoadApplicationsConfig (configurationManager))
 				return 1;
 
 			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
@@ -145,7 +145,7 @@ namespace Mono.WebServer.FastCgi
 			};
 		}
 
-		static bool LoadApplicationsConfig (ConfigurationManager configurationManager)
+		static bool TryLoadApplicationsConfig (ConfigurationManager configurationManager)
 		{
 			bool autoMap = false; //(bool) configurationManager ["automappaths"];
 
@@ -184,7 +184,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateSocket (ConfigurationManager configurationManager, out Socket socket)
+		static bool TryCreateSocket (ConfigurationManager configurationManager, out Socket socket)
 		{
 			socket = null;
 
@@ -194,33 +194,38 @@ namespace Mono.WebServer.FastCgi
 
 			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
 
-			SocketCreator creator = GetSocketCreator (socket_parts);
-			return creator != null && creator (configurationManager, socket_parts, out socket);
+			SocketCreator creator;
+			return TryGetSocketCreator (socket_parts, out creator)
+				&& creator (configurationManager, socket_parts, out socket);
 		}
 
-		static SocketCreator GetSocketCreator (string[] socket_parts)
+		static bool TryGetSocketCreator (string[] socket_parts, out SocketCreator creator)
 		{
 			switch (socket_parts [0].ToLower ()) {
 			case "pipe":
-				return CreatePipe;
+				creator = TryCreatePipe;
+				return true;
 				// The FILE sockets is of the format
 				// "file[:PATH]".
 			case "unix":
 			case "file":
-				return CreateUnixSocket;
+				creator = TryCreateUnixSocket;
+				return true;
 				// The TCP socket is of the format
 				// "tcp[[:ADDRESS]:PORT]".
 			case "tcp":
-				return CreateTcpSocket;
+				creator = TryCreateTcpSocket;
+				return true;
 			default:
 				Logger.Write (LogLevel.Error,
 				              "Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
 				              socket_parts [0]);
-				return null;
+				creator = null;
+				return false;
 			}
 		}
 
-		static bool GetRootDirectory (ConfigurationManager configurationManager,
+		static bool TryGetRootDirectory (ConfigurationManager configurationManager,
 		                              out string rootDir)
 		{
 			rootDir = configurationManager.Root;
@@ -238,7 +243,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateTcpSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
+		static bool TryCreateTcpSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			socket = null;
 			ushort port;
@@ -287,7 +292,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreateUnixSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
+		static bool TryCreateUnixSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			string path = socketParts.Length == 2
 				? socketParts[1]
@@ -309,7 +314,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool CreatePipe (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
+		static bool TryCreatePipe (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			socket = null;
 			try {

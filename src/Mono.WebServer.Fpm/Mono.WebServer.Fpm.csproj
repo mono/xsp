@@ -45,9 +45,11 @@
   <ItemGroup>
     <Compile Include="ChildConfigurationManager.cs" />
     <Compile Include="ChildInfo.cs" />
+    <Compile Include="ChildrenManager.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="main.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Spawner.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">

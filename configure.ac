@@ -18,6 +18,7 @@ SHAMROCK_EXPAND_DATADIR
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_MKDIR_P
+AC_PROG_LIBTOOL
 
 # Options
 AC_ARG_ENABLE([tracing],
@@ -135,6 +136,7 @@ AC_CONFIG_FILES([Makefile
 	packaging/Makefile
 	packaging/opensuse/Makefile
 	scripts/Makefile
+	lib/Makefile
 	src/Makefile
 	src/Mono.WebServer.Apache/Makefile
 	src/Mono.WebServer.FastCgi/Makefile

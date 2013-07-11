@@ -14,7 +14,15 @@ Makefile.in
 *.exe
 build/m4/shave/shave
 build/m4/shave/shave-libtool
+build/m4/libtool.m4
+build/m4/ltoptions.m4
+build/m4/ltsugar.m4
+build/m4/ltversion.m4
+build/m4/lt~obsolete.m4
 reautogen.sh
+depcomp
+libtool
+ltmain.sh
 xsp.spec
 xsp.userprefs
 src/*/bin

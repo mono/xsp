@@ -140,6 +140,7 @@ AC_CONFIG_FILES([Makefile
 	src/Mono.WebServer.FastCgi/Makefile
 	src/Mono.WebServer.XSP/Makefile
 	src/Mono.WebServer/Makefile
+	src/Mono.WebServer.Fpm/Makefile
 	test/1.1/Makefile
 	test/1.1/asp.net/Makefile
 	test/1.1/authtest/Makefile
@@ -174,6 +175,7 @@ AC_CONFIG_FILES([Makefile
 	src/Mono.WebServer/AssemblyInfo4.cs
 	src/Mono.WebServer.Apache/AssemblyInfo.cs
 	src/Mono.WebServer.FastCgi/AssemblyInfo.cs
+	src/Mono.WebServer.Fpm/AssemblyInfo.cs
 	src/Mono.WebServer.XSP/AssemblyInfo.cs
 	src/Mono.WebServer.XSP/xsp.pc
 	src/Mono.WebServer.XSP/xsp-2.pc

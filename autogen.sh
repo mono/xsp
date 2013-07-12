@@ -55,7 +55,27 @@ check_autotool_version automake 1.9
 check_autotool_version autoconf 2.53
 check_autotool_version pkg-config 0.14.0
 
+if [ -z "$LIBTOOL" ]; then
+  LIBTOOL=`which glibtool 2>/dev/null`
+  if [ ! -x "$LIBTOOL" ]; then
+    LIBTOOL=`which libtool`
+  fi
+fi
+
+($LIBTOOL --version) < /dev/null > /dev/null 2>&1 || {
+  echo
+  echo "**Error**: You must have \`libtool' installed to compile mono_fpm."
+  echo "Get ftp://ftp.gnu.org/pub/gnu/libtool-1.2d.tar.gz"
+  echo "(or a newer version if it is available)"
+  error "Exiting"
+}
+
 run aclocal -I build/m4/shamrock -I build/m4/shave $ACLOCAL_FLAGS
+
+if test -z "$NO_LIBTOOLIZE"; then
+  ${LIBTOOL}ize --force --copy
+fi
+
 run autoconf
 run automake --gnu --add-missing --force --copy
 

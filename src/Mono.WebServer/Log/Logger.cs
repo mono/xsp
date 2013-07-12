@@ -73,7 +73,8 @@ namespace Mono.WebServer.Log {
 		{
 			Write (LogLevel.Error, e.Message);
 			if(e.StackTrace != null)
-				Write (LogLevel.Error, e.StackTrace);
+				foreach(var line in e.StackTrace.Split(new []{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+					Write (LogLevel.Error, line);
 		}
 
 		public static void Write (LogLevel level, string message)

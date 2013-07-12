@@ -1,4 +1,5 @@
-SUBDIRS=build man src test tools scripts packaging
+SUBDIRS=build man src test tools scripts packaging lib
+ACLOCAL_AMFLAGS += -I build/m4
 
 if UNITTESTS
 SUBDIRS += unittests

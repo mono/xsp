@@ -42,10 +42,9 @@
 # include <sys/param.h> /* FreeBSD sucks */
 #endif
 
-#include "ancillary.h"
+#include "fpm_helper.h"
 
-int
-ancil_recv_fds_with_buffer(int sock, int *fds, unsigned n_fds, void *buffer)
+int recv_fds_with_buffer(int sock, int *fds, unsigned n_fds, void *buffer)
 {
     struct msghdr msghdr;
     char nothing;
@@ -77,29 +76,22 @@ ancil_recv_fds_with_buffer(int sock, int *fds, unsigned n_fds, void *buffer)
     return(n_fds);
 }
 
-#ifndef SPARE_RECV_FDS
-int
-ancil_recv_fds(int sock, int *fd, unsigned n_fds)
+int recv_fds(int sock, int *fd, unsigned n_fds)
 {
     ANCIL_FD_BUFFER(ANCIL_MAX_N_FDS) buffer;
 
     assert(n_fds <= ANCIL_MAX_N_FDS);
-    return(ancil_recv_fds_with_buffer(sock, fd, n_fds, &buffer));
+    return(recv_fds_with_buffer(sock, fd, n_fds, &buffer));
 }
-#endif /* SPARE_RECV_FDS */
 
-#ifndef SPARE_RECV_FD
-int
-ancil_recv_fd(int sock, int *fd)
+int recv_fd(int sock, int *fd)
 {
     ANCIL_FD_BUFFER(1) buffer;
 
-    return(ancil_recv_fds_with_buffer(sock, fd, 1, &buffer) == 1 ? 0 : -1);
+    return(recv_fds_with_buffer(sock, fd, 1, &buffer) == 1 ? 0 : -1);
 }
-#endif /* SPARE_RECV_FD */
 
-int
-ancil_send_fds_with_buffer(int sock, const int *fds, unsigned n_fds, void *buffer)
+int send_fds_with_buffer(int sock, const int *fds, unsigned n_fds, void *buffer)
 {
     struct msghdr msghdr;
     char nothing = '!';
@@ -125,23 +117,17 @@ ancil_send_fds_with_buffer(int sock, const int *fds, unsigned n_fds, void *buffe
     return(sendmsg(sock, &msghdr, 0) >= 0 ? 0 : -1);
 }
 
-#ifndef SPARE_SEND_FDS
-int
-ancil_send_fds(int sock, const int *fds, unsigned n_fds)
+int send_fds(int sock, const int *fds, unsigned n_fds)
 {
     ANCIL_FD_BUFFER(ANCIL_MAX_N_FDS) buffer;
 
     assert(n_fds <= ANCIL_MAX_N_FDS);
-    return(ancil_send_fds_with_buffer(sock, fds, n_fds, &buffer));
+    return(send_fds_with_buffer(sock, fds, n_fds, &buffer));
 }
-#endif /* SPARE_SEND_FDS */
 
-#ifndef SPARE_SEND_FD
-int
-ancil_send_fd(int sock, int fd)
+int send_fd(int sock, int fd)
 {
     ANCIL_FD_BUFFER(1) buffer;
 
-    return(ancil_send_fds_with_buffer(sock, &fd, 1, &buffer));
+    return(send_fds_with_buffer(sock, &fd, 1, &buffer));
 }
-#endif /* SPARE_SEND_FD */

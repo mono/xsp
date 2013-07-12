@@ -52,6 +52,10 @@
       <Project>{5339C36C-A524-44CE-93BD-59A79F57B346}</Project>
       <Name>Mono.WebServer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Mono.WebServer.Fpm\Mono.WebServer.Fpm.csproj">
+      <Project>{4CA9FE8F-B3C7-42DB-8CFC-11A220581925}</Project>
+      <Name>Mono.WebServer.Fpm</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Default.aspx">

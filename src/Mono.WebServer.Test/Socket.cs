@@ -4,6 +4,7 @@ using Mono.Unix;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Mono.WebServer.Fpm;
 
 namespace Mono.WebServer.Test {
 	[TestFixture()]
@@ -36,12 +37,6 @@ namespace Mono.WebServer.Test {
 			client.BeginAccept (accept, client);
 		}
 
-		[DllImportAttribute("fpm_helper")]
-		static extern void send_fd(IntPtr sock, IntPtr fd);
-
-		[DllImportAttribute("fpm_helper")]
-		static extern void recv_fd(IntPtr sock, out IntPtr fd);
-
 		void FastCgiAccept(IAsyncResult res)
 		{
 			if (!res.IsCompleted)
@@ -53,9 +48,7 @@ namespace Mono.WebServer.Test {
 
 			using (var connection = socket.EndAccept (res))
 			{
-				IntPtr frontFd;
-				recv_fd (connection.Handle, out frontFd);
-				using (var stream = new UnixStream(frontFd.ToInt32()))
+				using (var stream = SocketPassing.ReceiveFrom (connection))
 				using (var writer = new StreamWriter(stream))
 					writer.WriteLine (message);
 			}
@@ -72,7 +65,7 @@ namespace Mono.WebServer.Test {
 
 			using (var connection = socket.EndAccept (res)) {
 				UnixClient back = new UnixClient (fastcgiSocketPath);
-				send_fd (back.Client.Handle, connection.Handle);
+				SocketPassing.SendTo (back.Client, connection.Handle);
 			}
 		}
 	}

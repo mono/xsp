@@ -19,11 +19,11 @@ namespace Mono.WebServer.Fpm {
 			return new UnixStream (fd.ToInt32 ());
 		}
 
-		[DllImportAttribute("fpm_helper")]
-		static extern void send_fd(IntPtr sock, IntPtr fd);
+		[DllImport ("fpm_helper")]
+		static extern void send_fd (IntPtr sock, IntPtr fd);
 
-		[DllImportAttribute("fpm_helper")]
-		static extern void recv_fd(IntPtr sock, out IntPtr fd);
+		[DllImport ("fpm_helper")]
+		static extern void recv_fd (IntPtr sock, out IntPtr fd);
 	}
 }
 

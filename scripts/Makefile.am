@@ -12,9 +12,11 @@ endif
 bin_scripts = xsp mod-mono-server fastcgi-mono-server
 tool_scripts = asp-state dbsessmgr
 
-bin_SCRIPTS = $(bin2_scripts) $(tool2_scripts) $(tool_scripts) $(bin_scripts) $(bin4_scripts) $(tool4_scripts)
+binplain_scripts = mono-fpm
 
-CLEANFILES = $(bin2_scripts_real) $(tool2_scripts) $(bin_scripts) $(tool_scripts) $(bin4_scripts) $(tool4_scripts)
+bin_SCRIPTS = $(bin2_scripts) $(tool2_scripts) $(tool_scripts) $(bin_scripts) $(bin4_scripts) $(tool4_scripts) $(binplain_scripts)
+
+CLEANFILES = $(bin2_scripts_real) $(tool2_scripts) $(bin_scripts) $(tool_scripts) $(bin4_scripts) $(tool4_scripts) $(binplain_scripts)
 
 plat_bindir2 = $(prefix)/lib/mono/2.0
 plat_tooldir2 = $(prefix)/lib/xsp/2.0
@@ -32,6 +34,11 @@ REWRITE2 = sed \
 REWRITE_TOOLS2 = echo dd $@ dd; sed \
 	-e 's,@''plat_bindir@,$(plat_tooldir2),g'		\
 	-e 's,@''exe_file@,'`basename $@ 2`'2.exe,g'		\
+	-e 's,@''RUNTIME@,@RUNTIME@,g'
+
+REWRITEPLAIN = sed \
+	-e 's,@''plat_bindir@,$(plat_bindir4),g'		\
+	-e 's,@''exe_file@,'`basename $@ 4`'.exe,g'		\
 	-e 's,@''RUNTIME@,@RUNTIME@,g'
 
 if NET_4_0
@@ -56,6 +63,10 @@ $(tool2_scripts): $(srcdir)/script.in Makefile.am
 
 $(bin_scripts): $(srcdir)/script.in Makefile.am
 	$(REWRITE2) $(srcdir)/script.in > $@.tmp
+	mv $@.tmp $@
+
+$(binplain_scripts): $(srcdir)/script.in Makefile.am
+	$(REWRITEPLAIN) $(srcdir)/script.in > $@.tmp
 	mv $@.tmp $@
 
 $(tool_scripts): $(srcdir)/script.in Makefile.am

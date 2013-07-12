@@ -5,6 +5,7 @@
 
     To compile XSP type and install it to /usr:
 
+        ./autogen.sh
 	./configure --prefix=/usr
 	make 
 	make install

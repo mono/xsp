@@ -107,9 +107,15 @@ namespace Mono.WebServer.FastCgi
 			server.Start (stoppable, (int)configurationManager.Backlog);
 
 			if (configurationManager.OnDemand) {
+				System.Threading.ReaderWriterLockSlim aliveLock = new System.Threading.ReaderWriterLockSlim ();
 				bool alive = false;
 
-				server.Accepted += (sender, e) => alive = true;
+				server.Accepted += (sender, e) => {
+					if (!aliveLock.TryEnterWriteLock (0))
+						return;
+					alive = true;
+					aliveLock.ExitWriteLock ();
+				};
 
 				Watchdog pluto = new Watchdog (configurationManager.IdleTime * 1000);
 				pluto.End += (sender, e) => {
@@ -119,10 +125,18 @@ namespace Mono.WebServer.FastCgi
 
 				Timer t = new Timer (1000);
 				t.Elapsed += (sender, e) => {
-					if (alive) {
-						alive = false;
-						pluto.Kick ();
-						Logger.Write (LogLevel.Debug, "Kicked the dog");
+					try{
+						aliveLock.EnterUpgradeableReadLock();
+						if (alive) {
+							aliveLock.EnterWriteLock();
+							alive = false;
+							aliveLock.ExitWriteLock();
+							pluto.Kick ();
+							Logger.Write (LogLevel.Debug, "Kicked the dog");
+						}
+					}
+					finally{
+						aliveLock.ExitReadLock();
 					}
 				};
 				t.Start ();

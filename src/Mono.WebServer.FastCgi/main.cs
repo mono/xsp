@@ -106,7 +106,8 @@ namespace Mono.WebServer.FastCgi
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable, (int)configurationManager.Backlog);
 
-			MaybeCreateWatchdog (configurationManager, server);
+			if (configurationManager.OnDemand)
+				CreateWatchdog (configurationManager, server);
 			
 			if (stoppable) {
 				Console.WriteLine (
@@ -118,48 +119,46 @@ namespace Mono.WebServer.FastCgi
 			return 0;
 		}
 
-		static void MaybeCreateWatchdog (ConfigurationManager configurationManager, Mono.FastCgi.Server server)
+		static void CreateWatchdog (ConfigurationManager configurationManager, Mono.FastCgi.Server server)
 		{
-			if (configurationManager.OnDemand) {
-				using (System.Threading.ReaderWriterLockSlim aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
-					bool alive = false;
+			using (var aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
+				bool alive = false;
 
-					// On a new connection try to set alive to true
-					// If we can't then don't bother, it's not needed
-					server.Accepted += (sender, e) => {
-						TryRunLocked (
-							() => aliveLock.TryEnterWriteLock (0),
-							() => {	alive = true; },
-							aliveLock.ExitWriteLock
-						);
-					};
+				// On a new connection try to set alive to true
+				// If we can't then don't bother, it's not needed
+				server.Accepted += (sender, e) => {
+					TryRunLocked (
+						() => aliveLock.TryEnterWriteLock (0),
+						() => {	alive = true; },
+						aliveLock.ExitWriteLock
+					);
+				};
 
-					Watchdog pluto = new Watchdog (configurationManager.IdleTime * 1000);
-					pluto.End += (sender, e) =>  {
-						Logger.Write (LogLevel.Debug, "The dog bit!");
-						server.Stop ();
-					};
+				var pluto = new Watchdog (configurationManager.IdleTime * 1000);
+				pluto.End += (sender, e) => {
+					Logger.Write (LogLevel.Debug, "The dog bit!");
+					server.Stop ();
+				};
 
-					// Check every second for hearthbeats
-					Timer t = new Timer (1000);
-					t.Elapsed += (sender, e) => {
-						RunLocked (
-							aliveLock.EnterUpgradeableReadLock,
-							() => {
-								if (alive) {
-									RunLocked(
-										aliveLock.EnterWriteLock,
-										() => { alive = false; },
-										aliveLock.ExitWriteLock
-									);
-									pluto.Kick ();
-								}
-							},
-							aliveLock.ExitUpgradeableReadLock
-						);
-					};
-					t.Start ();
-				}
+				// Check every second for hearthbeats
+				var t = new Timer (1000);
+				t.Elapsed += (sender, e) => {
+					RunLocked (
+						aliveLock.EnterUpgradeableReadLock,
+						() => {
+							if (!alive)
+								return;
+							RunLocked(
+								aliveLock.EnterWriteLock,
+								() => { alive = false; },
+								aliveLock.ExitWriteLock
+							);
+							pluto.Kick ();
+						},
+						aliveLock.ExitUpgradeableReadLock
+					);
+				};
+				t.Start ();
 			}
 		}
 

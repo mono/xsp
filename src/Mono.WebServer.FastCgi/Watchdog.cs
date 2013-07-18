@@ -1,13 +1,10 @@
 //
-// server.cs: Web Server that uses ASP.NET hosting
+// Watchdog.cs: A generic watchdog
 //
 // Authors:
-//   Brian Nickel (brian.nickel@gmail.com)
-//   Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
 //
-// (C) 2002,2003 Ximian, Inc (http://www.ximian.com)
-// (C) Copyright 2004 Novell, Inc. (http://www.novell.com)
-// (C) Copyright 2007 Brian Nickel
+// (C) Copyright 2013 Leonardo Taglialegne
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -28,12 +25,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-using System;
-using System.Net;
-using System.Reflection;
-using Mono.FastCgi;
-using Mono.WebServer.Log;
-using Mono.WebServer.Options;
+
 using System.Timers;
 
 namespace Mono.WebServer.FastCgi
@@ -77,7 +69,7 @@ namespace Mono.WebServer.FastCgi
 
 		Timer CreateTimer (double timeout)
 		{
-			Timer toret = new Timer (timeout) {
+			var toret = new Timer (timeout) {
 				AutoReset = false
 			};
 			toret.Elapsed += (sender, args) =>  {

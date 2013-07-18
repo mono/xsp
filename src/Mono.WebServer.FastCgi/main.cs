@@ -107,39 +107,39 @@ namespace Mono.WebServer.FastCgi
 			server.Start (stoppable, (int)configurationManager.Backlog);
 
 			if (configurationManager.OnDemand) {
-				System.Threading.ReaderWriterLockSlim aliveLock = new System.Threading.ReaderWriterLockSlim ();
-				bool alive = false;
+				using (System.Threading.ReaderWriterLockSlim aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
+					bool alive = false;
 
-				server.Accepted += (sender, e) => {
-					if (!aliveLock.TryEnterWriteLock (0))
-						return;
-					alive = true;
-					aliveLock.ExitWriteLock ();
-				};
+					server.Accepted += (sender, e) => {
+						if (!aliveLock.TryEnterWriteLock (0))
+							return;
+						alive = true;
+						aliveLock.ExitWriteLock ();
+					};
 
-				Watchdog pluto = new Watchdog (configurationManager.IdleTime * 1000);
-				pluto.End += (sender, e) => {
-					Logger.Write (LogLevel.Debug, "The dog bit");
-					server.Stop ();
-				};
+					Watchdog pluto = new Watchdog (configurationManager.IdleTime * 1000);
+					pluto.End += (sender, e) => {
+						Logger.Write (LogLevel.Debug, "The dog bit");
+						server.Stop ();
+					};
 
-				Timer t = new Timer (1000);
-				t.Elapsed += (sender, e) => {
-					try{
-						aliveLock.EnterUpgradeableReadLock();
-						if (alive) {
-							aliveLock.EnterWriteLock();
-							alive = false;
-							aliveLock.ExitWriteLock();
-							pluto.Kick ();
-							Logger.Write (LogLevel.Debug, "Kicked the dog");
+					Timer t = new Timer (1000);
+					t.Elapsed += (sender, e) => {
+						try {
+							aliveLock.EnterUpgradeableReadLock ();
+							if (alive) {
+								aliveLock.EnterWriteLock ();
+								alive = false;
+								aliveLock.ExitWriteLock ();
+								pluto.Kick ();
+								Logger.Write (LogLevel.Debug, "Kicked the dog");
+							}
+						} finally {
+							aliveLock.ExitReadLock ();
 						}
-					}
-					finally{
-						aliveLock.ExitReadLock();
-					}
-				};
-				t.Start ();
+					};
+					t.Start ();
+				}
 			}
 			
 			if (stoppable) {

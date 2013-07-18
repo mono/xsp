@@ -35,6 +35,7 @@ using System.Reflection;
 using Mono.FastCgi;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
+using System.Timers;
 
 namespace Mono.WebServer.FastCgi
 {
@@ -104,6 +105,28 @@ namespace Mono.WebServer.FastCgi
 
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable, (int)configurationManager.Backlog);
+
+			if (configurationManager.OnDemand) {
+				bool alive = false;
+
+				server.Accepted += (sender, e) => alive = true;
+
+				Watchdog pluto = new Watchdog (configurationManager.IdleTime * 1000);
+				pluto.End += (sender, e) => {
+					Logger.Write (LogLevel.Debug, "The dog bit");
+					server.Stop ();
+				};
+
+				Timer t = new Timer (1000);
+				t.Elapsed += (sender, e) => {
+					if (alive) {
+						alive = false;
+						pluto.Kick ();
+						Logger.Write (LogLevel.Debug, "Kicked the dog");
+					}
+				};
+				t.Start ();
+			}
 			
 			if (stoppable) {
 				Console.WriteLine (

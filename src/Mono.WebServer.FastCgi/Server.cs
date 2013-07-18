@@ -89,7 +89,7 @@ namespace Mono.FastCgi {
 		
 		#region Public Properties
 
-		public event EventHandler Accepted;
+		public event EventHandler RequestReceived;
 		
 		public int MaxConnections {
 			get {return max_connections;}
@@ -365,8 +365,7 @@ namespace Mono.FastCgi {
 					connection = new Connection (accepted, this);
 					lock (connections)
 						connections.Add (connection);
-					if (Accepted != null)
-						Accepted.BeginInvoke (this, EventArgs.Empty, null, null);
+					connection.RequestReceived += RequestReceived;
 				} catch (System.Net.Sockets.SocketException e) {
 					Logger.Write (LogLevel.Error,
 						Strings.Server_AcceptFailed, e.Message);

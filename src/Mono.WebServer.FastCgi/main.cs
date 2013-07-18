@@ -126,7 +126,7 @@ namespace Mono.WebServer.FastCgi
 
 				// On a new connection try to set alive to true
 				// If we can't then don't bother, it's not needed
-				server.Accepted += (sender, e) => {
+				server.RequestReceived += (sender, e) => {
 					TryRunLocked (
 						() => aliveLock.TryEnterWriteLock (0),
 						() => {	alive = true; },

@@ -27,13 +27,21 @@
 //
 
 using System.Diagnostics;
+using System;
 
 namespace Mono.WebServer.Fpm {
-	class ChildInfo 
+	struct ChildInfo
 	{
-		public Process Process { get; set; }
+		public Process Process { get; private set; }
 
-		public ChildInfo (Process process = null)
+		public Func<Process> Spawner { get; set; }
+
+		public void Spawn ()
+		{
+			Process = Spawner ();
+		}
+
+		public ChildInfo (Process process) : this()
 		{
 			Process = process;
 		}

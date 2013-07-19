@@ -1,8 +1,38 @@
-﻿using System;
+﻿//
+// ChildrenManager.cs:
+//
+// Author:
+//   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
+//
+// Copyright (c) 2013 Leonardo Taglialegne.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Mono.Unix;
 using Mono.WebServer.Log;
+using System.Diagnostics;
 
 namespace Mono.WebServer.Fpm
 {
@@ -14,26 +44,28 @@ namespace Mono.WebServer.Fpm
 		{
 			foreach (ChildInfo child in children) {
 				try {
-					if (!child.Process.HasExited)
-						child.Process.Kill();
+					Process process = child.Process;
+					if (process != null && !process.HasExited)
+						process.Kill();
 				} catch (InvalidOperationException) {
 					// Died between the if and the kill
 				}
 			}
-			children.RemoveAll(child => child.Process.HasExited);
+			children.RemoveAll(child => child.Process != null && child.Process.HasExited);
 		}
 
 		public static void TermChildren()
 		{
 			foreach (ChildInfo child in children) {
 				try {
-					if (!child.Process.HasExited)
+					Process process = child.Process;
+					if (process != null && !process.HasExited)
 						; //TODO: Write some nice close code
 				} catch (InvalidOperationException) {
 					// Died between the if and the kill
 				}
 			}
-			children.RemoveAll (child => child.Process.HasExited);
+			children.RemoveAll (child => child.Process != null && child.Process.HasExited);
 		}
 
 		public static void StartChildren(FileInfo[] configFiles, ConfigurationManager configurationManager)
@@ -43,26 +75,29 @@ namespace Mono.WebServer.Fpm
 			if (configurationManager == null)
 				throw new ArgumentNullException ("configurationManager");
 			foreach (var fileInfo in configFiles) {
-				Logger.Write(LogLevel.Debug, "Loading {0}", fileInfo.Name);
-				var childConfigurationManager = new ChildConfigurationManager();
+				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
+				var childConfigurationManager = new ChildConfigurationManager ();
 				string fullName = fileInfo.FullName;
-				childConfigurationManager.LoadXmlConfig(fullName);
+				childConfigurationManager.LoadXmlConfig (fullName);
 				string user = childConfigurationManager.User;
 				string fastCgiCommand = configurationManager.FastCgiCommand;
 
-				ChildInfo child;
+				Func<Process> spawner;
 				if (Platform.IsUnix) {
-					if (String.IsNullOrEmpty(user)) {
-						Logger.Write(LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						user = UnixFileSystemInfo.GetFileSystemEntry(fullName).OwnerUser.UserName;
+					if (String.IsNullOrEmpty (user)) {
+						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
+						user = UnixFileSystemInfo.GetFileSystemEntry (fullName).OwnerUser.UserName;
 					}
 
-					child = Spawner.RunAs(user, Spawner.SpawnChild, fullName, fastCgiCommand);
+					spawner = () => Spawner.RunAs (user, Spawner.SpawnChild, fullName, fastCgiCommand);
 				} else {
-					Logger.Write(LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					child = Spawner.SpawnChild(fullName, fastCgiCommand);
+					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
+					spawner = () => Spawner.SpawnChild (fullName, fastCgiCommand);
 				}
-				children.Add(child);
+				var child = new ChildInfo { Spawner = spawner};
+				children.Add (child);
+				if (!childConfigurationManager.OnDemand)
+					child.Spawn ();
 			}
 		}
 	}

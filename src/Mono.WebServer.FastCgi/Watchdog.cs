@@ -75,9 +75,9 @@ namespace Mono.WebServer.FastCgi
 			toret.Elapsed += (sender, args) =>  {
 				lock (end_lock) {
 					ended = true;
-					if (End != null)
-						End (sender, args);
 				}
+				if (End != null)
+					End (sender, args);
 			};
 			toret.Start ();
 			return toret;

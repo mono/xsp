@@ -164,11 +164,23 @@ namespace Mono.WebServer.FastCgi
 
 		static void RunLocked (Action takeLock, Action code, Action releaseLock)
 		{
+			if (takeLock == null)
+				throw new ArgumentNullException ("takeLock");
+			if (code == null)
+				throw new ArgumentNullException ("code");
+			if (releaseLock == null)
+				throw new ArgumentNullException ("releaseLock");
 			TryRunLocked (() => {takeLock (); return true;}, code, releaseLock);
 		}
 
-		static void TryRunLocked (Func<bool> takeLock, Action code, Action releaseLock) 
+		static void TryRunLocked (Func<bool> takeLock, Action code, Action releaseLock)
 		{
+			if (takeLock == null)
+				throw new ArgumentNullException ("takeLock");
+			if (code == null)
+				throw new ArgumentNullException ("code");
+			if (releaseLock == null)
+				throw new ArgumentNullException ("releaseLock");
 			bool locked = false;
 			try {
 				if (!takeLock ())
@@ -250,7 +262,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool TryCreateSocket (ConfigurationManager configurationManager, out Socket socket)
+		public static bool TryCreateSocket (ConfigurationManager configurationManager, out Socket socket)
 		{
 			socket = null;
 

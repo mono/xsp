@@ -46,6 +46,8 @@ namespace Mono.FastCgi {
 		bool started;
 		
 		bool accepting;
+
+		bool stopped;
 		
 		Thread runner;
 		
@@ -64,6 +66,8 @@ namespace Mono.FastCgi {
 		int buffer_count;
 		
 		readonly object buffer_lock = new object ();
+
+		readonly object state_lock = new object ();
 		
 		#endregion
 		
@@ -84,6 +88,8 @@ namespace Mono.FastCgi {
 		
 		
 		#region Public Properties
+
+		public event EventHandler RequestReceived;
 		
 		public int MaxConnections {
 			get {return max_connections;}
@@ -154,33 +160,46 @@ namespace Mono.FastCgi {
 
 		public void Start (bool background, int backlog)
 		{
-			if (started) {
-				throw new InvalidOperationException (
-					Strings.Server_AlreadyStarted);
+			lock (state_lock) {
+				stopped = false;
+
+				if (started) {
+					throw new InvalidOperationException (
+						Strings.Server_AlreadyStarted);
+				}
+
+				listen_socket.Listen (backlog);
+
+				runner = new Thread (RunServer) { IsBackground = background };
+				runner.Start ();
 			}
-
-			listen_socket.Listen (backlog);
-
-			runner = new Thread (RunServer) {IsBackground = background};
-			runner.Start ();
 		}
 
+		/// <summary>
+		/// Stop this instance. Calling Stop multiple times is a no-op.
+		/// </summary>
 		public void Stop ()
 		{
-			if (!started)
-				throw new InvalidOperationException (
-					Strings.Server_NotStarted);
+			lock (state_lock) {
+				if (stopped)
+					return;
 
-			started = false;
-			listen_socket.Close ();
-			lock (connections) {
-				foreach (Connection c in new List<Connection> (connections)) {
-					EndConnection (c);
+				if (!started)
+					throw new InvalidOperationException (Strings.Server_NotStarted);
+
+				started = false;
+				stopped = true;
+
+				listen_socket.Close ();
+				lock (connections) {
+					foreach (Connection c in new List<Connection> (connections)) {
+						EndConnection (c);
+					}
 				}
-			}
 			
-			runner.Abort ();
-			runner = null;
+				runner.Abort ();
+				runner = null;
+			}
 		}
 		
 		public void EndConnection (Connection connection)
@@ -346,6 +365,7 @@ namespace Mono.FastCgi {
 					connection = new Connection (accepted, this);
 					lock (connections)
 						connections.Add (connection);
+					connection.RequestReceived += RequestReceived;
 				} catch (System.Net.Sockets.SocketException e) {
 					Logger.Write (LogLevel.Error,
 						Strings.Server_AcceptFailed, e.Message);

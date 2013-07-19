@@ -35,6 +35,7 @@ using System.Reflection;
 using Mono.FastCgi;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
+using System.Timers;
 
 namespace Mono.WebServer.FastCgi
 {
@@ -104,6 +105,9 @@ namespace Mono.WebServer.FastCgi
 
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable, (int)configurationManager.Backlog);
+
+			if (configurationManager.OnDemand)
+				CreateWatchdog (configurationManager, server);
 			
 			if (stoppable) {
 				Console.WriteLine (
@@ -113,6 +117,80 @@ namespace Mono.WebServer.FastCgi
 			}
 			
 			return 0;
+		}
+
+		static void CreateWatchdog (ConfigurationManager configurationManager, Mono.FastCgi.Server server)
+		{
+			using (var aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
+				bool alive = false;
+
+				// On a new connection try to set alive to true
+				// If we can't then don't bother, it's not needed
+				server.RequestReceived += (sender, e) => {
+					TryRunLocked (
+						() => aliveLock.TryEnterWriteLock (0),
+						() => {	alive = true; },
+						aliveLock.ExitWriteLock
+					);
+				};
+
+				var pluto = new Watchdog (configurationManager.IdleTime * 1000);
+				pluto.End += (sender, e) => {
+					Logger.Write (LogLevel.Debug, "The dog bit!");
+					server.Stop ();
+				};
+
+				// Check every second for hearthbeats
+				var t = new Timer (1000);
+				t.Elapsed += (sender, e) => {
+					RunLocked (
+						aliveLock.EnterUpgradeableReadLock,
+						() => {
+							if (!alive)
+								return;
+							RunLocked(
+								aliveLock.EnterWriteLock,
+								() => { alive = false; },
+								aliveLock.ExitWriteLock
+							);
+							pluto.Kick ();
+						},
+						aliveLock.ExitUpgradeableReadLock
+					);
+				};
+				t.Start ();
+			}
+		}
+
+		static void RunLocked (Action takeLock, Action code, Action releaseLock)
+		{
+			if (takeLock == null)
+				throw new ArgumentNullException ("takeLock");
+			if (code == null)
+				throw new ArgumentNullException ("code");
+			if (releaseLock == null)
+				throw new ArgumentNullException ("releaseLock");
+			TryRunLocked (() => {takeLock (); return true;}, code, releaseLock);
+		}
+
+		static void TryRunLocked (Func<bool> takeLock, Action code, Action releaseLock)
+		{
+			if (takeLock == null)
+				throw new ArgumentNullException ("takeLock");
+			if (code == null)
+				throw new ArgumentNullException ("code");
+			if (releaseLock == null)
+				throw new ArgumentNullException ("releaseLock");
+			bool locked = false;
+			try {
+				if (!takeLock ())
+					return;
+				locked = true;
+				code ();
+			} finally {
+				if (locked)
+					releaseLock ();
+			}
 		}
 
 		static Mono.FastCgi.Server CreateServer (ConfigurationManager configurationManager,
@@ -184,7 +262,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool TryCreateSocket (ConfigurationManager configurationManager, out Socket socket)
+		public static bool TryCreateSocket (ConfigurationManager configurationManager, out Socket socket)
 		{
 			socket = null;
 

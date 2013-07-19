@@ -78,6 +78,8 @@ namespace Mono.FastCgi {
 		
 		
 		#region Public Properties
+
+		public event EventHandler RequestReceived;
 		
 		public int RequestCount {
 			get {return requests.Count;}
@@ -122,6 +124,15 @@ namespace Mono.FastCgi {
 				}
 				
 				Request request = GetRequest (record.RequestID);
+
+				try {
+					if (RequestReceived != null)
+						RequestReceived (this, EventArgs.Empty);
+				} catch(Exception e) {
+					// We don't care if the event handler has problems
+					Logger.Write(LogLevel.Error, "Error while invoking RequestReceived event:");
+					Logger.Write(e);
+				}
 				
 				HandleRequest (record, request);
 			}

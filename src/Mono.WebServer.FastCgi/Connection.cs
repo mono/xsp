@@ -125,8 +125,12 @@ namespace Mono.FastCgi {
 				
 				Request request = GetRequest (record.RequestID);
 
-				if (RequestReceived != null)
-					RequestReceived (this, EventArgs.Empty);
+				try {
+					if (RequestReceived != null)
+						RequestReceived (this, EventArgs.Empty);
+				} catch(Exception) {
+					// We don't care if the event handler has problems
+				}
 				
 				HandleRequest (record, request);
 			}

@@ -128,8 +128,10 @@ namespace Mono.FastCgi {
 				try {
 					if (RequestReceived != null)
 						RequestReceived (this, EventArgs.Empty);
-				} catch(Exception) {
+				} catch(Exception e) {
 					// We don't care if the event handler has problems
+					Logger.Write(LogLevel.Error, "Error while invoking RequestReceived event:");
+					Logger.Write(e);
 				}
 				
 				HandleRequest (record, request);

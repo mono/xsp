@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Web" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -94,6 +95,7 @@
     <Compile Include="WorkerRequest.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="Watchdog.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

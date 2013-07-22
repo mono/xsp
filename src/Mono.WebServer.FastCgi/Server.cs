@@ -321,6 +321,7 @@ namespace Mono.FastCgi {
 						return;
 					}
 					
+					// TODO: check this code, buffer can't be null
 					for (int i = 0; i < length && buffer != null; i++) {
 						if (buffers [i] == null) {
 							buffers [i] = buffer;

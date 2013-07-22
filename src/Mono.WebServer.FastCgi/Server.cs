@@ -422,13 +422,11 @@ namespace Mono.FastCgi {
 		
 		
 		#region Responder Management
-		
+
 		public void SetResponder (Type responder)
 		{
-			if (responder == null) {
-				responder_type = responder;
-				return;
-			}
+			if (responder == null)
+				throw new ArgumentNullException ("responder");
 
 			if (!typeof (IResponder).IsAssignableFrom (responder))
 				throw new ArgumentException (

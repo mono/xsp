@@ -394,11 +394,7 @@ namespace Mono.WebServer
 			} catch (Exception ex) {
 				inUnhandledException = true;
 				var hex = new HttpException (400, "Bad request", ex);
-				// TODO: Check, this looks like a bug
-				if (hex != null) // just a precaution
-					error = hex.GetHtmlErrorMessage ();
-				else
-					error = String.Format (DEFAULT_EXCEPTION_HTML, ex.Message);
+				error = hex.GetHtmlErrorMessage ();
 			}
 
 			if (!inUnhandledException)

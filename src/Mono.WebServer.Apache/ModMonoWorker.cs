@@ -120,8 +120,7 @@ namespace Mono.WebServer.Apache
 			string final_pdir = null;
 			string final_vdir = null;
 			while (vinfo != null && pinfo != null) {
-				// TODO: Check this code, it's always true!
-				if (final_pdir == null && CheckDirectory (pinfo)) {
+				if (CheckDirectory (pinfo)) {
 					final_pdir = pinfo.ToString ();
 					final_vdir = vinfo.ToString ();
 					break;

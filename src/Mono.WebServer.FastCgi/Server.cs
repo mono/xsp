@@ -303,7 +303,7 @@ namespace Mono.FastCgi {
 			lock (buffer_lock) {
 				int length = buffers.Length;
 				foreach (byte [] buffer in new[] {buffer1, buffer2}) {
-					if (buffer.Length < Record.SuggestedBufferSize)
+					if (buffer == null || buffer.Length < Record.SuggestedBufferSize)
 						continue;
 					
 					// If the buffer count is equal to the
@@ -321,8 +321,7 @@ namespace Mono.FastCgi {
 						return;
 					}
 					
-					// TODO: check this code, buffer can't be null
-					for (int i = 0; i < length && buffer != null; i++) {
+					for (int i = 0; i < length; i++) {
 						if (buffers [i] == null) {
 							buffers [i] = buffer;
 							buffer_count ++;

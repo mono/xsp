@@ -189,6 +189,9 @@ namespace System
 
 		void ICollection<T>.CopyTo (T[] array, int arrayIndex)
 		{
+			if (array == null)
+				throw new ArgumentNullException ("array");
+
 			System.Array.Copy (this.array, offset, array, arrayIndex, count);
 		}
 
@@ -211,6 +214,9 @@ namespace System
 
 		public void CopyTo(T[] dest, int destIndex, int count)
 		{
+			if (dest == null)
+				throw new ArgumentNullException ("dest");
+
 			System.Array.Copy(array, offset, dest, destIndex, count);
 		}
 	}

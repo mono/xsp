@@ -53,6 +53,42 @@ namespace System
 			get { return count; }
 		}
 
+		bool ICollection<T>.IsReadOnly {
+			get {
+				return true;
+			}
+		}
+
+		T IReadOnlyList<T>.this[int index] {
+			get {
+				return ((IList<T>) this)[index];
+			}
+		}
+
+		public T this[int index] {
+			get {
+				return ((IList<T>)this)[index];
+			}
+			set {
+				((IList<T>)this) [index] = value;
+			}
+		}
+
+		T IList<T>.this[int index] {
+			get {
+				if (index < 0 || count < index)
+					throw new ArgumentOutOfRangeException ("index");
+
+				return array[offset + index];
+			}
+			set {
+				if (index < 0 || count < index)
+					throw new ArgumentOutOfRangeException ("index");
+
+				array[offset + index] = value;
+			}
+		}
+
 		public CompatArraySegment (T [] array, int offset, int count)
 		{
 			if (array == null)
@@ -119,42 +155,6 @@ namespace System
 		public static bool operator !=(CompatArraySegment<T> a, CompatArraySegment<T> b)
 		{
 			return !(a.Equals(b));
-		}
-
-		bool ICollection<T>.IsReadOnly {
-			get {
-				return true;
-			}
-		}
-
-		T IReadOnlyList<T>.this[int index] {
-			get {
-				return ((IList<T>) this)[index];
-			}
-		}
-
-		public T this[int index] {
-			get {
-				return ((IList<T>)this)[index];
-			}
-			set {
-				((IList<T>)this) [index] = value;
-			}
-		}
-
-		T IList<T>.this[int index] {
-			get {
-				if (index < 0 || count < index)
-					throw new ArgumentOutOfRangeException ("index");
-
-				return array[offset + index];
-			}
-			set {
-				if (index < 0 || count < index)
-					throw new ArgumentOutOfRangeException ("index");
-
-				array[offset + index] = value;
-			}
 		}
 
 		void ICollection<T>.Add (T item)

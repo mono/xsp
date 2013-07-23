@@ -8,8 +8,8 @@ namespace Mono.WebServer.FastCgi
 		public CompatArraySegment<byte>? Body { get; private set; }
 		public CompatArraySegment<byte>? Padding { get; private set; }
 
-		private readonly BufferManager bigBufferManager;
-		private readonly BufferManager smallBufferManager;
+		readonly BufferManager bigBufferManager;
+		readonly BufferManager smallBufferManager;
 
 		public Buffers (BufferManager bigBufferManager, BufferManager smallBufferManager)
 			: this ()

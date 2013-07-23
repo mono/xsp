@@ -95,11 +95,8 @@ namespace Mono.WebServer
 
 		protected void ProcessRequest (MonoWorkerRequest mwr)
 		{
-			// TODO: Check this, it looks like a bug
-			if (mwr == null) {
-				EndOfRequest (mwr);
-				return;
-			}
+			if (mwr == null)
+				throw new ArgumentNullException ("mwr");
 			
 			if (!mwr.ReadRequestData ()) {
 				EndOfRequest (mwr);

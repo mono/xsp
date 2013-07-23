@@ -303,7 +303,7 @@ namespace Mono.FastCgi {
 			lock (buffer_lock) {
 				int length = buffers.Length;
 				foreach (byte [] buffer in new[] {buffer1, buffer2}) {
-					if (buffer.Length < Record.SuggestedBufferSize)
+					if (buffer == null || buffer.Length < Record.SuggestedBufferSize)
 						continue;
 					
 					// If the buffer count is equal to the
@@ -321,7 +321,7 @@ namespace Mono.FastCgi {
 						return;
 					}
 					
-					for (int i = 0; i < length && buffer != null; i++) {
+					for (int i = 0; i < length; i++) {
 						if (buffers [i] == null) {
 							buffers [i] = buffer;
 							buffer_count ++;
@@ -422,13 +422,11 @@ namespace Mono.FastCgi {
 		
 		
 		#region Responder Management
-		
+
 		public void SetResponder (Type responder)
 		{
-			if (responder == null) {
-				responder_type = responder;
-				return;
-			}
+			if (responder == null)
+				throw new ArgumentNullException ("responder");
 
 			if (!typeof (IResponder).IsAssignableFrom (responder))
 				throw new ArgumentException (

@@ -141,7 +141,7 @@ namespace Mono.WebServer
 			if (fullPath != null && !fullPath.EndsWith (dirSepChar.ToString ()))
 				fullPath += dirSepChar;
 			
-			// TODO - check for duplicates, sort, optimize, etc.
+			// TODO: Check for duplicates, sort, optimize, etc.
 			if (Verbose && !SingleApplication) {
 				Logger.Write (LogLevel.Notice, "Registering application:");
 				Logger.Write(LogLevel.Notice, "    Host:          {0}", vhost ?? "any");

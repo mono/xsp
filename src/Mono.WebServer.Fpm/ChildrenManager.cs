@@ -75,7 +75,9 @@ namespace Mono.WebServer.Fpm
 				throw new ArgumentNullException ("configFiles");
 			if (configurationManager == null)
 				throw new ArgumentNullException ("configurationManager");
-			foreach (var fileInfo in configFiles) {
+			foreach (FileInfo fileInfo in configFiles) {
+				if (fileInfo == null)
+					continue;
 				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
 				var childConfigurationManager = new ChildConfigurationManager ();
 				string fullName = fileInfo.FullName;

@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using Mono.WebServer.FastCgi.Compatibility;
 using Mono.WebServer.Log;
 using IOPath = System.IO.Path;
 using Mono.WebServer;
@@ -171,10 +172,15 @@ namespace Mono.FastCgi {
 		
 		public void AddParameterData (byte [] data)
 		{
+			AddParameterData (data.ToReadOnlyList ());
+		}
+
+		public void AddParameterData (IReadOnlyList<byte> data)
+		{
 			// Validate arguments in public methods.
 			if (data == null)
 				throw new ArgumentNullException ("data");
-			
+
 			// When all the parameter data is received, it is acted
 			// on and the parameter_data object is nullified.
 			// Further data suggests a problem with the HTTP server.
@@ -183,25 +189,25 @@ namespace Mono.FastCgi {
 					Strings.Request_ParametersAlreadyCompleted);
 				return;
 			}
-			
+
 			// If data was provided, append it to that already
 			// received, and exit.
-			if (data.Length > 0) {
+			if (data.Count > 0) {
 				parameter_data.AddRange (data);
 				return;
 			}
-			
+
 			// A zero length record indicates the end of that form
 			// of data. When it is received, the data can then be
 			// examined and worked on.
-			
-			data = parameter_data.ToArray ();
+
+			data = parameter_data.ToArray ().ToReadOnlyList ();
 			try {
 				parameter_table = NameValuePair.FromData (data);
 				// The parameter data is no longer needed and
 				// can be sent to the garbage collector.
 				parameter_data = null;
-			
+
 				// Inform listeners of the completion.
 				if (ParameterDataCompleted != null)
 					ParameterDataCompleted (this,

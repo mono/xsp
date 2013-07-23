@@ -33,6 +33,7 @@ using System.IO;
 using Mono.Unix;
 using Mono.WebServer.Log;
 using System.Diagnostics;
+using Mono.FastCgi;
 
 namespace Mono.WebServer.Fpm
 {
@@ -96,8 +97,14 @@ namespace Mono.WebServer.Fpm
 				}
 				var child = new ChildInfo { Spawner = spawner};
 				children.Add (child);
-				if (!childConfigurationManager.OnDemand)
+				if (childConfigurationManager.OnDemand) {
+					Socket socket;
+					if (!FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
+
+					}
+				} else {
 					child.Spawn ();
+				}
 			}
 		}
 	}

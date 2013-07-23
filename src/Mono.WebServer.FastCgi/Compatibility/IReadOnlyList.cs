@@ -1,11 +1,11 @@
 //
-// SocketAbstractions/Socket.cs: Abstracts socket operations.
+// IReadOnlyList.cs
 //
-// Author:
-//   Brian Nickel (brian.nickel@gmail.com)
+// Authors:
+//	Marek Safar  <marek.safar@gmail.com>
 //
-// Copyright (C) 2007 Brian Nickel
-// 
+// Copyright (C) 2011 Xamarin, Inc (http://www.xamarin.com)
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,24 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+#if !NET_4_5
 
-namespace Mono.FastCgi {
-	public abstract class Socket
+namespace System.Collections.Generic
+{
+	public interface IReadOnlyList<T> : IReadOnlyCollection<T>
 	{
-		public abstract void Close ();
-		
-		public abstract int Receive (byte [] buffer, int offset, int size, System.Net.Sockets.SocketFlags flags);
-		
-		public abstract int Send (byte [] data, int offset, int size, System.Net.Sockets.SocketFlags flags);
-
-		
-		public abstract void Listen (int backlog);
-		
-		public abstract IAsyncResult BeginAccept (AsyncCallback callback, object state);
-		
-		public abstract Socket EndAccept (IAsyncResult asyncResult);
-		
-		public abstract bool Connected {get;}
+		T this [int index] { get; }
 	}
 }
+
+#endif

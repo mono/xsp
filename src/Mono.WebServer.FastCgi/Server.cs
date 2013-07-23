@@ -37,10 +37,11 @@ using Mono.WebServer.Log;
 namespace Mono.FastCgi {
 	public class Server
 	{
+		public BufferManager BigBufferManager { get; private set; }
+		public BufferManager SmallBufferManager { get; private set; }
+
 		#region Private Fields
 
-		readonly BufferManager buffer_manager = new BufferManager();
-		
 		readonly List<Connection> connections = new List<Connection> ();
 		
 		readonly Socket listen_socket;
@@ -77,6 +78,9 @@ namespace Mono.FastCgi {
 				throw new ArgumentNullException ("socket");
 			
 			listen_socket = socket;
+
+			BigBufferManager = new BufferManager (4 * 1024); //4k
+			SmallBufferManager = new BufferManager (8);
 		}
 		
 		#endregion
@@ -257,16 +261,18 @@ namespace Mono.FastCgi {
 			
 			return pairs;
 		}
-		
+
+		[Obsolete("Use BigBufferManager or SmallBufferManager instead.")]
 		public void AllocateBuffers (out byte [] buffer1,
 		                             out byte [] buffer2)
 		{
-			buffer_manager.AllocateBuffers (out buffer1, out buffer2);
+			buffer1 = new byte[Record.SuggestedBufferSize];
+			buffer2 = new byte[Record.SuggestedBufferSize];
 		}
-		
+
+		[Obsolete("Use BigBufferManager or SmallBufferManager instead.")]
 		public void ReleaseBuffers (byte [] buffer1, byte [] buffer2)
 		{
-			buffer_manager.ReleaseBuffers (buffer1, buffer2);
 		}
 		
 		#endregion
@@ -324,8 +330,8 @@ namespace Mono.FastCgi {
 			try {
 				connection.Run ();
 			} catch (Exception e) {
-				Logger.Write (LogLevel.Error,
-					Strings.Server_ConnectionFailed, e.Message);
+				Logger.Write (LogLevel.Error, Strings.Server_ConnectionFailed);
+				Logger.Write (e);
 				try {
 					// Upon catastrophic failure, forcefully stop 
 					// all remaining connection activity, since no 

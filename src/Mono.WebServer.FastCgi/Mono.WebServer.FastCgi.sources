@@ -1,5 +1,11 @@
 ./ApplicationHost.cs
 ./BeginRequestBody.cs
+./BufferManager.cs
+./Buffers.cs
+./Compatibility/ArrayExtensions.cs
+./Compatibility/CompatArraySegment.cs
+./Compatibility/IReadOnlyCollection.cs
+./Compatibility/IReadOnlyList.cs
 ./ConfigurationManager.cs
 ./ConfigurationManager.Fields.cs
 ./ConfigurationManager.Modern.cs
@@ -10,6 +16,7 @@
 ./main.cs
 ./NameValuePair.cs
 ./Record.cs
+./RecordType.cs
 ./Request.cs
 ./Responder.cs
 ./ResponderRequest.cs

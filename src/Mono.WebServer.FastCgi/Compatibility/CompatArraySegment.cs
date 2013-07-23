@@ -127,6 +127,11 @@ namespace System
 			this.count = array.Length;
 		}
 
+		public CompatArraySegment<T> Trim (int size)
+		{
+			return new CompatArraySegment<T> (array, offset, size);
+		}
+
 		public override bool Equals (Object obj)
 		{
 			if (obj is ArraySegment<T>) {

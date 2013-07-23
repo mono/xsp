@@ -238,7 +238,9 @@ namespace Mono.FastCgi {
 				if (pathTranslated == null)
 					SetParameter ("PATH_TRANSLATED", String.Empty);
 				vapp = WebServer.FastCgi.Server.GetApplicationForPath (HostName, PortNumber, Path, PhysicalPath);
-				if (vapp != null)
+				if (vapp == null)
+					Logger.Write (LogLevel.Debug, "Couldn't find vapp.");
+				else
 					ApplicationHost = vapp.AppHost as ApplicationHost;
 				return;
 			}

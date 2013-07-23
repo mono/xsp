@@ -33,6 +33,36 @@ namespace Mono.WebServer.FastCgi
 			Padding = MaybeSegment (buffer, headerSize + bodySize);
 		}
 
+		public CompatArraySegment<byte> EnforceHeaderLength (int length)
+		{
+			if (Header == null || Header.Value.Count < length) {
+				if (Header != null)
+					smallBufferManager.ReturnBuffer (Header.Value);
+				Header = new CompatArraySegment<byte> (new byte[length]);
+			}
+			return Header.Value;
+		}
+
+		public CompatArraySegment<byte> EnforceBodyLength (int length)
+		{
+			if (Body == null || Body.Value.Count < length) {
+				if (Body != null)
+					bigBufferManager.ReturnBuffer (Body.Value);
+				Body = new CompatArraySegment<byte> (new byte[length]);
+			}
+			return Body.Value;
+		}
+
+		public CompatArraySegment<byte> EnforcePaddingLength (int length)
+		{
+			if (Padding == null || Padding.Value.Count < length) {
+				if (Padding != null)
+					smallBufferManager.ReturnBuffer (Padding.Value);
+				Padding = new CompatArraySegment<byte> (new byte[length]);
+			}
+			return Padding.Value;
+		}
+
 		static CompatArraySegment<byte>? MaybeSegment (byte[] buffer, int offset)
 		{
 			if (buffer == null)

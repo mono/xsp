@@ -333,8 +333,10 @@ namespace Mono.FastCgi {
 			if (IsConnected)
 				lock (send_lock) {
 					try {
-						var record = new Record (1, type, requestID, bodyData, bodyIndex, bodyLength);
-							record.Send (socket, send_buffers);
+						send_buffers.EnforceBodyLength(bodyLength);
+						Array.Copy(bodyData, bodyIndex, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyLength);
+						var record = new Record (1, type, requestID, send_buffers, bodyLength);
+						record.Send (socket);
 					} catch (System.Net.Sockets.SocketException) {
 					}
 				}
@@ -345,9 +347,12 @@ namespace Mono.FastCgi {
 		{
 			var body = new EndRequestBody (appStatus, protocolStatus);
 			try {	
-				if (IsConnected)
-					new Record (1, RecordType.EndRequest, requestID,
-						    body.GetData ()).Send (socket);
+				if (IsConnected) {
+					byte[] bodyData = body.GetData ();
+					send_buffers.EnforceBodyLength(bodyData.Length);
+					Array.Copy(bodyData, 0, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyData.Length);
+					new Record (1, RecordType.EndRequest, requestID, send_buffers, bodyData.Length).Send (socket);
+				}
 			} catch (System.Net.Sockets.SocketException) {
 			}
 				

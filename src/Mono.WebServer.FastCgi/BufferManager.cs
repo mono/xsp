@@ -56,9 +56,6 @@ namespace Mono.WebServer.FastCgi
 
 		public void ReturnBuffer(CompatArraySegment<byte> buffer)
 		{
-			if (buffer == null)
-				throw new ArgumentNullException ("buffer");
-
 			lock (bufferLock)
 			{
 				buffers.Push(buffer);

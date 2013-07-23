@@ -107,7 +107,7 @@ namespace Mono.FastCgi {
 			Logger.Write (LogLevel.Debug, Strings.Record_Received, Type, RequestID, BodyLength);
 		}
 
-		[Obsolete("FIXMEFIXMEFIXMEFIXME")]
+		[Obsolete]
 		public Record (byte version, RecordType type, ushort requestID,
 		               byte [] bodyData) : this (version, type,
 		                                         requestID, bodyData,
@@ -125,7 +125,7 @@ namespace Mono.FastCgi {
 			body_length = (ushort) bodyLength;
 		}
 		
-		[Obsolete("FIXMEFIXMEFIXMEFIXME")]
+		[Obsolete]
 		public Record (byte version, RecordType type, ushort requestID,
 		               byte [] bodyData, int bodyIndex, int bodyLength) : this()
 		{
@@ -177,7 +177,6 @@ namespace Mono.FastCgi {
 		
 		#region Public Methods
 		
-		[Obsolete("FIXMEFIXMEFIXMEFIXME")]
 		public void CopyTo (byte[] dest, int destIndex)
 		{
 			if (dest == null)
@@ -223,8 +222,6 @@ namespace Mono.FastCgi {
 		public void Send(Socket socket)
 		{
 			var padding_size = (byte) ((8 - (body_length % 8)) % 8);
-
-			int total_size = 8 + body_length + padding_size;
 
 			CompatArraySegment<byte> header = buffers.EnforceHeaderLength (HeaderSize);
 

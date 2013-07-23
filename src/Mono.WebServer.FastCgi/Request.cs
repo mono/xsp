@@ -524,16 +524,24 @@ namespace Mono.FastCgi {
 		public bool DataCompleted {
 			get {return record.BodyLength == 0;}
 		}
-		
+
+		[Obsolete("Use GetBody()")]
 		public byte[] GetData ()
 		{
 			return record.GetBody ();
+		}
+
+		public IReadOnlyList<byte> GetBody()
+		{
+			IReadOnlyList<byte> body;
+			record.GetBody(out body);
+			return body;
 		}
 		
 		public int DataLength {
 			get {return record.BodyLength;}
 		}
-		
+
 		public void CopyTo (byte[] dest, int destIndex)
 		{
 			if (dest == null)

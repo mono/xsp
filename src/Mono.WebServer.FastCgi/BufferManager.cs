@@ -26,15 +26,16 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace Mono.WebServer.FastCgi
 {
 	public class BufferManager
 	{
-		readonly int segmentSize;
 		const int CLIENTS_PER_BUFFER = 100;
+
+		readonly int segmentSize;
 
 		/// <summary>
 		/// The size of a complete buffer.
@@ -46,6 +47,9 @@ namespace Mono.WebServer.FastCgi
 
 		public BufferManager (int segmentSize)
 		{
+			if (segmentSize < 0)
+				throw new ArgumentOutOfRangeException ("segmentSize", segmentSize, "Should be positive");
+
 			this.segmentSize = segmentSize;
 			bufferSize = CLIENTS_PER_BUFFER * this.segmentSize;
 		}

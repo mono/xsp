@@ -41,6 +41,18 @@ namespace System
 		T [] array;
 		readonly int offset, count;
 
+		public T [] Array {
+			get { return array; }
+		}
+
+		public int Offset {
+			get { return offset; }
+		}
+
+		public int Count {
+			get { return count; }
+		}
+
 		public CompatArraySegment (T [] array, int offset, int count)
 		{
 			if (array == null)
@@ -77,18 +89,6 @@ namespace System
 			this.array = array;
 			this.offset = 0;
 			this.count = array.Length;
-		}
-
-		public T [] Array {
-			get { return array; }
-		}
-
-		public int Offset {
-			get { return offset; }
-		}
-
-		public int Count {
-			get { return count; }
 		}
 
 		public override bool Equals (Object obj)

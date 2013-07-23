@@ -28,6 +28,7 @@
 
 using System;
 using Mono.WebServer.FastCgi;
+using System.Collections.Generic;
 
 namespace Mono.FastCgi {
 	public enum Role : ushort
@@ -72,7 +73,8 @@ namespace Mono.FastCgi {
 				throw new ArgumentException (
 					Strings.BeginRequestBody_WrongSize, "record");
 			
-			byte[] body = record.GetBody ();
+			IReadOnlyList<byte> body;
+			record.GetBody (out body);
 			role  = (Role) Record.ReadUInt16 (body, 0);
 			flags = (BeginRequestFlags) body [2];
 		}

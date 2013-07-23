@@ -53,18 +53,13 @@ namespace Mono.WebServer.Apache {
 		public static int Main (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-			bool quiet = false;
-			// TODO: Understand why the while is here but commented
-			//while (true) {
 			try {
 				var svr = new Server ();
-				return svr.RealMain (args, true, null, quiet);
+				return svr.RealMain (args, true, null, false);
 			} catch (ThreadAbortException) {
 				// Single-app mode and ASP.NET appdomain unloaded
 				Thread.ResetAbort ();
-				quiet = true; // hush 'RealMain'
 			}
-			//}
 			return 1;
 		}
 

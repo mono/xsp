@@ -43,7 +43,7 @@ namespace Mono.WebServer
 			return mi != null ? String.Format ("{0}.{1}(): ", mi.ReflectedType, mi.Name) : null;
 		}
 
-		static string GetExtraInfo (StackFrame sf)
+		static string GetExtraInfo (StackFrame sf = null)
 		{
 			string threadid = String.Format ("thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
 			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));			
@@ -51,11 +51,6 @@ namespace Mono.WebServer
 			if (!String.IsNullOrEmpty (filepath))
 				return String.Format (" [{0}, {1}, in {2}:{3}]", domainid, threadid, filepath, sf.GetFileLineNumber ());
 			return String.Format (" [{0}, {1}]", domainid, threadid);
-		}
-
-		static string GetExtraInfo ()
-		{
-			return GetExtraInfo (null);
 		}
 
 		static void Enter (string format, StackFrame sf, params object[] parms)

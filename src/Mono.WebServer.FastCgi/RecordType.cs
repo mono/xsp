@@ -1,11 +1,11 @@
-﻿//
-// ChildInfo.cs:
+//
+// RecordType.cs
 //
 // Author:
-//   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
+//   Brian Nickel (brian.nickel@gmail.com)
 //
-// Copyright (c) 2013 Leonardo Taglialegne.
-//
+// Copyright (C) 2007 Brian Nickel
+// 
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,24 +26,25 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Diagnostics;
 using System;
+using System.Globalization;
+using Mono.WebServer.FastCgi;
+using Mono.WebServer.Log;
 
-namespace Mono.WebServer.Fpm {
-	struct ChildInfo
-	{
-		public Process Process { get; private set; }
-
-		public Func<Process> Spawner { get; set; }
-
-		public void Spawn ()
-		{
-			Process = Spawner ();
-		}
-
-		public ChildInfo (Process process) : this()
-		{
-			Process = process;
-		}
+namespace Mono.FastCgi {
+	public enum RecordType : byte {
+		None            =  0,
+		BeginRequest    =  1,
+		AbortRequest    =  2,
+		EndRequest      =  3,
+		Params          =  4,
+		StandardInput   =  5,
+		StandardOutput  =  6,
+		StandardError   =  7,
+		Data            =  8,
+		GetValues       =  9,
+		GetValuesResult = 10,
+		UnknownType     = 11
 	}
+	
 }

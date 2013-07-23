@@ -83,7 +83,8 @@ namespace Mono.WebServer.Fpm {
 
 			Logger.Write (LogLevel.Debug, "Configuration directory exists, loading configuration files");
 
-			ChildrenManager.StartChildren (configDirInfo.GetFiles("*.xml"), configurationManager);
+			FileInfo[] configFiles = configDirInfo.GetFiles ("*.xml");
+			ChildrenManager.StartChildren (configFiles, configurationManager);
 
 			if (!configurationManager.Stoppable)
 				return 0;

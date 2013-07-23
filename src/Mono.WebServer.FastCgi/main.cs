@@ -196,21 +196,17 @@ namespace Mono.WebServer.FastCgi
 		static Mono.FastCgi.Server CreateServer (ConfigurationManager configurationManager,
 		                                         Socket socket)
 		{
-			var server = new Mono.FastCgi.Server (socket);
+			var server = new Mono.FastCgi.Server (socket) {
+				MaxConnections = configurationManager.MaxConns,
+				MaxRequests = configurationManager.MaxReqs,
+				MultiplexConnections = configurationManager.Multiplex
+			};
 
 			server.SetResponder (typeof (Responder));
 
-			server.MaxConnections = configurationManager.MaxConns;
-			server.MaxRequests = configurationManager.MaxReqs;
-			server.MultiplexConnections = configurationManager.Multiplex;
-
-			Logger.Write (LogLevel.Debug, "Max connections: {0}",
-				server.MaxConnections);
-			Logger.Write (LogLevel.Debug, "Max requests: {0}",
-				server.MaxRequests);
-			Logger.Write (LogLevel.Debug,
-				"Multiplex connections: {0}",
-				server.MultiplexConnections);
+			Logger.Write (LogLevel.Debug, "Max connections: {0}",       server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}",          server.MaxRequests);
+			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}", server.MultiplexConnections);
 			return server;
 		}
 

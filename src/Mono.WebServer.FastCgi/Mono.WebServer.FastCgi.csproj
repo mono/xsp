@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
+    <Compile Include="Compatibility\ArrayExtensions.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="ConfigurationManager.Fields.cs" />
     <Compile Include="ConfigurationManager.Modern.cs" />
@@ -96,6 +97,12 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Watchdog.cs" />
+    <Compile Include="BufferManager.cs" />
+    <Compile Include="RecordType.cs" />
+    <Compile Include="Compatibility\CompatArraySegment.cs" />
+    <Compile Include="Compatibility\IReadOnlyCollection.cs" />
+    <Compile Include="Compatibility\IReadOnlyList.cs" />
+    <Compile Include="Buffers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">
@@ -103,4 +110,5 @@
       <Name>Mono.WebServer</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

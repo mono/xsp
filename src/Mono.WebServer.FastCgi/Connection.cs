@@ -49,10 +49,10 @@ namespace Mono.FastCgi {
 		readonly object request_lock = new object ();
 
 		readonly object send_lock = new object ();
-		
-		byte[] receive_buffer;
-		
-		byte[] send_buffer;
+
+		readonly Buffers receive_buffers;
+
+		readonly Buffers send_buffers;
 
 		readonly object connection_teardown_lock = new object ();
 		#endregion
@@ -70,7 +70,9 @@ namespace Mono.FastCgi {
 			
 			this.socket = socket;
 			this.server = server;
-			server.AllocateBuffers (out receive_buffer, out send_buffer);
+
+			receive_buffers = new Buffers(server.BigBufferManager, server.SmallBufferManager);
+			send_buffers = new Buffers (server.BigBufferManager, server.SmallBufferManager);
 		}
 		
 		#endregion
@@ -115,8 +117,7 @@ namespace Mono.FastCgi {
 				Record record;
 				
 				try {
-					record = new Record (socket,
-						receive_buffer);
+					record = new Record (socket, receive_buffers);
 				} catch (System.Net.Sockets.SocketException) {
 					StopRun (Strings.Connection_RecordNotReceived);
 					Stop ();
@@ -153,11 +154,9 @@ namespace Mono.FastCgi {
 					}
 					if (!stop)
 						server.EndConnection (this);
-					if (receive_buffer != null && send_buffer != null) {
-						server.ReleaseBuffers (receive_buffer, send_buffer);
-						receive_buffer = null;
-						send_buffer = null;
-					}
+
+					send_buffers.Return ();
+					receive_buffers.Return ();
 				}
 			}
 			
@@ -247,7 +246,9 @@ namespace Mono.FastCgi {
 				return;
 			}
 
-			request.AddParameterData (record.GetBody ());
+			IReadOnlyList<byte> body;
+			record.GetBody (out body);
+			request.AddParameterData (body);
 		}
 
 		void HandleGetValues (Record record)
@@ -256,7 +257,9 @@ namespace Mono.FastCgi {
 
 			// Look up the data from the server.
 			try {
-				IDictionary<string, string> pairs_in = NameValuePair.FromData (record.GetBody ());
+				IReadOnlyList<byte> body;
+				record.GetBody (out body);
+				IDictionary<string, string> pairs_in = NameValuePair.FromData (body);
 				IDictionary<string, string> pairs_out = server.GetValues (pairs_in.Keys);
 				response_data = NameValuePair.GetData (pairs_out);
 			} catch {
@@ -330,11 +333,10 @@ namespace Mono.FastCgi {
 			if (IsConnected)
 				lock (send_lock) {
 					try {
-						new Record (1, type, requestID,
-						bodyData, bodyIndex,
-							bodyLength).Send (
-								socket,
-								send_buffer);
+						send_buffers.EnforceBodyLength(bodyLength);
+						Array.Copy(bodyData, bodyIndex, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyLength);
+						var record = new Record (1, type, requestID, send_buffers, bodyLength);
+						record.Send (socket);
 					} catch (System.Net.Sockets.SocketException) {
 					}
 				}
@@ -345,9 +347,12 @@ namespace Mono.FastCgi {
 		{
 			var body = new EndRequestBody (appStatus, protocolStatus);
 			try {	
-				if (IsConnected)
-					new Record (1, RecordType.EndRequest, requestID,
-						    body.GetData ()).Send (socket);
+				if (IsConnected) {
+					byte[] bodyData = body.GetData ();
+					send_buffers.EnforceBodyLength(bodyData.Length);
+					Array.Copy(bodyData, 0, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyData.Length);
+					new Record (1, RecordType.EndRequest, requestID, send_buffers, bodyData.Length).Send (socket);
+				}
 			} catch (System.Net.Sockets.SocketException) {
 			}
 				
@@ -372,11 +377,9 @@ namespace Mono.FastCgi {
 
 					if (!stop)
 						server.EndConnection (this);
-					if (receive_buffer != null && send_buffer != null) {
-						server.ReleaseBuffers (receive_buffer, send_buffer);
-						receive_buffer = null;
-						send_buffer = null;
-					}
+
+					receive_buffers.Return ();
+					send_buffers.Return ();
 				}
 			}
 		}

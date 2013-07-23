@@ -3,7 +3,6 @@ using NUnit.Framework;
 using Mono.Unix;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using Mono.WebServer.Fpm;
 using System.Net;
 
@@ -11,28 +10,28 @@ namespace Mono.WebServer.Test {
 	[TestFixture]
 	public class SocketTest
 	{
-		const string fastcgiSocketPath = "\0fastcgi";
-		const string fpmSocketPath = "\0fpm";
-		const string message = "Foo!";
+		const string FASTCGI_SOCKET_PATH = "\0fastcgi";
+		const string FPM_SOCKET_PATH = "\0fpm";
+		const string MESSAGE = "Foo!";
 
 		[Test]
 		public void TestPassUnixFd ()
 		{
-			using (ListenUnix (fastcgiSocketPath, FastCgiAccept))
-			using (ListenUnix (fpmSocketPath, FpmUnixAccept)) {
-				var webserver = new UnixClient (fpmSocketPath);
+			using (ListenUnix (FASTCGI_SOCKET_PATH, FastCgiAccept))
+			using (ListenUnix (FPM_SOCKET_PATH, FpmUnixAccept)) {
+				var webserver = new UnixClient (FPM_SOCKET_PATH);
 				string read;
 				using (var stream = webserver.GetStream ())
 				using (var reader = new StreamReader(stream))
 					read = reader.ReadLine ();
-				Assert.AreEqual (message, read);
+				Assert.AreEqual (MESSAGE, read);
 			}
 		}
 
 		[Test]
 		public void TestPassTcpFd ()
 		{
-			using (ListenUnix (fastcgiSocketPath, FastCgiAccept)) {
+			using (ListenUnix (FASTCGI_SOCKET_PATH, FastCgiAccept)) {
 				var portAndSocket = ListenTcp (FpmTcpAccept);
 
 				using (portAndSocket.Item2) {
@@ -42,7 +41,7 @@ namespace Mono.WebServer.Test {
 					using (var stream = webserver.GetStream ())
 					using (var reader = new StreamReader(stream))
 						read = reader.ReadLine ();
-					Assert.AreEqual (message, read);
+					Assert.AreEqual (MESSAGE, read);
 				}
 			}
 		}
@@ -81,7 +80,7 @@ namespace Mono.WebServer.Test {
 			{
 				using (var stream = SocketPassing.ReceiveFrom (connection))
 				using (var writer = new StreamWriter(stream))
-					writer.WriteLine (message);
+					writer.WriteLine (MESSAGE);
 			}
 		}
 
@@ -95,7 +94,7 @@ namespace Mono.WebServer.Test {
 				throw new ArgumentNullException ("state");
 
 			using (var connection = socket.EndAccept (res)) {
-				UnixClient back = new UnixClient (fastcgiSocketPath);
+				var back = new UnixClient (FASTCGI_SOCKET_PATH);
 				SocketPassing.SendTo (back.Client, connection.Handle);
 			}
 		}
@@ -110,7 +109,7 @@ namespace Mono.WebServer.Test {
 				throw new ArgumentNullException ("state");
 
 			using (var connection = socket.EndAcceptSocket (res)) {
-				UnixClient back = new UnixClient (fastcgiSocketPath);
+				var back = new UnixClient (FASTCGI_SOCKET_PATH);
 				SocketPassing.SendTo (back.Client, connection.Handle);
 			}
 		}

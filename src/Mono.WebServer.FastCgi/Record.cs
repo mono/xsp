@@ -32,32 +32,6 @@ using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
 
 namespace Mono.FastCgi {
-	public enum RecordType : byte {
-		None            =  0,
-		
-		BeginRequest    =  1,
-		
-		AbortRequest    =  2,
-		
-		EndRequest      =  3,
-		
-		Params          =  4,
-		
-		StandardInput   =  5,
-		
-		StandardOutput  =  6,
-		
-		StandardError   =  7,
-		
-		Data            =  8,
-		
-		GetValues       =  9,
-		
-		GetValuesResult = 10,
-		
-		UnknownType     = 11
-	}
-	
 	public struct Record
 	{
 		#region Private Fields

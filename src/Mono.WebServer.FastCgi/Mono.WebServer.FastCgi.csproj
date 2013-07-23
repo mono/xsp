@@ -96,6 +96,8 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Watchdog.cs" />
+    <Compile Include="BufferManager.cs" />
+    <Compile Include="RecordType.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

@@ -73,7 +73,7 @@ namespace Mono.WebServer
 		//
 		// This *MUST* be called with the reqlock held!
 		//
-		void GrowRequests (ref int curlen, ref int newid)
+		void GrowRequests (ref int curlen, out int newid)
 		{
 			int newsize = curlen + curlen/3;
 			var new_request_ids = new int [newsize];
@@ -115,7 +115,7 @@ namespace Mono.WebServer
 
 			requests_count++;
 			if (requests_count >= reqlen)
-				GrowRequests (ref reqlen, ref newid);
+				GrowRequests (ref reqlen, out newid);
 			if (newid == -1)
 				for (int i = 0; i < reqlen; i++) {
 					if (request_ids [i] != 0)

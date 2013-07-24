@@ -76,8 +76,7 @@ namespace Mono.FastCgi {
 		
 		#region Private Methods
 		
-		void OnInputDataReceived (Request sender,
-		                                  DataReceivedArgs args)
+		void OnInputDataReceived (Request sender, DataReceivedArgs args)
 		{
 			// If the data is completed, call the worker and return.
 			if (args.DataCompleted) {

@@ -1,10 +1,10 @@
-﻿//
-// ChildInfo.cs:
 //
-// Author:
-//   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
+// IReadOnlyList.cs
 //
-// Copyright (c) 2013 Leonardo Taglialegne.
+// Authors:
+//	Marek Safar  <marek.safar@gmail.com>
+//
+// Copyright (C) 2011 Xamarin, Inc (http://www.xamarin.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -26,24 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Diagnostics;
-using System;
+#if !NET_4_5
 
-namespace Mono.WebServer.Fpm {
-	struct ChildInfo
+namespace System.Collections.Generic
+{
+	public interface IReadOnlyList<T> : IReadOnlyCollection<T>
 	{
-		public Process Process { get; private set; }
-
-		public Func<Process> Spawner { get; set; }
-
-		public void Spawn ()
-		{
-			Process = Spawner ();
-		}
-
-		public ChildInfo (Process process) : this()
-		{
-			Process = process;
-		}
+		T this [int index] { get; }
 	}
 }
+
+#endif

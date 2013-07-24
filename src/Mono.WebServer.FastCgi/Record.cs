@@ -30,34 +30,9 @@ using System;
 using System.Globalization;
 using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
+using System.Collections.Generic;
 
 namespace Mono.FastCgi {
-	public enum RecordType : byte {
-		None            =  0,
-		
-		BeginRequest    =  1,
-		
-		AbortRequest    =  2,
-		
-		EndRequest      =  3,
-		
-		Params          =  4,
-		
-		StandardInput   =  5,
-		
-		StandardOutput  =  6,
-		
-		StandardError   =  7,
-		
-		Data            =  8,
-		
-		GetValues       =  9,
-		
-		GetValuesResult = 10,
-		
-		UnknownType     = 11
-	}
-	
 	public struct Record
 	{
 		#region Private Fields
@@ -68,9 +43,7 @@ namespace Mono.FastCgi {
 		
 		readonly ushort request_id;
 		
-		readonly byte [] data;
-		
-		readonly int body_index;
+		readonly Buffers buffers;
 		
 		readonly ushort body_length;
 		
@@ -89,18 +62,23 @@ namespace Mono.FastCgi {
 		
 		
 		#region Constructors
-		
-		public Record (Socket socket) : this (socket, null)
+
+		[Obsolete("Use the Record(Socket, Buffers) constructor.")]
+		public Record (Socket socket) : this (socket, new Buffers())
+		{
+		}
+
+		[Obsolete("Use the Record(Socket, Buffers) constructor.")]
+		public Record (Socket socket, byte[] buffer) : this (socket, new Buffers (buffer, HeaderSize, buffer.Length - HeaderSize - 8))
 		{
 		}
 		
-		public Record (Socket socket, byte [] buffer)
+		public Record (Socket socket, Buffers receive_buffer) : this()
 		{
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
-			
-			byte[] header_buffer = (buffer != null && buffer.Length
-				> 8) ? buffer : new byte [HeaderSize];
+
+			CompatArraySegment<byte> header_buffer = receive_buffer.EnforceHeaderLength (HeaderSize);
 
 			// Read the 8 byte record header.
 			ReceiveAll (socket, header_buffer, HeaderSize);
@@ -112,31 +90,44 @@ namespace Mono.FastCgi {
 			body_length    = ReadUInt16 (header_buffer, 4);
 			byte padding_length = header_buffer [6];
 			
-			int total_length = body_length + padding_length;
-			
-			data  = (buffer != null && buffer.Length >= total_length)
-				? buffer : new byte [total_length];
-			body_index = 0;
+			CompatArraySegment<byte> body_buffer  = receive_buffer.EnforceBodyLength (body_length);
 			
 			// Read the record data, and throw an exception if the
 			// complete data cannot be read.
-			if (total_length > 0)
-				ReceiveAll (socket, data, total_length);
+			if (body_length > 0)
+				ReceiveAll (socket, body_buffer, body_length);
+
+			CompatArraySegment<byte> padding_buffer = receive_buffer.EnforcePaddingLength (padding_length);
+
+			if(padding_length > 0)
+				ReceiveAll(socket, padding_buffer, padding_length);
+
+			buffers = receive_buffer;
 			
-			Logger.Write (LogLevel.Debug,
-				Strings.Record_Received,
-				Type, RequestID, BodyLength);
+			Logger.Write (LogLevel.Debug, Strings.Record_Received, Type, RequestID, BodyLength);
 		}
-		
+
+		[Obsolete]
 		public Record (byte version, RecordType type, ushort requestID,
 		               byte [] bodyData) : this (version, type,
 		                                         requestID, bodyData,
 		                                         0, -1)
 		{
 		}
-		
+
 		public Record (byte version, RecordType type, ushort requestID,
-		               byte [] bodyData, int bodyIndex, int bodyLength)
+		               Buffers buffers, int bodyLength) : this()
+		{
+			this.version = version;
+			this.type = type;
+			request_id  = requestID;
+			this.buffers = buffers;
+			body_length = (ushort) bodyLength;
+		}
+		
+		[Obsolete]
+		public Record (byte version, RecordType type, ushort requestID,
+		               byte [] bodyData, int bodyIndex, int bodyLength) : this()
 		{
 			if (bodyData == null)
 				throw new ArgumentNullException ("bodyData");
@@ -152,14 +143,13 @@ namespace Mono.FastCgi {
 				throw new ArgumentException (
 					Strings.Record_DataTooBig,
 					"bodyLength");
-			
-			
-			this.version     = version;
-			this.type        = type;
+
+
+			this.version = version;
+			this.type = type;
 			request_id  = requestID;
-			data        = bodyData;
-			body_index  = bodyIndex;
-			body_length = (ushort) bodyLength;
+			buffers = new Buffers (bodyData, bodyIndex, bodyLength);
+			BodyLength = (ushort) bodyLength;
 		}
 		
 		#endregion
@@ -180,9 +170,7 @@ namespace Mono.FastCgi {
 			get {return request_id;}
 		}
 		
-		public ushort BodyLength {
-			get {return body_length;}
-		}
+		public ushort BodyLength { get; private set; }
 		#endregion
 		
 		
@@ -195,21 +183,29 @@ namespace Mono.FastCgi {
 				throw new ArgumentNullException ("dest");
 			
 			if (body_length > dest.Length - destIndex)
-				throw new ArgumentOutOfRangeException (
-					"destIndex");
-			
-			Array.Copy (data, body_index, dest, destIndex,
-				body_length);
+				throw new ArgumentOutOfRangeException ("destIndex");
+
+			if (buffers.Body.HasValue)
+				buffers.Body.Value.CopyTo (dest, destIndex, body_length);
 		}
 		
+		[Obsolete("Use GetBody(out ReadOnlyCollection<byte>)")]
 		public byte[] GetBody ()
 		{
 			var body_data = new byte [body_length];
-			Array.Copy (data, body_index, body_data, 0,
-				body_length);
+			if(buffers.Body.HasValue)
+				buffers.Body.Value.CopyTo (body_data, 0, body_length);
 			return body_data;
 		}
-		
+
+		public void GetBody (out IReadOnlyList<byte> body)
+		{
+			if (buffers.Body == null)
+				body = null;
+			else
+				body = buffers.Body.Value.Trim(body_length);
+		}
+
 		public override string ToString ()
 		{
 			return String.Format (CultureInfo.CurrentCulture,
@@ -217,48 +213,45 @@ namespace Mono.FastCgi {
 				Version, Type, RequestID, BodyLength);
 		}
 		
-		public void Send (Socket socket)
-		{
-			Send (socket, null);
-		}
-		
+		[Obsolete("Use Send(Socket)")]
 		public void Send (Socket socket, byte [] buffer)
 		{
-			var padding_size = (byte) ((8 - (body_length % 8)) % 8);
-			
-			int total_size = 8 + body_length + padding_size;
-			
-			byte[] data = (buffer != null && buffer.Length >
-				total_size) ? buffer : new byte [total_size];
-			
-			data [0] = version;
-			data [1] = (byte) type;
-			data [2] = (byte) (request_id >> 8);
-			data [3] = (byte) (request_id & 0xFF);
-			data [4] = (byte) (body_length >> 8);
-			data [5] = (byte) (body_length & 0xFF);
-			data [6] = padding_size;
-			
-			Array.Copy (this.data, body_index, data, 8,
-				body_length);
-			
-			for (int i = 0; i < padding_size; i ++)
-				data [8 + body_length + i] = 0;
-			
-			Logger.Write (LogLevel.Debug,
-				Strings.Record_Sent,
-				Type, RequestID, body_length);
-			
-			SendAll (socket, data, total_size);
+			Send(socket, null);
 		}
-		
+
+		public void Send(Socket socket)
+		{
+			var padding_size = (byte) ((8 - (body_length % 8)) % 8);
+
+			CompatArraySegment<byte> header = buffers.EnforceHeaderLength (HeaderSize);
+
+			header [0] = version;
+			header [1] = (byte) type;
+			header [2] = (byte) (request_id >> 8);
+			header [3] = (byte) (request_id & 0xFF);
+			header [4] = (byte) (body_length >> 8);
+			header [5] = (byte) (body_length & 0xFF);
+			header [6] = padding_size;
+
+			CompatArraySegment<byte> padding = buffers.EnforcePaddingLength (padding_size);
+
+			for (int i = 0; i < padding_size; i ++)
+				padding [i] = 0;
+
+			Logger.Write (LogLevel.Debug, Strings.Record_Sent, Type, RequestID, body_length);
+
+			SendAll (socket, header, HeaderSize);
+			SendAll (socket, buffers.Body, body_length);
+			SendAll (socket, padding, padding_size);
+		}
+
 		#endregion
 		
 		
 		
 		#region Internal Static Methods
 		
-		internal static ushort ReadUInt16 (byte [] array,
+		internal static ushort ReadUInt16 (IReadOnlyList<byte> array,
 		                                   int arrayIndex)
 		{
 			ushort value = array [arrayIndex];
@@ -273,29 +266,28 @@ namespace Mono.FastCgi {
 		
 		#region Private Static Methods
 		
-		static void ReceiveAll (Socket socket, byte [] data, int length)
+		static void ReceiveAll (Socket socket, CompatArraySegment<byte> data, int length)
 		{
 			if (length <= 0)
 				return;
 			
 			int total = 0;
 			while (total < length) {
-				total += socket.Receive (data, total,
+				total += socket.Receive (data.Array, total + data.Offset,
 					length - total,
 					System.Net.Sockets.SocketFlags.None);
 			}
 		}
 		
-		static void SendAll (Socket socket, byte [] data, int length)
+		static void SendAll (Socket socket, CompatArraySegment<byte>? data, int length)
 		{
-			if (length <= 0)
+			if (length <= 0 || data == null)
 				return;
 			
 			int total = 0;
 			while (total < length) {
-				total += socket.Send (data, total,
-					length - total,
-					System.Net.Sockets.SocketFlags.None);
+				total += socket.Send (data.Value.Array, data.Value.Offset + total,
+					length - total, System.Net.Sockets.SocketFlags.None);
 			}
 		}
 		

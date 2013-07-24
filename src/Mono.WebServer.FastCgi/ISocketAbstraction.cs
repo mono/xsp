@@ -36,6 +36,7 @@ namespace Mono.FastCgi {
 		public abstract int Receive (byte [] buffer, int offset, int size, System.Net.Sockets.SocketFlags flags);
 		
 		public abstract int Send (byte [] data, int offset, int size, System.Net.Sockets.SocketFlags flags);
+
 		
 		public abstract void Listen (int backlog);
 		

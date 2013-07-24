@@ -31,6 +31,7 @@ using System.Text;
 using System.Collections.Generic;
 using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
+using Mono.WebServer.FastCgi.Compatibility;
 
 namespace Mono.FastCgi {
 	public struct NameValuePair
@@ -74,8 +75,8 @@ namespace Mono.FastCgi {
 			
 			// Lengths are stored in 1 or 4 bytes depending on the
 			// size of the contents.
-			int name_length  = ReadLength (data, ref index);
-			int value_length = ReadLength (data, ref index);
+			int name_length  = ReadLength (data.ToReadOnlyList (), ref index);
+			int value_length = ReadLength (data.ToReadOnlyList (), ref index);
 			
 			// Do a sanity check on the size of the data.
 			if (index + name_length + value_length > data.Length)
@@ -96,7 +97,42 @@ namespace Mono.FastCgi {
 				Strings.NameValuePair_ParameterRead,
 				name, value);
 		}
-		
+
+		public NameValuePair(IReadOnlyList<byte> data, ref int index)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			// Name/value pairs are stored with their lengths first,
+			// then their contents.
+
+			// Lengths are stored in 1 or 4 bytes depending on the
+			// size of the contents.
+			int name_length = ReadLength(data, ref index);
+			int value_length = ReadLength(data, ref index);
+
+			// Do a sanity check on the size of the data.
+			if (index + name_length + value_length > data.Count)
+				throw new ArgumentOutOfRangeException("index");
+
+			// Make sure the encoding doesn't change while running.
+			Encoding enc = encoding;
+
+			// Read the name.
+			// FIXME: Please, PLEASE fix me
+			var segment = (CompatArraySegment<byte>)data;
+			name = enc.GetString(segment.Array, segment.Offset + index, name_length);
+			index += name_length;
+
+			// Read the value.
+			value = enc.GetString(segment.Array, segment.Offset +index, value_length);
+			index += value_length;
+
+			Logger.Write(LogLevel.Debug,
+				Strings.NameValuePair_ParameterRead,
+				name, value);
+		}
+
 		#endregion
 		
 		
@@ -156,7 +192,38 @@ namespace Mono.FastCgi {
 			
 			return pairs;
 		}
-		
+
+		public static IDictionary<string, string> FromData(IReadOnlyList<byte> data)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			// Specialized.NameValueCollection would probably be
+			// better, but it doesn't implement IDictionary.
+			var pairs = new Dictionary<string, string>();
+			int index = 0;
+
+			// Loop through the array, reading pairs at a specified
+			// position until the end is reached.
+
+			while (index < data.Count)
+			{
+				var pair = new NameValuePair(data, ref index);
+
+				if (pairs.ContainsKey(pair.Name))
+				{
+					Logger.Write(LogLevel.Warning,
+						Strings.NameValuePair_DuplicateParameter,
+						pair.Name);
+
+					pairs[pair.Name] = pair.Value;
+				}
+				else
+					pairs.Add(pair.Name, pair.Value);
+			}
+
+			return pairs;
+		}
 		public static byte [] GetData (IDictionary<string,string> pairs)
 		{
 			if (pairs == null)
@@ -216,12 +283,12 @@ namespace Mono.FastCgi {
 		
 		#region Private Static Methods
 		
-		static int ReadLength (byte [] data, ref int index)
+		static int ReadLength (IReadOnlyList<byte> data, ref int index)
 		{
 			if (index < 0)
 				throw new ArgumentOutOfRangeException ("index");
 			
-			if (index >= data.Length)
+			if (index >= data.Count)
 				throw new ArgumentOutOfRangeException ("index");
 			
 			// Lengths are stored in either 1 or 4 bytes. For
@@ -235,7 +302,7 @@ namespace Mono.FastCgi {
 			// a 4 byte value is used. However, the MSB in the first
 			// byte is not included, as it was used as an indicator.
 			
-			if (index > data.Length - 4)
+			if (index > data.Count - 4)
 				throw new ArgumentOutOfRangeException ("index");
 			
 			

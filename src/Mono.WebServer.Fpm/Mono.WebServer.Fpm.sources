@@ -1,6 +1,8 @@
-ChildConfigurationManager.cs
-ChildInfo.cs
-ChildrenManager.cs
-ConfigurationManager.cs
-main.cs
-Spawner.cs
+./ChildConfigurationManager.cs
+./ChildInfo.cs
+./ChildrenManager.cs
+./ConfigurationManager.cs
+./Connection.cs
+./main.cs
+./SocketPassing.cs
+./Spawner.cs

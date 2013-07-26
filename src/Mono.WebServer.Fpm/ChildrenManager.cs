@@ -34,6 +34,7 @@ using Mono.Unix;
 using Mono.WebServer.Log;
 using System.Diagnostics;
 using Mono.FastCgi;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.WebServer.Fpm
 {
@@ -80,8 +81,8 @@ namespace Mono.WebServer.Fpm
 					continue;
 				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
 				var childConfigurationManager = new ChildConfigurationManager ();
-				string fullName = fileInfo.FullName;
-				childConfigurationManager.LoadXmlConfig (fullName);
+				string configFile = fileInfo.FullName;
+				childConfigurationManager.LoadXmlConfig (configFile);
 				string user = childConfigurationManager.User;
 				string fastCgiCommand = configurationManager.FastCgiCommand;
 
@@ -89,23 +90,26 @@ namespace Mono.WebServer.Fpm
 				if (Platform.IsUnix) {
 					if (String.IsNullOrEmpty (user)) {
 						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						user = UnixFileSystemInfo.GetFileSystemEntry (fullName).OwnerUser.UserName;
+						user = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
 					}
 
-					spawner = () => Spawner.RunAs (user, Spawner.SpawnChild, fullName, fastCgiCommand);
+					spawner = () => Spawner.RunAs (user, Spawner.SpawnChild, configFile, fastCgiCommand);
 				} else {
 					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					spawner = () => Spawner.SpawnChild (fullName, fastCgiCommand);
+					spawner = () => Spawner.SpawnChild (configFile, fastCgiCommand);
 				}
-				var child = new ChildInfo { Spawner = spawner};
+				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager };
 				children.Add (child);
-				if (childConfigurationManager.OnDemand) {
+				if (childConfigurationManager.OnDemand != null) {
 					Socket socket;
-					if (!FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
-
+					if (FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
+						var server = new GenericServer<Connection> (socket, child);
+						server.Start (configurationManager.Stoppable, (int)childConfigurationManager.Backlog);
 					}
 				} else {
-					child.Spawn ();
+					if (!child.TrySpawn ()) {
+						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", configFile);
+					}
 				}
 			}
 		}

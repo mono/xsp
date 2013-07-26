@@ -45,13 +45,10 @@ namespace Mono.FastCgi {
 		
 		int max_requests = Int32.MaxValue;
 		
-		bool multiplex_connections;
-		
 		Type responder_type;
 		
 		#endregion
-		
-		
+
 		
 		#region Constructors
 		
@@ -92,10 +89,7 @@ namespace Mono.FastCgi {
 			}
 		}
 		
-		public bool MultiplexConnections {
-			get {return multiplex_connections;}
-			set {multiplex_connections = value;}
-		}
+		public bool MultiplexConnections { get; set; }
 		
 		public bool CanAccept {
 			get {return backend.CanAccept; }
@@ -178,7 +172,7 @@ namespace Mono.FastCgi {
 				break;
 				
 				case "FCGI_MPXS_CONNS":
-					value = multiplex_connections ? "1" : "0";
+					value = MultiplexConnections ? "1" : "0";
 				break;
 				}
 				

@@ -26,24 +26,43 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Diagnostics;
 using System;
+using System.Diagnostics;
+using Mono.FastCgi;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.WebServer.Fpm {
-	struct ChildInfo
+	struct ChildInfo : IServerCallback<Connection>
 	{
+		Socket ondemandSocket;
+
+		public Mono.WebServer.FastCgi.ConfigurationManager ConfigurationManager { get; set; }
+
 		public Process Process { get; private set; }
 
 		public Func<Process> Spawner { get; set; }
 
-		public void Spawn ()
-		{
-			Process = Spawner ();
-		}
-
 		public ChildInfo (Process process) : this()
 		{
 			Process = process;
+		}
+
+		public bool TrySpawn ()
+		{
+			Process = Spawner ();
+			return ConfigurationManager.OnDemand == null || FastCgi.Server.TryCreateSocket (ConfigurationManager, out ondemandSocket);
+		}
+
+		public Connection OnAccept (Socket socket)
+		{
+			if (Process == null && !TrySpawn ())
+				throw new Exception ("Couldn't spawn child!");
+
+			if (!ondemandSocket.Connected)
+				ondemandSocket.Connect ();
+			SocketPassing.SendTo (ondemandSocket.Handle, socket.Handle);
+
+			return new Connection (socket);
 		}
 	}
 }

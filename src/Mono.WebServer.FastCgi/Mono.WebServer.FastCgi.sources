@@ -25,6 +25,8 @@
 ./Server/GenericServer.cs
 ./Server/IConnection.cs
 ./Server/IServerCallback.cs
+./Server/IServer.cs
+./Server/OndemandServer.cs
 ./Server/ServerProxy.cs
 ./SocketFactory.cs
 ./StandardSocket.cs

@@ -41,7 +41,13 @@ namespace Mono.WebServer.FastCgi {
 
 		readonly IntPtr socket;
 		bool connected;
-		
+
+		public override IntPtr Handle {
+			get {
+				return socket;
+			}
+		}
+
 		unsafe public UnmanagedSocket (IntPtr socket)
 		{
 			if (!supports_libc)
@@ -60,6 +66,11 @@ namespace Mono.WebServer.FastCgi {
 		
 		
 			this.socket = socket;
+		}
+
+		public override void Connect ()
+		{
+			throw new NotImplementedException ();
 		}
 		
 		public override void Close ()

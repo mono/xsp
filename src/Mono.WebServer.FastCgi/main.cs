@@ -101,13 +101,17 @@ namespace Mono.WebServer.FastCgi
 			if (!TryLoadApplicationsConfig (configurationManager))
 				return 1;
 
-			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
+			IServer server;
+
+			if (configurationManager.OnDemand == null) {
+				server = new ServerProxy(CreateServer (configurationManager, socket));
+			} else {
+				server = CreateOndemandServer (configurationManager, socket);
+				CreateWatchdog (configurationManager, server);
+			}
 
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable, (int)configurationManager.Backlog);
-
-			if (configurationManager.OnDemand)
-				CreateWatchdog (configurationManager, server);
 			
 			if (stoppable) {
 				Console.WriteLine (
@@ -119,7 +123,7 @@ namespace Mono.WebServer.FastCgi
 			return 0;
 		}
 
-		static void CreateWatchdog (ConfigurationManager configurationManager, Mono.FastCgi.Server server)
+		static void CreateWatchdog (ConfigurationManager configurationManager, IServer server)
 		{
 			using (var aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
 				bool alive = false;
@@ -191,6 +195,20 @@ namespace Mono.WebServer.FastCgi
 				if (locked)
 					releaseLock ();
 			}
+		}
+
+		static IServer CreateOndemandServer (ConfigurationManager configurationManager, Socket socket)
+		{
+			var server = new OndemandServer (socket) {
+				MaxConnections = configurationManager.MaxConns,
+				MaxRequests = configurationManager.MaxReqs,
+				MultiplexConnections = configurationManager.Multiplex
+			};
+
+			Logger.Write (LogLevel.Debug, "Max connections: {0}",       server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}",          server.MaxRequests);
+			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}", server.MultiplexConnections);
+			return server;
 		}
 
 		static Mono.FastCgi.Server CreateServer (ConfigurationManager configurationManager,

@@ -48,6 +48,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Spawner.cs" />
     <Compile Include="SocketPassing.cs" />
+    <Compile Include="Connection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">

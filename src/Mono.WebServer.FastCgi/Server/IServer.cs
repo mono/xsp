@@ -1,5 +1,5 @@
-﻿//
-// ConnectionProxy.cs
+//
+// IServer.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -31,33 +31,12 @@ using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi
 {
-	public struct ConnectionProxy : IConnection
+	public interface IServer
 	{
-		readonly Connection connection;
+		void Start (bool background, int backlog);
 
-		public ConnectionProxy (Connection connection)
-		{
-			this.connection = connection;
-		}
+		void Stop ();
 
-		public int RequestCount {
-			get { return connection.RequestCount; }
-		}
-
-		public void Run ()
-		{
-			connection.Run ();
-		}
-
-		public void Stop ()
-		{
-			connection.Stop ();
-		}
-
-		public event EventHandler RequestReceived
-		{
-			add { connection.RequestReceived += value; }
-			remove { connection.RequestReceived -= value; }
-		}
+		event EventHandler RequestReceived;
 	}
 }

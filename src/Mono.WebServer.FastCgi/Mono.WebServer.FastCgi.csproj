@@ -108,6 +108,8 @@
     <Compile Include="Server\IConnection.cs" />
     <Compile Include="Server\IServerCallback.cs" />
     <Compile Include="Compatibility\ArrayExtensions.cs" />
+    <Compile Include="Server\IServer.cs" />
+    <Compile Include="Server\OndemandServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

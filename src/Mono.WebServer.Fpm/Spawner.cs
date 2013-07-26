@@ -46,16 +46,16 @@ namespace Mono.WebServer.Fpm
 				return action(arg0, arg1);
 		}
 
-		public static Process SpawnChild(string fullName, string fastCgiCommand)
+		public static Process SpawnChild(string configFile, string fastCgiCommand)
 		{
-			if (fullName == null)
+			if (configFile == null)
 				throw new ArgumentNullException ("fullName");
 			if (fastCgiCommand == null)
 				throw new ArgumentNullException ("fastCgiCommand");
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = fastCgiCommand,
-					Arguments = String.Format("--config-file \"{0}\"", fullName),
+					Arguments = String.Format("--config-file \"{0}\"", configFile),
 					UseShellExecute = true
 				}
 			};

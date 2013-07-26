@@ -26,25 +26,37 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi
 {
-	struct ServerProxy : IServerCallback<ConnectionProxy>
+	struct ServerProxy : IServerCallback<ConnectionProxy>, IServer
 	{
 		readonly Mono.FastCgi.Server server;
 
-		#region IAcceptCallback implementation
+		internal ServerProxy(Mono.FastCgi.Server server){
+			this.server=server;
+		}
 
 		public ConnectionProxy OnAccept (Socket socket)
 		{
 			return server.OnAccept (socket);
 		}
 
-		#endregion
+		public void Start (bool background, int backlog)
+		{
+			server.Start (background, backlog);
+		}
 
-		internal ServerProxy(Mono.FastCgi.Server server){
-			this.server=server;
+		public void Stop ()
+		{
+			server.Stop ();
+		}
+
+		public event EventHandler RequestReceived {
+			add { server.RequestReceived += value; }
+			remove { server.RequestReceived -= value; }
 		}
 	}
 }

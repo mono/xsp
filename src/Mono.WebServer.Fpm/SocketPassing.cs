@@ -36,6 +36,11 @@ using Mono.Unix;
 namespace Mono.WebServer.Fpm {
 	public static class SocketPassing
 	{
+		public static void SendTo (IntPtr connection, IntPtr passing)
+		{
+			send_fd (connection, passing);
+		}
+
 		public static void SendTo (Socket connection, IntPtr passing)
 		{
 			send_fd (connection.Handle, passing);

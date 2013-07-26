@@ -27,10 +27,9 @@
 //
 
 using System;
-using System.Linq;
-using System.Threading;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
 
@@ -42,29 +41,13 @@ namespace Mono.FastCgi {
 
 		#region Private Fields
 
-		readonly List<Connection> connections = new List<Connection> ();
-		
-		readonly Socket listen_socket;
-		
-		bool started;
-		
-		bool accepting;
-
-		bool stopped;
-		
-		Thread runner;
-		
-		readonly object accept_lock = new object ();
-		
-		int max_connections = Int32.MaxValue;
+		readonly GenericServer<ConnectionProxy> backend;
 		
 		int max_requests = Int32.MaxValue;
 		
 		bool multiplex_connections;
 		
 		Type responder_type;
-
-		readonly object state_lock = new object ();
 		
 		#endregion
 		
@@ -76,11 +59,12 @@ namespace Mono.FastCgi {
 		{
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
-			
-			listen_socket = socket;
 
 			BigBufferManager = new BufferManager (4 * 1024); //4k
 			SmallBufferManager = new BufferManager (8);
+
+			backend = new GenericServer<ConnectionProxy> (socket, new ServerProxy (this));
+			backend.RequestReceived += RequestReceived;
 		}
 		
 		#endregion
@@ -92,15 +76,8 @@ namespace Mono.FastCgi {
 		public event EventHandler RequestReceived;
 		
 		public int MaxConnections {
-			get {return max_connections;}
-			set {
-				if (value < 1)
-					throw new ArgumentOutOfRangeException (
-						"value",
-						Strings.Server_MaxConnsOutOfRange);
-				
-				max_connections = value;
-			}
+			get { return backend.MaxConnections; }
+			set { backend.MaxConnections = value; }
 		}
 		
 		public int MaxRequests {
@@ -121,28 +98,22 @@ namespace Mono.FastCgi {
 		}
 		
 		public bool CanAccept {
-			get {return started && ConnectionCount < max_connections;}
+			get {return backend.CanAccept; }
 		}
 		
 		public bool CanRequest {
-			get {return started && RequestCount < max_requests;}
+			get {return backend.Started && RequestCount < max_requests;}
 		}
 		
 		public int ConnectionCount {
 			get {
-				lock (connections)
-					return connections.Count;
+				return backend.ConnectionCount;
 			}
 		}
 		
 		public int RequestCount {
 			get {
-				int requests = 0;
-				lock (connections) {
-					requests += connections.Sum(c => c.RequestCount);
-				}
-				
-				return requests;
+				return backend.Connections.Sum(c => c.RequestCount);
 			}
 		}
 		
@@ -151,6 +122,11 @@ namespace Mono.FastCgi {
 		
 		
 		#region Public Methods
+
+		internal ConnectionProxy OnAccept (Socket socket)
+		{
+			return new ConnectionProxy (new Connection (socket, this));
+		}
 		
 		[Obsolete]
 		public void Start (bool background)
@@ -160,19 +136,7 @@ namespace Mono.FastCgi {
 
 		public void Start (bool background, int backlog)
 		{
-			lock (state_lock) {
-				stopped = false;
-
-				if (started) {
-					throw new InvalidOperationException (
-						Strings.Server_AlreadyStarted);
-				}
-
-				listen_socket.Listen (backlog);
-
-				runner = new Thread (RunServer) { IsBackground = background };
-				runner.Start ();
-			}
+			backend.Start (background, backlog);
 		}
 
 		/// <summary>
@@ -180,42 +144,12 @@ namespace Mono.FastCgi {
 		/// </summary>
 		public void Stop ()
 		{
-			lock (state_lock) {
-				if (stopped)
-					return;
-
-				if (!started)
-					throw new InvalidOperationException (Strings.Server_NotStarted);
-
-				started = false;
-				stopped = true;
-
-				listen_socket.Close ();
-				lock (connections) {
-					foreach (Connection c in new List<Connection> (connections)) {
-						EndConnection (c);
-					}
-				}
-			
-				runner.Abort ();
-				runner = null;
-			}
+			backend.Stop ();
 		}
 		
 		public void EndConnection (Connection connection)
 		{
-			if (connection == null)
-				throw new ArgumentNullException ("connection");
-			
-			connection.Stop ();
-
-			lock (connections) {
-				if (connections.Contains (connection))
-					connections.Remove (connection);
-			}
-			
-			if (!accepting && CanAccept)
-				BeginAccept ();
+			backend.EndConnection (new ConnectionProxy (connection));
 		}
 		
 		
@@ -235,8 +169,7 @@ namespace Mono.FastCgi {
 				switch (name)
 				{
 				case "FCGI_MAX_CONNS":
-					value = max_connections.ToString (
-						CultureInfo.InvariantCulture);
+					value = backend.MaxConnections.ToString (CultureInfo.InvariantCulture);
 				break;
 					
 				case "FCGI_MAX_REQS":
@@ -276,92 +209,6 @@ namespace Mono.FastCgi {
 		}
 		
 		#endregion
-		
-		
-		
-		#region Private Methods
-		
-		void RunServer ()
-		{
-			started = true;
-			listen_socket.BeginAccept (OnAccept, null);
-			if (runner.IsBackground)
-				return;
-
-			while (true) // Just sleep until we're aborted.
-				Thread.Sleep (1000000);
-		}
-		
-		void OnAccept (IAsyncResult ares)
-		{
-			Logger.Write (LogLevel.Debug, Strings.Server_Accepting);
-			Connection connection = null;
-			
-			lock (accept_lock) {
-				accepting = false;
-			}
-			
-			try {
-				try {
-					Socket accepted = listen_socket.EndAccept (ares);
-					connection = new Connection (accepted, this);
-					lock (connections)
-						connections.Add (connection);
-					connection.RequestReceived += RequestReceived;
-				} catch (System.Net.Sockets.SocketException e) {
-					Logger.Write (LogLevel.Error,
-						Strings.Server_AcceptFailed, e.Message);
-					if (e.ErrorCode == 10022)
-						Stop ();
-				} catch (ObjectDisposedException) {
-					Logger.Write (LogLevel.Debug, Strings.Server_ConnectionClosed);
-					return; // Already done (e.g., shutdown)
-				}
-			
-				if (CanAccept)
-					BeginAccept ();
-			} catch (Exception e) {
-				Logger.Write (LogLevel.Error,
-					Strings.Server_AcceptFailed, e.Message);
-			}
-			
-			if (connection == null)
-				return;
-			try {
-				connection.Run ();
-			} catch (Exception e) {
-				Logger.Write (LogLevel.Error, Strings.Server_ConnectionFailed);
-				Logger.Write (e);
-				try {
-					// Upon catastrophic failure, forcefully stop 
-					// all remaining connection activity, since no 
-					// specific error-handling kicked in to rescue 
-					// the connection or its requests and the 
-					// connection's main loop has now terminated.
-					// This prevents abandoned FastCGI connections 
-					// from staying open indefinitely.
-					EndConnection(connection);
-					Logger.Write (LogLevel.Debug, Strings.Server_ConnectionClosed);
-				} catch {
-					// Ignore at this point -- too bad
-				}
-			}
-		}
-		
-		void BeginAccept ()
-		{
-			lock (accept_lock) {
-				if (accepting)
-					return;
-				
-				accepting = true;
-				listen_socket.BeginAccept (OnAccept, null);
-			}
-		}
-		
-		#endregion
-		
-		
 		
 		#region Responder Management
 

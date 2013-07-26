@@ -20,7 +20,12 @@
 ./Request.cs
 ./Responder.cs
 ./ResponderRequest.cs
+./Server/ConnectionProxy.cs
 ./Server.cs
+./Server/GenericServer.cs
+./Server/IConnection.cs
+./Server/IServerCallback.cs
+./Server/ServerProxy.cs
 ./SocketFactory.cs
 ./StandardSocket.cs
 ./Strings.cs

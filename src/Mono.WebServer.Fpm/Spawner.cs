@@ -55,7 +55,7 @@ namespace Mono.WebServer.Fpm
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = fastCgiCommand,
-					Arguments = String.Format("--config-file \"{0}\"", configFile),
+					Arguments = String.Format("--configfile \"{0}\"", configFile),
 					UseShellExecute = true
 				}
 			};

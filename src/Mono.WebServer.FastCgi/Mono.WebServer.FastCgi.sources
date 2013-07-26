@@ -28,6 +28,7 @@
 ./Server/IServer.cs
 ./Server/OndemandServer.cs
 ./Server/ServerProxy.cs
+./Server/SocketPassing.cs
 ./SocketFactory.cs
 ./StandardSocket.cs
 ./Strings.cs

@@ -88,10 +88,6 @@ namespace Mono.WebServer.FastCgi
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
-			Socket socket;
-			if (!TryCreateSocket (configurationManager, out socket))
-				return 1;
-
 			string root_dir;
 			if (!TryGetRootDirectory (configurationManager, out root_dir))
 				return 1;
@@ -103,11 +99,17 @@ namespace Mono.WebServer.FastCgi
 
 			IServer server;
 
-			if (configurationManager.OnDemand == null) {
-				server = new ServerProxy(CreateServer (configurationManager, socket));
-			} else {
+			if (configurationManager.OnDemand) {
+				Socket socket;
+				if (!TryCreateUnixSocket (configurationManager.OnDemandSock, out socket))
+					return 1;
 				server = CreateOndemandServer (configurationManager, socket);
 				CreateWatchdog (configurationManager, server);
+			} else {
+				Socket socket;
+				if (!TryCreateSocket (configurationManager, out socket))
+					return 1;
+				server = new ServerProxy(CreateServer (configurationManager, socket));
 			}
 
 			var stoppable = configurationManager.Stoppable;
@@ -390,19 +392,22 @@ namespace Mono.WebServer.FastCgi
 				? socketParts[1]
 				: configurationManager.Filename;
 
-			socket = null;
+			return TryCreateUnixSocket (path, out socket);}
 
+		static bool TryCreateUnixSocket (string path, out Socket socket)
+		{
+			socket = null;
 			try {
-				socket = SocketFactory.CreateUnixSocket (path);
-			} catch (System.Net.Sockets.SocketException e) {
-				Logger.Write (LogLevel.Error,
-					"Error creating the socket: {0}",
-					e.Message);
+				if (path.StartsWith ("\\0") && path.IndexOf ('\0', 1) < 0)
+					socket = SocketFactory.CreateUnixSocket ('\0' + path.Substring (2));
+				else
+					socket = SocketFactory.CreateUnixSocket (path);
+			}
+			catch (System.Net.Sockets.SocketException e) {
+				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
 				return false;
 			}
-
-			Logger.Write (LogLevel.Debug,
-				"Listening on file: {0}", path);
+			Logger.Write (LogLevel.Debug, "Listening on file: {0}", path);
 			return true;
 		}
 

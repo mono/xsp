@@ -71,7 +71,7 @@ namespace Mono.FastCgi {
 			
 			if (record.BodyLength != 8)
 				throw new ArgumentException (
-					Strings.BeginRequestBody_WrongSize, "record");
+					String.Format(Strings.BeginRequestBody_WrongSize, record.BodyLength), "record");
 			
 			IReadOnlyList<byte> body;
 			record.GetBody (out body);

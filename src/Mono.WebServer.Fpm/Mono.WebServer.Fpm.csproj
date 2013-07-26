@@ -47,7 +47,6 @@
     <Compile Include="main.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Spawner.cs" />
-    <Compile Include="SocketPassing.cs" />
     <Compile Include="Connection.cs" />
   </ItemGroup>
   <ItemGroup>

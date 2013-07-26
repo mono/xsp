@@ -31,7 +31,7 @@ namespace Mono.WebServer.FastCgi {
 		public static string Record_DataTooBig = "Data exceeds 65535 bytes and cannot be stored.";
 		public static string Record_ToString = "FastCGI Record:\n   Version:        {0}\n   Type:           {0}\n   Request ID:     {0}\n   Content Length: {0}";
 		public static string BeginRequestBody_WrongType = "The record's type is not BeginRequest.";
-		public static string BeginRequestBody_WrongSize = "8 bytes expected.";
+		public static string BeginRequestBody_WrongSize = "8 bytes expected, got {0}.";
 		public static string UnmanagedSocket_NotSupported = "Unmanaged sockets not supported.";
 		public static string UnixSocket_AlreadyExists = "There's already a server listening on {0}";
 		public static string ResponderRequest_IncompleteInput = "Insufficient input data received. (Expected {0} bytes but got {1}.)";

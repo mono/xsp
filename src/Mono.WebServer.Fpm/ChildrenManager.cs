@@ -98,16 +98,19 @@ namespace Mono.WebServer.Fpm
 					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
 					spawner = () => Spawner.SpawnChild (configFile, fastCgiCommand);
 				}
-				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager };
+				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = configFile };
 				children.Add (child);
-				if (childConfigurationManager.OnDemand != null) {
+				if (childConfigurationManager.OnDemand) {
 					Socket socket;
 					if (FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
 						var server = new GenericServer<Connection> (socket, child);
 						server.Start (configurationManager.Stoppable, (int)childConfigurationManager.Backlog);
 					}
+
 				} else {
-					if (!child.TrySpawn ()) {
+					if (child.TrySpawn ()) {
+						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (configFile));
+					} else {
 						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", configFile);
 					}
 				}

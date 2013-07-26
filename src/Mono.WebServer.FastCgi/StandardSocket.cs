@@ -63,7 +63,7 @@ namespace Mono.WebServer.FastCgi {
 
 		public override void Connect ()
 		{
-			throw new NotImplementedException ();
+			socket.Connect (localEndPoint);
 		}
 		
 		public override void Close ()

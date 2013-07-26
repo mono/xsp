@@ -56,6 +56,10 @@
       <Project>{4CA9FE8F-B3C7-42DB-8CFC-11A220581925}</Project>
       <Name>Mono.WebServer.Fpm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">
+      <Project>{6A65EE42-6B11-40F4-8E3C-B40E4AB21001}</Project>
+      <Name>Mono.WebServer.FastCgi</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Default.aspx">

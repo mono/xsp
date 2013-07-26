@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
+using System.IO;
 
 namespace Mono.FastCgi {
 	public class Connection
@@ -39,7 +40,7 @@ namespace Mono.FastCgi {
 		readonly List<Request> requests = new List<Request> ();
 		
 		Socket socket;
-		
+
 		readonly Server server;
 		
 		bool keep_alive;
@@ -60,7 +61,7 @@ namespace Mono.FastCgi {
 		
 		
 		#region Constructors
-		
+
 		public Connection (Socket socket, Server server)
 		{
 			if (socket == null)
@@ -107,8 +108,7 @@ namespace Mono.FastCgi {
 		
 		public void Run ()
 		{
-			Logger.Write (LogLevel.Notice,
-				Strings.Connection_BeginningRun);
+			Logger.Write (LogLevel.Notice, Strings.Connection_BeginningRun);
 			if (socket == null) {
 				Logger.Write (LogLevel.Notice, Strings.Connection_NoSocketInRun);
 				return;
@@ -117,7 +117,7 @@ namespace Mono.FastCgi {
 				Record record;
 				
 				try {
-					record = new Record (socket, receive_buffers);
+					record = new Record(socket, receive_buffers);
 				} catch (System.Net.Sockets.SocketException) {
 					StopRun (Strings.Connection_RecordNotReceived);
 					Stop ();
@@ -141,17 +141,8 @@ namespace Mono.FastCgi {
 			
 			if (requests.Count == 0) {
 				lock (connection_teardown_lock) {
-					try {
-						if (socket != null)
-							socket.Close ();
-					} catch (System.Net.Sockets.SocketException e) {
-						// Ignore: "The descriptor is not a socket"
-						//         error from UnmanagedSocket.Close
-						if (e.ErrorCode != 10038)
-							throw;  // Rethrow other errors
-					} finally {
-						socket = null;
-					}
+					CloseSocket();
+
 					if (!stop)
 						server.EndConnection (this);
 
@@ -162,6 +153,21 @@ namespace Mono.FastCgi {
 			
 			Logger.Write (LogLevel.Notice,
 				Strings.Connection_EndingRun);
+		}
+
+		void CloseSocket ()
+		{
+			try {
+				if (socket != null)
+					socket.Close ();
+			} catch (System.Net.Sockets.SocketException e) {
+				// Ignore: "The descriptor is not a socket"
+				//         error from UnmanagedSocket.Close
+				if (e.ErrorCode != 10038)
+					throw;  // Rethrow other errors
+			} finally {
+				socket = null;
+			}
 		}
 
 		void HandleRequest (Record record, Request request)
@@ -336,7 +342,7 @@ namespace Mono.FastCgi {
 						send_buffers.EnforceBodyLength(bodyLength);
 						Array.Copy(bodyData, bodyIndex, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyLength);
 						var record = new Record (1, type, requestID, send_buffers, bodyLength);
-						record.Send (socket);
+						record.Send(socket);
 					} catch (System.Net.Sockets.SocketException) {
 					}
 				}
@@ -351,7 +357,8 @@ namespace Mono.FastCgi {
 					byte[] bodyData = body.GetData ();
 					send_buffers.EnforceBodyLength(bodyData.Length);
 					Array.Copy(bodyData, 0, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyData.Length);
-					new Record (1, RecordType.EndRequest, requestID, send_buffers, bodyData.Length).Send (socket);
+					var record = new Record (1, RecordType.EndRequest, requestID, send_buffers, bodyData.Length);
+					record.Send (socket);
 				}
 			} catch (System.Net.Sockets.SocketException) {
 			}
@@ -367,13 +374,7 @@ namespace Mono.FastCgi {
 
 			lock (connection_teardown_lock) {
 				if (requests.Count == 0 && (!keep_alive || stop)) {
-					if (socket != null) {
-						try {
-							socket.Close ();
-						} finally {
-							socket = null;
-						}
-					}
+					CloseSocket ();
 
 					if (!stop)
 						server.EndConnection (this);

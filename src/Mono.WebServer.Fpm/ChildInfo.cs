@@ -30,6 +30,8 @@ using System;
 using System.Diagnostics;
 using Mono.FastCgi;
 using Mono.WebServer.FastCgi;
+using Mono.WebServer.Log;
+using System.IO;
 
 namespace Mono.WebServer.Fpm {
 	struct ChildInfo : IServerCallback<Connection>
@@ -42,6 +44,8 @@ namespace Mono.WebServer.Fpm {
 
 		public Func<Process> Spawner { get; set; }
 
+		public string Name { get; set; }
+
 		public ChildInfo (Process process) : this()
 		{
 			Process = process;
@@ -50,13 +54,17 @@ namespace Mono.WebServer.Fpm {
 		public bool TrySpawn ()
 		{
 			Process = Spawner ();
-			return ConfigurationManager.OnDemand == null || FastCgi.Server.TryCreateSocket (ConfigurationManager, out ondemandSocket);
+			return !ConfigurationManager.OnDemand || FastCgi.Server.TryCreateSocket (ConfigurationManager, out ondemandSocket);
 		}
 
 		public Connection OnAccept (Socket socket)
 		{
-			if (Process == null && !TrySpawn ())
-				throw new Exception ("Couldn't spawn child!");
+			if (Process == null) {
+				if (TrySpawn ())
+					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", Process.Id, Path.GetFileName (Name));
+				else
+					throw new Exception ("Couldn't spawn child!");
+			}
 
 			if (!ondemandSocket.Connected)
 				ondemandSocket.Connect ();

@@ -33,7 +33,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Mono.Unix;
 
-namespace Mono.WebServer.Fpm {
+namespace Mono.WebServer.FastCgi {
 	public static class SocketPassing
 	{
 		public static void SendTo (IntPtr connection, IntPtr passing)
@@ -46,11 +46,16 @@ namespace Mono.WebServer.Fpm {
 			send_fd (connection.Handle, passing);
 		}
 
-		public static Stream ReceiveFrom (Socket connection)
+		public static IntPtr ReceiveFrom (IntPtr connection)
 		{
 			IntPtr fd;
-			recv_fd (connection.Handle, out fd);
-			return new UnixStream (fd.ToInt32 ());
+			recv_fd (connection, out fd);
+			return fd;
+		}
+
+		public static UnixStream ReceiveFrom (Socket connection)
+		{
+			return new UnixStream (ReceiveFrom (connection.Handle).ToInt32 ());
 		}
 
 		[DllImport ("fpm_helper")]

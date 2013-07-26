@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Sockets;
 using Mono.WebServer.Fpm;
 using System.Net;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.WebServer.Test {
 	[TestFixture]

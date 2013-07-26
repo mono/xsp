@@ -110,6 +110,7 @@
     <Compile Include="Compatibility\ArrayExtensions.cs" />
     <Compile Include="Server\IServer.cs" />
     <Compile Include="Server\OndemandServer.cs" />
+    <Compile Include="Server\SocketPassing.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

@@ -4,5 +4,4 @@
 ./ConfigurationManager.cs
 ./Connection.cs
 ./main.cs
-./SocketPassing.cs
 ./Spawner.cs

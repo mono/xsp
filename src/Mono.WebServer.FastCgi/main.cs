@@ -394,7 +394,7 @@ namespace Mono.WebServer.FastCgi
 
 			return TryCreateUnixSocket (path, out socket);}
 
-		static bool TryCreateUnixSocket (string path, out Socket socket)
+		public static bool TryCreateUnixSocket (string path, out Socket socket)
 		{
 			socket = null;
 			try {

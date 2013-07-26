@@ -84,8 +84,8 @@ namespace Mono.WebServer.Log {
 				return;
 
 			string text = String.Format (CultureInfo.CurrentCulture,
-				"[{0:u}] ({1, -7}) {2,-7} {3}", DateTime.Now,
-				Process.GetCurrentProcess().Id, level, message);
+				"[{0:u}] ({1}) {2,-7} {3}", DateTime.Now,
+				Process.GetCurrentProcess().ProcessName, level, message);
 
 			if (WriteToConsole)
 				lock(write_lock)

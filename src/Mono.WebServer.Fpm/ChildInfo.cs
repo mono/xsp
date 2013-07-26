@@ -32,12 +32,11 @@ using Mono.FastCgi;
 using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
 using System.IO;
+using System.Threading;
 
 namespace Mono.WebServer.Fpm {
 	struct ChildInfo : IServerCallback<Connection>
 	{
-		Socket ondemandSocket;
-
 		public Mono.WebServer.FastCgi.ConfigurationManager ConfigurationManager { get; set; }
 
 		public Process Process { get; private set; }
@@ -54,21 +53,27 @@ namespace Mono.WebServer.Fpm {
 		public bool TrySpawn ()
 		{
 			Process = Spawner ();
-			return !ConfigurationManager.OnDemand || FastCgi.Server.TryCreateSocket (ConfigurationManager, out ondemandSocket);
+			return Process != null && !Process.HasExited;
 		}
 
 		public Connection OnAccept (Socket socket)
 		{
-			if (Process == null) {
-				if (TrySpawn ())
+			if (Process == null || Process.HasExited) {
+				if (TrySpawn ()) {
 					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", Process.Id, Path.GetFileName (Name));
+					// Let the daemon start
+					Thread.Sleep (300);
+				}
 				else
 					throw new Exception ("Couldn't spawn child!");
 			}
 
-			if (!ondemandSocket.Connected)
-				ondemandSocket.Connect ();
+			Socket ondemandSocket;
+			FastCgi.Server.TryCreateUnixSocket (ConfigurationManager.OnDemandSock, out ondemandSocket);
+			ondemandSocket.Connect ();
 			SocketPassing.SendTo (ondemandSocket.Handle, socket.Handle);
+			Logger.Write (LogLevel.Debug, "Sent fd {0} via fd {1}", socket.Handle, ondemandSocket.Handle);
+			ondemandSocket.Close ();
 
 			return new Connection (socket);
 		}

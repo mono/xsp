@@ -134,6 +134,8 @@ namespace Mono.FastCgi {
 					Logger.Write(LogLevel.Error, "Error while invoking RequestReceived event:");
 					Logger.Write(e);
 				}
+
+				Logger.Write(LogLevel.Debug, "Now handling request");
 				
 				HandleRequest (record, request);
 			}

@@ -29,6 +29,7 @@
 using System;
 using Mono.FastCgi;
 using System.IO;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer.FastCgi {
 	public class OndemandServer : IServerCallback<ConnectionProxy>, IServer
@@ -77,7 +78,9 @@ namespace Mono.WebServer.FastCgi {
 
 		public ConnectionProxy OnAccept (Socket socket)
 		{
-			Socket passed = new UnmanagedSocket(SocketPassing.ReceiveFrom (socket.Handle));
+			IntPtr fd = SocketPassing.ReceiveFrom (socket.Handle);
+			Logger.Write (LogLevel.Debug, "Received fd {0} from {1}", fd, socket.Handle);
+			Socket passed = new UnmanagedSocket(fd);
 			return new ConnectionProxy(new Connection (passed, server));
 		}
 	}

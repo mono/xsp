@@ -103,7 +103,7 @@ namespace Mono.WebServer.FastCgi
 				Socket socket;
 				if (!TryCreateUnixSocket (configurationManager.OnDemandSock, out socket))
 					return 1;
-				server = CreateOndemandServer (configurationManager, socket);
+				server = CreateOnDemandServer (configurationManager, socket);
 				CreateWatchdog (configurationManager, server);
 			} else {
 				Socket socket;
@@ -199,9 +199,9 @@ namespace Mono.WebServer.FastCgi
 			}
 		}
 
-		static IServer CreateOndemandServer (ConfigurationManager configurationManager, Socket socket)
+		static IServer CreateOnDemandServer (ConfigurationManager configurationManager, Socket socket)
 		{
-			var server = new OndemandServer (socket) {
+			var server = new OnDemandServer (socket) {
 				MaxConnections = configurationManager.MaxConns,
 				MaxRequests = configurationManager.MaxReqs,
 				MultiplexConnections = configurationManager.Multiplex

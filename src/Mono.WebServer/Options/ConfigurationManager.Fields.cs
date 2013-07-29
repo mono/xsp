@@ -84,7 +84,8 @@ namespace Mono.WebServer.Options {
 		{
 			try {
 				if (ConfigFile != null)
-					LoadXmlConfig (ConfigFile);
+					if(!TryLoadXmlConfig (ConfigFile))
+						return false;
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return false;

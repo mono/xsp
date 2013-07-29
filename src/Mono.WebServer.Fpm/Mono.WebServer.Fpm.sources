@@ -3,5 +3,6 @@
 ./ChildrenManager.cs
 ./ConfigurationManager.cs
 ./Connection.cs
+./InstanceType.cs
 ./main.cs
 ./Spawner.cs

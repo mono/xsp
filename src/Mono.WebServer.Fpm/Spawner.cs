@@ -35,7 +35,7 @@ namespace Mono.WebServer.Fpm
 {
 	static class Spawner 
 	{
-		public static T RunAs<T, T1, T2>(string user, Func<T1, T2, T> action, T1 arg0, T2 arg1)
+		public static T RunAs<T, T1, T2, T3>(string user, Func<T1, T2, T3, T> action, T1 arg0, T2 arg1, T3 arg2)
 		{
 			if (user == null)
 				throw new ArgumentNullException ("user");
@@ -43,10 +43,10 @@ namespace Mono.WebServer.Fpm
 				throw new ArgumentNullException ("action");
 			using (var identity = new WindowsIdentity(user))
 			using (identity.Impersonate())
-				return action(arg0, arg1);
+				return action(arg0, arg1, arg2);
 		}
 
-		public static Process SpawnChild(string configFile, string fastCgiCommand)
+		public static Process SpawnChild(string configFile, string fastCgiCommand, bool onDemand)
 		{
 			if (configFile == null)
 				throw new ArgumentNullException ("fullName");
@@ -55,7 +55,7 @@ namespace Mono.WebServer.Fpm
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = fastCgiCommand,
-					Arguments = String.Format("--configfile \"{0}\"", configFile),
+					Arguments = String.Format("--configfile \"{0}\"{1}", configFile, onDemand ? " --ondemand" : String.Empty),
 					UseShellExecute = true
 				}
 			};

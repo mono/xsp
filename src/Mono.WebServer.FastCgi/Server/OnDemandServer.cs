@@ -1,5 +1,5 @@
 //
-// OndemandServer.cs
+// OnDemandServer.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -32,7 +32,7 @@ using System.IO;
 using Mono.WebServer.Log;
 
 namespace Mono.WebServer.FastCgi {
-	public class OndemandServer : IServerCallback<ConnectionProxy>, IServer
+	public class OnDemandServer : IServerCallback<ConnectionProxy>, IServer
 	{
 		readonly GenericServer<ConnectionProxy> backend;
 		readonly Mono.FastCgi.Server server;
@@ -60,7 +60,7 @@ namespace Mono.WebServer.FastCgi {
 
 		public bool MultiplexConnections { get; set; }
 
-		public OndemandServer (Socket socket)
+		public OnDemandServer (Socket socket)
 		{
 			backend = new GenericServer<ConnectionProxy> (socket, this);
 			server = new Mono.FastCgi.Server (socket);

@@ -41,9 +41,11 @@ namespace Mono.WebServer.Fpm {
 
 		public Process Process { get; private set; }
 
-		public Func<Process> Spawner { get; set; }
+		public Func<bool, Process> Spawner { get; set; }
 
 		public string Name { get; set; }
+
+		public bool OnDemand { get; set; }
 
 		public ChildInfo (Process process) : this()
 		{
@@ -52,7 +54,7 @@ namespace Mono.WebServer.Fpm {
 
 		public bool TrySpawn ()
 		{
-			Process = Spawner ();
+			Process = Spawner (OnDemand);
 			return Process != null && !Process.HasExited;
 		}
 
@@ -68,12 +70,12 @@ namespace Mono.WebServer.Fpm {
 					throw new Exception ("Couldn't spawn child!");
 			}
 
-			Socket ondemandSocket;
-			FastCgi.Server.TryCreateUnixSocket (ConfigurationManager.OnDemandSock, out ondemandSocket);
-			ondemandSocket.Connect ();
-			SocketPassing.SendTo (ondemandSocket.Handle, socket.Handle);
-			Logger.Write (LogLevel.Debug, "Sent fd {0} via fd {1}", socket.Handle, ondemandSocket.Handle);
-			ondemandSocket.Close ();
+			Socket onDemandSocket;
+			FastCgi.Server.TryCreateUnixSocket (ConfigurationManager.OnDemandSock, out onDemandSocket);
+			onDemandSocket.Connect ();
+			SocketPassing.SendTo (onDemandSocket.Handle, socket.Handle);
+			Logger.Write (LogLevel.Debug, "Sent fd {0} via fd {1}", socket.Handle, onDemandSocket.Handle);
+			onDemandSocket.Close ();
 
 			return new Connection (socket);
 		}

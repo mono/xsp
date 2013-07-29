@@ -26,7 +26,7 @@
 ./Server/IConnection.cs
 ./Server/IServerCallback.cs
 ./Server/IServer.cs
-./Server/OndemandServer.cs
+./Server/OnDemandServer.cs
 ./Server/ServerProxy.cs
 ./Server/SocketPassing.cs
 ./SocketFactory.cs

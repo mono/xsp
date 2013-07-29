@@ -149,7 +149,7 @@ namespace Mono.FastCgi {
 			this.type = type;
 			request_id  = requestID;
 			buffers = new Buffers (bodyData, bodyIndex, bodyLength);
-			BodyLength = body_length = (ushort) bodyLength;
+			body_length = (ushort) bodyLength;
 		}
 		
 		#endregion

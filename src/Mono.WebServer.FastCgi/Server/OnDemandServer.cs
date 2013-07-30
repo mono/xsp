@@ -78,8 +78,8 @@ namespace Mono.WebServer.FastCgi {
 		{
 			IntPtr fd = SocketPassing.ReceiveFrom (socket.Handle);
 			Logger.Write (LogLevel.Debug, "Received fd {0} from {1}", fd, socket.Handle);
-			Socket passed = new UnmanagedSocket(fd);
-			return new ConnectionProxy(new Connection (passed, server));
+			Socket passed = new UnmanagedSocket (fd, true);
+			return new ConnectionProxy (new Connection (passed, server));
 		}
 	}
 }

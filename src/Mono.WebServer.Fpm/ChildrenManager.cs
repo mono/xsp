@@ -94,10 +94,10 @@ namespace Mono.WebServer.Fpm
 						user = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
 					}
 
-					spawner = (onDemand) => Spawner.RunAs (user, Spawner.SpawnChild, configFile, fastCgiCommand, onDemand);
+					spawner = onDemand => Spawner.RunAs (user, Spawner.SpawnChild, configFile, fastCgiCommand, onDemand);
 				} else {
 					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					spawner = (onDemand) => Spawner.SpawnChild (configFile, fastCgiCommand, onDemand);
+					spawner = onDemand => Spawner.SpawnChild (configFile, fastCgiCommand, onDemand);
 				}
 				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = configFile, OnDemand = childConfigurationManager.InstanceType == InstanceType.Dynamic };
 				children.Add (child);

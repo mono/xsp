@@ -17,7 +17,7 @@ namespace Mono.WebServer.Options {
 		readonly BoolSetting printlog = new BoolSetting ("printlog", "Prints log messages to the console.", environment: "MONO_PRINTLOG|MONO_FCGI_PRINTLOG", defaultValue: true);
 
 		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_LOGFILE|MONO_FCGI_LOGFILE");
-		readonly StringSetting configFile = new StringSetting ("configfile", Descriptions.ConfigFile);
+		readonly StringSetting configFile = new StringSetting ("configfile|config-file", Descriptions.ConfigFile);
 
 		readonly EnumSetting<LogLevel> loglevels = new EnumSetting<LogLevel> ("loglevels", Descriptions.LogLevels, "FastCgiLogLevels", "MONO_FCGI_LOGLEVELS", LogLevel.Standard);
 		#endregion
@@ -84,7 +84,8 @@ namespace Mono.WebServer.Options {
 		{
 			try {
 				if (ConfigFile != null)
-					LoadXmlConfig (ConfigFile);
+					if(!TryLoadXmlConfig (ConfigFile))
+						return false;
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return false;

@@ -17,17 +17,24 @@ namespace Mono.WebServer.Options {
 			get { return settings; }
 		}
 
-		public void LoadXmlConfig (string file)
+
+		public bool TryLoadXmlConfig (string file)
 		{
 			if (String.IsNullOrEmpty (file))
 				throw new ArgumentNullException ("file");
 			var doc = new XmlDocument ();
-			doc.Load (file);
+			try {
+				doc.Load (file);
+			} catch (FileNotFoundException e) {
+				Console.Error.WriteLine("ERROR: Couldn't find configuration file {0}!", e.FileName);
+				return false;
+			}
 			if (Platform.IsUnix) {
 				var fileInfo = new UnixFileInfo (file);
 				ImportSettings (doc, true, file, fileInfo.OwnerUser.UserName, fileInfo.OwnerGroup.GroupName);
 			} else
 				ImportSettings (doc, true, file);
+			return true;
 		}
 		
 		[Obsolete]

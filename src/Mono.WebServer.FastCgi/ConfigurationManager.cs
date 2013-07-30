@@ -82,7 +82,7 @@ namespace Mono.WebServer {
 
 		public void LoadXmlConfig (string filename)
 		{
-			configurationManager.LoadXmlConfig (filename);
+			configurationManager.TryLoadXmlConfig (filename);
 		}
 	}
 }

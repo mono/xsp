@@ -1,5 +1,5 @@
-﻿//
-// Spawner.cs:
+//
+// IServerCallback.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,43 +26,13 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Mono.FastCgi;
 
-using System;
-using System.Diagnostics;
-using System.Security.Principal;
-
-namespace Mono.WebServer.Fpm
+namespace Mono.WebServer.FastCgi
 {
-	static class Spawner 
+	public interface IServerCallback<out T>
 	{
-		public static T RunAs<T, T1, T2, T3>(string user, Func<T1, T2, T3, T> action, T1 arg0, T2 arg1, T3 arg2)
-		{
-			if (user == null)
-				throw new ArgumentNullException ("user");
-			if (action == null)
-				throw new ArgumentNullException ("action");
-			using (var identity = new WindowsIdentity(user))
-			using (identity.Impersonate())
-				return action(arg0, arg1, arg2);
-		}
-
-		public static Process SpawnChild(string configFile, string fastCgiCommand, bool onDemand)
-		{
-			if (configFile == null)
-				throw new ArgumentNullException ("configFile");
-			if (configFile.Length == 0)
-				throw new ArgumentException ("Config file name can't be empty", "configFile");
-			if (fastCgiCommand == null)
-				throw new ArgumentNullException ("fastCgiCommand");
-			var process = new Process {
-				StartInfo = new ProcessStartInfo {
-					FileName = fastCgiCommand,
-					Arguments = String.Format("--configfile \"{0}\"{1}", configFile, onDemand ? " --ondemand" : String.Empty),
-					UseShellExecute = true
-				}
-			};
-			process.Start();
-			return process;
-		}
+		T OnAccept(Socket socket);
 	}
+
 }

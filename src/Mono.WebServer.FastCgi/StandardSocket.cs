@@ -33,6 +33,13 @@ using Mono.FastCgi;
 namespace Mono.WebServer.FastCgi {
 	class StandardSocket : Socket {
 		readonly System.Net.Sockets.Socket socket;
+		readonly System.Net.EndPoint localEndPoint;
+
+		public override IntPtr Handle {
+			get {
+				return socket.Handle;
+			}
+		}
 		
 		public StandardSocket (System.Net.Sockets.Socket socket)
 		{
@@ -50,10 +57,13 @@ namespace Mono.WebServer.FastCgi {
 			if (localEndPoint == null)
 				throw new ArgumentNullException ("localEndPoint");
 			
-			socket = new System.Net.Sockets.Socket (addressFamily, socketType,
-				protocolType);
-			
-			socket.Bind (localEndPoint);
+			socket = new System.Net.Sockets.Socket (addressFamily, socketType, protocolType);
+			this.localEndPoint = localEndPoint;
+		}
+
+		public override void Connect ()
+		{
+			socket.Connect (localEndPoint);
 		}
 		
 		public override void Close ()
@@ -104,6 +114,7 @@ namespace Mono.WebServer.FastCgi {
 		
 		public override void Listen (int backlog)
 		{
+			socket.Bind (localEndPoint);
 			socket.Listen (backlog);
 		}
 		

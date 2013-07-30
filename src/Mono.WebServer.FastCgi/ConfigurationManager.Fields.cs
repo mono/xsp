@@ -33,16 +33,16 @@ namespace Mono.WebServer.FastCgi {
 	{
 		public ConfigurationManager ()
 		{
-			Add(stoppable, multiplex, ondemand,
+			Add(stoppable, multiplex, onDemand,
 				maxConns, maxReqs, port, idleTime,
-				filename, socket);
+				filename, socket, onDemandSock);
 		}
 
 		#region Backing fields
 		readonly BoolSetting stoppable = new BoolSetting ("stoppable", Descriptions.Stoppable);
 		readonly BoolSetting multiplex = new BoolSetting ("multiplex", "Allows multiple requests to be send over a single connection.",
 			"FastCgiMultiplexConnections", "MONO_FCGI_MULTIPLEX");
-		readonly BoolSetting ondemand = new BoolSetting ("ondemand", "Listen on the socket provided via a sendmsg(2), and terminate after it receives no requests for some time");
+		readonly BoolSetting onDemand = new BoolSetting ("ondemand", "Listen on the socket specified via /ondemandsock and accepts via sendmsg(2). Terminates after it receives no requests for some time");
 
 		readonly UInt16Setting maxConns = new UInt16Setting ("maxconns", Descriptions.MaxConns,
 			"FastCgiMaxConnections", "MONO_FCGI_MAXCONNS", 1024);
@@ -54,6 +54,7 @@ namespace Mono.WebServer.FastCgi {
 		readonly StringSetting filename = new StringSetting ("filename", "Specifies a unix socket filename to listen on.\n" +
 			"To use this argument, \"socket\" must be set to \"unix\".", "MonoUnixSocket", "MONO_FCGI_FILENAME", "/tmp/fastcgi-mono-server");
 		readonly StringSetting socket = new StringSetting ("socket", Descriptions.Socket, "MonoSocketType", "MONO_FCGI_SOCKET", "pipe");
+		readonly StringSetting onDemandSock = new StringSetting ("ondemandsock", "The socket to listen on for ondemand service");
 		#endregion
 
 		#region Typesafe properties
@@ -64,7 +65,7 @@ namespace Mono.WebServer.FastCgi {
 			get { return multiplex; }
 		}
 		public bool OnDemand {
-			get { return ondemand; }
+			get { return onDemand; }
 		}
 
 		public ushort MaxConns {
@@ -85,6 +86,9 @@ namespace Mono.WebServer.FastCgi {
 		}
 		public string Socket {
 			get { return socket; }
+		}
+		public string OnDemandSock {
+			get { return onDemandSock; }
 		}
 
 		/*

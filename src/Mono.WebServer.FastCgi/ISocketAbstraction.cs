@@ -31,12 +31,15 @@ using System;
 namespace Mono.FastCgi {
 	public abstract class Socket
 	{
+		public abstract IntPtr Handle { get; }
+
+		public abstract void Connect ();
+
 		public abstract void Close ();
 		
 		public abstract int Receive (byte [] buffer, int offset, int size, System.Net.Sockets.SocketFlags flags);
 		
 		public abstract int Send (byte [] data, int offset, int size, System.Net.Sockets.SocketFlags flags);
-
 		
 		public abstract void Listen (int backlog);
 		

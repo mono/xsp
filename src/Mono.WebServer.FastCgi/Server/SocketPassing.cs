@@ -1,5 +1,5 @@
-﻿//
-// Spawner.cs:
+//
+// SocketPassing.cs:
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -28,41 +28,45 @@
 
 
 using System;
-using System.Diagnostics;
-using System.Security.Principal;
+using System.IO;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using Mono.Unix;
 
-namespace Mono.WebServer.Fpm
-{
-	static class Spawner 
+namespace Mono.WebServer.FastCgi {
+	public static class SocketPassing
 	{
-		public static T RunAs<T, T1, T2, T3>(string user, Func<T1, T2, T3, T> action, T1 arg0, T2 arg1, T3 arg2)
+		public static void SendTo (IntPtr connection, IntPtr passing)
 		{
-			if (user == null)
-				throw new ArgumentNullException ("user");
-			if (action == null)
-				throw new ArgumentNullException ("action");
-			using (var identity = new WindowsIdentity(user))
-			using (identity.Impersonate())
-				return action(arg0, arg1, arg2);
+			send_fd (connection, passing);
 		}
 
-		public static Process SpawnChild(string configFile, string fastCgiCommand, bool onDemand)
+		public static void SendTo (Socket connection, IntPtr passing)
 		{
-			if (configFile == null)
-				throw new ArgumentNullException ("configFile");
-			if (configFile.Length == 0)
-				throw new ArgumentException ("Config file name can't be empty", "configFile");
-			if (fastCgiCommand == null)
-				throw new ArgumentNullException ("fastCgiCommand");
-			var process = new Process {
-				StartInfo = new ProcessStartInfo {
-					FileName = fastCgiCommand,
-					Arguments = String.Format("--configfile \"{0}\"{1}", configFile, onDemand ? " --ondemand" : String.Empty),
-					UseShellExecute = true
-				}
-			};
-			process.Start();
-			return process;
+			if (connection == null)
+				throw new ArgumentNullException ("connection");
+			send_fd (connection.Handle, passing);
 		}
+
+		public static IntPtr ReceiveFrom (IntPtr connection)
+		{
+			IntPtr fd;
+			recv_fd (connection, out fd);
+			return fd;
+		}
+
+		public static UnixStream ReceiveFrom (Socket connection)
+		{
+			if (connection == null)
+				throw new ArgumentNullException ("connection");
+			return new UnixStream (ReceiveFrom (connection.Handle).ToInt32 ());
+		}
+
+		[DllImport ("fpm_helper")]
+		static extern void send_fd (IntPtr sock, IntPtr fd);
+
+		[DllImport ("fpm_helper")]
+		static extern void recv_fd (IntPtr sock, out IntPtr fd);
 	}
 }
+

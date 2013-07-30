@@ -88,10 +88,6 @@ namespace Mono.WebServer.FastCgi
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
-			Socket socket;
-			if (!TryCreateSocket (configurationManager, out socket))
-				return 1;
-
 			string root_dir;
 			if (!TryGetRootDirectory (configurationManager, out root_dir))
 				return 1;
@@ -101,13 +97,23 @@ namespace Mono.WebServer.FastCgi
 			if (!TryLoadApplicationsConfig (configurationManager))
 				return 1;
 
-			Mono.FastCgi.Server server = CreateServer (configurationManager, socket);
+			IServer server;
+
+			if (configurationManager.OnDemand) {
+				Socket socket;
+				if (!TryCreateUnixSocket (configurationManager.OnDemandSock, out socket))
+					return 1;
+				server = CreateOnDemandServer (configurationManager, socket);
+				CreateWatchdog (configurationManager, server);
+			} else {
+				Socket socket;
+				if (!TryCreateSocket (configurationManager, out socket))
+					return 1;
+				server = new ServerProxy(CreateServer (configurationManager, socket));
+			}
 
 			var stoppable = configurationManager.Stoppable;
 			server.Start (stoppable, (int)configurationManager.Backlog);
-
-			if (configurationManager.OnDemand)
-				CreateWatchdog (configurationManager, server);
 			
 			if (stoppable) {
 				Console.WriteLine (
@@ -119,7 +125,7 @@ namespace Mono.WebServer.FastCgi
 			return 0;
 		}
 
-		static void CreateWatchdog (ConfigurationManager configurationManager, Mono.FastCgi.Server server)
+		static void CreateWatchdog (ConfigurationManager configurationManager, IServer server)
 		{
 			using (var aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
 				bool alive = false;
@@ -191,6 +197,20 @@ namespace Mono.WebServer.FastCgi
 				if (locked)
 					releaseLock ();
 			}
+		}
+
+		static IServer CreateOnDemandServer (ConfigurationManager configurationManager, Socket socket)
+		{
+			var server = new OnDemandServer (socket) {
+				MaxConnections = configurationManager.MaxConns,
+				MaxRequests = configurationManager.MaxReqs,
+				MultiplexConnections = configurationManager.Multiplex
+			};
+
+			Logger.Write (LogLevel.Debug, "Max connections: {0}",       server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}",          server.MaxRequests);
+			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}", server.MultiplexConnections);
+			return server;
 		}
 
 		static Mono.FastCgi.Server CreateServer (ConfigurationManager configurationManager,
@@ -372,19 +392,22 @@ namespace Mono.WebServer.FastCgi
 				? socketParts[1]
 				: configurationManager.Filename;
 
-			socket = null;
+			return TryCreateUnixSocket (path, out socket);}
 
+		public static bool TryCreateUnixSocket (string path, out Socket socket)
+		{
+			socket = null;
 			try {
-				socket = SocketFactory.CreateUnixSocket (path);
-			} catch (System.Net.Sockets.SocketException e) {
-				Logger.Write (LogLevel.Error,
-					"Error creating the socket: {0}",
-					e.Message);
+				if (path.StartsWith ("\\0") && path.IndexOf ('\0', 1) < 0)
+					socket = SocketFactory.CreateUnixSocket ('\0' + path.Substring (2));
+				else
+					socket = SocketFactory.CreateUnixSocket (path);
+			}
+			catch (System.Net.Sockets.SocketException e) {
+				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
 				return false;
 			}
-
-			Logger.Write (LogLevel.Debug,
-				"Listening on file: {0}", path);
+			Logger.Write (LogLevel.Debug, "Listening on file: {0}", path);
 			return true;
 		}
 

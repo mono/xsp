@@ -1,0 +1,6 @@
+<Settings>
+	<Setting Name="ondemandsock" Value="\0backsock" />
+	<Setting Name="socket" Value="tcp:9000" />
+	<Setting Name="applications" Value="/:." />
+	<Setting Name="loglevels" Value="All" />
+</Settings>

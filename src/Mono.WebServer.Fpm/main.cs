@@ -31,6 +31,7 @@ using System.IO;
 using System.Reflection;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
+using System.Threading;
 
 namespace Mono.WebServer.Fpm {
 	public static class Server
@@ -86,8 +87,10 @@ namespace Mono.WebServer.Fpm {
 			FileInfo[] configFiles = configDirInfo.GetFiles ("*.xml");
 			ChildrenManager.StartChildren (configFiles, configurationManager);
 
-			if (!configurationManager.Stoppable)
-				return 0;
+			if (!configurationManager.Stoppable) {
+				ManualResetEvent sleep = new ManualResetEvent (false);
+				sleep.WaitOne (); // Do androids dream of electric sheep?
+			}
 
 			Console.WriteLine ("Hit Return to stop the server.");
 			Console.ReadLine ();

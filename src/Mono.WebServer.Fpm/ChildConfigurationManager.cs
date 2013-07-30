@@ -34,13 +34,19 @@ namespace Mono.WebServer.Fpm {
 	{
 		readonly StringSetting user = new StringSetting ("user", String.Empty);
 
+		readonly EnumSetting<InstanceType> instanceType = new EnumSetting<InstanceType>("instance-type", "The kind of instance (static or dynamic)", defaultValue:InstanceType.Dynamic);
+
 		public string User {
 			get { return user; }
 		}
 
+		public InstanceType InstanceType {
+			get { return instanceType; }
+		}
+
 		public ChildConfigurationManager ()
 		{
-			Add (user);
+			Add (user, instanceType);
 		}
 	}
 }

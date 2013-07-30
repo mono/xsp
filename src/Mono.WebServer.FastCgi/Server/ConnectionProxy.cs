@@ -1,5 +1,5 @@
-//
-// SocketPassing.cs:
+﻿//
+// ConnectionProxy.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,33 +26,39 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using Mono.Unix;
+using Mono.FastCgi;
 
-namespace Mono.WebServer.Fpm {
-	public static class SocketPassing
+namespace Mono.WebServer.FastCgi
+{
+	public struct ConnectionProxy : IConnection
 	{
-		public static void SendTo (Socket connection, IntPtr passing)
-		{
-			send_fd (connection.Handle, passing);
+		readonly Connection connection;
+
+		public event EventHandler RequestReceived {
+			add { connection.RequestReceived += value; }
+			remove { connection.RequestReceived -= value; }
 		}
 
-		public static Stream ReceiveFrom (Socket connection)
-		{
-			IntPtr fd;
-			recv_fd (connection.Handle, out fd);
-			return new UnixStream (fd.ToInt32 ());
+		public int RequestCount {
+			get { return connection.RequestCount; }
 		}
 
-		[DllImport ("fpm_helper")]
-		static extern void send_fd (IntPtr sock, IntPtr fd);
+		public ConnectionProxy (Connection connection)
+		{
+			if (connection == null)
+				throw new ArgumentNullException ("connection");
+			this.connection = connection;
+		}
 
-		[DllImport ("fpm_helper")]
-		static extern void recv_fd (IntPtr sock, out IntPtr fd);
+		public void Run ()
+		{
+			connection.Run ();
+		}
+
+		public void Stop ()
+		{
+			connection.Stop ();
+		}
 	}
 }
-

@@ -31,6 +31,7 @@ using System.Globalization;
 using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Mono.FastCgi {
 	public struct Record
@@ -44,8 +45,6 @@ namespace Mono.FastCgi {
 		readonly ushort request_id;
 		
 		readonly Buffers buffers;
-		
-		readonly ushort body_length;
 		
 		public const int SuggestedBufferSize = 0x08 + 0xFFFF + 0xFF;
 		
@@ -72,7 +71,7 @@ namespace Mono.FastCgi {
 		public Record (Socket socket, byte[] buffer) : this (socket, new Buffers (buffer, HeaderSize, buffer.Length - HeaderSize - 8))
 		{
 		}
-		
+
 		public Record (Socket socket, Buffers receive_buffer) : this()
 		{
 			if (socket == null)
@@ -82,20 +81,20 @@ namespace Mono.FastCgi {
 
 			// Read the 8 byte record header.
 			ReceiveAll (socket, header_buffer, HeaderSize);
-			
+
 			// Read the values from the data.
 			version        = header_buffer [0];
 			type           = (RecordType) header_buffer [1];
 			request_id     = ReadUInt16 (header_buffer, 2);
-			body_length    = ReadUInt16 (header_buffer, 4);
+			BodyLength     = ReadUInt16 (header_buffer, 4);
 			byte padding_length = header_buffer [6];
-			
-			CompatArraySegment<byte> body_buffer  = receive_buffer.EnforceBodyLength (body_length);
-			
+
+			CompatArraySegment<byte> body_buffer  = receive_buffer.EnforceBodyLength (BodyLength);
+
 			// Read the record data, and throw an exception if the
 			// complete data cannot be read.
-			if (body_length > 0)
-				ReceiveAll (socket, body_buffer, body_length);
+			if (BodyLength > 0)
+				ReceiveAll (socket, body_buffer, BodyLength);
 
 			CompatArraySegment<byte> padding_buffer = receive_buffer.EnforcePaddingLength (padding_length);
 
@@ -103,7 +102,7 @@ namespace Mono.FastCgi {
 				ReceiveAll(socket, padding_buffer, padding_length);
 
 			buffers = receive_buffer;
-			
+
 			Logger.Write (LogLevel.Debug, Strings.Record_Received, Type, RequestID, BodyLength);
 		}
 
@@ -122,7 +121,7 @@ namespace Mono.FastCgi {
 			this.type = type;
 			request_id  = requestID;
 			this.buffers = buffers;
-			body_length = (ushort) bodyLength;
+			BodyLength = (ushort) bodyLength;
 		}
 		
 		[Obsolete]
@@ -182,19 +181,19 @@ namespace Mono.FastCgi {
 			if (dest == null)
 				throw new ArgumentNullException ("dest");
 			
-			if (body_length > dest.Length - destIndex)
+			if (BodyLength > dest.Length - destIndex)
 				throw new ArgumentOutOfRangeException ("destIndex");
 
 			if (buffers.Body.HasValue)
-				buffers.Body.Value.CopyTo (dest, destIndex, body_length);
+				buffers.Body.Value.CopyTo (dest, destIndex, BodyLength);
 		}
 		
 		[Obsolete("Use GetBody(out ReadOnlyCollection<byte>)")]
 		public byte[] GetBody ()
 		{
-			var body_data = new byte [body_length];
+			var body_data = new byte [BodyLength];
 			if(buffers.Body.HasValue)
-				buffers.Body.Value.CopyTo (body_data, 0, body_length);
+				buffers.Body.Value.CopyTo (body_data, 0, BodyLength);
 			return body_data;
 		}
 
@@ -203,7 +202,7 @@ namespace Mono.FastCgi {
 			if (buffers.Body == null)
 				body = null;
 			else
-				body = buffers.Body.Value.Trim(body_length);
+				body = buffers.Body.Value.Trim(BodyLength);
 		}
 
 		public override string ToString ()
@@ -221,7 +220,7 @@ namespace Mono.FastCgi {
 
 		public void Send(Socket socket)
 		{
-			var padding_size = (byte) ((8 - (body_length % 8)) % 8);
+			var padding_size = (byte) ((8 - (BodyLength % 8)) % 8);
 
 			CompatArraySegment<byte> header = buffers.EnforceHeaderLength (HeaderSize);
 
@@ -229,8 +228,8 @@ namespace Mono.FastCgi {
 			header [1] = (byte) type;
 			header [2] = (byte) (request_id >> 8);
 			header [3] = (byte) (request_id & 0xFF);
-			header [4] = (byte) (body_length >> 8);
-			header [5] = (byte) (body_length & 0xFF);
+			header [4] = (byte) (BodyLength >> 8);
+			header [5] = (byte) (BodyLength & 0xFF);
 			header [6] = padding_size;
 
 			CompatArraySegment<byte> padding = buffers.EnforcePaddingLength (padding_size);
@@ -238,10 +237,10 @@ namespace Mono.FastCgi {
 			for (int i = 0; i < padding_size; i ++)
 				padding [i] = 0;
 
-			Logger.Write (LogLevel.Debug, Strings.Record_Sent, Type, RequestID, body_length);
+			Logger.Write (LogLevel.Debug, Strings.Record_Sent, Type, RequestID, BodyLength);
 
 			SendAll (socket, header, HeaderSize);
-			SendAll (socket, buffers.Body, body_length);
+			SendAll (socket, buffers.Body, BodyLength);
 			SendAll (socket, padding, padding_size);
 		}
 

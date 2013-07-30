@@ -36,7 +36,7 @@ using Mono.WebServer.Log;
 namespace Mono.WebServer.FastCgi {
 	class UnixSocket : StandardSocket, IDisposable {
 		string path;
-		readonly long inode;
+		readonly long? inode;
 		
 		protected UnixSocket (UnixEndPoint localEndPoint)
 			: base (System.Net.Sockets.AddressFamily.Unix,
@@ -50,8 +50,8 @@ namespace Mono.WebServer.FastCgi {
 		{
 			this.path = path;
 			try {
-				if(path.StartsWith("\0"))
-					inode = -1;
+				if (path.StartsWith("\0"))
+					inode = null;
 				else
 					inode = new UnixFileInfo (path).Inode;
 			} catch (InvalidOperationException) {
@@ -96,7 +96,7 @@ namespace Mono.WebServer.FastCgi {
 				string f = path;
 				path = null;
 
-				if (System.IO.File.Exists (f) && inode >= 0 && inode == new UnixFileInfo (f).Inode) {
+				if (inode != null && System.IO.File.Exists (f) && inode == new UnixFileInfo (f).Inode) {
 					System.IO.File.Delete (f);
 				}
 			}

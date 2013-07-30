@@ -39,18 +39,15 @@ namespace Mono.WebServer.FastCgi
 	{
 		readonly Socket listen_socket;
 		readonly IServerCallback<T> serverCallback;
-
 		readonly object accept_lock = new object();
 		readonly object state_lock = new object ();
-
 		bool accepting;
 		bool stopped;
-
 		Thread runner;
-
 		readonly List<T> connections = new List<T>();
-
 		int max_connections = Int32.MaxValue;
+		ManualResetEvent stop_signal = new ManualResetEvent(false);
+		ManualResetEvent stopped_signal = new ManualResetEvent(false);
 
 		public event EventHandler RequestReceived;
 
@@ -96,8 +93,6 @@ namespace Mono.WebServer.FastCgi
 		public void Start (bool background, int backlog)
 		{
 			lock (state_lock) {
-				stopped = false;
-
 				if (Started)
 					throw new InvalidOperationException (Strings.Server_AlreadyStarted);
 
@@ -105,6 +100,8 @@ namespace Mono.WebServer.FastCgi
 
 				runner = new Thread (RunServer) { IsBackground = background };
 				runner.Start ();
+
+				stopped = false;
 			}
 		}
 
@@ -117,9 +114,6 @@ namespace Mono.WebServer.FastCgi
 				if (!Started)
 					throw new InvalidOperationException (Strings.Server_NotStarted);
 
-				Started = false;
-				stopped = true;
-
 				listen_socket.Close ();
 				lock (connections) {
 					foreach (T c in new List<T> (connections)) {
@@ -127,8 +121,14 @@ namespace Mono.WebServer.FastCgi
 					}
 				}
 
-				runner.Abort ();
+				stop_signal.Set ();
+				stopped_signal.WaitOne ();
+				stopped_signal.Reset ();
+
 				runner = null;
+
+				Started = false;
+				stopped = true;
 			}
 		}
 
@@ -157,8 +157,9 @@ namespace Mono.WebServer.FastCgi
 			if (runner.IsBackground)
 				return;
 
-			while (true) // Just sleep until we're aborted.
-				Thread.Sleep (1000000);
+			stop_signal.WaitOne ();
+			stop_signal.Reset ();
+			stopped_signal.Set ();
 		}
 
 		void OnAccept (IAsyncResult ares)

@@ -87,9 +87,10 @@ namespace Mono.WebServer.Fpm {
 			FileInfo[] configFiles = configDirInfo.GetFiles ("*.xml");
 			ChildrenManager.StartChildren (configFiles, configurationManager);
 
-			if (!configurationManager.Stoppable)
-				while (true)
-					Thread.Sleep (10000000); // Do androids dream of electric sheep?
+			if (!configurationManager.Stoppable) {
+				ManualResetEvent sleep = new ManualResetEvent (false);
+				sleep.WaitOne (); // Do androids dream of electric sheep?
+			}
 
 			Console.WriteLine ("Hit Return to stop the server.");
 			Console.ReadLine ();

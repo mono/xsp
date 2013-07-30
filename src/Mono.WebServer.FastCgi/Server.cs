@@ -41,7 +41,7 @@ namespace Mono.FastCgi {
 
 		#region Private Fields
 
-		readonly GenericServer<ConnectionProxy> backend;
+		readonly IGenericServer<ConnectionProxy> backend;
 		
 		int max_requests = Int32.MaxValue;
 		
@@ -61,6 +61,18 @@ namespace Mono.FastCgi {
 			SmallBufferManager = new BufferManager (8);
 
 			backend = new GenericServer<ConnectionProxy> (socket, new ServerProxy (this));
+			backend.RequestReceived += RequestReceived;
+		}
+
+		public Server (IGenericServer<ConnectionProxy> backend)
+		{
+			if (backend == null)
+				throw new ArgumentNullException ("backend");
+
+			BigBufferManager = new BufferManager (4 * 1024); //4k
+			SmallBufferManager = new BufferManager (8);
+
+			this.backend = backend;
 			backend.RequestReceived += RequestReceived;
 		}
 		

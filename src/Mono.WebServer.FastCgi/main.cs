@@ -207,6 +207,8 @@ namespace Mono.WebServer.FastCgi
 				MultiplexConnections = configurationManager.Multiplex
 			};
 
+			server.SetResponder (typeof (Responder));
+
 			Logger.Write (LogLevel.Debug, "Max connections: {0}",       server.MaxConnections);
 			Logger.Write (LogLevel.Debug, "Max requests: {0}",          server.MaxRequests);
 			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}", server.MultiplexConnections);

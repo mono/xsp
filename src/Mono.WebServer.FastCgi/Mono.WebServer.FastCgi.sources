@@ -22,8 +22,10 @@
 ./ResponderRequest.cs
 ./Server/ConnectionProxy.cs
 ./Server.cs
+./Server/FakeGenericServer.cs
 ./Server/GenericServer.cs
 ./Server/IConnection.cs
+./Server/IGenericServer.cs
 ./Server/IServerCallback.cs
 ./Server/IServer.cs
 ./Server/OnDemandServer.cs

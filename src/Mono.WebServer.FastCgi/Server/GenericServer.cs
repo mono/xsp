@@ -58,10 +58,7 @@ namespace Mono.WebServer.FastCgi
 			get { return connections; }
 		} 
 
-		public bool Started {
-			get;
-			private set;
-		}
+		public bool Started { get; private set; }
 
 		public bool CanAccept {
 			get { return Started && connections.Count < max_connections; }
@@ -88,6 +85,10 @@ namespace Mono.WebServer.FastCgi
 
 		public GenericServer (Socket socket, IServerCallback<T> callback)
 		{
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
+			if(callback==null)
+				throw new ArgumentNullException("callback");
 			listen_socket = socket;
 			serverCallback = callback;
 		}
@@ -97,10 +98,8 @@ namespace Mono.WebServer.FastCgi
 			lock (state_lock) {
 				stopped = false;
 
-				if (Started) {
-					throw new InvalidOperationException (
-						Strings.Server_AlreadyStarted);
-				}
+				if (Started)
+					throw new InvalidOperationException (Strings.Server_AlreadyStarted);
 
 				listen_socket.Listen (backlog);
 

@@ -50,9 +50,7 @@ namespace Mono.WebServer.FastCgi {
 			get {return max_requests;}
 			set {
 				if (value < 1)
-					throw new ArgumentOutOfRangeException (
-						"value",
-						Strings.Server_MaxReqsOutOfRange);
+					throw new ArgumentOutOfRangeException ("value", Strings.Server_MaxReqsOutOfRange);
 
 				max_requests = value;
 			}

@@ -35,8 +35,16 @@ namespace Mono.WebServer.FastCgi
 	{
 		readonly Mono.FastCgi.Server server;
 
-		internal ServerProxy(Mono.FastCgi.Server server){
-			this.server=server;
+		public event EventHandler RequestReceived {
+			add { server.RequestReceived += value; }
+			remove { server.RequestReceived -= value; }
+		}
+
+		internal ServerProxy(Mono.FastCgi.Server server)
+		{
+			if (server == null)
+				throw new ArgumentNullException ("server");
+			this.server = server;
 		}
 
 		public ConnectionProxy OnAccept (Socket socket)
@@ -52,11 +60,6 @@ namespace Mono.WebServer.FastCgi
 		public void Stop ()
 		{
 			server.Stop ();
-		}
-
-		public event EventHandler RequestReceived {
-			add { server.RequestReceived += value; }
-			remove { server.RequestReceived -= value; }
 		}
 	}
 }

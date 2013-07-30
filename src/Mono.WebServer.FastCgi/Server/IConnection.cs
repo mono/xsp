@@ -31,10 +31,9 @@ using System;
 namespace Mono.WebServer.FastCgi {
 	public interface IConnection
 	{
-		void Run ();
-
-		void Stop ();
-
 		event EventHandler RequestReceived;
+
+		void Run ();
+		void Stop ();
 	}
 }

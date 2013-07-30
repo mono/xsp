@@ -43,6 +43,8 @@ namespace Mono.WebServer.FastCgi {
 
 		public static void SendTo (Socket connection, IntPtr passing)
 		{
+			if (connection == null)
+				throw new ArgumentNullException ("connection");
 			send_fd (connection.Handle, passing);
 		}
 
@@ -55,6 +57,8 @@ namespace Mono.WebServer.FastCgi {
 
 		public static UnixStream ReceiveFrom (Socket connection)
 		{
+			if (connection == null)
+				throw new ArgumentNullException ("connection");
 			return new UnixStream (ReceiveFrom (connection.Handle).ToInt32 ());
 		}
 

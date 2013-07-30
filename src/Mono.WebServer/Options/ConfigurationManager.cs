@@ -25,9 +25,8 @@ namespace Mono.WebServer.Options {
 			var doc = new XmlDocument ();
 			try {
 				doc.Load (file);
-			}
-			catch(FileNotFoundException e) {
-				Console.WriteLine("ERROR: Couldn't find configuration file {0}!", e.FileName);
+			} catch (FileNotFoundException e) {
+				Console.Error.WriteLine("ERROR: Couldn't find configuration file {0}!", e.FileName);
 				return false;
 			}
 			if (Platform.IsUnix) {

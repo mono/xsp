@@ -117,7 +117,7 @@ namespace Mono.FastCgi {
 				Record record;
 				
 				try {
-					record = new Record(socket, receive_buffers);
+					record = new Record (socket, receive_buffers);
 				} catch (System.Net.Sockets.SocketException) {
 					StopRun (Strings.Connection_RecordNotReceived);
 					Stop ();
@@ -344,7 +344,7 @@ namespace Mono.FastCgi {
 						send_buffers.EnforceBodyLength(bodyLength);
 						Array.Copy(bodyData, bodyIndex, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyLength);
 						var record = new Record (1, type, requestID, send_buffers, bodyLength);
-						record.Send(socket);
+						record.Send (socket);
 					} catch (System.Net.Sockets.SocketException) {
 					}
 				}

@@ -8,12 +8,14 @@ namespace Mono.WebServer.Fpm {
 	{
 		readonly Socket socket;
 
+		public event EventHandler RequestReceived;
+
 		public Connection (Socket socket)
 		{
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
 			this.socket = socket;
 		}
-
-		public event EventHandler RequestReceived;
 
 		public void Run ()
 		{
@@ -22,7 +24,7 @@ namespace Mono.WebServer.Fpm {
 		public void Stop ()
 		{
 			try {
-				if(socket.Connected)
+				if (socket.Connected)
 					socket.Close ();
 			} catch (Exception e) {
 				Logger.Write (e);

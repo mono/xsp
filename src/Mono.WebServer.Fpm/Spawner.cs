@@ -49,7 +49,9 @@ namespace Mono.WebServer.Fpm
 		public static Process SpawnChild(string configFile, string fastCgiCommand, bool onDemand)
 		{
 			if (configFile == null)
-				throw new ArgumentNullException ("fullName");
+				throw new ArgumentNullException ("configFile");
+			if (configFile.Length == 0)
+				throw new ArgumentException ("Config file name can't be empty", "configFile");
 			if (fastCgiCommand == null)
 				throw new ArgumentNullException ("fastCgiCommand");
 			var process = new Process {

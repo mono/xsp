@@ -35,13 +35,20 @@ namespace Mono.WebServer.FastCgi
 	{
 		readonly Connection connection;
 
-		public ConnectionProxy (Connection connection)
-		{
-			this.connection = connection;
+		public event EventHandler RequestReceived {
+			add { connection.RequestReceived += value; }
+			remove { connection.RequestReceived -= value; }
 		}
 
 		public int RequestCount {
 			get { return connection.RequestCount; }
+		}
+
+		public ConnectionProxy (Connection connection)
+		{
+			if (connection == null)
+				throw new ArgumentNullException ("connection");
+			this.connection = connection;
 		}
 
 		public void Run ()
@@ -52,12 +59,6 @@ namespace Mono.WebServer.FastCgi
 		public void Stop ()
 		{
 			connection.Stop ();
-		}
-
-		public event EventHandler RequestReceived
-		{
-			add { connection.RequestReceived += value; }
-			remove { connection.RequestReceived -= value; }
 		}
 	}
 }

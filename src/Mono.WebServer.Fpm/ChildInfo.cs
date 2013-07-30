@@ -60,6 +60,8 @@ namespace Mono.WebServer.Fpm {
 
 		public Connection OnAccept (Socket socket)
 		{
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
 			if (Process == null || Process.HasExited) {
 				if (TrySpawn ()) {
 					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", Process.Id, Path.GetFileName (Name));

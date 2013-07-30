@@ -43,9 +43,7 @@ namespace Mono.WebServer.FastCgi {
 		bool connected;
 
 		public override IntPtr Handle {
-			get {
-				return socket;
-			}
+			get { return socket; }
 		}
 
 		unsafe public UnmanagedSocket (IntPtr socket)

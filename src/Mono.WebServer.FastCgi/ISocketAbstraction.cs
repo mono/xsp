@@ -31,9 +31,7 @@ using System;
 namespace Mono.FastCgi {
 	public abstract class Socket
 	{
-		public abstract IntPtr Handle {
-			get;
-		}
+		public abstract IntPtr Handle { get; }
 
 		public abstract void Connect ();
 

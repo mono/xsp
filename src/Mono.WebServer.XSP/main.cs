@@ -111,6 +111,8 @@ namespace Mono.WebServer.XSP
 			if (!configurationManager.LoadConfigFile ())
 				return 1;
 
+			configurationManager.SetupLogger ();
+
 			WebSource webSource;
 			if (security.Enabled) {
 				try {

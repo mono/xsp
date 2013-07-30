@@ -41,6 +41,8 @@ namespace Mono.WebServer.FastCgi
 
 		public FakeGenericServer (IGenericServer<T> server)
 		{
+			if (server == null)
+				throw new ArgumentNullException ("server");
 			backend = server;
 		}
 

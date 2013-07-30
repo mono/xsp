@@ -250,7 +250,6 @@ namespace Mono.FastCgi {
 		void HandleParams (Request request, Record record)
 		{
 			if (request == null) {
-				Logger.Write (LogLevel.Debug, "Request was null, ending request");
 				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
 				return;
 			}
@@ -354,7 +353,6 @@ namespace Mono.FastCgi {
 		public void EndRequest (ushort requestID, int appStatus,
 		                        ProtocolStatus protocolStatus)
 		{
-			Logger.Write (LogLevel.Debug, "Ending request with protocolStatus {0}", protocolStatus);
 			var body = new EndRequestBody (appStatus, protocolStatus);
 			try {	
 				if (IsConnected) {

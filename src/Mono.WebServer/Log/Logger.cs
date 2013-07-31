@@ -84,14 +84,13 @@ namespace Mono.WebServer.Log {
 				return;
 
 			string text = String.Format (CultureInfo.CurrentCulture,
-				"[{0:u}] ({1}) {2,-7} {3}", DateTime.Now,
-				Process.GetCurrentProcess().ProcessName, level, message);
+				"[{0:u}] {1,-7} {2}", DateTime.Now, level, message);
 
 			if (WriteToConsole)
 				lock(write_lock)
-					Console.WriteLine (text);
+					Console.WriteLine (message);
 
-			logger.Write (level, message);
+			logger.Write (level, text);
 		}
 		
 		public static void Close ()

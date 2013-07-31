@@ -49,8 +49,7 @@ namespace Mono.WebServer.FastCgi {
 		unsafe public UnmanagedSocket (IntPtr socket)
 		{
 			if (!supports_libc)
-				throw new NotSupportedException (
-					Strings.UnmanagedSocket_NotSupported);
+				throw new NotSupportedException (Strings.UnmanagedSocket_NotSupported);
 			
 			if ((int) socket < 0)
 				throw new ArgumentException ("Invalid socket.",
@@ -69,12 +68,10 @@ namespace Mono.WebServer.FastCgi {
 		unsafe public UnmanagedSocket (IntPtr socket, bool connected)
 		{
 			if (!supports_libc)
-				throw new NotSupportedException (
-					Strings.UnmanagedSocket_NotSupported);
+				throw new NotSupportedException (Strings.UnmanagedSocket_NotSupported);
 
 			if ((int) socket < 0)
-				throw new ArgumentException ("Invalid socket.",
-				                             "socket");
+				throw new ArgumentException ("Invalid socket.", "socket");
 
 			var address = new byte [1024];
 			int size = 1024;

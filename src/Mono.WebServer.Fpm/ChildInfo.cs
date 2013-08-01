@@ -37,7 +37,7 @@ using System.Threading;
 namespace Mono.WebServer.Fpm {
 	struct ChildInfo : IServerCallback<Connection>
 	{
-		public Mono.WebServer.FastCgi.ConfigurationManager ConfigurationManager { get; set; }
+		public FastCgi.ConfigurationManager ConfigurationManager { get; set; }
 
 		public Process Process { get; private set; }
 

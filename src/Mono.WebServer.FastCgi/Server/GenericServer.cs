@@ -35,7 +35,7 @@ using Mono.WebServer.Log;
 
 namespace Mono.WebServer.FastCgi
 {
-	public class GenericServer<T> where T : IConnection
+	public class GenericServer<T> : IGenericServer<T> where T : IConnection
 	{
 		readonly Socket listen_socket;
 		readonly IServerCallback<T> serverCallback;

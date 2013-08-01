@@ -96,7 +96,7 @@ namespace Mono.WebServer.FastCgi {
 				string f = path;
 				path = null;
 
-				if (inode != null && System.IO.File.Exists (f) && inode == new UnixFileInfo (f).Inode) {
+				if (inode.HasValue && System.IO.File.Exists (f) && inode.Value == new UnixFileInfo (f).Inode) {
 					System.IO.File.Delete (f);
 				}
 			}

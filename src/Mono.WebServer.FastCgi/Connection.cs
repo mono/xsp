@@ -135,7 +135,7 @@ namespace Mono.FastCgi {
 					Logger.Write(e);
 				}
 
-				Logger.Write(LogLevel.Debug, "Now handling request");
+				Logger.Write(LogLevel.Debug, "Now handling record (with type {0})", record.Type);
 				
 				HandleRequest (record, request);
 			}

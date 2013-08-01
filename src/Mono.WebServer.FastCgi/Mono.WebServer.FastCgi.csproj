@@ -111,6 +111,8 @@
     <Compile Include="Server\IServer.cs" />
     <Compile Include="Server\SocketPassing.cs" />
     <Compile Include="Server\OnDemandServer.cs" />
+    <Compile Include="Server\FakeGenericServer.cs" />
+    <Compile Include="Server\IGenericServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

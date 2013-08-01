@@ -88,7 +88,7 @@ namespace Mono.WebServer.Fpm {
 			ChildrenManager.StartChildren (configFiles, configurationManager);
 
 			if (!configurationManager.Stoppable) {
-				ManualResetEvent sleep = new ManualResetEvent (false);
+				var sleep = new ManualResetEvent (false);
 				sleep.WaitOne (); // Do androids dream of electric sheep?
 			}
 

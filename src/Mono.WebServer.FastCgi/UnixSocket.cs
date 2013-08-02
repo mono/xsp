@@ -47,22 +47,14 @@ namespace Mono.WebServer.FastCgi {
 		{
 		}
 		
-		public UnixSocket (string path) : this (CreateEndPoint (path))
+		public UnixSocket (string path) : this (path, null)
 		{
-			this.path = path;
-			try {
-				if (path.StartsWith("\0"))
-					inode = null;
-				else
-					inode = new UnixFileInfo (path).Inode;
-			} catch (InvalidOperationException) {
-				Logger.Write (LogLevel.Error, "Path \"{0}\" doesn't exist?", path);
-				throw;
-			}
 		}
 
 		public UnixSocket (string path, uint? permissions) : this (CreateEndPoint (path))
 		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
 			this.path = path;
 			try {
 				if (path.StartsWith("\0"))

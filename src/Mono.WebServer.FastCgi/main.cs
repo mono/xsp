@@ -302,7 +302,7 @@ namespace Mono.WebServer.FastCgi
 				&& creator (configurationManager, socket_parts, out socket);
 		}
 
-		public static bool TryCreateSocketFromUri (Uri uri, out Socket socket)
+		static bool TryCreateSocketFromUri (Uri uri, out Socket socket)
 		{
 			switch (uri.Scheme) {
 			case "pipe":
@@ -436,6 +436,8 @@ namespace Mono.WebServer.FastCgi
 
 		public static bool TryCreateUnixSocket (string path, out Socket socket, string perm = null)
 		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
 			socket = null;
 			try {
 				string realPath;

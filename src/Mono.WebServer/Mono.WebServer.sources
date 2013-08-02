@@ -11,6 +11,7 @@
 ./LockRecursionException.cs
 ./LockRecursionPolicy.cs
 ./Log/FileLogger.cs
+./Log/ILogger.cs
 ./Log/Logger.cs
 ./Log/LogLevel.cs
 ./MapPathEventArgs.cs

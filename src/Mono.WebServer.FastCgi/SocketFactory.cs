@@ -28,6 +28,7 @@
 
 using System;
 using Mono.WebServer.FastCgi;
+using Mono.Unix;
 
 namespace Mono.FastCgi {
 	public static class SocketFactory
@@ -47,6 +48,11 @@ namespace Mono.FastCgi {
 		public static Socket CreateUnixSocket (string path)
 		{
 			return new UnixSocket (path);
+		}
+
+		public static Socket CreateUnixSocket (string path, ushort? permissions)
+		{
+			return new UnixSocket (path, permissions);
 		}
 		
 		public static Socket CreatePipeSocket (IntPtr sock)

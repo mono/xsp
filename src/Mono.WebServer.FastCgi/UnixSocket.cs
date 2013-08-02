@@ -32,6 +32,7 @@ using System;
 using Mono.Unix;
 using System.Globalization;
 using Mono.WebServer.Log;
+using Mono.Unix.Native;
 
 namespace Mono.WebServer.FastCgi {
 	class UnixSocket : StandardSocket, IDisposable {
@@ -59,7 +60,23 @@ namespace Mono.WebServer.FastCgi {
 				throw;
 			}
 		}
-		
+
+		public UnixSocket (string path, uint? permissions) : this (CreateEndPoint (path))
+		{
+			this.path = path;
+			try {
+				if (path.StartsWith("\0"))
+					inode = null;
+				else {
+					inode = new UnixFileInfo (path).Inode;
+					if (permissions != null)
+						Mono.Unix.Native.Syscall.chmod (path, NativeConvert.ToFilePermissions (permissions.Value));
+				}
+			} catch (InvalidOperationException) {
+				Logger.Write (LogLevel.Error, "Path \"{0}\" doesn't exist?", path);
+				throw;
+			}
+		}
 		
 		protected static UnixEndPoint CreateEndPoint (string path)
 		{

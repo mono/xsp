@@ -36,11 +36,14 @@ using Mono.FastCgi;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 using System.Timers;
+using Mono.Unix;
 
 namespace Mono.WebServer.FastCgi
 {
 	public static class Server
 	{
+		const string WRONG_KIND = "Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".";
+
 		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socketParts, out Socket socket);
 
 		static ApplicationServer appserver;
@@ -288,18 +291,40 @@ namespace Mono.WebServer.FastCgi
 			// "type[:ARG1[:ARG2[:...]]]".
 			var socket_type = configurationManager.Socket;
 
+			Uri uri;
+			if (Uri.TryCreate (socket_type, UriKind.Absolute, out uri))
+				return TryCreateSocketFromUri (uri, out socket);
+
 			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
 
 			SocketCreator creator;
-			return TryGetSocketCreator (socket_parts, out creator)
+			return TryGetSocketCreator (socket_parts [0], out creator)
 				&& creator (configurationManager, socket_parts, out socket);
 		}
 
-		static bool TryGetSocketCreator (string[] socket_parts, out SocketCreator creator)
+		static bool TryCreateSocketFromUri (Uri uri, out Socket socket)
 		{
-			switch (socket_parts [0].ToLower ()) {
+			switch (uri.Scheme) {
 			case "pipe":
-				creator = TryCreatePipe;
+				return TryCreatePipe (out socket);
+			case "unix":
+			case "file":
+				return TryCreateUnixSocket (uri.Host, out socket, uri.UserInfo);
+			case "tcp":
+				return TryCreateTcpSocket (uri.Host, uri.Port, out socket);
+			default:
+				Logger.Write (LogLevel.Error, WRONG_KIND, uri.Scheme);
+				return false;
+			}
+		}
+
+		static bool TryGetSocketCreator (string socket_kind, out SocketCreator creator)
+		{
+			switch (socket_kind.ToLower ()) {
+			case "pipe":
+				creator = delegate(ConfigurationManager configmanager, string[] socketParts, out Socket socket) {
+					return TryCreatePipe (out socket);
+				};
 				return true;
 				// The FILE sockets is of the format
 				// "file[:PATH]".
@@ -313,9 +338,7 @@ namespace Mono.WebServer.FastCgi
 				creator = TryCreateTcpSocket;
 				return true;
 			default:
-				Logger.Write (LogLevel.Error,
-				              "Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
-				              socket_parts [0]);
+				Logger.Write (LogLevel.Error, WRONG_KIND, socket_kind);
 				creator = null;
 				return false;
 			}
@@ -336,6 +359,20 @@ namespace Mono.WebServer.FastCgi
 			rootDir = Environment.CurrentDirectory;
 			Logger.Write (LogLevel.Debug, "Root directory: {0}",
 				rootDir);
+			return true;
+		}
+
+		static bool TryCreateTcpSocket (string ip, int port, out Socket socket)
+		{
+			socket = null;
+
+			IPAddress address = IPAddress.Loopback;
+			if (!IPAddress.TryParse (ip, out address)) {
+				Logger.Write (LogLevel.Error, "Error in argument \"address\". \"{0}\" cannot be converted to an IP address.", ip);
+				return false;
+			}
+
+			socket = SocketFactory.CreateTcpSocket (address, port);
 			return true;
 		}
 
@@ -394,16 +431,32 @@ namespace Mono.WebServer.FastCgi
 				? socketParts[1]
 				: configurationManager.Filename;
 
-			return TryCreateUnixSocket (path, out socket);}
+			return TryCreateUnixSocket (path, out socket);
+		}
 
-		public static bool TryCreateUnixSocket (string path, out Socket socket)
+		public static bool TryCreateUnixSocket (string path, out Socket socket, string perm = null)
 		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
+			if (path.Length == 0)
+				throw new ArgumentException ("path must not be empty", "path");
 			socket = null;
 			try {
+				string realPath;
 				if (path.StartsWith ("\\0") && path.IndexOf ('\0', 1) < 0)
-					socket = SocketFactory.CreateUnixSocket ('\0' + path.Substring (2));
+					realPath = '\0' + path.Substring (2);
 				else
-					socket = SocketFactory.CreateUnixSocket (path);
+					realPath = path;
+
+				ushort uperm = UInt16.MaxValue;
+				if (perm != null) {
+					if (!UInt16.TryParse (perm, out uperm)) {
+						Logger.Write (LogLevel.Error, "Error parsing permissions. Use octal");
+						return false;
+					}
+					socket = SocketFactory.CreateUnixSocket(realPath, uperm);
+				}
+				socket = SocketFactory.CreateUnixSocket (realPath);
 			}
 			catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
@@ -413,7 +466,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool TryCreatePipe (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
+		static bool TryCreatePipe (out Socket socket)
 		{
 			socket = null;
 			try {

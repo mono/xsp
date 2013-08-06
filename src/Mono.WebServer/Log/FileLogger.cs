@@ -2,7 +2,7 @@
 using System.IO;
 
 namespace Mono.WebServer.Log {
-	class FileLogger {
+	class FileLogger : ILogger {
 		StreamWriter writer;
 
 		readonly object write_lock = new object ();

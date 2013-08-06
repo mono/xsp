@@ -41,6 +41,9 @@
   <ItemGroup>
     <Compile Include="HelloWorld.cs" />
     <Compile Include="Socket.cs" />
+    <Compile Include="Utilities.cs" />
+    <Compile Include="Stress.cs" />
+    <Compile Include="FailLogger.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

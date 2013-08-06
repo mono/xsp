@@ -111,5 +111,6 @@
     <Compile Include="WebTrace.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Log\FileLogger.cs" />
+    <Compile Include="Log\ILogger.cs" />
   </ItemGroup>
 </Project>

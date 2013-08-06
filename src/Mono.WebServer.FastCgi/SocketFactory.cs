@@ -28,6 +28,7 @@
 
 using System;
 using Mono.WebServer.FastCgi;
+using Mono.Unix;
 
 namespace Mono.FastCgi {
 	public static class SocketFactory
@@ -35,18 +36,31 @@ namespace Mono.FastCgi {
 		public static Socket CreateTcpSocket (System.Net.IPEndPoint
 		                                      localEndPoint)
 		{
+			if (localEndPoint == null)
+				throw new ArgumentNullException ("localEndPoint");
 			return new TcpSocket (localEndPoint);
 		}
 		
 		public static Socket CreateTcpSocket (System.Net.IPAddress
 		                                      address, int port)
 		{
+			if (address == null)
+				throw new ArgumentNullException ("address");
 			return new TcpSocket (address, port);
 		}
 		
 		public static Socket CreateUnixSocket (string path)
 		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
 			return new UnixSocket (path);
+		}
+
+		public static Socket CreateUnixSocket (string path, ushort? permissions)
+		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
+			return new UnixSocket (path, permissions);
 		}
 		
 		public static Socket CreatePipeSocket (IntPtr sock)

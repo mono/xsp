@@ -29,11 +29,13 @@
 using System;
 using System.Globalization;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Mono.WebServer.Log {
 	public static class Logger
 	{
-		static readonly FileLogger logger = new FileLogger ();
+		static readonly List<ILogger> loggers = new List<ILogger> ();
+		static readonly FileLogger file_logger = new FileLogger ();
 
 		static readonly object write_lock = new object ();
 
@@ -48,13 +50,19 @@ namespace Mono.WebServer.Log {
 		static Logger ()
 		{
 			Level = LogLevel.Standard;
+			loggers.Add (file_logger);
 		}
 		
 		#region Public Static Methods
+
+		public static void AddLogger (ILogger logger)
+		{
+			Logger.loggers.Add (logger);
+		}
 		
 		public static void Open (string path)
 		{
-			logger.Open (path);
+			file_logger.Open (path);
 		}
 		
 		public static void Write (LogLevel level,
@@ -90,12 +98,13 @@ namespace Mono.WebServer.Log {
 				lock(write_lock)
 					Console.WriteLine (message);
 
-			logger.Write (level, text);
+			foreach(var logger in loggers)
+				logger.Write (level, text);
 		}
 		
 		public static void Close ()
 		{
-			logger.Close ();
+			file_logger.Close ();
 		}
 		
 		#endregion

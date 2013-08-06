@@ -123,8 +123,8 @@ namespace System
 				throw new ArgumentNullException ("array");
 
 			this.array = array;
-			this.offset = 0;
-			this.count = array.Length;
+			offset = 0;
+			count = array.Length;
 		}
 
 		public CompatArraySegment<T> Trim (int size)
@@ -142,14 +142,15 @@ namespace System
 
 		public bool Equals (ArraySegment<T> obj)
 		{
-			if ((this.array == obj.Array) && (this.offset == obj.Offset) && (this.count == obj.Count))
+			if ((array == obj.Array) && (offset == obj.Offset) && (count == obj.Count))
 				return true;
 			return false;
 		}
 
 		public override int GetHashCode ()
 		{
-			return ((this.array.GetHashCode() ^ this.offset) ^ this.count);
+			// TODO: fix this
+			return ((array.GetHashCode () ^ offset) ^ count);
 		}
 
 		public static bool operator ==(CompatArraySegment<T> a, CompatArraySegment<T> b)

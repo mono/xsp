@@ -357,7 +357,7 @@ namespace Mono.WebServer
 				return;
 			
 			string localPath = GetFilePathTranslated ();
-			if (localPath == null || localPath.Length == 0)
+			if (String.IsNullOrEmpty (localPath))
 				return;
 
 			char dirsep = Path.DirectorySeparatorChar;

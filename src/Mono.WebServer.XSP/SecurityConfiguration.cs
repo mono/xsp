@@ -345,7 +345,7 @@ namespace Mono.WebServer.XSP {
 			return false;
 		}
 
-		RSA GetKeyMatchingCertificate (MSX.PKCS12 pfx, MSX.X509Certificate cert)
+		static RSA GetKeyMatchingCertificate (MSX.PKCS12 pfx, MSX.X509Certificate cert)
 		{
 			IDictionary attributes = pfx.GetAttributes (cert);
 			return (pfx.GetAsymmetricAlgorithm (attributes) as RSA);

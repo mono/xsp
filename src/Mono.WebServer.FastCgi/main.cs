@@ -32,11 +32,10 @@
 using System;
 using System.Net;
 using System.Reflection;
-using Mono.FastCgi;
+using System.Timers;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
-using System.Timers;
-using Mono.Unix;
+using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi
 {
@@ -372,7 +371,7 @@ namespace Mono.WebServer.FastCgi
 				return false;
 			}
 
-			socket = SocketFactory.CreateTcpSocket (address, port);
+			socket = new TcpSocket (address, port);
 			return true;
 		}
 
@@ -409,8 +408,7 @@ namespace Mono.WebServer.FastCgi
 			}
 
 			try {
-				socket = SocketFactory.CreateTcpSocket (
-					address, port);
+				socket = new TcpSocket (address, port);
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error,
 					"Error creating the socket: {0}",
@@ -421,7 +419,7 @@ namespace Mono.WebServer.FastCgi
 			Logger.Write (LogLevel.Debug,
 				"Listening on port: {0}", port);
 			Logger.Write (LogLevel.Debug,
-				"Listening on address: {0}", address.ToString ());
+				"Listening on address: {0}", address);
 			return true;
 		}
 
@@ -454,9 +452,9 @@ namespace Mono.WebServer.FastCgi
 						Logger.Write (LogLevel.Error, "Error parsing permissions. Use octal");
 						return false;
 					}
-					socket = SocketFactory.CreateUnixSocket(realPath, uperm);
+					socket = new UnixSocket(realPath, uperm);
 				}
-				socket = SocketFactory.CreateUnixSocket (realPath);
+				socket = new UnixSocket (realPath);
 			}
 			catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
@@ -470,8 +468,7 @@ namespace Mono.WebServer.FastCgi
 		{
 			socket = null;
 			try {
-				socket = SocketFactory.CreatePipeSocket (
-					IntPtr.Zero);
+				socket = new UnmanagedSocket (IntPtr.Zero);
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error,
 					"Pipe socket is not bound.");

@@ -86,7 +86,7 @@ namespace Mono.WebServer.FastCgi {
 
 		public override void Connect ()
 		{
-			throw new NotImplementedException ();
+			throw new NotSupportedException ();
 		}
 		
 		public override void Close ()
@@ -197,6 +197,7 @@ namespace Mono.WebServer.FastCgi {
 		class SockAccept : IAsyncResult
 		{
 			bool completed;
+			readonly object waithandle_lock = new object ();
 			ManualResetEvent waithandle;
 			readonly AsyncCallback callback;
 			readonly object state;
@@ -247,7 +248,7 @@ namespace Mono.WebServer.FastCgi {
 			
 			public WaitHandle AsyncWaitHandle {
 				get {
-					lock (this)
+					lock (waithandle_lock)
 						if (waithandle == null)
 							waithandle = new ManualResetEvent (completed);
 					

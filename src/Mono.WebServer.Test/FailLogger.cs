@@ -1,8 +1,3 @@
-using System;
-using Mono.WebServer.XSP;
-using Mono.FastCgi;
-using System.IO;
-using System.Reflection;
 using Mono.WebServer.Log;
 using NUnit.Framework;
 

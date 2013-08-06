@@ -438,6 +438,8 @@ namespace Mono.WebServer.FastCgi
 		{
 			if (path == null)
 				throw new ArgumentNullException ("path");
+			if (path.Length == 0)
+				throw new ArgumentException ("path must not be empty", "path");
 			socket = null;
 			try {
 				string realPath;

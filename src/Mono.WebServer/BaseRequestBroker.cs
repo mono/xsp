@@ -65,15 +65,14 @@ namespace Mono.WebServer
 		// May freely wrap around.
 		uint requests_served;
 
-		// Grows the size of the request allocation tables by 33%.
-		//
-		// Parameters:
-		//   curlen - current length of the allocation tables.
-		//   newid - ID to use for a new request.
-		//
-		// This *MUST* be called with the reqlock held!
-		//
-		void GrowRequests (ref int curlen, out int newid)
+		/// <summary>
+		/// Grows the size of the request allocation tables by 33%.
+		///
+		/// This *MUST* be called with the reqlock held!
+		/// </summary>
+		/// <returns>ID to use for a new request.</returns>
+		/// <param name="curlen">Current length of the allocation tables.</param>
+		int GrowRequests (ref int curlen)
 		{
 			int newsize = curlen + curlen/3;
 			var new_request_ids = new int [newsize];
@@ -92,17 +91,17 @@ namespace Mono.WebServer
 			Array.Clear (buffers, 0, buffers.Length);
 			buffers = new_buffers;
 
-			newid = curlen + 1;
 			curlen = newsize;
+			return curlen + 1;
 		}
 		
-		// Gets the next available request ID, expanding the array
-		// of possible ID's if necessary.
-		//
-		// Returns ID of the request.
-		//
-		// This *MUST* be called with the reqlock held!
-		//
+		/// <summary>
+		/// Gets the next available request ID, expanding the array
+		/// of possible ID's if necessary.
+		///
+		/// This *MUST* be called with the reqlock held!
+		/// </summary>
+		/// <returns>ID of the request.</returns>
 		int GetNextRequestId ()
 		{
 			int reqlen = request_ids.Length;
@@ -115,24 +114,19 @@ namespace Mono.WebServer
 
 			requests_count++;
 			if (requests_count >= reqlen)
-				GrowRequests (ref reqlen, out newid);
-			if (newid == -1)
-				for (int i = 0; i < reqlen; i++) {
-					if (request_ids [i] != 0)
-						continue;
-					newid = i;
-					break;
-				}
+				newid = GrowRequests (ref reqlen);
+			else
+				newid = Array.IndexOf (request_ids, 0);
 
-			if (newid != -1) {
-				// TODO: newid had better not exceed 0xFFFF.
-				newid = ((ushort)newid & 0xFFFF) | (((ushort)requests_served & 0x7FFF) << 16);
-				request_ids [IdToIndex(newid)] = newid;
-				return newid;
+			if (newid == -1) {
+				// Should never happen...
+				throw new ApplicationException ("could not allocate new request id");
 			}
-				
-			// Should never happen...
-			throw new ApplicationException ("could not allocate new request id");
+
+			// TODO: newid had better not exceed 0xFFFF.
+			newid = ((ushort)newid & 0xFFFF) | (((ushort)requests_served & 0x7FFF) << 16);
+			request_ids [IdToIndex(newid)] = newid;
+			return newid;
 		}		
 
 		public int RegisterRequest (Worker worker)
@@ -143,8 +137,7 @@ namespace Mono.WebServer
 				result = IdToIndex (GetNextRequestId ());
 				requests [result] = worker;
 				
-				// Don't create a new array if one already
-				// exists.
+				// Don't create a new array if one already exists.
 				byte[] a = buffers [result];
 				if (a == null)
 					buffers [result] = new byte [BUFFER_SIZE];
@@ -174,14 +167,13 @@ namespace Mono.WebServer
 				requests_count--;
 			}
 		}
-		
-		// Invokes registered handlers of UnregisterRequestEvent. Each handler is passed an
-		// arguments object which contains the ID of a request that is about to be
-		// unregistered.
-		//
-		// Parameters:
-		//   id - ID of a request that is about to be unregistered
-		//
+
+		/// <summary>
+		/// Invokes registered handlers of UnregisterRequestEvent. Each handler is passed an
+		/// arguments object which contains the ID of a request that is about to be
+		/// unregistered.
+		/// </summary>
+		/// <param name="id">ID of a request that is about to be unregistered.</param>
 		void DoUnregisterRequest (int id)
 		{
 			if (UnregisterRequestEvent == null)
@@ -216,9 +208,9 @@ namespace Mono.WebServer
 				if (w == null)
 					return 0;
 
-				//use a pre-allocated buffer only when the size matches
-				//as it will be transferred across appdomain boundaries
-				//in full length
+				// Use a pre-allocated buffer only when the size matches
+				// as it will be transferred across appdomain boundaries
+				// in full length
 				if (size == BUFFER_SIZE) {
 					buffer = buffers [IdToIndex (requestId)];
 				} else {

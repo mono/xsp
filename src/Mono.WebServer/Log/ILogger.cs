@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Mono.WebServer.Log
 {
 	public interface ILogger

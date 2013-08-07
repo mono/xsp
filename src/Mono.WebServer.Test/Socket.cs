@@ -1,11 +1,10 @@
 using System;
-using NUnit.Framework;
-using Mono.Unix;
 using System.IO;
-using System.Net.Sockets;
-using Mono.WebServer.Fpm;
 using System.Net;
+using System.Net.Sockets;
+using Mono.Unix;
 using Mono.WebServer.FastCgi;
+using NUnit.Framework;
 
 namespace Mono.WebServer.Test {
 	[TestFixture]
@@ -68,7 +67,7 @@ namespace Mono.WebServer.Test {
 			return new Tuple<int,IDisposable>(endpoint.Port, socket.Server);
 		}
 
-		void FastCgiAccept(IAsyncResult res)
+		static void FastCgiAccept(IAsyncResult res)
 		{
 			if (!res.IsCompleted)
 				throw new ArgumentException("res");
@@ -85,7 +84,7 @@ namespace Mono.WebServer.Test {
 			}
 		}
 
-		void FpmUnixAccept(IAsyncResult res)
+		static void FpmUnixAccept(IAsyncResult res)
 		{
 			if (!res.IsCompleted)
 				throw new ArgumentException("res");
@@ -100,7 +99,7 @@ namespace Mono.WebServer.Test {
 			}
 		}
 
-		void FpmTcpAccept(IAsyncResult res)
+		static void FpmTcpAccept(IAsyncResult res)
 		{
 			if (!res.IsCompleted)
 				throw new ArgumentException("res");

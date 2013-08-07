@@ -27,11 +27,10 @@
 //
 
 using System;
-using System.Globalization;
-using Mono.WebServer.FastCgi;
-using Mono.WebServer.Log;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
+using Mono.WebServer.Log;
+using Mono.WebServer.FastCgi;
 
 namespace Mono.FastCgi {
 	public struct Record

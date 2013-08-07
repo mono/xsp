@@ -115,7 +115,7 @@ namespace Mono.WebServer
 				"<p>The document has moved to <a href='http://{0}{1}'>http://{0}{1}</a>.</p>\n" +
 				"</body></html>\n";
 
-		static void Redirect (XSPWorkerRequest wr, string location)
+		static void Redirect (HttpWorkerRequest wr, string location)
 		{
 			string host = wr.GetKnownRequestHeader (HttpWorkerRequest.HeaderHost);
 			wr.SendStatus (301, "Moved Permanently");

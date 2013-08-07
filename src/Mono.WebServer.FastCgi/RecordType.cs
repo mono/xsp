@@ -26,11 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using Mono.WebServer.FastCgi;
-using Mono.WebServer.Log;
-
 namespace Mono.FastCgi {
 	public enum RecordType : byte {
 		None            =  0,
@@ -46,5 +41,4 @@ namespace Mono.FastCgi {
 		GetValuesResult = 10,
 		UnknownType     = 11
 	}
-	
 }

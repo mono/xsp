@@ -51,7 +51,7 @@ namespace Mono.WebServer.Test {
 			try {
 				for(int i = 0; i < count; i++) {
 					threads [i] = new Thread (() => {
-						TcpClient client = new TcpClient ("localhost", 9000);
+						var client = new TcpClient ("localhost", 9000);
 						using(var sw = new StreamWriter(client.GetStream()))
 							sw.Write("\0\0\0\0");
 						client.Close ();

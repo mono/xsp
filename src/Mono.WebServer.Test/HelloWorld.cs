@@ -1,8 +1,6 @@
 using System;
 using NUnit.Framework;
 using Mono.WebServer.XSP;
-using System.Reflection;
-using System.IO;
 using System.Net;
 
 namespace Mono.WebServer.Test

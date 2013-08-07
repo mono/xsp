@@ -226,7 +226,7 @@ namespace Mono.WebServer
 			return true;
 		}
 
-		string GetSafePath (string path)
+		static string GetSafePath (string path)
 		{
 			string trail = "";
 			if (path.EndsWith ("/"))

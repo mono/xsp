@@ -28,9 +28,9 @@
 
 using System;
 using Mono.WebServer.FastCgi;
-using Mono.Unix;
 
 namespace Mono.FastCgi {
+	[Obsolete]
 	public static class SocketFactory
 	{
 		public static Socket CreateTcpSocket (System.Net.IPEndPoint

@@ -60,7 +60,7 @@ namespace Mono.WebServer.FastCgi
 			"<p>The document has moved to <a href='http://{0}{1}'>http://{0}{1}</a>.</p>\n" +
 			"</body></html>\n";
 		
-		static void Redirect (MonoWorkerRequest wr, string location)
+		static void Redirect (HttpWorkerRequest wr, string location)
 		{
 			string host = wr.GetKnownRequestHeader (HttpWorkerRequest.HeaderHost);
 			wr.SendStatus (301, "Moved Permanently");
@@ -140,7 +140,7 @@ namespace Mono.WebServer.FastCgi
 			return File.Exists (MapPath (virtualPath));
 		}
 		
-		bool VirtualDirectoryExists (string virtualPath, WorkerRequest worker)
+		bool VirtualDirectoryExists (string virtualPath, HttpWorkerRequest worker)
 		{
 			VirtualPathProvider vpp = HostingEnvironment.VirtualPathProvider;
 			// TODO: Remove the second condition of the "if" statement (it is only a workaround) involving DefaultVirtualPathProvider as soon as Mono's DefaultVirtualPathProvider.DirectoryExists method works properly (i.e., the indirectly-called HostingEnvironment.MapPath method should not require an HttpContext.Current.Request object to do its work; also see the comment in the ApplicationHost.MapPath method above)

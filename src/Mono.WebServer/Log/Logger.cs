@@ -27,9 +27,8 @@
 //
 
 using System;
-using System.Globalization;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Mono.WebServer.Log {
 	public static class Logger
@@ -80,6 +79,8 @@ namespace Mono.WebServer.Log {
 
 		public static void Write (Exception e)
 		{
+			if (e == null)
+				throw new ArgumentNullException ("e");
 			Write (LogLevel.Error, e.Message);
 			if(e.StackTrace != null)
 				foreach(var line in e.StackTrace.Split(new []{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))

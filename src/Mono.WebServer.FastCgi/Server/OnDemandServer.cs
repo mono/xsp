@@ -27,9 +27,8 @@
 //
 
 using System;
-using Mono.FastCgi;
-using System.IO;
 using Mono.WebServer.Log;
+using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi {
 	public class OnDemandServer : IServerCallback<ConnectionProxy>, IServer

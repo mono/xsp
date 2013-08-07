@@ -62,7 +62,7 @@ namespace Mono.WebServer.FastCgi {
 				else {
 					inode = new UnixFileInfo (path).Inode;
 					if (permissions != null)
-						Mono.Unix.Native.Syscall.chmod (path, NativeConvert.ToFilePermissions (permissions.Value));
+						Syscall.chmod (path, NativeConvert.ToFilePermissions (permissions.Value));
 				}
 			} catch (InvalidOperationException) {
 				Logger.Write (LogLevel.Error, "Path \"{0}\" doesn't exist?", path);

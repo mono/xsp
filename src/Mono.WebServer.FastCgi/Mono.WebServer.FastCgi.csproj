@@ -71,8 +71,6 @@
   <ItemGroup>
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="BeginRequestBody.cs" />
-    <Compile Include="ConfigurationManager.Fields.cs" />
-    <Compile Include="ConfigurationManager.Modern.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="EndRequestBody.cs" />
     <Compile Include="ISocketAbstraction.cs" />
@@ -113,6 +111,8 @@
     <Compile Include="Server\IGenericServer.cs" />
     <Compile Include="Obsolete\SocketFactory.cs" />
     <Compile Include="Obsolete\ConfigurationManager.cs" />
+    <Compile Include="ConfigurationManager.cs" />
+    <Compile Include="ConfigurationManager.Obsolete.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

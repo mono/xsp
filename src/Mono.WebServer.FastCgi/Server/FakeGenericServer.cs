@@ -26,9 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using System;
-using Mono.FastCgi;
-using System.IO;
-using Mono.WebServer.Log;
 using System.Collections.Generic;
 
 namespace Mono.WebServer.FastCgi

@@ -102,5 +102,13 @@ namespace Mono.WebServer.FastCgi {
 		 * </Setting>
 		 */
 		#endregion
+
+		public override string Name {
+			get { return "mono-fastcgi"; }
+		}
+
+		public override string Description {
+			get { return "A FastCgi interface for ASP.NET applications."; }
+		}
 	}
 }

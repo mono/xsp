@@ -44,6 +44,7 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Stress.cs" />
     <Compile Include="FailLogger.cs" />
+    <Compile Include="CompatArraySegmentTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

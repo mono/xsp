@@ -28,10 +28,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading;
-using Mono.FastCgi;
 using Mono.WebServer.Log;
+using Mono.FastCgi;
 
 namespace Mono.WebServer.FastCgi
 {
@@ -39,15 +38,15 @@ namespace Mono.WebServer.FastCgi
 	{
 		readonly Socket listen_socket;
 		readonly IServerCallback<T> serverCallback;
-		readonly object accept_lock = new object();
+		readonly object accept_lock = new object ();
 		readonly object state_lock = new object ();
 		bool accepting;
 		bool stopped;
 		Thread runner;
-		readonly List<T> connections = new List<T>();
+		readonly List<T> connections = new List<T> ();
 		int max_connections = Int32.MaxValue;
-		ManualResetEvent stop_signal = new ManualResetEvent(false);
-		ManualResetEvent stopped_signal = new ManualResetEvent(false);
+		AutoResetEvent stop_signal = new AutoResetEvent (false);
+		AutoResetEvent stopped_signal = new AutoResetEvent (false);
 
 		public event EventHandler RequestReceived;
 
@@ -84,8 +83,8 @@ namespace Mono.WebServer.FastCgi
 		{
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
-			if(callback==null)
-				throw new ArgumentNullException("callback");
+			if (callback==null)
+				throw new ArgumentNullException ("callback");
 			listen_socket = socket;
 			serverCallback = callback;
 		}
@@ -123,7 +122,6 @@ namespace Mono.WebServer.FastCgi
 
 				stop_signal.Set ();
 				stopped_signal.WaitOne ();
-				stopped_signal.Reset ();
 
 				runner = null;
 
@@ -158,14 +156,13 @@ namespace Mono.WebServer.FastCgi
 				return;
 
 			stop_signal.WaitOne ();
-			stop_signal.Reset ();
 			stopped_signal.Set ();
 		}
 
 		void OnAccept (IAsyncResult ares)
 		{
 			Logger.Write (LogLevel.Debug, Strings.Server_Accepting);
-			T connection = default(T);
+			T connection = default (T);
 			bool created = false;
 
 			lock (accept_lock) {
@@ -212,7 +209,7 @@ namespace Mono.WebServer.FastCgi
 					// connection's main loop has now terminated.
 					// This prevents abandoned FastCGI connections 
 					// from staying open indefinitely.
-					EndConnection(connection);
+					EndConnection (connection);
 					Logger.Write (LogLevel.Debug, Strings.Server_ConnectionClosed);
 				} catch {
 					// Ignore at this point -- too bad

@@ -105,14 +105,15 @@ namespace Mono.WebServer
 		int GetNextRequestId ()
 		{
 			int reqlen = request_ids.Length;
-			int newid = -1;
-			
+
 			requests_served++; // increment to 1 before putting into request_ids
 					   // so that the 0 id is reserved for slot not used
 			if (requests_served == 0x8000) // and check for wrap-around for the above
 				requests_served = 1; // making sure we don't exceed 0x7FFF or go negative
 
 			requests_count++;
+
+			int newid;
 			if (requests_count >= reqlen)
 				newid = GrowRequests (ref reqlen);
 			else

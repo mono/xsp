@@ -27,7 +27,7 @@
 //
 
 using System;
-using System.IO;
+using System.IO.Foo;
 using System.Threading;
 using System.Web;
 using System.Web.Configuration;

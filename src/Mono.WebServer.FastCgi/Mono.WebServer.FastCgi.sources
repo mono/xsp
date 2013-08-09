@@ -7,14 +7,15 @@
 ./Compatibility/IReadOnlyCollection.cs
 ./Compatibility/IReadOnlyList.cs
 ./ConfigurationManager.cs
-./ConfigurationManager.Fields.cs
-./ConfigurationManager.Modern.cs
+./ConfigurationManager.Obsolete.cs
 ./Connection.cs
 ./DictionaryExtensions.cs
 ./EndRequestBody.cs
 ./ISocketAbstraction.cs
 ./main.cs
 ./NameValuePair.cs
+./Obsolete/ConfigurationManager.cs
+./Obsolete/SocketFactory.cs
 ./Record.cs
 ./RecordType.cs
 ./Request.cs
@@ -31,7 +32,6 @@
 ./Server/OnDemandServer.cs
 ./Server/ServerProxy.cs
 ./Server/SocketPassing.cs
-./SocketFactory.cs
 ./StandardSocket.cs
 ./Strings.cs
 ./TcpSocket.cs

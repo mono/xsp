@@ -30,7 +30,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace System.IO {
+namespace System.IO.Foo {
 
 	// FIXME: there's a complication with this algorithm under windows.
 	// the pattern '*.*' matches all files (i think . matches the extension),

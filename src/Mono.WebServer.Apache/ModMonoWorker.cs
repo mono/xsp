@@ -87,7 +87,7 @@ namespace Mono.WebServer.Apache
 		public override void Run (object state)
 		{
 			try {
-				InnerRun (state);
+				InnerRun ();
 			} catch (Exception e) {
 				// FileNotFoundException might be a sign of a bad deployment
 				// once we require the .exe and Mono.WebServer in bin or the GAC.
@@ -174,7 +174,7 @@ namespace Mono.WebServer.Apache
 			return (info.GetDirectories ("bin").Length != 0);
 		}
 
-		void InnerRun (object state)
+		void InnerRun ()
 		{
 			requestId = -1;
 			broker = null;

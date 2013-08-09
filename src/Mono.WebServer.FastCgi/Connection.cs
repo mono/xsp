@@ -84,7 +84,7 @@ namespace Mono.FastCgi {
 		public event EventHandler RequestReceived;
 		
 		public int RequestCount {
-			get {return requests.Count;}
+			get {lock(request_lock) return requests.Count;}
 		}
 		
 		public bool IsConnected {
@@ -139,8 +139,12 @@ namespace Mono.FastCgi {
 				HandleRequest (record, request);
 			}
 			while (!stop && (UnfinishedRequests || keep_alive));
-			
-			if (requests.Count == 0) {
+
+			int count;
+			lock(request_lock)
+				count = requests.Count;
+
+			if (count == 0) {
 				lock (connection_teardown_lock) {
 					CloseSocket();
 
@@ -374,7 +378,10 @@ namespace Mono.FastCgi {
 			}
 
 			lock (connection_teardown_lock) {
-				if (requests.Count == 0 && (!keep_alive || stop)) {
+				int count;
+				lock(request_lock)
+					count = requests.Count;
+				if (count == 0 && (!keep_alive || stop)) {
 					CloseSocket ();
 
 					if (!stop)
@@ -389,8 +396,10 @@ namespace Mono.FastCgi {
 		public void Stop ()
 		{
 			stop = true;
-			
-			foreach (Request req in new List<Request> (requests))
+			List<Request> snapshot;
+			lock(request_lock)
+				snapshot = new List<Request> (requests);	
+			foreach (Request req in snapshot)
 				EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
 		}
 		
@@ -402,9 +411,10 @@ namespace Mono.FastCgi {
 		
 		bool UnfinishedRequests {
 			get {
-				foreach (Request request in requests)
-					if (request.DataNeeded)
-						return true;
+				lock(request_lock)
+					foreach (Request request in requests)
+						if (request.DataNeeded)
+							return true;
 				
 				return false;
 			}
@@ -418,9 +428,10 @@ namespace Mono.FastCgi {
 		
 		Request GetRequest (ushort requestID)
 		{
-			foreach (Request request in requests)
-				if (request.RequestID == requestID)
-					return request;
+			lock(request_lock)
+				foreach (Request request in requests)
+					if (request.RequestID == requestID)
+						return request;
 			
 			return null;
 		}
@@ -428,11 +439,14 @@ namespace Mono.FastCgi {
 		int GetRequestIndex (ushort requestID)
 		{
 			int i = 0;
-			int count = requests.Count;
-			while (i < count &&
-				requests [i].RequestID != requestID)
-				i ++;
-			
+			int count;
+			lock(request_lock)
+			{
+				count = requests.Count;
+				while (i < count &&
+					requests [i].RequestID != requestID)
+					i ++;
+			}
 			return (i != count) ? i : -1;
 		}
 		

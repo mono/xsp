@@ -172,7 +172,6 @@ AC_CONFIG_FILES([Makefile
 	man/dbsessmgr.1
         man/asp-state.1
 	man/mono-asp-apps.1
-	src/Mono.WebServer/AssemblyInfo.cs
 	src/Mono.WebServer/AssemblyInfo2.cs
 	src/Mono.WebServer/AssemblyInfo4.cs
 	src/Mono.WebServer.Apache/AssemblyInfo.cs

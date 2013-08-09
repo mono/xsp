@@ -18,7 +18,7 @@ endif
 noinst_SCRIPTS= $(monowebserver2_install) $(monowebserver4_install)
 
 CLEANFILES = 2.0/Mono.WebServer2.dll* 4.0/Mono.WebServer2.dll*
-EXTRA_DIST = $(monowebserver2_sources) AssemblyInfo.cs.in AssemblyInfo2.cs.in AssemblyInfo4.cs.in
+EXTRA_DIST = $(monowebserver2_sources) AssemblyInfo2.cs.in AssemblyInfo4.cs.in
 
 sources = $(shell cat $(srcdir)/Mono.WebServer.sources)
 

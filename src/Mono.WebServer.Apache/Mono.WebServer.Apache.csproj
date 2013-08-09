@@ -9,6 +9,8 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Mono.WebServer.Apache</RootNamespace>
     <AssemblyName>Mono.WebServer.Apache</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\mono.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

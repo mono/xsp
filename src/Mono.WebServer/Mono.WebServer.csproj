@@ -9,6 +9,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Mono.WebServer</RootNamespace>
     <AssemblyName>Mono.WebServer</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\mono.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -109,8 +111,8 @@
     <Compile Include="WebSource.cs" />
     <Compile Include="Worker.cs" />
     <Compile Include="WebTrace.cs" />
-    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Log\FileLogger.cs" />
     <Compile Include="Log\ILogger.cs" />
+    <Compile Include="AssemblyInfo4.cs" />
   </ItemGroup>
 </Project>

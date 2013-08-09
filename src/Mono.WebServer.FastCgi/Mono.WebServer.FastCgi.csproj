@@ -9,6 +9,8 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Mono.WebServer.FastCgi</RootNamespace>
     <AssemblyName>fastcgi-mono-server4</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\mono.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

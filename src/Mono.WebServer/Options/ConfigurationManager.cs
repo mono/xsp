@@ -13,7 +13,7 @@ namespace Mono.WebServer.Options {
 		readonly SettingsCollection settings;
 
 		[Obsolete]
-		protected SettingsCollection Settings {
+		internal SettingsCollection Settings {
 			get { return settings; }
 		}
 

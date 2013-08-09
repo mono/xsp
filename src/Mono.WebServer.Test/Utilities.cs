@@ -43,7 +43,24 @@ namespace Mono.WebServer.Test {
 			string filename = Path.GetFileName (cut);
 
 			string target = Path.Combine (binpath, filename);
-			File.Copy (cut, target, true);
+			try{
+				File.Copy (cut, target, true);
+			}
+			catch(UnauthorizedAccessException){
+				try {
+					File.ReadAllText (cut);
+				}
+				catch (UnauthorizedAccessException i) {
+					throw new Exception ("Couldn't read source", i);
+				}
+				try {
+					File.WriteAllText (target, "WOLOLO");
+				}
+				catch (UnauthorizedAccessException i) {
+					throw new Exception ("Couldn't write dest", i);
+				}
+				throw;
+			}
 		}
 	}
 }

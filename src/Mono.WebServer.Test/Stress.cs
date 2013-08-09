@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.IO;
 
 namespace Mono.WebServer.Test {
+	[TestFixture]
 	public class Stress
 	{
 		[SetUp]

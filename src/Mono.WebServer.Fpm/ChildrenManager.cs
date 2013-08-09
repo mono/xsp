@@ -61,8 +61,9 @@ namespace Mono.WebServer.Fpm
 			foreach (ChildInfo child in children) {
 				try {
 					Process process = child.Process;
-					if (process != null && !process.HasExited)
-						; //TODO: Write some nice close code
+					if (process != null && !process.HasExited) {
+						//TODO: Write some nice close code
+					}
 				} catch (InvalidOperationException) {
 					// Died between the if and the kill
 				}

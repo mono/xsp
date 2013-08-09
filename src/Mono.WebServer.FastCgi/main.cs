@@ -365,7 +365,7 @@ namespace Mono.WebServer.FastCgi
 		{
 			socket = null;
 
-			IPAddress address = IPAddress.Loopback;
+			IPAddress address;
 			if (!IPAddress.TryParse (ip, out address)) {
 				Logger.Write (LogLevel.Error, "Error in argument \"address\". \"{0}\" cannot be converted to an IP address.", ip);
 				return false;

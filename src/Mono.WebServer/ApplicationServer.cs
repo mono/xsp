@@ -189,7 +189,7 @@ namespace Mono.WebServer
 			}
 		}
 
-		void AddApplicationFromElement (XmlElement el)
+		void AddApplicationFromElement (XmlNode el)
 		{
 			XmlNode n = el.SelectSingleNode ("enabled");
 			if (n != null && n.InnerText.Trim () == "false")

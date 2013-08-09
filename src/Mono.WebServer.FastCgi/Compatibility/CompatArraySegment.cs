@@ -61,20 +61,11 @@ namespace System
 
 		T IReadOnlyList<T>.this[int index] {
 			get {
-				return ((IList<T>) this)[index];
+				return this [index];
 			}
 		}
 
 		public T this[int index] {
-			get {
-				return ((IList<T>)this)[index];
-			}
-			set {
-				((IList<T>)this) [index] = value;
-			}
-		}
-
-		T IList<T>.this[int index] {
 			get {
 				if (index < 0 || count < index)
 					throw new ArgumentOutOfRangeException ("index");
@@ -86,6 +77,15 @@ namespace System
 					throw new ArgumentOutOfRangeException ("index");
 
 				array[offset + index] = value;
+			}
+		}
+
+		T IList<T>.this[int index] {
+			get {
+				return this [index];
+			}
+			set {
+				this [index] = value;
 			}
 		}
 
@@ -135,7 +135,7 @@ namespace System
 		public override bool Equals (Object obj)
 		{
 			if (obj is ArraySegment<T>) {
-				return this.Equals((ArraySegment<T>) obj);
+				return Equals((ArraySegment<T>) obj);
 			}
 			return false;
 		}

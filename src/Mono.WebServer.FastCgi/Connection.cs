@@ -364,20 +364,10 @@ namespace Mono.FastCgi {
 			} catch (System.Net.Sockets.SocketException) {
 			}
 				
-			
-			int index = GetRequestIndex (requestID);
-			
-			if (index >= 0) {
-				lock (request_lock) {
-					requests.RemoveAt (index);
-				}
-			}
+			RemoveRequest(requestID);	
 
 			lock (connection_teardown_lock) {
-				int count;
-				lock(request_lock)
-					count = requests.Count;
-				if (count == 0 && (!keep_alive || stop)) {
+				if (requests.Count == 0 && (!keep_alive || stop)) {
 					CloseSocket ();
 
 					if (!stop)
@@ -392,11 +382,9 @@ namespace Mono.FastCgi {
 		public void Stop ()
 		{
 			stop = true;
-			List<Request> snapshot;
 			lock(request_lock)
-				snapshot = new List<Request> (requests);	
-			foreach (Request req in snapshot)
-				EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
+				foreach (Request req in requests)
+					EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
 		}
 		
 		#endregion
@@ -432,7 +420,7 @@ namespace Mono.FastCgi {
 			return null;
 		}
 		
-		int GetRequestIndex (ushort requestID)
+		void RemoveRequest (ushort requestID)
 		{
 			int i = 0;
 			int count;
@@ -442,8 +430,9 @@ namespace Mono.FastCgi {
 				while (i < count &&
 					requests [i].RequestID != requestID)
 					i ++;
+				if (i != count)
+					requests.RemoveAt(i);
 			}
-			return (i != count) ? i : -1;
 		}
 		
 		void StopRun (string message, params object [] args)

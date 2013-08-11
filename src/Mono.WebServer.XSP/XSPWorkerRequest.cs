@@ -644,7 +644,10 @@ namespace Mono.WebServer
 				SendHeaders ();
 			}
 
-			Send (data, 0, length);
+			int sent = Send (data, 0, length);
+			if (sent != length)
+				throw new IOException ("Blocking send did not send entire buffer");
+
 			if (uncork)
 				Cork (false);
 		}

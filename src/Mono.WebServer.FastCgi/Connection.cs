@@ -139,7 +139,7 @@ namespace Mono.FastCgi {
 				HandleRequest (record, request);
 			}
 			while (!stop && (UnfinishedRequests || keep_alive));
-			
+
 			if (requests.Count == 0) {
 				lock (connection_teardown_lock) {
 					CloseSocket();
@@ -330,7 +330,7 @@ namespace Mono.FastCgi {
 		public void SendRecord (RecordType type, ushort requestID,
 		                        byte [] bodyData)
 		{
-			SendRecord (type, requestID, bodyData, 0, -1);
+			SendRecord (type, requestID, bodyData, 0, bodyData.Length);
 		}
 		
 		public void SendRecord (RecordType type, ushort requestID,
@@ -364,14 +364,7 @@ namespace Mono.FastCgi {
 			} catch (System.Net.Sockets.SocketException) {
 			}
 				
-			
-			int index = GetRequestIndex (requestID);
-			
-			if (index >= 0) {
-				lock (request_lock) {
-					requests.RemoveAt (index);
-				}
-			}
+			RemoveRequest(requestID);	
 
 			lock (connection_teardown_lock) {
 				if (requests.Count == 0 && (!keep_alive || stop)) {
@@ -389,9 +382,9 @@ namespace Mono.FastCgi {
 		public void Stop ()
 		{
 			stop = true;
-			
-			foreach (Request req in new List<Request> (requests))
-				EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
+			lock(request_lock)
+				foreach (Request req in requests)
+					EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
 		}
 		
 		#endregion
@@ -402,9 +395,10 @@ namespace Mono.FastCgi {
 		
 		bool UnfinishedRequests {
 			get {
-				foreach (Request request in requests)
-					if (request.DataNeeded)
-						return true;
+				lock(request_lock)
+					foreach (Request request in requests)
+						if (request.DataNeeded)
+							return true;
 				
 				return false;
 			}
@@ -418,22 +412,27 @@ namespace Mono.FastCgi {
 		
 		Request GetRequest (ushort requestID)
 		{
-			foreach (Request request in requests)
-				if (request.RequestID == requestID)
-					return request;
+			lock(request_lock)
+				foreach (Request request in requests)
+					if (request.RequestID == requestID)
+						return request;
 			
 			return null;
 		}
 		
-		int GetRequestIndex (ushort requestID)
+		void RemoveRequest (ushort requestID)
 		{
 			int i = 0;
-			int count = requests.Count;
-			while (i < count &&
-				requests [i].RequestID != requestID)
-				i ++;
-			
-			return (i != count) ? i : -1;
+			int count;
+			lock(request_lock)
+			{
+				count = requests.Count;
+				while (i < count &&
+					requests [i].RequestID != requestID)
+					i ++;
+				if (i != count)
+					requests.RemoveAt(i);
+			}
 		}
 		
 		void StopRun (string message, params object [] args)

@@ -84,7 +84,7 @@ namespace Mono.FastCgi {
 		public event EventHandler RequestReceived;
 		
 		public int RequestCount {
-			get {lock(request_lock) return requests.Count;}
+			get {return requests.Count;}
 		}
 		
 		public bool IsConnected {
@@ -140,11 +140,7 @@ namespace Mono.FastCgi {
 			}
 			while (!stop && (UnfinishedRequests || keep_alive));
 
-			int count;
-			lock(request_lock)
-				count = requests.Count;
-
-			if (count == 0) {
+			if (requests.Count == 0) {
 				lock (connection_teardown_lock) {
 					CloseSocket();
 
@@ -334,7 +330,7 @@ namespace Mono.FastCgi {
 		public void SendRecord (RecordType type, ushort requestID,
 		                        byte [] bodyData)
 		{
-			SendRecord (type, requestID, bodyData, 0, -1);
+			SendRecord (type, requestID, bodyData, 0, bodyData.Length);
 		}
 		
 		public void SendRecord (RecordType type, ushort requestID,

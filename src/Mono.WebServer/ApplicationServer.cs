@@ -445,7 +445,9 @@ namespace Mono.WebServer
 
 			byte[] data = Encoding.UTF8.GetBytes (sb.ToString ());
 			try {
-				socket.Send (data);
+				int sent = socket.Send (data);
+				if (sent != data.Length)
+					throw new IOException ("Blocking send did not send entire buffer");
 			} catch (Exception ex2) {
 				Logger.Write(LogLevel.Error, "Failed to send exception:");
 				Logger.Write(ex);

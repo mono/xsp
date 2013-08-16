@@ -303,6 +303,8 @@ namespace Mono.WebServer.FastCgi
 
 		static bool TryCreateSocketFromUri (Uri uri, out Socket socket)
 		{
+			socket = null;
+			
 			switch (uri.Scheme) {
 			case "pipe":
 				return TryCreatePipe (out socket);

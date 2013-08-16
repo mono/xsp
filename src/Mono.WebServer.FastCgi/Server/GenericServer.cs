@@ -44,6 +44,8 @@ namespace Mono.WebServer.FastCgi
 		bool stopped;
 		Thread runner;
 		readonly List<T> connections = new List<T> ();
+		readonly object connections_lock = new object ();
+
 		int max_connections = Int32.MaxValue;
 		AutoResetEvent stop_signal = new AutoResetEvent (false);
 		AutoResetEvent stopped_signal = new AutoResetEvent (false);
@@ -51,7 +53,7 @@ namespace Mono.WebServer.FastCgi
 		public event EventHandler RequestReceived;
 
 		public IEnumerable<T> Connections {
-			get { return connections; }
+			get { lock(connections_lock) return new List<T> (connections); }
 		} 
 
 		public bool Started { get; private set; }
@@ -74,8 +76,7 @@ namespace Mono.WebServer.FastCgi
 
 		public int ConnectionCount {
 			get {
-				lock (connections)
-					return connections.Count;
+				return connections.Count;
 			}
 		}
 
@@ -114,7 +115,7 @@ namespace Mono.WebServer.FastCgi
 					throw new InvalidOperationException (Strings.Server_NotStarted);
 
 				listen_socket.Close ();
-				lock (connections) {
+				lock (connections_lock) {
 					foreach (T c in new List<T> (connections)) {
 						EndConnection (c);
 					}
@@ -137,7 +138,7 @@ namespace Mono.WebServer.FastCgi
 
 			connection.Stop ();
 
-			lock (connections) {
+			lock (connections_lock) {
 				if (connections.Contains (connection))
 					connections.Remove (connection);
 			}
@@ -174,7 +175,7 @@ namespace Mono.WebServer.FastCgi
 					Socket accepted = listen_socket.EndAccept (ares);
 					connection = serverCallback.OnAccept (accepted);
 					created = true;
-					lock (connections)
+					lock (connections_lock)
 						connections.Add (connection);
 					connection.RequestReceived += RequestReceived;
 				} catch (System.Net.Sockets.SocketException e) {

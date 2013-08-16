@@ -88,7 +88,9 @@ namespace Mono.WebServer
 			var b = new byte [] {0};
 			bool result = true;
 			try {
-				sock.Send (b);
+				int sent = sock.Send (b);
+				if (sent != b.Length)
+					throw new IOException ("Blocking send did not send entire buffer");
 			} catch {
 				result = false;
 			}

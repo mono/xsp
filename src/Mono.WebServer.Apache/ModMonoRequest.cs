@@ -182,7 +182,9 @@ namespace Mono.WebServer
 
 		void Send ()
 		{
-			client.Send (writer_ms.GetBuffer (), (int) writer_ms.Length, SocketFlags.None);
+			int sent = client.Send (writer_ms.GetBuffer (), (int) writer_ms.Length, SocketFlags.None);
+			if (sent != (int) writer_ms.Length)
+				throw new IOException ("Blocking send did not send entire buffer");
 			writer_ms.Position = 0;
 			writer_ms.SetLength (0);
 		}
@@ -302,7 +304,9 @@ namespace Mono.WebServer
 			writer.Write (length);
 			Send ();
 			if (use_libc) {
-				Send (ptr, length);
+				int sent = Send (ptr, length);
+				if (sent != length)
+					throw new IOException ("Blocking send did not send entire buffer");
 				return;
 			}
 			
@@ -318,7 +322,9 @@ namespace Mono.WebServer
 				Marshal.Copy (ptr, buf, 0, size);
 				length -= size;
 				unsafe { ptr = (IntPtr)((byte*)ptr.ToPointer () + size); }
-				client.Send (buf, size, SocketFlags.None);
+				int sent = client.Send (buf, size, SocketFlags.None);
+				if (sent != size)
+					throw new IOException ("Blocking send did not send entire buffer");
 			}
 		}
 
@@ -350,7 +356,9 @@ namespace Mono.WebServer
 			writer.Write ((int) ModMonoCmd.SEND_FROM_MEMORY);
 			writer.Write (length);
 			Send ();
-			client.Send (data, position, length, SocketFlags.None);
+			int sent = client.Send (data, position, length, SocketFlags.None);
+			if (sent != length)
+				throw new IOException ("Blocking send did not send entire buffer");
 		}
 
 		public void SendFile (string filename)

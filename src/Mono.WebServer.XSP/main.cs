@@ -43,6 +43,8 @@ namespace Mono.WebServer.XSP
 	{
 		static RSA key;
 
+		static readonly Tuple<int, string, ApplicationServer> success = new Tuple<int,string,ApplicationServer> (0, null, null);
+
 		static AsymmetricAlgorithm GetPrivateKey (X509Certificate certificate, string targetHost) 
 		{ 
 			return key;
@@ -61,11 +63,16 @@ namespace Mono.WebServer.XSP
 
 		public static int Main (string [] args)
 		{
+			return DebugMain (args).Item1;
+		}
+
+		internal static Tuple<int, string, ApplicationServer> DebugMain (string [] args)
+		{
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 			bool quiet = false;
 			while (true) {
 				try {
-					return new Server ().RealMain (args, true, null, quiet);
+					return new Server ().DebugMain (args, true, null, quiet);
 				} catch (ThreadAbortException ex) {
 					Logger.Write (ex);
 					// Single-app mode and ASP.NET appdomain unloaded
@@ -75,22 +82,28 @@ namespace Mono.WebServer.XSP
 			}
 		}
 
-		//
-		// Parameters:
-		//
-		//   args - original args passed to the program
-		//   root - true means caller is in the root domain
-		//   ext_apphost - used when single app mode is used, in a recursive call to
-		//        RealMain from the single app domain
-		//   quiet - don't show messages. Used to avoid double printing of the banner
-		//
+		/// <param name="args">Original args passed to the program.</param>
+		/// <param name="root">If set to <c>true</c> it means the caller is in the root domain.</param>
+		/// <param name="ext_apphost">Used when single app mode is used, in a recursive call to RealMain from the single app domain.</param>
+		/// <param name="quiet">If set to <c>true</c> don't show messages. Used to avoid double printing of the banner.</param>
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
+		{
+			return DebugMain (args, root, ext_apphost, quiet).Item1;
+		}
+
+		/// <param name="args">Original args passed to the program.</param>
+		/// <param name="root">If set to <c>true</c> it means the caller is in the root domain.</param>
+		/// <param name="ext_apphost">Used when single app mode is used, in a recursive call to RealMain from the single app domain.</param>
+		/// <param name="quiet">If set to <c>true</c> don't show messages. Used to avoid double printing of the banner.</param>
+		public Tuple<int, string, ApplicationServer> DebugMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			var configurationManager = new ConfigurationManager (quiet);
 			var security = new SecurityConfiguration ();
+
+			ApplicationServer server = null;
 			
 			if (!ParseOptions (configurationManager, args, security))
-				return 1;
+				return Tuple.Create (1, "Error while parsing options", server);
 
 			// Show the help and exit.
 			if (configurationManager.Help) {
@@ -99,17 +112,17 @@ namespace Mono.WebServer.XSP
 				Console.WriteLine ("Press any key...");
 				Console.ReadKey ();
 #endif
-				return 0;
+				return success;
 			}
 
 			// Show the version and exit.
 			if (configurationManager.Version) {
 				Version.Show ();
-				return 0;
+				return success;
 			}
 
 			if (!configurationManager.LoadConfigFile ())
-				return 1;
+				return Tuple.Create (1, "Error while loading the configuration file", server);
 
 			configurationManager.SetupLogger ();
 
@@ -125,13 +138,13 @@ namespace Mono.WebServer.XSP
 				}
 				catch (CryptographicException ce) {
 					Logger.Write (ce);
-					return 1;
+					return Tuple.Create (1, "Error while setting up https", server);
 				}
 			} else {
 				webSource = new XSPWebSource (configurationManager.Address, configurationManager.Port, !root);
 			}
 
-			var server = new ApplicationServer (webSource, configurationManager.Root) {
+			server = new ApplicationServer (webSource, configurationManager.Root) {
 				Verbose = configurationManager.Verbose,
 				SingleApplication = !root
 			};
@@ -155,7 +168,7 @@ namespace Mono.WebServer.XSP
 				vh.CreateHost (server, webSource);
 				var svr = (Server) vh.AppHost.Domain.CreateInstanceAndUnwrap (GetType ().Assembly.GetName ().ToString (), GetType ().FullName);
 				webSource.Dispose ();
-				return svr.RealMain (args, false, vh.AppHost, configurationManager.Quiet);
+				return svr.DebugMain (args, false, vh.AppHost, configurationManager.Quiet);
 			}
 			server.AppHost = ext_apphost;
 
@@ -166,8 +179,8 @@ namespace Mono.WebServer.XSP
 			}
 
 			try {
-				if (server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog) == false)
-					return 2;
+				if (!server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog))
+					return Tuple.Create (2, "Error while starting server", server);
 
 				if (!configurationManager.Quiet) {
 					// MonoDevelop depends on this string. If you change it, let them know.
@@ -203,10 +216,10 @@ namespace Mono.WebServer.XSP
 					Logger.Write (e);
 				else
 					server.ShutdownSockets ();
-				return 1;
+				return Tuple.Create (1, "Error running server", server);
 			}
 
-			return 0;
+			return Tuple.Create (0, String.Empty, server);
 		}
 
 		static bool ParseOptions (ConfigurationManager manager, string[] args, SecurityConfiguration security)

@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using Mono.WebServer.XSP;
 using System.Net;
 
 namespace Mono.WebServer.Test
@@ -19,14 +18,15 @@ namespace Mono.WebServer.Test
 		[Test]
 		public void TestCase ()
 		{
-			int result = Server.Main (new []{"--applications", "/:.","--port", "9000","--nonstop"});
-			Assert.AreEqual (0, result);
-			var wc = new WebClient ();
-			try {
-				string downloaded = wc.DownloadString ("http://localhost:9000/");
-				Assert.AreEqual (Environment.CurrentDirectory, downloaded);
-			} catch (WebException e) {
-				Assert.Fail(e.Message);
+			using (var server = new DebugServer()) {
+				Assert.AreEqual (0, server.Run ());
+				var wc = new WebClient ();
+				try {
+					string downloaded = wc.DownloadString ("http://localhost:9000/");
+					Assert.AreEqual (Environment.CurrentDirectory, downloaded);
+				} catch (WebException e) {
+					Assert.Fail (e.Message);
+				}
 			}
 		}
 	}

@@ -18,7 +18,6 @@ namespace Mono.WebServer.Test
 		[Test]
 		public void TestCase ()
 		{
-			int i = 0;
 			using (var server = new DebugServer()) {
 				Assert.AreEqual (0, server.Run ());
 				var wc = new WebClient ();

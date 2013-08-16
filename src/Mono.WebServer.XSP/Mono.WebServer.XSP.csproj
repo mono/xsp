@@ -74,6 +74,7 @@
     <Compile Include="XSPWorker.cs" />
     <Compile Include="XSPWorkerRequest.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CompatTuple.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">

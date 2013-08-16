@@ -43,7 +43,7 @@ namespace Mono.WebServer.XSP
 	{
 		static RSA key;
 
-		static readonly Tuple<int, string, ApplicationServer> success = new Tuple<int,string,ApplicationServer> (0, null, null);
+		static readonly CompatTuple<int, string, ApplicationServer> success = new CompatTuple<int,string,ApplicationServer> (0, null, null);
 
 		static AsymmetricAlgorithm GetPrivateKey (X509Certificate certificate, string targetHost) 
 		{ 
@@ -66,7 +66,7 @@ namespace Mono.WebServer.XSP
 			return DebugMain (args).Item1;
 		}
 
-		internal static Tuple<int, string, ApplicationServer> DebugMain (string [] args)
+		internal static CompatTuple<int, string, ApplicationServer> DebugMain (string [] args)
 		{
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 			bool quiet = false;
@@ -95,7 +95,7 @@ namespace Mono.WebServer.XSP
 		/// <param name="root">If set to <c>true</c> it means the caller is in the root domain.</param>
 		/// <param name="ext_apphost">Used when single app mode is used, in a recursive call to RealMain from the single app domain.</param>
 		/// <param name="quiet">If set to <c>true</c> don't show messages. Used to avoid double printing of the banner.</param>
-		public Tuple<int, string, ApplicationServer> DebugMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
+		internal CompatTuple<int, string, ApplicationServer> DebugMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
 			var configurationManager = new ConfigurationManager (quiet);
 			var security = new SecurityConfiguration ();
@@ -103,7 +103,7 @@ namespace Mono.WebServer.XSP
 			ApplicationServer server = null;
 			
 			if (!ParseOptions (configurationManager, args, security))
-				return Tuple.Create (1, "Error while parsing options", server);
+				return new CompatTuple<int,string,ApplicationServer> (1, "Error while parsing options", server);
 
 			// Show the help and exit.
 			if (configurationManager.Help) {
@@ -122,7 +122,7 @@ namespace Mono.WebServer.XSP
 			}
 
 			if (!configurationManager.LoadConfigFile ())
-				return Tuple.Create (1, "Error while loading the configuration file", server);
+				return new CompatTuple<int,string,ApplicationServer> (1, "Error while loading the configuration file", server);
 
 			configurationManager.SetupLogger ();
 
@@ -138,7 +138,7 @@ namespace Mono.WebServer.XSP
 				}
 				catch (CryptographicException ce) {
 					Logger.Write (ce);
-					return Tuple.Create (1, "Error while setting up https", server);
+					return new CompatTuple<int,string,ApplicationServer> (1, "Error while setting up https", server);
 				}
 			} else {
 				webSource = new XSPWebSource (configurationManager.Address, configurationManager.Port, !root);
@@ -180,7 +180,7 @@ namespace Mono.WebServer.XSP
 
 			try {
 				if (!server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog))
-					return Tuple.Create (2, "Error while starting server", server);
+					return new CompatTuple<int,string,ApplicationServer> (2, "Error while starting server", server);
 
 				if (!configurationManager.Quiet) {
 					// MonoDevelop depends on this string. If you change it, let them know.
@@ -216,10 +216,10 @@ namespace Mono.WebServer.XSP
 					Logger.Write (e);
 				else
 					server.ShutdownSockets ();
-				return Tuple.Create (1, "Error running server", server);
+				return new CompatTuple<int,string,ApplicationServer> (1, "Error running server", server);
 			}
 
-			return Tuple.Create (0, String.Empty, server);
+			return new CompatTuple<int,string,ApplicationServer> (0, null, server);
 		}
 
 		static bool ParseOptions (ConfigurationManager manager, string[] args, SecurityConfiguration security)

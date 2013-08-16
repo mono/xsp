@@ -291,8 +291,8 @@ namespace Mono.WebServer.FastCgi
 			var socket_type = configurationManager.Socket;
 
 			Uri uri;
-			if (Uri.TryCreate (socket_type, UriKind.Absolute, out uri))
-				return TryCreateSocketFromUri (uri, out socket);
+			if (Uri.TryCreate (socket_type, UriKind.Absolute, out uri) && TryCreateSocketFromUri (uri, out socket))
+				return true;
 
 			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
 
@@ -367,7 +367,7 @@ namespace Mono.WebServer.FastCgi
 
 			IPAddress address;
 			if (!IPAddress.TryParse (ip, out address)) {
-				Logger.Write (LogLevel.Error, "Error in argument \"address\". \"{0}\" cannot be converted to an IP address.", ip);
+				Logger.Write (LogLevel.Debug, "\"{0}\" cannot be converted to an IP address.", ip);
 				return false;
 			}
 

@@ -101,7 +101,7 @@ namespace Mono.WebServer.FastCgi {
                         {
                             // Note: a better error message would probably be deemed fit.
                             socket.Close();
-                            throw new Exception("Remote end hung up.");
+                            throw new System.Net.Sockets.SocketException();
                         }
 
 			return received;

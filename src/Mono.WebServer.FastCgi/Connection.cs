@@ -166,6 +166,9 @@ namespace Mono.FastCgi {
 				//         error from UnmanagedSocket.Close
 				if (e.ErrorCode != 10038)
 					throw;  // Rethrow other errors
+			} catch(ObjectDisposedException){
+				// Ignore: already closed
+				// TODO: figure out a better flow than try/catch
 			} finally {
 				socket = null;
 			}
@@ -383,7 +386,7 @@ namespace Mono.FastCgi {
 		{
 			stop = true;
 			lock(request_lock)
-				foreach (Request req in requests)
+				foreach (Request req in new List<Request>(requests))
 					EndRequest (req.RequestID, -1, ProtocolStatus.RequestComplete);
 		}
 		

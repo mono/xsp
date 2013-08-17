@@ -168,7 +168,6 @@ namespace Mono.FastCgi {
 					throw;  // Rethrow other errors
 			} catch(ObjectDisposedException){
 				// Ignore: already closed
-				// TODO: figure out a better flow than try/catch
 			} finally {
 				socket = null;
 			}
@@ -427,11 +426,9 @@ namespace Mono.FastCgi {
 		{
 			int i = 0;
 			int count;
-			lock(request_lock)
-			{
+			lock(request_lock) {
 				count = requests.Count;
-				while (i < count &&
-					requests [i].RequestID != requestID)
+				while (i < count && requests [i].RequestID != requestID)
 					i ++;
 				if (i != count)
 					requests.RemoveAt(i);

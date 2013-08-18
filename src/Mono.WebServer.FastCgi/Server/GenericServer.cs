@@ -47,8 +47,8 @@ namespace Mono.WebServer.FastCgi
 		readonly object connections_lock = new object ();
 
 		int max_connections = Int32.MaxValue;
-		AutoResetEvent stop_signal = new AutoResetEvent (false);
-		AutoResetEvent stopped_signal = new AutoResetEvent (false);
+		readonly AutoResetEvent stop_signal = new AutoResetEvent (false);
+		readonly AutoResetEvent stopped_signal = new AutoResetEvent (false);
 
 		public event EventHandler RequestReceived;
 

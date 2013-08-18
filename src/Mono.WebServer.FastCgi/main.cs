@@ -324,9 +324,7 @@ namespace Mono.WebServer.FastCgi
 		{
 			switch (socket_kind.ToLower ()) {
 			case "pipe":
-				creator = delegate(ConfigurationManager configmanager, string[] socketParts, out Socket socket) {
-					return TryCreatePipe (out socket);
-				};
+				creator = (ConfigurationManager configmanager, string[] socketParts, out Socket socket) => TryCreatePipe (out socket);
 				return true;
 				// The FILE sockets is of the format
 				// "file[:PATH]".
@@ -444,13 +442,13 @@ namespace Mono.WebServer.FastCgi
 			socket = null;
 			try {
 				string realPath;
-				if (path.StartsWith ("\\0") && path.IndexOf ('\0', 1) < 0)
+				if (path.StartsWith ("\\0", StringComparison.InvariantCulture) && path.IndexOf ('\0', 1) < 0)
 					realPath = '\0' + path.Substring (2);
 				else
 					realPath = path;
 
-				ushort uperm = UInt16.MaxValue;
 				if (perm != null) {
+					ushort uperm;
 					if (!UInt16.TryParse (perm, out uperm)) {
 						Logger.Write (LogLevel.Error, "Error parsing permissions. Use octal");
 						return false;

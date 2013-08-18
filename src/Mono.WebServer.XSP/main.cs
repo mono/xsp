@@ -100,10 +100,8 @@ namespace Mono.WebServer.XSP
 			var configurationManager = new ConfigurationManager (quiet);
 			var security = new SecurityConfiguration ();
 
-			ApplicationServer server = null;
-			
 			if (!ParseOptions (configurationManager, args, security))
-				return new CompatTuple<int,string,ApplicationServer> (1, "Error while parsing options", server);
+				return new CompatTuple<int,string,ApplicationServer> (1, "Error while parsing options", null);
 
 			// Show the help and exit.
 			if (configurationManager.Help) {
@@ -122,7 +120,7 @@ namespace Mono.WebServer.XSP
 			}
 
 			if (!configurationManager.LoadConfigFile ())
-				return new CompatTuple<int,string,ApplicationServer> (1, "Error while loading the configuration file", server);
+				return new CompatTuple<int,string,ApplicationServer> (1, "Error while loading the configuration file", null);
 
 			configurationManager.SetupLogger ();
 
@@ -138,13 +136,13 @@ namespace Mono.WebServer.XSP
 				}
 				catch (CryptographicException ce) {
 					Logger.Write (ce);
-					return new CompatTuple<int,string,ApplicationServer> (1, "Error while setting up https", server);
+					return new CompatTuple<int,string,ApplicationServer> (1, "Error while setting up https", null);
 				}
 			} else {
 				webSource = new XSPWebSource (configurationManager.Address, configurationManager.Port, !root);
 			}
 
-			server = new ApplicationServer (webSource, configurationManager.Root) {
+			var server = new ApplicationServer (webSource, configurationManager.Root) {
 				Verbose = configurationManager.Verbose,
 				SingleApplication = !root
 			};

@@ -56,7 +56,7 @@ namespace Mono.WebServer.Log {
 
 		public static void AddLogger (ILogger logger)
 		{
-			Logger.loggers.Add (logger);
+			loggers.Add (logger);
 		}
 		
 		public static void Open (string path)

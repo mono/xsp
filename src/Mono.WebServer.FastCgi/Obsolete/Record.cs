@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Mono.WebServer.Log;
 using Mono.WebServer.FastCgi;
+using Mono.WebServer.FastCgi.Compatibility;
 using NRecord = Mono.WebServer.FastCgi.Record;
 
 namespace Mono.FastCgi {
@@ -203,7 +204,7 @@ namespace Mono.FastCgi {
 			if (buffers.Body == null)
 				body = null;
 			else
-				body = buffers.Body.Value.Trim(BodyLength);
+				body = buffers.Body.Value.Trimmed (BodyLength);
 		}
 
 		public override string ToString ()

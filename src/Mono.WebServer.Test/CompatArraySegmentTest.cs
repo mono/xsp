@@ -1,6 +1,7 @@
 using System;
-using NUnit.Framework;
 using System.Collections.Generic;
+using Mono.WebServer.FastCgi.Compatibility;
+using NUnit.Framework;
 
 namespace Mono.WebServer.Test {
 	[TestFixture]
@@ -10,10 +11,9 @@ namespace Mono.WebServer.Test {
 		public void TestCase ()
 		{
 			var test = new CompatArraySegment<int> (new int[1]);
-			IList<int> ilist = test;
 
 			test [0] = -3;
-			Assert.AreEqual (-3, ilist [0]);
+			Assert.AreEqual (-3, test [0]);
 		}
 	}
 }

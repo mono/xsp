@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using Mono.WebServer.FastCgi.Compatibility;
 
 namespace Mono.WebServer.FastCgi
 {

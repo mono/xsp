@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using Mono.WebServer.Log;
 using Mono.WebServer.FastCgi;
+using NRecord = Mono.WebServer.FastCgi.Record;
 
 namespace Mono.FastCgi {
 	public class Connection
@@ -113,10 +114,10 @@ namespace Mono.FastCgi {
 				return;
 			}
 			do {
-				Record record;
+				NRecord record;
 				
 				try {
-					record = new Record (socket, receive_buffers);
+					record = NRecord.Receive(socket, receive_buffers);
 				} catch (System.Net.Sockets.SocketException) {
 					StopRun (Strings.Connection_RecordNotReceived);
 					Stop ();
@@ -168,13 +169,12 @@ namespace Mono.FastCgi {
 					throw;  // Rethrow other errors
 			} catch(ObjectDisposedException){
 				// Ignore: already closed
-				// TODO: figure out a better flow than try/catch
 			} finally {
 				socket = null;
 			}
 		}
 
-		void HandleRequest (Record record, Request request)
+		void HandleRequest (NRecord record, Request request)
 		{
 			switch (record.Type) {
 				// Creates a new request.
@@ -215,7 +215,7 @@ namespace Mono.FastCgi {
 			}
 		}
 
-		void HandleUnknown (Record record)
+		void HandleUnknown (NRecord record)
 		{
 			Logger.Write (LogLevel.Warning, Strings.Connection_UnknownRecordType, record.Type);
 			SendRecord (RecordType.UnknownType, record.RequestID, new UnknownTypeBody (record.Type).GetData ());
@@ -229,7 +229,7 @@ namespace Mono.FastCgi {
 			request.Abort (Strings.Connection_AbortRecordReceived);
 		}
 
-		void HandleData (Request request, Record record)
+		void HandleData (Request request, NRecord record)
 		{
 			if (request == null) {
 				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
@@ -239,7 +239,7 @@ namespace Mono.FastCgi {
 			request.AddFileData (record);
 		}
 
-		void HandleStandardInput (Request request, Record record)
+		void HandleStandardInput (Request request, NRecord record)
 		{
 			if (request == null) {
 				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
@@ -249,26 +249,24 @@ namespace Mono.FastCgi {
 			request.AddInputData (record);
 		}
 
-		void HandleParams (Request request, Record record)
+		void HandleParams (Request request, NRecord record)
 		{
 			if (request == null) {
 				StopRun (Strings.Connection_RequestDoesNotExist, record.RequestID);
 				return;
 			}
 
-			IReadOnlyList<byte> body;
-			record.GetBody (out body);
+			IReadOnlyList<byte> body = record.GetBody ();
 			request.AddParameterData (body);
 		}
 
-		void HandleGetValues (Record record)
+		void HandleGetValues (NRecord record)
 		{
 			byte[] response_data;
 
 			// Look up the data from the server.
 			try {
-				IReadOnlyList<byte> body;
-				record.GetBody (out body);
+				IReadOnlyList<byte> body = record.GetBody ();
 				IDictionary<string, string> pairs_in = NameValuePair.FromData (body);
 				IDictionary<string, string> pairs_out = server.GetValues (pairs_in.Keys);
 				response_data = NameValuePair.GetData (pairs_out);
@@ -279,7 +277,7 @@ namespace Mono.FastCgi {
 			SendRecord (RecordType.GetValuesResult, record.RequestID, response_data);
 		}
 
-		void HandleBeginRequest (Request request, Record record)
+		void HandleBeginRequest (Request request, NRecord record)
 		{
 			// If a request with the given ID
 			// already exists, there's a bug in the
@@ -345,7 +343,7 @@ namespace Mono.FastCgi {
 					try {
 						send_buffers.EnforceBodyLength(bodyLength);
 						Array.Copy(bodyData, bodyIndex, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyLength);
-						var record = new Record (1, type, requestID, send_buffers, bodyLength);
+						var record = new NRecord (1, type, requestID, bodyLength, send_buffers);
 						record.Send (socket);
 					} catch (System.Net.Sockets.SocketException) {
 					}
@@ -361,7 +359,7 @@ namespace Mono.FastCgi {
 					byte[] bodyData = body.GetData ();
 					send_buffers.EnforceBodyLength(bodyData.Length);
 					Array.Copy(bodyData, 0, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyData.Length);
-					var record = new Record (1, RecordType.EndRequest, requestID, send_buffers, bodyData.Length);
+					var record = new NRecord (1, RecordType.EndRequest, requestID, bodyData.Length, send_buffers);
 					record.Send (socket);
 				}
 			} catch (System.Net.Sockets.SocketException) {
@@ -427,11 +425,9 @@ namespace Mono.FastCgi {
 		{
 			int i = 0;
 			int count;
-			lock(request_lock)
-			{
+			lock(request_lock) {
 				count = requests.Count;
-				while (i < count &&
-					requests [i].RequestID != requestID)
+				while (i < count && requests [i].RequestID != requestID)
 					i ++;
 				if (i != count)
 					requests.RemoveAt(i);

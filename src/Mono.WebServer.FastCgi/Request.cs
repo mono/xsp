@@ -34,6 +34,8 @@ using Mono.WebServer.Log;
 using IOPath = System.IO.Path;
 using Mono.WebServer;
 using Mono.WebServer.FastCgi;
+using NRecord = Mono.WebServer.FastCgi.Record;
+using System.Linq;
 
 namespace Mono.FastCgi {
 	public class Request
@@ -343,25 +345,31 @@ namespace Mono.FastCgi {
 		protected event DataReceivedHandler  InputDataReceived;
 		
 		bool input_data_completed;
-		
+
+		[Obsolete]
 		public void AddInputData (Record record)
+		{
+			AddInputData ((NRecord)record);
+		}
+
+		internal void AddInputData (NRecord record)
 		{
 			// Validate arguments in public methods.
 			if (record.Type != RecordType.StandardInput)
 				throw new ArgumentException (
 					Strings.Request_NotStandardInput,
 					"record");
-			
+
 			// There should be no data following a zero byte record.
 			if (input_data_completed) {
 				Logger.Write (LogLevel.Warning,
-					Strings.Request_StandardInputAlreadyCompleted);
+				              Strings.Request_StandardInputAlreadyCompleted);
 				return;
 			}
 
 			if (record.BodyLength == 0)
 				input_data_completed = true;
-			
+
 			// Inform listeners of the data.
 			if (InputDataReceived != null)
 				InputDataReceived (this, new DataReceivedArgs (record));
@@ -375,8 +383,14 @@ namespace Mono.FastCgi {
 		protected event DataReceivedHandler FileDataReceived;
 		
 		bool file_data_completed;
-		
+
+		[Obsolete]
 		public void AddFileData (Record record)
+		{
+			AddFileData ((NRecord)record);
+		}
+
+		internal void AddFileData (NRecord record)
 		{
 			// Validate arguments in public methods.
 			if (record.Type != RecordType.Data)
@@ -514,9 +528,15 @@ namespace Mono.FastCgi {
 	
 	public class DataReceivedArgs : EventArgs
 	{
-		Record record;
-		
+		NRecord record;
+
+		[Obsolete]
 		public DataReceivedArgs (Record record)
+		{
+			this.record = (NRecord)record;
+		}
+
+		internal DataReceivedArgs(NRecord record)
 		{
 			this.record = record;
 		}
@@ -528,14 +548,12 @@ namespace Mono.FastCgi {
 		[Obsolete("Use GetBody()")]
 		public byte[] GetData ()
 		{
-			return record.GetBody ();
+			return record.GetBody ().ToArray ();
 		}
 
 		public IReadOnlyList<byte> GetBody()
 		{
-			IReadOnlyList<byte> body;
-			record.GetBody(out body);
-			return body;
+			return record.GetBody();
 		}
 		
 		public int DataLength {

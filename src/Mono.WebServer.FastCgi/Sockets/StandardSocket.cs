@@ -30,7 +30,7 @@
 using System;
 using Mono.FastCgi;
 
-namespace Mono.WebServer.FastCgi {
+namespace Mono.WebServer.FastCgi.Sockets {
 	class StandardSocket : Socket {
 		readonly System.Net.Sockets.Socket socket;
 		readonly System.Net.EndPoint localEndPoint;

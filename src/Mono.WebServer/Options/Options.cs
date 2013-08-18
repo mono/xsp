@@ -755,7 +755,7 @@ namespace NDesk.Options {
 			if (f != "-")
 				return false;
 			for (int i = 0; i < n.Length; ++i) {
-				string opt = f + n [i].ToString ();
+				string opt = f + n [i];
 				string rn = n [i].ToString ();
 				if (!Contains (rn)) {
 					if (i == 0)
@@ -879,8 +879,8 @@ namespace NDesk.Options {
 			if (String.IsNullOrEmpty (description))
 				return maxIndex == 1 ? "VALUE" : "VALUE" + (index + 1);
 			string[] nameStart = maxIndex == 1
-				? new[]{"{0:", "{"} 
-				: new[]{"{" + index + ":"};
+				? new[] { "{0:", "{" }
+				: new[] { "{" + index + ":" };
 			foreach (string name in nameStart) {
 				int start, j = 0;
 				do {

@@ -75,21 +75,15 @@
     <Compile Include="BeginRequestBody.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="EndRequestBody.cs" />
-    <Compile Include="ISocketAbstraction.cs" />
     <Compile Include="main.cs" />
     <Compile Include="NameValuePair.cs" />
-    <Compile Include="Record.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="Responder.cs" />
     <Compile Include="ResponderRequest.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Server\ConnectionProxy.cs" />
-    <Compile Include="StandardSocket.cs" />
     <Compile Include="Strings.cs" />
-    <Compile Include="TcpSocket.cs" />
-    <Compile Include="UnixSocket.cs" />
     <Compile Include="UnknownTypeBody.cs" />
-    <Compile Include="UnmanagedSocket.cs" />
     <Compile Include="WebSource.cs" />
     <Compile Include="WorkerRequest.cs" />
     <Compile Include="AssemblyInfo.cs" />
@@ -115,6 +109,13 @@
     <Compile Include="Obsolete\ConfigurationManager.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="ConfigurationManager.Obsolete.cs" />
+    <Compile Include="Obsolete\Record.cs" />
+    <Compile Include="Record.cs" />
+    <Compile Include="Sockets\TcpSocket.cs" />
+    <Compile Include="Sockets\StandardSocket.cs" />
+    <Compile Include="Sockets\UnmanagedSocket.cs" />
+    <Compile Include="Sockets\UnixSocket.cs" />
+    <Compile Include="Sockets\Socket.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer\Mono.WebServer.csproj">
@@ -126,5 +127,6 @@
   <ItemGroup />
   <ItemGroup>
     <Folder Include="Obsolete\" />
+    <Folder Include="Sockets\" />
   </ItemGroup>
 </Project>

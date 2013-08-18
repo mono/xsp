@@ -36,6 +36,7 @@ using System.Timers;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 using Mono.FastCgi;
+using Mono.WebServer.FastCgi.Sockets;
 
 namespace Mono.WebServer.FastCgi
 {

@@ -167,7 +167,7 @@ namespace Mono.FastCgi {
 				//         error from UnmanagedSocket.Close
 				if (e.ErrorCode != 10038)
 					throw;  // Rethrow other errors
-			} catch(ObjectDisposedException){
+			} catch (ObjectDisposedException){
 				// Ignore: already closed
 			} finally {
 				socket = null;
@@ -308,14 +308,11 @@ namespace Mono.FastCgi {
 
 			// If the role is "Responder", and it is
 			// supported, create a ResponderRequest.
-			if (body.Role == Role.Responder && server.SupportsResponder) {
+			if (body.Role == Role.Responder && server.SupportsResponder)
 				request = new ResponderRequest(record.RequestID, this);
-			}
-
-			// If the request is null, the role is
-			// not supported. Inform the client and
-			// don't begin the request.
-			if (request == null) {
+			else {
+				// If the role is not supported inform the client
+				// and don't begin the request.
 				Logger.Write (LogLevel.Warning, Strings.Connection_RoleNotSupported, body.Role);
 				EndRequest (record.RequestID, 0, ProtocolStatus.UnknownRole);
 				return;

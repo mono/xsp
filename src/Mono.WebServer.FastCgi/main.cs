@@ -367,10 +367,8 @@ namespace Mono.WebServer.FastCgi
 			socket = null;
 
 			IPAddress address;
-			if (!IPAddress.TryParse (ip, out address)) {
-				Logger.Write (LogLevel.Debug, "\"{0}\" cannot be converted to an IP address.", ip);
+			if (!IPAddress.TryParse (ip, out address))
 				return false;
-			}
 
 			socket = new TcpSocket (address, port);
 			return true;

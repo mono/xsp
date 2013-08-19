@@ -34,7 +34,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Socket = Mono.FastCgi.Socket;
 
-namespace Mono.WebServer.FastCgi {
+namespace Mono.WebServer.FastCgi.Sockets {
 	class UnmanagedSocket : Socket {
 		[DllImport ("libc", SetLastError=true, EntryPoint="close")] 
 		extern static int close (IntPtr s);

@@ -34,7 +34,7 @@ using System.Globalization;
 using Mono.WebServer.Log;
 using Mono.Unix.Native;
 
-namespace Mono.WebServer.FastCgi {
+namespace Mono.WebServer.FastCgi.Sockets {
 	class UnixSocket : StandardSocket, IDisposable {
 		string path;
 		readonly long? inode;

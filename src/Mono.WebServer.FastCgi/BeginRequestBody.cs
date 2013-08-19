@@ -29,6 +29,7 @@
 using System;
 using Mono.WebServer.FastCgi;
 using System.Collections.Generic;
+using NRecord = Mono.WebServer.FastCgi.Record;
 
 namespace Mono.FastCgi {
 	public enum Role : ushort
@@ -61,7 +62,24 @@ namespace Mono.FastCgi {
 		
 		
 		#region Constructors
-		
+
+		internal BeginRequestBody (NRecord record)
+		{
+			if (record.Type != RecordType.BeginRequest)
+				throw new ArgumentException (
+					Strings.BeginRequestBody_WrongType,
+					"record");
+
+			if (record.BodyLength != 8)
+				throw new ArgumentException (
+					String.Format(Strings.BeginRequestBody_WrongSize, record.BodyLength), "record");
+
+			IReadOnlyList<byte> body = record.GetBody ();
+			role = NRecord.ReadRole (body);
+			flags = (BeginRequestFlags) body [2];
+		}
+
+		[Obsolete]
 		public BeginRequestBody (Record record)
 		{
 			if (record.Type != RecordType.BeginRequest)
@@ -75,7 +93,7 @@ namespace Mono.FastCgi {
 			
 			IReadOnlyList<byte> body;
 			record.GetBody (out body);
-			role  = (Role) Record.ReadUInt16 (body, 0);
+			role = NRecord.ReadRole (body);
 			flags = (BeginRequestFlags) body [2];
 		}
 		

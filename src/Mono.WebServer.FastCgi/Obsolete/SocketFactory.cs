@@ -27,7 +27,7 @@
 //
 
 using System;
-using Mono.WebServer.FastCgi;
+using Mono.WebServer.FastCgi.Sockets;
 
 namespace Mono.FastCgi {
 	[Obsolete]

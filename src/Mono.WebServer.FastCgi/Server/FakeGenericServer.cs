@@ -43,8 +43,9 @@ namespace Mono.WebServer.FastCgi
 			backend = server;
 		}
 
-		public void Start (bool background, int backlog)
+		public bool Start (bool background, int backlog)
 		{
+			return true;
 		}
 
 		public void Stop ()

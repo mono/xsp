@@ -1,0 +1,9 @@
+<Settings>
+	<Setting Name="ondemandsock" Value="\0back$(filename)" />
+	<!--<Setting Name="user" Value="$(filename)" />-->
+	<Setting Name="socket" Value="unix://660@/tmp/sockets/$(filename)" />
+	<Setting Name="applications" Value="/:/tmp/website" />
+	<Setting Name="idle-time" Value="5" />
+	<Setting Name="loglevels" Value="All" />
+	<Setting Name="verbose" Value="true" />
+</Settings>

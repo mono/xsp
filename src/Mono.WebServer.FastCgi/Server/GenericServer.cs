@@ -90,19 +90,28 @@ namespace Mono.WebServer.FastCgi
 			serverCallback = callback;
 		}
 
-		public void Start (bool background, int backlog)
+		public bool Start (bool background, int backlog)
 		{
 			lock (state_lock) {
 				if (Started)
 					throw new InvalidOperationException (Strings.Server_AlreadyStarted);
 
-				listen_socket.Listen (backlog);
+				try {
+					listen_socket.Listen (backlog);
+				} catch (System.Net.Sockets.SocketException e){
+					if (e.ErrorCode == 10013) {
+						Logger.Write (LogLevel.Error, "Failed to start server: permission denied for socket {0}", listen_socket);
+						return false;
+					}
+				}
 
 				runner = new Thread (RunServer) { IsBackground = background };
 				runner.Start ();
 
 				stopped = false;
 			}
+
+			return true;
 		}
 
 		public void Stop ()

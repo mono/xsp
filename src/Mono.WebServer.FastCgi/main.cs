@@ -116,7 +116,10 @@ namespace Mono.WebServer.FastCgi
 			}
 
 			var stoppable = configurationManager.Stoppable;
-			server.Start (stoppable, (int)configurationManager.Backlog);
+			if (!server.Start (stoppable, (int)configurationManager.Backlog)) {
+				Logger.Write (LogLevel.Error, "Failed to start server!");
+				return 1;
+			}
 			
 			if (stoppable) {
 				Console.WriteLine (
@@ -311,7 +314,9 @@ namespace Mono.WebServer.FastCgi
 				return TryCreatePipe (out socket);
 			case "unix":
 			case "file":
-				return TryCreateUnixSocket (uri.Host, out socket, uri.UserInfo);
+				if (String.IsNullOrEmpty (uri.PathAndQuery))
+					throw new ArgumentException (String.Format ("Path is null in \"{0}\"", uri));
+				return TryCreateUnixSocket (uri.PathAndQuery, out socket, uri.UserInfo);
 			case "tcp":
 				return TryCreateTcpSocket (uri.Host, uri.Port, out socket);
 			default:
@@ -445,15 +450,17 @@ namespace Mono.WebServer.FastCgi
 				else
 					realPath = path;
 
-				if (perm != null) {
+				if (perm == null)
+					socket = new UnixSocket (realPath);
+				else {
 					ushort uperm;
 					if (!UInt16.TryParse (perm, out uperm)) {
-						Logger.Write (LogLevel.Error, "Error parsing permissions. Use octal");
+						Logger.Write (LogLevel.Error, "Error parsing permissions \"{0}\". Use octal.", perm);
 						return false;
 					}
-					socket = new UnixSocket(realPath, uperm);
+					uperm = Convert.ToUInt16 (uperm.ToString (), 8);
+					socket = new UnixSocket (realPath, uperm);
 				}
-				socket = new UnixSocket (realPath);
 			}
 			catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);

@@ -30,7 +30,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
-using System.Diagnostics;
 
 namespace Mono.WebServer.Log {
 	public static class Logger

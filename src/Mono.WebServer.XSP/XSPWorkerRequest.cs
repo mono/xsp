@@ -441,7 +441,7 @@ namespace Mono.WebServer
 				return null;
 
 			var content_length = (string) headers ["Content-Length"];
-			long length = -1;
+			long length;
 
 			// If not empty parse, if correctly parsed validate
 			if (!String.IsNullOrEmpty (content_length)
@@ -450,7 +450,7 @@ namespace Mono.WebServer
 				throw new InvalidOperationException ("Content-Length exceeds the maximum accepted size.");
 
 			int input_data_length = inputLength - position;
-			if (length == -1 || length > input_data_length)
+			if (length < 0 || length > input_data_length)
 				length = input_data_length;
 
 			var result = new byte [length];

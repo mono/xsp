@@ -178,7 +178,7 @@ namespace Mono.WebServer.Apache {
 			}
 
 			try {
-				if (server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog) == false)
+				if (!server.Start (!configurationManager.NonStop, (int)configurationManager.Backlog))
 					return 2;
 
 				if (!configurationManager.NonStop) {

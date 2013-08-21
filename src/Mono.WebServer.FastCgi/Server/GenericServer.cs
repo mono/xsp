@@ -103,6 +103,7 @@ namespace Mono.WebServer.FastCgi
 						Logger.Write (LogLevel.Error, "Failed to start server: permission denied for socket {0}", listen_socket);
 						return false;
 					}
+					throw;
 				}
 
 				runner = new Thread (RunServer) { IsBackground = background };

@@ -445,7 +445,7 @@ namespace Mono.WebServer.FastCgi
 			socket = null;
 			try {
 				string realPath;
-				if (path.StartsWith ("\\0", StringComparison.InvariantCulture) && path.IndexOf ('\0', 1) < 0)
+				if (path.StartsWith ("\\0", StringComparison.Ordinal) && path.IndexOf ("\\0", 1, StringComparison.Ordinal) < 0)
 					realPath = '\0' + path.Substring (2);
 				else
 					realPath = path;

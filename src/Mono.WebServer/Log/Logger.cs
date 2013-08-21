@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
 
 namespace Mono.WebServer.Log {
 	public static class Logger
@@ -44,6 +45,22 @@ namespace Mono.WebServer.Log {
 
 		public static bool WriteToConsole { get; set; }
 
+		public static bool Verbose { get; set; }
+
+		[ThreadStatic]
+		static object context;
+
+		public static object Context {
+			get {
+				if (context == null && Verbose && (Level & LogLevel.Debug) != LogLevel.None)
+					context = Thread.CurrentThread.ManagedThreadId;
+				return context;
+			}
+			set {
+				context = value;
+			}
+		}
+
 		#endregion
 		
 		static Logger ()
@@ -56,23 +73,15 @@ namespace Mono.WebServer.Log {
 
 		public static void AddLogger (ILogger logger)
 		{
-			Logger.loggers.Add (logger);
+			loggers.Add (logger);
 		}
 		
 		public static void Open (string path)
 		{
 			file_logger.Open (path);
 		}
-		
-		public static void Write (LogLevel level,
-		                          IFormatProvider provider,
-		                          string format, params object [] args)
-		{
-			Write (level, String.Format (provider, format, args));
-		}
-				
-		public static void Write (LogLevel level, string format,
-		                          params object [] args)
+
+		public static void Write (LogLevel level, string format, params object [] args)
 		{
 			Write (level, CultureInfo.CurrentCulture, format, args);
 		}
@@ -92,17 +101,32 @@ namespace Mono.WebServer.Log {
 			if ((Level & level) == LogLevel.None)
 				return;
 
-			string text = String.Format (CultureInfo.CurrentCulture,
-				"[{0:u}] {1,-7} {2}", DateTime.Now, level, message);
+			string format = Context == null
+				? "[{1}] {2,-7}: {2}"
+				: "{0} [{1}] {2,-7}: {3}";
+			string time = Verbose
+				? DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss.ffffff")
+				: DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss");
+			string text = String.Format (CultureInfo.CurrentCulture, format, context, time, level, message);
 
 			if (WriteToConsole)
-				lock(write_lock)
-					Console.WriteLine (message);
+				lock (write_lock)
+					if (Verbose)
+						Console.WriteLine (text);
+					else
+						Console.WriteLine (message);
 
 			foreach(var logger in loggers)
 				logger.Write (level, text);
 		}
-		
+
+		static void Write (LogLevel level,
+		                   IFormatProvider provider,
+		                   string format, params object [] args)
+		{
+			Write (level, String.Format (provider, format, args));
+		}
+
 		public static void Close ()
 		{
 			file_logger.Close ();

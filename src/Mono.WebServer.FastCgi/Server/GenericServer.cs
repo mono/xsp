@@ -47,8 +47,8 @@ namespace Mono.WebServer.FastCgi
 		readonly object connections_lock = new object ();
 
 		int max_connections = Int32.MaxValue;
-		AutoResetEvent stop_signal = new AutoResetEvent (false);
-		AutoResetEvent stopped_signal = new AutoResetEvent (false);
+		readonly AutoResetEvent stop_signal = new AutoResetEvent (false);
+		readonly AutoResetEvent stopped_signal = new AutoResetEvent (false);
 
 		public event EventHandler RequestReceived;
 
@@ -90,19 +90,29 @@ namespace Mono.WebServer.FastCgi
 			serverCallback = callback;
 		}
 
-		public void Start (bool background, int backlog)
+		public bool Start (bool background, int backlog)
 		{
 			lock (state_lock) {
 				if (Started)
 					throw new InvalidOperationException (Strings.Server_AlreadyStarted);
 
-				listen_socket.Listen (backlog);
+				try {
+					listen_socket.Listen (backlog);
+				} catch (System.Net.Sockets.SocketException e){
+					if (e.ErrorCode == 10013) {
+						Logger.Write (LogLevel.Error, "Failed to start server: permission denied for socket {0}", listen_socket);
+						return false;
+					}
+					throw;
+				}
 
 				runner = new Thread (RunServer) { IsBackground = background };
 				runner.Start ();
 
 				stopped = false;
 			}
+
+			return true;
 		}
 
 		public void Stop ()

@@ -30,18 +30,14 @@ using System.Collections.Generic;
 
 namespace Mono.WebServer.FastCgi
 {
-	public interface IGenericServer<T> where T : IConnection
+	public interface IGenericServer<T> : IServer where T : IConnection
 	{
-		event EventHandler RequestReceived;
-
 		int MaxConnections { get; set; }
 		int ConnectionCount { get; }
 		bool Started { get; }
 		bool CanAccept { get; }
 		IEnumerable<T> Connections { get; }
 
-		void Start (bool background, int backlog);
-		void Stop ();
 		void EndConnection (T connectionProxy);
 	}
 }

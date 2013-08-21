@@ -52,9 +52,10 @@ namespace Mono.WebServer.FastCgi
 			return server.OnAccept (socket);
 		}
 
-		public void Start (bool background, int backlog)
+		public bool Start (bool background, int backlog)
 		{
 			server.Start (background, backlog);
+			return true;
 		}
 
 		public void Stop ()

@@ -35,6 +35,7 @@ using Mono.WebServer.Log;
 using System.Diagnostics;
 using Mono.FastCgi;
 using Mono.WebServer.FastCgi;
+using System.Threading;
 
 namespace Mono.WebServer.Fpm
 {
@@ -112,6 +113,7 @@ namespace Mono.WebServer.Fpm
 				} else {
 					if (child.TrySpawn ()) {
 						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (configFile));
+						Thread.Sleep (500); // TODO: improve this (it's used to wait for the child to be ready)
 					} else {
 						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", configFile);
 					}

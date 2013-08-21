@@ -64,7 +64,8 @@ namespace Mono.FastCgi {
 			this.name  = name;
 			this.value = value;
 		}
-		
+
+		[Obsolete]
 		public NameValuePair (byte [] data, ref int index)
 		{
 			if (data == null)
@@ -163,7 +164,8 @@ namespace Mono.FastCgi {
 		
 		
 		#region Public Static Methods
-		
+
+		[Obsolete]
 		public static IDictionary<string,string> FromData (byte [] data)
 		{
 			if (data == null)

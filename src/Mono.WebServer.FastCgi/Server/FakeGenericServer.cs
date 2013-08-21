@@ -32,7 +32,7 @@ namespace Mono.WebServer.FastCgi
 {
 	public class FakeGenericServer<T> : IGenericServer<T> where T : IConnection
 	{
-		IGenericServer<T> backend;
+		readonly IGenericServer<T> backend;
 
 		public event EventHandler RequestReceived;
 
@@ -43,8 +43,9 @@ namespace Mono.WebServer.FastCgi
 			backend = server;
 		}
 
-		public void Start (bool background, int backlog)
+		public bool Start (bool background, int backlog)
 		{
+			return true;
 		}
 
 		public void Stop ()

@@ -30,6 +30,7 @@ do
 	mkdir -p $USERDIR
 	chown $USER $USERDIR
 	chmod 750 $USERDIR
-	echo "$USER" > $USERDIR/index.aspx
+	echo "<p>$USER</p>" > $USERDIR/index.aspx
+	echo "<p><%=\"Test\"%></p>" >> $USERDIR/index.aspx
 	chown $USER $USERDIR/index.aspx
 done

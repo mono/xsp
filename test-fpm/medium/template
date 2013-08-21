@@ -4,7 +4,7 @@
 	<Setting Name="name" Value="$(filename)" />
 	<Setting Name="socket" Value="unix://660@/tmp/sockets/$(filename)" />
 	<Setting Name="applications" Value="/:/tmp/website/$(filename)" />
-	<Setting Name="idle-time" Value="5" />
+	<Setting Name="idle-time" Value="20" />
 	<Setting Name="loglevels" Value="All" />
 	<Setting Name="verbose" Value="true" />
 </Settings>

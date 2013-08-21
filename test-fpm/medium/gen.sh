@@ -2,6 +2,8 @@
 
 ../gen.sh || exit 1
 
+WEBDIR=${WEBDIR:-"/tmp/website"}
+
 # Create configs
 for i in {1..10}
 do
@@ -22,4 +24,12 @@ do
 			* ) continue;;
 		esac
 	fi
+
+	USERDIR=$WEBDIR/$USER
+	rm -f $USERDIR/index.aspx
+	mkdir -p $USERDIR
+	chown $USER $USERDIR
+	chmod 750 $USERDIR
+	echo "$USER" > $USERDIR/index.aspx
+	chown $USER $USERDIR/index.aspx
 done

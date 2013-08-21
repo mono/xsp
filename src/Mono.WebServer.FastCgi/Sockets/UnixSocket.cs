@@ -33,38 +33,44 @@ using Mono.Unix;
 using System.Globalization;
 using Mono.WebServer.Log;
 using Mono.Unix.Native;
+using System.Net;
 
 namespace Mono.WebServer.FastCgi.Sockets {
 	class UnixSocket : StandardSocket, IDisposable {
 		string path;
-		readonly long? inode;
+		long? inode;
+		readonly uint? permissions;
 		
-		protected UnixSocket (UnixEndPoint localEndPoint)
+		protected UnixSocket (EndPoint localEndPoint)
 			: base (System.Net.Sockets.AddressFamily.Unix,
 			        System.Net.Sockets.SocketType.Stream,
 			        System.Net.Sockets.ProtocolType.IP,
 			        localEndPoint)
 		{
 		}
-		
-		public UnixSocket (string path) : this (path, null)
-		{
-		}
 
-		public UnixSocket (string path, uint? permissions) : this (CreateEndPoint (path))
+		public UnixSocket (string path, uint? permissions = null) : this (CreateEndPoint (path))
 		{
 			if (path == null)
 				throw new ArgumentNullException ("path");
 			this.path = path;
+			this.permissions = permissions;
+		}
+
+		public override void Listen (int backlog)
+		{
+			base.Listen (backlog);
 			try {
-				if (path.StartsWith("\0"))
+				if (path.StartsWith("\0", StringComparison.Ordinal))
 					inode = null;
 				else {
-					inode = new UnixFileInfo (path).Inode;
+					var info = new UnixFileInfo (path);
+					inode = info.Inode;
 					if (permissions != null)
 						Syscall.chmod (path, NativeConvert.ToFilePermissions (permissions.Value));
 				}
-			} catch (InvalidOperationException) {
+			} catch (InvalidOperationException e) {
+				Logger.Write (LogLevel.Error, e.Message);
 				Logger.Write (LogLevel.Error, "Path \"{0}\" doesn't exist?", path);
 				throw;
 			}
@@ -97,6 +103,11 @@ namespace Mono.WebServer.FastCgi.Sockets {
 			}
 			
 			return ep;
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[UnixSocket] {0}", path);
 		}
 		
 		public void Dispose ()

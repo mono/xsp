@@ -67,10 +67,10 @@ namespace Mono.WebServer.Fpm {
 					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", Process.Id, Path.GetFileName (Name));
 					// Let the daemon start
 					Thread.Sleep (300);
-				}
-				else
+				} else
 					throw new Exception ("Couldn't spawn child!");
-			}
+			} else
+				Logger.Write (LogLevel.Debug, "Recycling child with pid {0}", Process.Id);
 
 			Socket onDemandSocket;
 			FastCgi.Server.TryCreateUnixSocket (ConfigurationManager.OnDemandSock, out onDemandSocket);

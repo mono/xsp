@@ -61,6 +61,7 @@ namespace Mono.WebServer.Options {
 			Logger.Level = LogLevels;
 			OpenLogFile ();
 			Logger.WriteToConsole = PrintLog;
+			Logger.Verbose = Verbose;
 		}
 
 		void OpenLogFile ()

@@ -116,7 +116,10 @@ namespace Mono.WebServer.FastCgi
 			}
 
 			var stoppable = configurationManager.Stoppable;
-			server.Start (stoppable, (int)configurationManager.Backlog);
+			if (!server.Start (stoppable, (int)configurationManager.Backlog)) {
+				Logger.Write (LogLevel.Error, "Failed to start server!");
+				return 1;
+			}
 			
 			if (stoppable) {
 				Console.WriteLine (
@@ -311,7 +314,9 @@ namespace Mono.WebServer.FastCgi
 				return TryCreatePipe (out socket);
 			case "unix":
 			case "file":
-				return TryCreateUnixSocket (uri.Host, out socket, uri.UserInfo);
+				if (String.IsNullOrEmpty (uri.PathAndQuery))
+					throw new ArgumentException (String.Format ("Path is null in \"{0}\"", uri));
+				return TryCreateUnixSocket (uri.PathAndQuery, out socket, uri.UserInfo);
 			case "tcp":
 				return TryCreateTcpSocket (uri.Host, uri.Port, out socket);
 			default:
@@ -324,9 +329,7 @@ namespace Mono.WebServer.FastCgi
 		{
 			switch (socket_kind.ToLower ()) {
 			case "pipe":
-				creator = delegate(ConfigurationManager configmanager, string[] socketParts, out Socket socket) {
-					return TryCreatePipe (out socket);
-				};
+				creator = (ConfigurationManager configmanager, string[] socketParts, out Socket socket) => TryCreatePipe (out socket);
 				return true;
 				// The FILE sockets is of the format
 				// "file[:PATH]".
@@ -369,10 +372,8 @@ namespace Mono.WebServer.FastCgi
 			socket = null;
 
 			IPAddress address;
-			if (!IPAddress.TryParse (ip, out address)) {
-				Logger.Write (LogLevel.Debug, "\"{0}\" cannot be converted to an IP address.", ip);
+			if (!IPAddress.TryParse (ip, out address))
 				return false;
-			}
 
 			socket = new TcpSocket (address, port);
 			return true;
@@ -444,20 +445,22 @@ namespace Mono.WebServer.FastCgi
 			socket = null;
 			try {
 				string realPath;
-				if (path.StartsWith ("\\0") && path.IndexOf ('\0', 1) < 0)
+				if (path.StartsWith ("\\0", StringComparison.Ordinal) && path.IndexOf ("\\0", 1, StringComparison.Ordinal) < 0)
 					realPath = '\0' + path.Substring (2);
 				else
 					realPath = path;
 
-				ushort uperm = UInt16.MaxValue;
-				if (perm != null) {
+				if (perm == null)
+					socket = new UnixSocket (realPath);
+				else {
+					ushort uperm;
 					if (!UInt16.TryParse (perm, out uperm)) {
-						Logger.Write (LogLevel.Error, "Error parsing permissions. Use octal");
+						Logger.Write (LogLevel.Error, "Error parsing permissions \"{0}\". Use octal.", perm);
 						return false;
 					}
-					socket = new UnixSocket(realPath, uperm);
+					uperm = Convert.ToUInt16 (uperm.ToString (), 8);
+					socket = new UnixSocket (realPath, uperm);
 				}
-				socket = new UnixSocket (realPath);
 			}
 			catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);

@@ -29,16 +29,17 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace System
+namespace Mono.WebServer.FastCgi.Compatibility
 {
 	[Serializable]
 	public struct CompatArraySegment<T>
-		: IList<T>, IReadOnlyList<T>
+		: IReadOnlyList<T>
 	{
-		T [] array;
+		readonly T [] array;
 		readonly int offset, count;
 
 		public T [] Array {
@@ -51,12 +52,6 @@ namespace System
 
 		public int Count {
 			get { return count; }
-		}
-
-		bool ICollection<T>.IsReadOnly {
-			get {
-				return true;
-			}
 		}
 
 		T IReadOnlyList<T>.this[int index] {
@@ -77,15 +72,6 @@ namespace System
 					throw new ArgumentOutOfRangeException ("index");
 
 				array[offset + index] = value;
-			}
-		}
-
-		T IList<T>.this[int index] {
-			get {
-				return this [index];
-			}
-			set {
-				this [index] = value;
 			}
 		}
 
@@ -127,78 +113,35 @@ namespace System
 			count = array.Length;
 		}
 
-		public CompatArraySegment<T> Trim (int size)
+		public CompatArraySegment<T> Trimmed (int size)
 		{
 			return new CompatArraySegment<T> (array, offset, size);
 		}
 
 		public override bool Equals (Object obj)
 		{
-			if (obj is ArraySegment<T>) {
-				return Equals((ArraySegment<T>) obj);
-			}
-			return false;
+			return obj is ArraySegment<T> && Equals ((ArraySegment<T>) obj);
 		}
 
 		public bool Equals (ArraySegment<T> obj)
 		{
-			if ((array == obj.Array) && (offset == obj.Offset) && (count == obj.Count))
-				return true;
-			return false;
+			return array == obj.Array && offset == obj.Offset && count == obj.Count;
 		}
 
 		public override int GetHashCode ()
 		{
 			// TODO: fix this
-			return ((array.GetHashCode () ^ offset) ^ count);
+			return array.GetHashCode () ^ offset ^ count;
 		}
 
 		public static bool operator ==(CompatArraySegment<T> a, CompatArraySegment<T> b)
 		{
-			return a.Equals(b);
+			return a.Equals (b);
 		}
 
 		public static bool operator !=(CompatArraySegment<T> a, CompatArraySegment<T> b)
 		{
-			return !(a.Equals(b));
-		}
-
-		void ICollection<T>.Add (T item)
-		{
-			throw new NotSupportedException ();
-		}
-
-		void ICollection<T>.Clear ()
-		{
-			throw new NotSupportedException ();
-		}
-
-		bool ICollection<T>.Remove (T item)
-		{
-			throw new NotSupportedException ();
-		}
-
-		void IList<T>.Insert (int index, T item)
-		{
-			throw new NotSupportedException ();
-		}
-
-		void IList<T>.RemoveAt (int index)
-		{
-			throw new NotSupportedException ();
-		}
-
-		bool ICollection<T>.Contains (T item)
-		{
-			return System.Array.IndexOf (array, item, offset, count) >= 0;
-		}
-
-		void ICollection<T>.CopyTo (T[] array, int arrayIndex)
-		{
-			if (array == null)
-				throw new ArgumentNullException ("array");
-
-			System.Array.Copy (this.array, offset, array, arrayIndex, count);
+			return !a.Equals (b);
 		}
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator ()
@@ -210,12 +153,6 @@ namespace System
 		IEnumerator IEnumerable.GetEnumerator ()
 		{
 			return ((IEnumerable<T>) this).GetEnumerator ();
-		}
-
-		int IList<T>.IndexOf (T item)
-		{
-			var res = System.Array.IndexOf (array, item, offset, count);
-			return res < 0 ? -1 : res - offset;
 		}
 
 		public void CopyTo(T[] dest, int destIndex, int count)

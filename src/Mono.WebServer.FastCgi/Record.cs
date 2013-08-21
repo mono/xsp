@@ -1,8 +1,9 @@
-using Mono.FastCgi;
 using System;
 using System.Collections.Generic;
-using Mono.WebServer.Log;
 using System.Globalization;
+using Mono.WebServer.Log;
+using Mono.FastCgi;
+using Mono.WebServer.FastCgi.Compatibility;
 
 namespace Mono.WebServer.FastCgi {
 	struct Record
@@ -92,9 +93,12 @@ namespace Mono.WebServer.FastCgi {
 
 		public IReadOnlyList<byte> GetBody ()
 		{
-			return Content.Body.Value.Trim (BodyLength);
+			if (Content.Body == null)
+				return null;
+			return Content.Body.Value.Trimmed (BodyLength);
 		}
 
+		[Obsolete]
 		public void CopyTo (byte[] dest, int destIndex)
 		{
 			if (dest == null)

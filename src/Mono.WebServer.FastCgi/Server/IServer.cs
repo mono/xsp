@@ -34,7 +34,7 @@ namespace Mono.WebServer.FastCgi
 	{
 		event EventHandler RequestReceived;
 
-		void Start (bool background, int backlog);
+		bool Start (bool background, int backlog);
 		void Stop ();
 	}
 }

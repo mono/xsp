@@ -5,7 +5,7 @@ using TP = Mono.Security.Protocol.Tls;
 namespace Mono.WebServer.XSP {
 	class ConfigurationManager : ServerConfigurationManager
 	{
-		public ConfigurationManager (bool quietDefault)
+		public ConfigurationManager (string name, bool quietDefault) : base (name)
 		{
 			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
 				minThreads, port,
@@ -87,7 +87,7 @@ namespace Mono.WebServer.XSP {
 		}
 		#endregion
 
-		public override string Name {
+		public override string ProgramName {
 			get { return "xsp"; }
 		}
 

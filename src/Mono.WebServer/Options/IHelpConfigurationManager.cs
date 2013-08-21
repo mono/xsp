@@ -2,7 +2,7 @@
 
 namespace Mono.WebServer.Options {
 	public interface IHelpConfigurationManager {
-		string Name { get; }
+		string ProgramName { get; }
 		string Description { get; }
 		OptionSet CreateOptionSet ();
 	}

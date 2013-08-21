@@ -51,7 +51,7 @@ namespace Mono.WebServer.Fpm {
 		}
 		#endregion
 
-		public string Name {
+		public string ProgramName {
 			get { return "mono-fpm"; }
 		}
 
@@ -59,7 +59,7 @@ namespace Mono.WebServer.Fpm {
 			get { return "mono-fpm is a FastCgi process manager."; }
 		}
 
-		public ConfigurationManager ()
+		public ConfigurationManager (string name) : base(name)
 		{
 			Add (stoppable,
 				configDir, fastCgiCommand);

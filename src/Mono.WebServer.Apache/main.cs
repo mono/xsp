@@ -74,7 +74,7 @@ namespace Mono.WebServer.Apache {
 		//
 		public int RealMain (string [] args, bool root, IApplicationHost ext_apphost, bool v_quiet)
 		{
-			var configurationManager = new ConfigurationManager (v_quiet,
+			var configurationManager = new ConfigurationManager ("mod_mono", v_quiet,
 				ext_apphost == null ? null : ext_apphost.Path);
 
 			if (!configurationManager.LoadCommandLineArgs (args))

@@ -4,7 +4,7 @@ using Mono.WebServer.Options;
 namespace Mono.WebServer.Apache {
 	class ConfigurationManager : ServerConfigurationManager
 	{
-		public ConfigurationManager (bool quietDefault, string rootDefault)
+		public ConfigurationManager (string name, bool quietDefault, string rootDefault) : base(name)
 		{
 			Add (nonstop, quiet, noHidden, terminate, master,
 				port, minThreads,
@@ -60,7 +60,7 @@ namespace Mono.WebServer.Apache {
 		}
 		#endregion
 
-		public override string Name {
+		public override string ProgramName {
 			get { return "mod-mono-server.exe"; }
 		}
 

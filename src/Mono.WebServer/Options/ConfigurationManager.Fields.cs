@@ -3,11 +3,12 @@ using Mono.WebServer.Log;
 
 namespace Mono.WebServer.Options {
 	public abstract partial class ConfigurationManager {
-		protected ConfigurationManager ()
+		protected ConfigurationManager (string name)
 		{
 			settings = new SettingsCollection {help, version, verbose, printlog,
-			logFile, configFile,
+			logFile, configFile, this.name,
 			loglevels};
+			this.name.MaybeUpdate (SettingSource.Default, name);
 		}
 
 		#region Baking fields
@@ -18,6 +19,7 @@ namespace Mono.WebServer.Options {
 
 		readonly StringSetting logFile = new StringSetting ("logfile", "Specifies a file to log events to.", "FastCgiLogFile", "MONO_LOGFILE|MONO_FCGI_LOGFILE");
 		readonly StringSetting configFile = new StringSetting ("configfile|config-file", Descriptions.ConfigFile);
+		readonly StringSetting name = new StringSetting ("name", "Specifies a name to print in the log");
 
 		readonly EnumSetting<LogLevel> loglevels = new EnumSetting<LogLevel> ("loglevels", Descriptions.LogLevels, "FastCgiLogLevels", "MONO_FCGI_LOGLEVELS", LogLevel.Standard);
 		#endregion
@@ -42,6 +44,9 @@ namespace Mono.WebServer.Options {
 		public string ConfigFile {
 			get { return configFile; }
 		}
+		public string Name {
+			get { return name; }
+		}
 
 		public LogLevel LogLevels {
 			get { return loglevels; }
@@ -62,6 +67,7 @@ namespace Mono.WebServer.Options {
 			OpenLogFile ();
 			Logger.WriteToConsole = PrintLog;
 			Logger.Verbose = Verbose;
+			Logger.Name = Name;
 		}
 
 		void OpenLogFile ()

@@ -37,6 +37,7 @@ using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 using Mono.FastCgi;
 using Mono.WebServer.FastCgi.Sockets;
+using System.Diagnostics;
 
 namespace Mono.WebServer.FastCgi
 {
@@ -58,7 +59,7 @@ namespace Mono.WebServer.FastCgi
 
 		public static int Main (string [] args)
 		{
-			var configurationManager = new ConfigurationManager ();
+			var configurationManager = new ConfigurationManager ("fastcgi-mono-server");
 			if (!configurationManager.LoadCommandLineArgs (args))
 				return 1;
 			
@@ -150,6 +151,9 @@ namespace Mono.WebServer.FastCgi
 				pluto.End += (sender, e) => {
 					Logger.Write (LogLevel.Debug, "The dog bit!");
 					server.Stop ();
+					Logger.Write (LogLevel.Debug, "Server stopped, from thread {0}. There are {1} native threads left.",
+						System.Threading.Thread.CurrentThread.ManagedThreadId, Process.GetCurrentProcess ().Threads.Count);
+					Environment.Exit (0);
 				};
 
 				// Check every second for hearthbeats

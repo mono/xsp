@@ -4,7 +4,9 @@ SOCKDIR=${SOCKDIR:-"/tmp/sockets"}
 SOCKDIR_PERM=${SOCKDIR_PERM:-"3733"}
 
 WEBDIR=${WEBDIR:-"/tmp/website"}
-WEBDIR_PERM=${WEBDIR_PERM:-"755"}
+WEBDIR_PERM=${WEBDIR_PERM:-"3711"}
+
+HTTPD=${HTTPD:-"nginx"}
 
 if [ $(whoami) != "root" ]; then
     echo "You need to run this script as root."
@@ -38,8 +40,10 @@ function checkdir {
 		fi
 	fi
 
+	chgrp $HTTPD $DIR
+
 	return 0
 }
 
 checkdir $SOCKDIR $SOCKDIR_PERM
-checkdir $WEBDIR $WEBDIR_PERM && rm -rf $WEBDIR/* && cp -r website/* $WEBDIR/
+checkdir $WEBDIR $WEBDIR_PERM

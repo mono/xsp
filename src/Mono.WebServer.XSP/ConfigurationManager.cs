@@ -5,16 +5,6 @@ using TP = Mono.Security.Protocol.Tls;
 namespace Mono.WebServer.XSP {
 	class ConfigurationManager : ServerConfigurationManager
 	{
-		public ConfigurationManager (bool quietDefault)
-		{
-			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
-				minThreads, port,
-				p12File, cert, pkFile, pkPwd, pidFile,
-				protocols);
-			address.MaybeUpdate (SettingSource.Default, IPAddress.Any);
-			quiet.MaybeUpdate (SettingSource.Default, quietDefault);
-		}
-
 		#region Backing fields
 		readonly BoolSetting nonstop = new BoolSetting ("nonstop", "Don't stop the server by pressing enter. Must be used when the server has no controlling terminal.");
 		readonly BoolSetting quiet = new BoolSetting ("quiet", "Disable the initial start up information.");
@@ -87,7 +77,7 @@ namespace Mono.WebServer.XSP {
 		}
 		#endregion
 
-		public override string Name {
+		public override string ProgramName {
 			get { return "xsp"; }
 		}
 
@@ -95,6 +85,16 @@ namespace Mono.WebServer.XSP {
 			get {
 				return "XSP server is a sample server that hosts the ASP.NET runtime in a minimalistic HTTP server";
 			}
+		}
+
+		public ConfigurationManager (string name, bool quietDefault) : base (name)
+		{
+			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
+			     minThreads, port,
+			     p12File, cert, pkFile, pkPwd, pidFile,
+			     protocols);
+			address.MaybeUpdate (SettingSource.Default, IPAddress.Any);
+			quiet.MaybeUpdate (SettingSource.Default, quietDefault);
 		}
 	}
 }

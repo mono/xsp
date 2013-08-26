@@ -28,3 +28,6 @@ lib/fpm_helper.o
 lib/fpm_helper.lo
 lib/.deps
 lib/.libs
+shim/shim
+shim/shim-shim.o
+shim/.deps

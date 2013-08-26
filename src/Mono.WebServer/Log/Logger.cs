@@ -47,17 +47,13 @@ namespace Mono.WebServer.Log {
 
 		public static bool Verbose { get; set; }
 
-		[ThreadStatic]
-		static object context;
+		public static string Name { get; set; }
 
-		public static object Context {
+		static int? ThreadId {
 			get {
-				if (context == null && Verbose && (Level & LogLevel.Debug) != LogLevel.None)
-					context = Thread.CurrentThread.ManagedThreadId;
-				return context;
-			}
-			set {
-				context = value;
+				if (Verbose && (Level & LogLevel.Debug) != LogLevel.None)
+					return Thread.CurrentThread.ManagedThreadId;
+				return null;
 			}
 		}
 
@@ -96,18 +92,25 @@ namespace Mono.WebServer.Log {
 					Write (LogLevel.Error, line);
 		}
 
+		static string GetFormatString ()
+		{
+			return ThreadId == null 
+				? "[{1}] {2,-7}: {2}" 
+				: Name == null
+					? "{0,-2} [{1}] {2,-7}: {3}"
+					: "{0,-2} {4,-8} [{1}] {2,-7}: {3}";
+		}
+
 		public static void Write (LogLevel level, string message)
 		{
 			if ((Level & level) == LogLevel.None)
 				return;
 
-			string format = Context == null
-				? "[{1}] {2,-7}: {2}"
-				: "{0} [{1}] {2,-7}: {3}";
+			var format = GetFormatString ();
 			string time = Verbose
 				? DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss.ffffff")
 				: DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss");
-			string text = String.Format (CultureInfo.CurrentCulture, format, context, time, level, message);
+			string text = String.Format (CultureInfo.CurrentCulture, format, ThreadId, time, level, message, Name);
 
 			if (WriteToConsole)
 				lock (write_lock)

@@ -38,7 +38,7 @@ namespace Mono.WebServer.Fpm {
 	{
 		public static int Main (string [] args)
 		{
-			var configurationManager = new ConfigurationManager ();
+			var configurationManager = new ConfigurationManager ("mono-fpm");
 			if (!configurationManager.LoadCommandLineArgs (args))
 				return 1;
 

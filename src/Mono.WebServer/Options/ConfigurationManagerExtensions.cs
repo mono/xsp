@@ -10,7 +10,7 @@ namespace Mono.WebServer.Options {
 			Version.Show ();
 			Console.WriteLine (configurationManager.Description);
 			Console.WriteLine ("Usage is:\n");
-			Console.WriteLine ("    {0} [...]", configurationManager.Name);
+			Console.WriteLine ("    {0} [...]", configurationManager.ProgramName);
 			Console.WriteLine ();
 			configurationManager.CreateOptionSet ().WriteOptionDescriptions (Console.Out);
 		}
@@ -26,8 +26,8 @@ namespace Mono.WebServer.Options {
 			try {
 				extra = optionSet.Parse (cmd_args);
 			} catch (OptionException e) {
-				Console.WriteLine ("{0}: {1}", configurationManager.Name, e.Message);
-				Console.WriteLine ("Try `{0} --help' for more information.", configurationManager.Name);
+				Console.WriteLine ("{0}: {1}", configurationManager.ProgramName, e.Message);
+				Console.WriteLine ("Try `{0} --help' for more information.", configurationManager.ProgramName);
 				return false;
 			}
 

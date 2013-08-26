@@ -82,7 +82,7 @@ namespace Mono.WebServer.Fpm
 				if (fileInfo == null)
 					continue;
 				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
-				var childConfigurationManager = new ChildConfigurationManager ();
+				var childConfigurationManager = new ChildConfigurationManager ("child-" + fileInfo.Name);
 				string configFile = fileInfo.FullName;
 				if (!childConfigurationManager.TryLoadXmlConfig (configFile))
 					continue;

@@ -230,7 +230,7 @@ namespace Mono.WebServer.XSP
 				stream.Close ();
 				if (stream != netStream) {
 					netStream.Close ();
-				} else if (false == netStream.OwnsSocket) {
+				} else if (!netStream.OwnsSocket) {
 					try {
 						if (sock.Connected && !(sock.Poll (0, SelectMode.SelectRead) && sock.Available == 0))
 							sock.Shutdown (SocketShutdown.Both);

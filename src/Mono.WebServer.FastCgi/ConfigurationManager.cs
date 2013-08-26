@@ -31,7 +31,7 @@ using Mono.WebServer.Options;
 namespace Mono.WebServer.FastCgi {
 	public partial class ConfigurationManager
 	{
-		public ConfigurationManager ()
+		public ConfigurationManager (string name) : base (name)
 		{
 			Add(stoppable, multiplex, onDemand,
 				maxConns, maxReqs, port, idleTime,
@@ -103,7 +103,7 @@ namespace Mono.WebServer.FastCgi {
 		 */
 		#endregion
 
-		public override string Name {
+		public override string ProgramName {
 			get { return "mono-fastcgi"; }
 		}
 

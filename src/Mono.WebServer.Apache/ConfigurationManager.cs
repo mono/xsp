@@ -4,16 +4,6 @@ using Mono.WebServer.Options;
 namespace Mono.WebServer.Apache {
 	class ConfigurationManager : ServerConfigurationManager
 	{
-		public ConfigurationManager (string name, bool quietDefault, string rootDefault) : base(name)
-		{
-			Add (nonstop, quiet, noHidden, terminate, master,
-				port, minThreads,
-				filename, pidFile);
-			quiet.MaybeUpdate (SettingSource.Default, quietDefault);
-			if (rootDefault != null)
-				root.MaybeUpdate (SettingSource.Default, rootDefault);
-		}
-
 		#region Backing fields
 		readonly BoolSetting nonstop = new BoolSetting ("nonstop", "Don't stop the server by pressing enter. Must be used when the server has no controlling terminal.");
 		readonly BoolSetting quiet = new BoolSetting ("quiet", "Disable the initial start up information.");
@@ -66,6 +56,16 @@ namespace Mono.WebServer.Apache {
 
 		public override string Description {
 			get { return "mod-mono-server.exe is a ASP.NET server used from mod_mono."; }
+		}
+
+		public ConfigurationManager (string name, bool quietDefault, string rootDefault) : base(name)
+		{
+			Add (nonstop, quiet, noHidden, terminate, master,
+			     port, minThreads,
+			     filename, pidFile);
+			quiet.MaybeUpdate (SettingSource.Default, quietDefault);
+			if (rootDefault != null)
+				root.MaybeUpdate (SettingSource.Default, rootDefault);
 		}
 	}
 }

@@ -528,7 +528,7 @@ namespace Mono.FastCgi {
 	
 	public class DataReceivedArgs : EventArgs
 	{
-		NRecord record;
+		readonly NRecord record;
 
 		[Obsolete]
 		public DataReceivedArgs (Record record)

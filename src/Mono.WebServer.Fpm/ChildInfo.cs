@@ -64,7 +64,9 @@ namespace Mono.WebServer.Fpm {
 				throw new ArgumentNullException ("socket");
 			if (Process == null || Process.HasExited) {
 				if (TrySpawn ()) {
-					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", Process.Id, Path.GetFileName (Name));
+					int id = Process.Id;
+					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", id, Path.GetFileName (Name));
+					Process.Exited += (sender, e) => Logger.Write (LogLevel.Notice, "Fastcgi daemon [dynamic] with pid {0} exited", id);
 					// Let the daemon start
 					Thread.Sleep (300);
 				} else

@@ -38,7 +38,7 @@ namespace Mono.WebServer {
 	[Obsolete]
 	public class ConfigurationManager
 	{
-		readonly FastCgi.ConfigurationManager configurationManager = new FastCgi.ConfigurationManager ();
+		readonly FastCgi.ConfigurationManager configurationManager = new FastCgi.ConfigurationManager ("fastcgi-mono-server");
 
 		public ConfigurationManager (Assembly asm, string resource)
 		{

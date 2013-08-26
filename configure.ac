@@ -137,6 +137,7 @@ AC_CONFIG_FILES([Makefile
 	packaging/opensuse/Makefile
 	scripts/Makefile
 	lib/Makefile
+	shim/Makefile
 	src/Makefile
 	src/Mono.WebServer.Apache/Makefile
 	src/Mono.WebServer.FastCgi/Makefile

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Mono.WebServer.FastCgi.Compatibility;
 using NUnit.Framework;
 

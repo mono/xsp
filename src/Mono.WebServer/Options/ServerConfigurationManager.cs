@@ -36,10 +36,10 @@ namespace Mono.WebServer.Options {
 		public IPAddress Address { get { return address; } }
 		#endregion
 
-		public abstract string Name { get; }
+		public abstract string ProgramName { get; }
 		public abstract string Description { get; }
 
-		protected ServerConfigurationManager ()
+		protected ServerConfigurationManager (string name) : base (name)
 		{
 			Add (root, applications, appConfigFile, appConfigDir,
 				backlog,

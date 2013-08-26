@@ -462,10 +462,10 @@ namespace Mono.WebServer
 				// The next line can throw (reusing and the client closed)
 				Worker worker = webSource.CreateWorker (accepted, this);
 				worker.SetReuseCount (reuses);
-				if (false == worker.IsAsync)
-					ThreadPool.QueueUserWorkItem (worker.Run);
-				else
+				if (worker.IsAsync)
 					worker.Run (null);
+				else
+					ThreadPool.QueueUserWorkItem (worker.Run);
 			} catch (Exception) {
 				try {
 					if (accepted != null) {

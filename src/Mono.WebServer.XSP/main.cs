@@ -97,7 +97,7 @@ namespace Mono.WebServer.XSP
 		/// <param name="quiet">If set to <c>true</c> don't show messages. Used to avoid double printing of the banner.</param>
 		internal CompatTuple<int, string, ApplicationServer> DebugMain (string [] args, bool root, IApplicationHost ext_apphost, bool quiet)
 		{
-			var configurationManager = new ConfigurationManager (quiet);
+			var configurationManager = new ConfigurationManager ("xsp", quiet);
 			var security = new SecurityConfiguration ();
 
 			if (!ParseOptions (configurationManager, args, security))

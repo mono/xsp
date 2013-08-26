@@ -44,7 +44,7 @@ namespace Mono.WebServer.Fpm {
 			get { return instanceType; }
 		}
 
-		public ChildConfigurationManager ()
+		public ChildConfigurationManager (string name) : base (name)
 		{
 			Add (user, instanceType);
 		}

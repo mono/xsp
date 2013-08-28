@@ -91,12 +91,15 @@ namespace Mono.WebServer.Fpm
 				Func<Process> spawner;
 				switch (childConfigurationManager.InstanceType) {
 					case InstanceType.Ondemand:
+						if (String.IsNullOrEmpty (childConfigurationManager.ShimSocket))
+							throw new Exception ("You must specify a socket for the shim");
 						spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
 						break;
 					default:
 						spawner = () => Spawner.SpawnChild (configFile, fastCgiCommand, childConfigurationManager.InstanceType);
 						break;
 				}
+
 				Action spawnShim = () => Spawner.SpawnShim (configurationManager.ShimCommand, childConfigurationManager.ShimSocket, configFile, fastCgiCommand);
 
 				string user = childConfigurationManager.User;

@@ -34,6 +34,9 @@ using Mono.WebServer.Log;
 using Mono.FastCgi;
 using System.Text;
 using Mono.WebServer.FastCgi;
+using Mono.Unix;
+using System.Net.Sockets;
+using Mono.WebServer.FastCgi.Compatibility;
 
 namespace Mono.WebServer.Fpm
 {
@@ -94,23 +97,25 @@ namespace Mono.WebServer.Fpm
 		}
 
 		public static Process SpawnOndemandChild (string socketFile) {
-				Socket socket = null;
-			bool connected = false;
+			CompatArraySegment<byte>? torelease = null;
 			try {
 				Logger.Write (LogLevel.Debug, "Spawning via the shim {0}", socketFile);
-				if (!Mono.WebServer.FastCgi.Server.TryCreateUnixSocket (socketFile, out socket))
-					throw new Exception ("Couldn't create the socket " + socketFile);
-				socket.Connect ();
-				connected = true;
-				socket.Send (spawnString, 0, spawnString.Length, System.Net.Sockets.SocketFlags.None);
-				var buffer = buffers.ClaimBuffer ();
-				var receivedCount = socket.Receive (buffer.Array, buffer.Offset, buffer.Count, System.Net.Sockets.SocketFlags.None);
-				if (receivedCount < 0)
-					throw new Exception ("Didn't receive the child pid");
+				UnixClient client = new UnixClient ();
+				client.Connect (socketFile);
+				CompatArraySegment<byte> buffer = buffers.ClaimBuffer ();
+				torelease = buffer;
+				int receivedCount;
+				using (NetworkStream socket = client.GetStream()) {
+					socket.Write (spawnString, 0, spawnString.Length);
+					receivedCount = socket.Read (buffer.Array, buffer.Offset, buffer.Count);
+					if (receivedCount < 0)
+						throw new Exception ("Didn't receive the child pid");
+				}
 				string received = Encoding.UTF8.GetString (buffer.Array, buffer.Offset, receivedCount);
+				string clean = received.Trim ('\n');
 				int pid;
-				if (!Int32.TryParse (received, out pid))
-					throw new Exception ("Couldn't parse the pid \"" + received + "\"");
+				if (!Int32.TryParse (clean, out pid))
+					throw new Exception ("Couldn't parse the pid \"" + clean + "\"");
 
 				if (pid < 0)
 					throw new Exception ("Invalid pid: " + pid);
@@ -121,8 +126,8 @@ namespace Mono.WebServer.Fpm
 				Logger.Write (e);
 				return null;
 			} finally {
-				if (connected && socket != null)
-					socket.Close ();
+				if (torelease != null)
+					buffers.ReturnBuffer (torelease.Value);
 			}
 		}
 

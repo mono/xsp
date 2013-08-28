@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -12,9 +13,13 @@
 
 #define UNIX_PATH_MAX 108
 
+#define BUFFER_SIZE 100
+
 bool start_server (const char * path, int * socket_fd)
 {
-    *socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    assert (path != 0);
+    assert (socket_fd != 0);
+    *socket_fd = socket (AF_UNIX, SOCK_STREAM, 0);
     if (*socket_fd == -1) {
         perror ("socket");
         return false;
@@ -23,11 +28,12 @@ bool start_server (const char * path, int * socket_fd)
     struct sockaddr_un local;
     local.sun_family = AF_UNIX;
 
-    if (strlen(path) >= UNIX_PATH_MAX) {
-        fprintf(stderr, "Path %s is too long!", path);
+    if (strlen (path) >= UNIX_PATH_MAX) {
+        fprintf (stderr, "Path %s is too long!", path);
         return false;
     }
-    strcpy (local.sun_path, path);
+    strncpy (local.sun_path, path, UNIX_PATH_MAX - 1);
+    local.sun_path [UNIX_PATH_MAX - 1] = 0;
     if (unlink (path) == -1 && errno != ENOENT) {
         perror ("unlink");
         return false;
@@ -50,14 +56,16 @@ bool start_server (const char * path, int * socket_fd)
 
 pid_t spawn (char ** command)
 {
-	pid_t child = fork ();
+    assert (command != 0);
+    pid_t child = fork ();
     if (child)
         return child;
 
-    printf("Spawning!\n");
+    printf ("Spawning!\n");
 
-    if (!execv (command[0], command + 1)) {
-        perror("execv");
+    assert (command [0] != 0);
+    if (!execv (command [0], command + 1)) {
+        perror ("execv");
         exit (1);
     }
 
@@ -66,9 +74,11 @@ pid_t spawn (char ** command)
 
 bool run_connection (int fd, char ** command)
 {
+    assert (fd != 0);
+    assert (command != 0);
     for (;;) {
-        char buffer[100];
-        ssize_t received = recv (fd, buffer, 100, 0);
+        char buffer [BUFFER_SIZE];
+        ssize_t received = recv (fd, buffer, BUFFER_SIZE, 0);
 
         if (received < 0) {
             perror ("recv");
@@ -79,30 +89,30 @@ bool run_connection (int fd, char ** command)
             return true;
 
 
-        if (strcmp (buffer, "SPAWN\n") == 0) {
+        if (strncmp (buffer, "SPAWN\n", 6) == 0) {
             if (send (fd, buffer, received, 0) < 0) {
                 perror ("send");
                 return false;
             }
-			pid_t spawned = spawn (command);
+            pid_t spawned = spawn (command);
             if (spawned >= 0) {
-				sprintf (buffer, "%d", spawned);
-				int len = strlen (buffer);
-				buffer [len] = '\n';
-				buffer [len + 1] = 0;
+                snprintf (buffer, BUFFER_SIZE - 1, "%d\n", spawned);
+                buffer [BUFFER_SIZE - 1] = 0;
                 if (send (fd, buffer, received, 0) < 0) {
                     perror ("send");
                     return false;
                 }
             } else {
-                strcpy(buffer, "NOK\n");
+                strncpy (buffer, "NOK\n", 4);
+                buffer [5] = 0;
                 if (send (fd, buffer, received, 0) < 0) {
                     perror ("send");
                     return false;
                 }
             }
         } else {
-            strcpy(buffer, "NACK!\n");
+            strncpy (buffer, "NACK!\n", 6);
+            buffer [7] = 0;
             if (send (fd, buffer, received, 0) < 0) {
                 perror ("send");
                 return false;
@@ -123,7 +133,7 @@ int main (int argc, char * argv [])
     const char * path = argv [1];
     char ** command = argv + 2;
 
-    if (!start_server(path, &local_fd))
+    if (!start_server (path, &local_fd))
         return 1;
 
     for (;;) {
@@ -138,7 +148,7 @@ int main (int argc, char * argv [])
 
         printf ("Connected.\n");
 
-        if(!run_connection (remote_fd, command)) {
+        if (!run_connection (remote_fd, command)) {
             printf ("Something went wrong while processing input\n");
         }
 

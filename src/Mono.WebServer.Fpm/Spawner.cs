@@ -77,19 +77,19 @@ namespace Mono.WebServer.Fpm
 			if (fastCgiCommand == null)
 				throw new ArgumentNullException ("fastCgiCommand");
 			switch (type) {
-			case InstanceType.Static:
-			case InstanceType.Dynamic:
-				var process = new Process {
-					StartInfo = new ProcessStartInfo {
-						FileName = fastCgiCommand,
-						Arguments = String.Format (type == InstanceType.Dynamic ? "--configfile \"{0}\" --ondemand" : "--configfile \"{0}\"", configFile),
-						UseShellExecute = true
-					}
-				};
-				process.Start ();
-				return process;
-			default:
-				throw new ArgumentOutOfRangeException ("type");
+				case InstanceType.Static:
+				case InstanceType.Dynamic:
+					var process = new Process {
+						StartInfo = new ProcessStartInfo {
+							FileName = fastCgiCommand,
+							Arguments = String.Format (type == InstanceType.Dynamic ? "--configfile \"{0}\" --ondemand" : "--configfile \"{0}\"", configFile),
+							UseShellExecute = true
+						}
+					};
+					process.Start ();
+					return process;
+				default:
+					throw new ArgumentOutOfRangeException ("type");
 			}
 		}
 

@@ -5,7 +5,7 @@
 WEBDIR=${WEBDIR:-"/tmp/website"}
 
 # Create configs
-for i in {1..10}
+for i in {1..9}
 do
 	USER=user$i
 	XML=$USER.xml

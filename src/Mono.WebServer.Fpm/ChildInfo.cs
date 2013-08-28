@@ -41,20 +41,13 @@ namespace Mono.WebServer.Fpm {
 
 		public Process Process { get; private set; }
 
-		public Func<bool, Process> Spawner { get; set; }
+		public Func<Process> Spawner { get; set; }
 
 		public string Name { get; set; }
 
-		public bool OnDemand { get; set; }
-
-		public ChildInfo (Process process) : this()
-		{
-			Process = process;
-		}
-
 		public bool TrySpawn ()
 		{
-			Process = Spawner (OnDemand);
+			Process = Spawner ();
 			return Process != null && !Process.HasExited;
 		}
 
@@ -62,6 +55,7 @@ namespace Mono.WebServer.Fpm {
 		{
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
+			Logger.Write (LogLevel.Debug, "ChildInfo.OnAccept");
 			if (Process == null || Process.HasExited) {
 				if (TrySpawn ()) {
 					int id = Process.Id;
@@ -82,6 +76,11 @@ namespace Mono.WebServer.Fpm {
 			onDemandSocket.Close ();
 
 			return new Connection (socket);
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[ChildInfo: Name={0}]", Name);
 		}
 	}
 }

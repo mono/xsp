@@ -1,4 +1,5 @@
 <Settings>
+	<Setting Name="shimsock" Value="/tmp/sockets/shim-$(filename)" />
 	<Setting Name="ondemandsock" Value="\0back$(filename)" />
 	<Setting Name="user" Value="$(filename)" />
 	<Setting Name="name" Value="$(filename)" />

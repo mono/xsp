@@ -103,6 +103,7 @@ namespace Mono.WebServer.FastCgi
 						Logger.Write (LogLevel.Error, "Failed to start server: permission denied for socket {0}", listen_socket);
 						return false;
 					}
+					Logger.Write (LogLevel.Error, "Failed to start server {0}: {1}", listen_socket, e.Message);
 					throw;
 				}
 
@@ -159,6 +160,7 @@ namespace Mono.WebServer.FastCgi
 
 		void RunServer ()
 		{
+			Logger.Write (LogLevel.Debug, "Server started [callback: {0}]", serverCallback);
 			lock (state_lock) {
 				Started = true;
 			}

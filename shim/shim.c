@@ -48,10 +48,11 @@ bool start_server (const char * path, int * socket_fd)
     return true;
 }
 
-bool spawn (char ** command)
+pid_t spawn (char ** command)
 {
-    if (fork ())
-        return true;
+	pid_t child = fork ();
+    if (child)
+        return child;
 
     printf("Spawning!\n");
 
@@ -60,7 +61,7 @@ bool spawn (char ** command)
         exit (1);
     }
 
-    return false;
+    return -1;
 }
 
 bool run_connection (int fd, char ** command)
@@ -83,8 +84,12 @@ bool run_connection (int fd, char ** command)
                 perror ("send");
                 return false;
             }
-            if (spawn (command)) {
-                strcpy(buffer, "OK\n");
+			pid_t spawned = spawn (command);
+            if (spawned >= 0) {
+				sprintf (buffer, "%d", spawned);
+				int len = strlen (buffer);
+				buffer [len] = '\n';
+				buffer [len + 1] = 0;
                 if (send (fd, buffer, received, 0) < 0) {
                     perror ("send");
                     return false;

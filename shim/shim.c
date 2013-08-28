@@ -127,6 +127,10 @@ bool run_connection (int fd, char * command)
 
 int main (int argc, char * argv [])
 {
+	printf ("Shim: I'm uid %d euid %d\n", getuid (), geteuid ());
+	uid_t euid = geteuid ();
+	setreuid (euid, euid);
+	printf ("Shim: I'm uid %d euid %d\n", getuid (), geteuid ());
     int local_fd;
 
     if (argc <= 2) {
@@ -143,6 +147,10 @@ int main (int argc, char * argv [])
         total_length += strlen (argv [i]) + 1;
 
     char * command = malloc (total_length * sizeof (char));
+    if (!command) {
+        perror ("malloc");
+        return 1;
+    }
     int j = 0;
     for (i = 2; i < argc; i++) {
         strcpy(command + j, argv [i]);

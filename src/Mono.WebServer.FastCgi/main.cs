@@ -151,8 +151,8 @@ namespace Mono.WebServer.FastCgi
 				pluto.End += (sender, e) => {
 					Logger.Write (LogLevel.Debug, "The dog bit!");
 					server.Stop ();
-					Logger.Write (LogLevel.Debug, "Server stopped, from thread {0}. There are {1} native threads left.",
-						System.Threading.Thread.CurrentThread.ManagedThreadId, Process.GetCurrentProcess ().Threads.Count);
+					Logger.Write (LogLevel.Debug, "Server stopped.");
+					Logger.Write (LogLevel.Debug, "Goodbye!");
 					Environment.Exit (0);
 				};
 

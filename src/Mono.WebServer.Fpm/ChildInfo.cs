@@ -60,6 +60,7 @@ namespace Mono.WebServer.Fpm {
 				if (TrySpawn ()) {
 					int id = Process.Id;
 					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", id, Path.GetFileName (Name));
+					Process.EnableRaisingEvents = true;
 					Process.Exited += (sender, e) => Logger.Write (LogLevel.Notice, "Fastcgi daemon [dynamic] with pid {0} exited", id);
 					// Let the daemon start
 					Thread.Sleep (300);

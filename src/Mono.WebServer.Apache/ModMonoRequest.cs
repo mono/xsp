@@ -248,23 +248,18 @@ namespace Mono.WebServer
 				throw new ArgumentOutOfRangeException ("size", "Abnormal string size " + size);
 
 			var buf = new byte [size];
-			string s;
-			if (size != 0) {
-				int chunk;
-				int total = 0;
-				do {
-					chunk = reader.Read (buf, total, size - total);
-					if (chunk == 0)
-						throw new IOException ("Lost connection with mod_mono");
-					if (chunk > 0)
-						total += chunk;
-				} while ((chunk > 0 && total < size));
-
-				s = Encoding.UTF8.GetString (buf);
-			} else {
-				s = "";
-			}
-			return s;
+			if (size == 0)
+				return String.Empty;
+			int chunk;
+			int total = 0;
+			do {
+				chunk = reader.Read (buf, total, size - total);
+				if (chunk == 0)
+					throw new IOException ("Lost connection with mod_mono");
+				if (chunk > 0)
+					total += chunk;
+			} while ((chunk > 0 && total < size));
+			return Encoding.UTF8.GetString (buf);
 		}
 
 		void WriteString (string s)

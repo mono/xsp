@@ -158,10 +158,8 @@ namespace Mono.WebServer.FastCgi
 					connections.Remove (connection);
 			}
 
-			if (!accepting && CanAccept) {
-				Logger.Write (LogLevel.Debug, "");
+			if (!accepting && CanAccept)
 				BeginAccept ();
-			}
 		}
 
 		void RunServer ()

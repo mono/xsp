@@ -71,7 +71,7 @@ namespace Mono.WebServer.FastCgi
 				buffers.Push (new CompatArraySegment<byte> (toadd, i, segmentSize));
 		}
 
-		public CompatArraySegment<byte>? ClaimBuffer ()
+		public CompatArraySegment<byte> ClaimBuffer ()
 		{
 			lock (bufferLock)
 			{

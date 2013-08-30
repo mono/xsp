@@ -203,7 +203,7 @@ namespace Mono.WebServer
 		protected override bool GetRequestData ()
 		{
 			if (TryDirectory ()) {
-				pathInfo = "";
+				pathInfo = String.Empty;
 				return true;
 			}
 

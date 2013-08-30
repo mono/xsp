@@ -187,7 +187,7 @@ namespace Mono.WebServer
 
 					req = req.Trim ();
 					// Ignore empty lines before the actual request.
-					if (req != "")
+					if (req.Length > 0)
 						break;
 				}
 			} catch (Exception) {
@@ -228,9 +228,7 @@ namespace Mono.WebServer
 
 		static string GetSafePath (string path)
 		{
-			string trail = "";
-			if (path.EndsWith ("/"))
-				trail = "/";
+			bool appendSlash = path.EndsWith ("/");
 
 			path = HttpUtility.UrlDecode (path);
 			path = path.Replace ('\\','/');
@@ -243,7 +241,7 @@ namespace Mono.WebServer
 			int end = parts.Length;
 			for (int i = 0; i < end; i++) {
 				string current = parts [i];
-				if (current == "" || current == "." )
+				if (current.Length == 0 || current == "." )
 					continue;
 
 				if (current == "..") {
@@ -258,8 +256,15 @@ namespace Mono.WebServer
 			if (result.Count == 0)
 				return "/";
 
-			result.Insert (0, "");
-			return String.Join ("/", result.ToArray ()) + trail;
+			StringBuilder res = new StringBuilder();
+			foreach (var part in result) {
+				res.Append ('/');
+				res.Append (part);
+			}
+
+			if (appendSlash)
+				res.Append ('/');
+			return res.ToString ();
 		}
 		
 		public void ReadRequestData ()

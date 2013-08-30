@@ -464,7 +464,7 @@ namespace Mono.WebServer.FastCgi
 			for (int i = 0; i < parts.Length; i ++) {
 				string s = parts [i];
 				if (String.IsNullOrEmpty (s)) {
-					parts [i] = "";
+					parts [i] = String.Empty;
 					continue;
 				}
 

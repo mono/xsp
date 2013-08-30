@@ -33,11 +33,15 @@ namespace Mono.WebServer.Fpm {
 	class ChildConfigurationManager : FastCgi.ConfigurationManager
 	{
 		readonly StringSetting user = new StringSetting ("user", String.Empty);
+		readonly StringSetting shimSocket = new StringSetting ("shimsock", String.Empty);
 
-		readonly EnumSetting<InstanceType> instanceType = new EnumSetting<InstanceType>("instance-type", "The kind of instance (static or dynamic)", defaultValue:InstanceType.Dynamic);
+		readonly EnumSetting<InstanceType> instanceType = new EnumSetting<InstanceType>("instance-type", "The kind of instance (static, ondemand or dynamic)", defaultValue:InstanceType.Ondemand);
 
 		public string User {
 			get { return user; }
+		}
+		public string ShimSocket {
+			get { return shimSocket; }
 		}
 
 		public InstanceType InstanceType {
@@ -46,7 +50,7 @@ namespace Mono.WebServer.Fpm {
 
 		public ChildConfigurationManager (string name) : base (name)
 		{
-			Add (user, instanceType);
+			Add (user, shimSocket, instanceType);
 		}
 	}
 }

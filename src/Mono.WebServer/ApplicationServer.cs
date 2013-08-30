@@ -229,7 +229,7 @@ namespace Mono.WebServer
  			if (applications == null)
  				throw new ArgumentNullException ("applications");
  
- 			if (applications == "")
+			if (applications.Length == 0)
 				return;
 
 			if (Verbose && !SingleApplication) {

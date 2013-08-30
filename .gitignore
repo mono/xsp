@@ -29,5 +29,6 @@ lib/fpm_helper.lo
 lib/.deps
 lib/.libs
 shim/shim
+shim/shimtest
 shim/shim-shim.o
 shim/.deps

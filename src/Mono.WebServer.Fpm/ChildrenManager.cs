@@ -81,41 +81,64 @@ namespace Mono.WebServer.Fpm
 			foreach (FileInfo fileInfo in configFiles) {
 				if (fileInfo == null)
 					continue;
-				Logger.Write (LogLevel.Debug, "Loading {0}", fileInfo.Name);
 				var childConfigurationManager = new ChildConfigurationManager ("child-" + fileInfo.Name);
+				Logger.Write (LogLevel.Debug, "Loaded {0} [{1}]", fileInfo.Name, childConfigurationManager.InstanceType.ToString ().ToLowerInvariant ());
 				string configFile = fileInfo.FullName;
 				if (!childConfigurationManager.TryLoadXmlConfig (configFile))
 					continue;
-				string user = childConfigurationManager.User;
 				string fastCgiCommand = configurationManager.FastCgiCommand;
 
-				Func<bool, Process> spawner;
-				if (Platform.IsUnix) {
-					if (String.IsNullOrEmpty (user)) {
-						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						user = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
-					}
-
-					spawner = onDemand => Spawner.RunAs (user, Spawner.SpawnChild, configFile, fastCgiCommand, onDemand);
-				} else {
-					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-					spawner = onDemand => Spawner.SpawnChild (configFile, fastCgiCommand, onDemand);
+				Func<Process> spawner;
+				switch (childConfigurationManager.InstanceType) {
+					case InstanceType.Ondemand:
+						if (String.IsNullOrEmpty (childConfigurationManager.ShimSocket))
+							throw new Exception ("You must specify a socket for the shim");
+						spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
+						break;
+					default:
+						spawner = () => Spawner.SpawnChild (configFile, fastCgiCommand, childConfigurationManager.InstanceType);
+						break;
 				}
-				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = configFile, OnDemand = childConfigurationManager.InstanceType == InstanceType.Dynamic };
+
+				Action spawnShim = () => Spawner.SpawnShim (configurationManager.ShimCommand, childConfigurationManager.ShimSocket, configFile, fastCgiCommand);
+
+				string user = childConfigurationManager.User;
+				if (String.IsNullOrEmpty (user)) {
+					if (Platform.IsUnix) {
+						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
+						string owner = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
+						if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
+							Spawner.RunAs (owner, spawnShim) ();
+						else
+							spawner = Spawner.RunAs (owner, spawner);
+					} else {
+						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
+						if (childConfigurationManager.InstanceType != InstanceType.Ondemand)
+							spawnShim ();
+					}
+				} else {
+					if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
+						Spawner.RunAs (user, spawnShim) ();
+					else
+						spawner = Spawner.RunAs (user, spawner);
+				}
+
+				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = configFile };
 				children.Add (child);
-				if (child.OnDemand){
+
+				if (childConfigurationManager.InstanceType == InstanceType.Static) {
+					if (child.TrySpawn ()) {
+						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (configFile));
+						Thread.Sleep (500);
+						// TODO: improve this (it's used to wait for the child to be ready)
+					} else
+						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", configFile);
+					break;
+				} else {
 					Socket socket;
 					if (FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
 						var server = new GenericServer<Connection> (socket, child);
 						server.Start (configurationManager.Stoppable, (int)childConfigurationManager.Backlog);
-					}
-
-				} else {
-					if (child.TrySpawn ()) {
-						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (configFile));
-						Thread.Sleep (500); // TODO: improve this (it's used to wait for the child to be ready)
-					} else {
-						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", configFile);
 					}
 				}
 			}

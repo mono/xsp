@@ -103,6 +103,7 @@ namespace Mono.WebServer.FastCgi
 						Logger.Write (LogLevel.Error, "Failed to start server: permission denied for socket {0}", listen_socket);
 						return false;
 					}
+					Logger.Write (LogLevel.Error, "Failed to start server {0}: {1}", listen_socket, e.Message);
 					throw;
 				}
 
@@ -117,6 +118,10 @@ namespace Mono.WebServer.FastCgi
 
 		public void Stop ()
 		{
+			// Avoid acquiring the lock if unneeded
+			if (stopped)
+				return;
+
 			lock (state_lock) {
 				if (stopped)
 					return;
@@ -124,20 +129,20 @@ namespace Mono.WebServer.FastCgi
 				if (!Started)
 					throw new InvalidOperationException (Strings.Server_NotStarted);
 
+				Started = false;
+				stopped = true;
+
+				Logger.Write (LogLevel.Debug, "Stopping now");
+
 				listen_socket.Close ();
-				lock (connections_lock) {
-					foreach (T c in new List<T> (connections)) {
+				lock (connections_lock)
+					foreach (T c in new List<T> (connections))
 						EndConnection (c);
-					}
-				}
 
 				stop_signal.Set ();
 				stopped_signal.WaitOne ();
 
 				runner = null;
-
-				Started = false;
-				stopped = true;
 			}
 		}
 
@@ -159,6 +164,7 @@ namespace Mono.WebServer.FastCgi
 
 		void RunServer ()
 		{
+			Logger.Write (LogLevel.Debug, "Server started [callback: {0}]", serverCallback);
 			lock (state_lock) {
 				Started = true;
 			}
@@ -183,6 +189,11 @@ namespace Mono.WebServer.FastCgi
 			try {
 				try {
 					Socket accepted = listen_socket.EndAccept (ares);
+					if (stopped) {
+						Logger.Write (LogLevel.Debug, "Shutting down...");
+						accepted.Close();
+						return;
+					}
 					connection = serverCallback.OnAccept (accepted);
 					created = true;
 					lock (connections_lock)

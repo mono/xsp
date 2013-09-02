@@ -31,7 +31,6 @@ using System;
 using System.Diagnostics;
 using System.Security.Principal;
 using Mono.WebServer.Log;
-using Mono.FastCgi;
 using System.Text;
 using Mono.WebServer.FastCgi;
 using Mono.Unix;
@@ -42,8 +41,8 @@ namespace Mono.WebServer.Fpm
 {
 	static class Spawner 
 	{
-		static byte[] spawnString = Encoding.UTF8.GetBytes ("SPAWN\n");
-		static BufferManager buffers = new BufferManager (100);
+		static readonly byte[] spawnString = Encoding.UTF8.GetBytes ("SPAWN\n");
+		static readonly BufferManager buffers = new BufferManager (100);
 
 		public static Action RunAs(string user, Action action)
 		{
@@ -71,7 +70,7 @@ namespace Mono.WebServer.Fpm
 			};
 		}
 
-		public static Process SpawnChild (string configFile, string fastCgiCommand, InstanceType type)
+		public static Process SpawnStaticChild (string configFile, string fastCgiCommand)
 		{
 			if (configFile == null)
 				throw new ArgumentNullException ("configFile");
@@ -79,28 +78,22 @@ namespace Mono.WebServer.Fpm
 				throw new ArgumentException ("Config file name can't be empty", "configFile");
 			if (fastCgiCommand == null)
 				throw new ArgumentNullException ("fastCgiCommand");
-			switch (type) {
-				case InstanceType.Static:
-				case InstanceType.Dynamic:
-					var process = new Process {
-						StartInfo = new ProcessStartInfo {
-							FileName = fastCgiCommand,
-							Arguments = String.Format (type == InstanceType.Dynamic ? "--configfile \"{0}\" --ondemand" : "--configfile \"{0}\"", configFile),
-							UseShellExecute = true
-						}
-					};
-					process.Start ();
-					return process;
-				default:
-					throw new ArgumentOutOfRangeException ("type");
-			}
+			var process = new Process {
+				StartInfo = new ProcessStartInfo {
+					FileName = fastCgiCommand,
+					Arguments = String.Format ("--configfile \"{0}\"", configFile),
+					UseShellExecute = true
+				}
+			};
+			process.Start ();
+			return process;
 		}
 
 		public static Process SpawnOndemandChild (string socketFile) {
 			CompatArraySegment<byte>? torelease = null;
 			try {
 				Logger.Write (LogLevel.Debug, "Spawning via the shim {0}", socketFile);
-				UnixClient client = new UnixClient ();
+				var client = new UnixClient ();
 				client.Connect (socketFile);
 				CompatArraySegment<byte> buffer = buffers.ClaimBuffer ();
 				torelease = buffer;

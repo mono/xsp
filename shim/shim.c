@@ -73,6 +73,8 @@ bool start_server (const char * path, int * socket_fd)
         perror ("listen");
         return false;
     }
+    
+    chmod (path, 0660);
 
     return true;
 }

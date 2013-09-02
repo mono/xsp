@@ -40,6 +40,22 @@ checkdir $CONFIGDIR $CONFIGDIR_PERM
 cp template $CONFIGDIR
 cd $CONFIGDIR
 
+function checkuser {
+	USR=$1
+
+	getent passwd $USR  > /dev/null
+
+	if [ $? != 0 ]; then
+		read -p "User $USR doesn't exist, create it? [y/N]" CREATEUSER
+		case $CREATEUSER in
+			[Yy]* )	useradd $USR -N -M -s /sbin/nologin -d /dev/null;;
+			* ) return 1;;
+		esac
+	fi
+	
+	return 0
+}
+
 # Create configs
 for i in {1..9}
 do
@@ -51,15 +67,7 @@ do
 		echo $XML
 	fi
 
-	getent passwd $USER  > /dev/null
-
-	if [ $? != 0 ]; then
-		read -p "User $USER doesn't exist, create it? [y/N]" CREATEUSER
-		case $CREATEUSER in
-			[Yy]* )	useradd $USER -N -M -s /sbin/nologin -d /dev/null;;
-			* ) continue;;
-		esac
-	fi
+	checkuser $USER || continue
 
 	USERDIR=$WEBDIR/$USER
 	rm -f $USERDIR/index.aspx

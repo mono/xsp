@@ -54,14 +54,28 @@ bool start_server (const char * path, int * socket_fd)
     return true;
 }
 
-pid_t spawn (char * command)
+pid_t spawn (char * command, int fd)
 {
     assert (command != 0);
+    printf ("Spawning!\n");
     pid_t child = fork ();
     if (child)
-        return child;
+        return 0;
 
-    printf ("Spawning!\n");
+	if (setsid () == -1) {
+		perror ("setsid");
+		exit(1);
+	}
+
+	child = fork ();
+	if (child) {
+		char buffer [BUFFER_SIZE];
+		int written = snprintf (buffer, BUFFER_SIZE - 1, "%d\n", child);
+		buffer [written] = 0;
+		send (fd, buffer, written, 0);
+		exit (0);
+		return -1;
+	}
 
     char * args [4];
     args [0] = "/bin/sh";
@@ -95,20 +109,12 @@ bool run_connection (int fd, char * command)
 
 
         if (strncmp (buffer, "SPAWN\n", 6) == 0) {
-            pid_t spawned = spawn (command);
-            if (spawned >= 0) {
-                int written = snprintf (buffer, BUFFER_SIZE - 1, "%d\n", spawned);
-                buffer [written] = 0;
-                printf ("Shim: Sending %d\n", spawned);
-                if (send (fd, buffer, received, 0) < 0) {
-                    perror ("send");
-                    return false;
-                }
-            } else {
+            pid_t spawned = spawn (command, fd);
+            if (spawned != 0) {
                 strncpy (buffer, "NOK\n", 4);
                 buffer [5] = 0;
                 printf ("Shim: Sending NOK\n");
-                if (send (fd, buffer, received, 0) < 0) {
+                if (send (fd, buffer, 5, 0) < 0) {
                     perror ("send");
                     return false;
                 }
@@ -117,7 +123,7 @@ bool run_connection (int fd, char * command)
             strncpy (buffer, "NACK!\n", 6);
             buffer [7] = 0;
             printf ("Shim: Sending NACK!\n");
-            if (send (fd, buffer, received, 0) < 0) {
+            if (send (fd, buffer, 7, 0) < 0) {
                 perror ("send");
                 return false;
             }

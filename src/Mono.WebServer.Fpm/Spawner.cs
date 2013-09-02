@@ -112,7 +112,7 @@ namespace Mono.WebServer.Fpm
 						throw new Exception ("Didn't receive the child pid");
 				}
 				string received = Encoding.UTF8.GetString (buffer.Array, buffer.Offset, receivedCount);
-				string clean = received.Trim ('\n');
+				string clean = received.Trim ();
 				int pid;
 				if (!Int32.TryParse (clean, out pid))
 					throw new Exception ("Couldn't parse the pid \"" + clean + "\"");

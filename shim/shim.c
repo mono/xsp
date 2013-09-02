@@ -15,10 +15,11 @@
 
 #define BUFFER_SIZE 10
 
-#if DEBUG
-#define log(str) printf ("Shim: %s\n", str)
-#define log(fmt, ...) {printf ("Shim: "); printf (fmt, __VA_ARGS__); printf ("\n");}
+#ifdef DEBUG
+#define log1(str) printf ("Shim [%5d]: %s\n", getpid (), str)
+#define log(fmt, ...) do{printf ("Shim [%5d]: ", getpid ()); printf (fmt, __VA_ARGS__); printf ("\n");}while(0)
 #else
+#define log1(str)
 #define log(...)
 #endif
 
@@ -31,8 +32,10 @@ ssize_t send_int (int fd, int value)
 {
     int size = snprintf (NULL, 0, "%d", value);
     char buffer [size + 1];
-    snprintf (buffer, size, "%d", value);
-    send (fd, buffer, size, 0);
+    snprintf (buffer, size + 1, "%d", value);
+    buffer [size] = 0;
+    log("%d (%s) has size %d", value, buffer, size);
+    return send_string (fd, buffer);
 }
 
 bool start_server (const char * path, int * socket_fd)
@@ -77,10 +80,12 @@ bool start_server (const char * path, int * socket_fd)
 pid_t spawn (char * command, int fd)
 {
     assert (command != 0);
-    log ("Spawning!");
+    log1 ("Spawning!");
     pid_t child = fork ();
     if (child)
         return 0;
+
+    log1 ("Forked!");
 
     if (setsid () == -1) {
         perror ("setsid");
@@ -90,9 +95,12 @@ pid_t spawn (char * command, int fd)
     child = fork ();
     if (child) {
         send_int (fd, child);
+        log ("Sent pid %d", child);
         exit (0);
         return -1;
     }
+
+    log1 ("Reforked!");
 
     char * args [4];
     args [0] = "/bin/sh";
@@ -127,14 +135,14 @@ bool run_connection (int fd, char * command)
         if (strncmp (buffer, "SPAWN\n", 6) == 0) {
             pid_t spawned = spawn (command, fd);
             if (spawned != 0) {
-                log ("Sending NOK");
+                log1 ("Sending NOK");
                 if (send_string (fd, "NOK\n") < 0) {
                     perror ("send");
                     return false;
                 }
             }
         } else {
-            log ("Sending NACK!");
+            log1 ("Sending NACK!");
             if (send_string (fd, "NACK!\n") < 0) {
                 perror ("send");
                 return false;
@@ -147,6 +155,7 @@ int main (int argc, char * argv [])
 {
     uid_t euid = geteuid ();
     setreuid (euid, euid);
+	log1 ("Started.");
     log ("I'm uid %d euid %d", getuid (), geteuid ());
 
     if (argc <= 2) {
@@ -182,7 +191,7 @@ int main (int argc, char * argv [])
         return 1;
 
     for (;;) {
-        log ("Waiting for a connection...");
+        log1 ("Waiting for a connection...");
         struct sockaddr_un remote;
         socklen_t t = sizeof (remote);
         int remote_fd = accept (local_fd, (struct sockaddr *)&remote, &t);
@@ -191,10 +200,10 @@ int main (int argc, char * argv [])
             return 1;
         }
 
-        log ("Connected.");
+        log1 ("Connected.");
 
         if (!run_connection (remote_fd, command))
-            log ("Something went wrong while processing input");
+            log1 ("Something went wrong while processing input");
 
         close (remote_fd);
     }

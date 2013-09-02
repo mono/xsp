@@ -24,15 +24,15 @@
 
 ssize_t send_string (int fd, const char * value)
 {
-	return send (fd, value, strlen (value), 0);
+    return send (fd, value, strlen (value), 0);
 }
 
 ssize_t send_int (int fd, int value)
 {
-	int size = snprintf (NULL, 0, "%d", value);
-	char buffer [size + 1];
-	snprintf (buffer, size, "%d", value);
-	send (fd, buffer, size, 0);
+    int size = snprintf (NULL, 0, "%d", value);
+    char buffer [size + 1];
+    snprintf (buffer, size, "%d", value);
+    send (fd, buffer, size, 0);
 }
 
 bool start_server (const char * path, int * socket_fd)
@@ -82,17 +82,17 @@ pid_t spawn (char * command, int fd)
     if (child)
         return 0;
 
-	if (setsid () == -1) {
-		perror ("setsid");
-		exit(1);
-	}
+    if (setsid () == -1) {
+        perror ("setsid");
+        exit(1);
+    }
 
-	child = fork ();
-	if (child) {
-		send_int (fd, child);
-		exit (0);
-		return -1;
-	}
+    child = fork ();
+    if (child) {
+        send_int (fd, child);
+        exit (0);
+        return -1;
+    }
 
     char * args [4];
     args [0] = "/bin/sh";
@@ -145,10 +145,9 @@ bool run_connection (int fd, char * command)
 
 int main (int argc, char * argv [])
 {
-	uid_t euid = geteuid ();
-	setreuid (euid, euid);
-	log ("I'm uid %d euid %d", getuid (), geteuid ());
-    int local_fd;
+    uid_t euid = geteuid ();
+    setreuid (euid, euid);
+    log ("I'm uid %d euid %d", getuid (), geteuid ());
 
     if (argc <= 2) {
         fprintf (stderr, "Usage: %s <socket> <command>\n", argv [0]);
@@ -178,6 +177,7 @@ int main (int argc, char * argv [])
 
     log ("Will run %s", command);
 
+    int local_fd;
     if (!start_server (path, &local_fd))
         return 1;
 

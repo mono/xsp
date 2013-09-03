@@ -25,7 +25,7 @@
 
 ssize_t send_string (int fd, const char * value)
 {
-    return send (fd, value, strlen (value), 0);
+    return send (fd, value, strlen (value) + 1, 0);
 }
 
 ssize_t send_int (int fd, int value)

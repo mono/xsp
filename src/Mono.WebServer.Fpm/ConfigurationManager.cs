@@ -37,6 +37,8 @@ namespace Mono.WebServer.Fpm {
 		readonly StringSetting configDir = new StringSetting ("config-dir", "Directory containing the configuration files.");
 		readonly StringSetting fastCgiCommand = new StringSetting ("fastcgi-command", "Name (if in PATH) or full path of the fastcgi executable", defaultValue: "fastcgi-mono-server4");
 		readonly StringSetting shimCommand = new StringSetting ("shim-command", "Name (if in PATH) or full path of the shim executable", defaultValue: "shim");
+		readonly StringSetting fpmUser = new StringSetting("fpm-user", "Name of the user to use for the fpm daemon", defaultValue: "fpm");
+		readonly StringSetting fpmGroup = new StringSetting("fpm-group", "Name of the group to use for the fpm daemon", defaultValue: "fpm");
 		#endregion
 
 		#region Typesafe properties
@@ -53,6 +55,12 @@ namespace Mono.WebServer.Fpm {
 		public string ShimCommand {
 			get { return shimCommand; }
 		}
+		public string FpmUser {
+			get { return fpmUser; }
+		}
+		public string FpmGroup {
+			get { return fpmGroup; }
+		}
 		#endregion
 
 		public string ProgramName {
@@ -65,8 +73,7 @@ namespace Mono.WebServer.Fpm {
 
 		public ConfigurationManager (string name) : base(name)
 		{
-			Add (stoppable,
-				configDir, fastCgiCommand);
+			Add (stoppable, configDir, fastCgiCommand, fpmUser, fpmGroup);
 		}
 	}
 }

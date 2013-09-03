@@ -1,49 +1,44 @@
 #!/bin/bash
 
-SOCKDIR=${SOCKDIR:-"/tmp/sockets"}
-SOCKDIR_PERM=${SOCKDIR_PERM:-"3733"}
+. vars.sh
+. functions.sh
 
-WEBDIR=${WEBDIR:-"/tmp/website"}
-WEBDIR_PERM=${WEBDIR_PERM:-"3711"}
+checkuser "fpm" "" || exit 1
 
-HTTPD=${HTTPD:-"nginx"}
+checkdir $CONFIGDIR $CONFIGDIR_PERM $CONFIGDIR_GROUP
+checkdir $SOCKDIR   $SOCKDIR_PERM   $SOCKDIR_GROUP
+checkdir $SHIMDIR   $SHIMDIR_PERM   $SHIMDIR_GROUP
+checkdir $WEBDIR    $WEBDIR_PERM    $WEBDIR_GROUP
 
-if [ $(whoami) != "root" ]; then
-    echo "You need to run this script as root."
-    echo "Use 'sudo ./$(basename $0)' then enter your password when prompted."
-    exit 1
+diff template  "$CONFIGDIR/template" 2> /dev/null
+if [ $? == 1 -o ! -f "$CONFIGDIR/template" ]; then
+    sudo cp template $CONFIGDIR
 fi
 
-function checkdir {
-	DIR=$1
-	PERM=$2
-	# Create dir
-	if [ ! -d $DIR ]; then
-		if [ -e $DIR ]; then
-			echo "$DIR exists but it's not a directory!"
-			exit 1
-		fi
+cd $CONFIGDIR
 
-		mkdir $DIR
-		chmod $PERM $DIR
-	fi
+# Create configs
+for i in {1..9}
+do
+    USER=user$i
+    XML=$USER.xml
+    
+    if [ ! -h "$XML" ]; then
+        sudo ln -s template $XML
+    fi
 
-	# Fix permissions
-	RPERM=$(stat -c '%a' $DIR)
-	if [ $RPERM != $PERM ]; then
-		read -p "Wrong permissions ($RPERM), set to $PERM? [Y/n] " FIXPERM
-		FIXPERM=${FIXPERM:-y}
-		if [ $FIXPERM == "y" ] || [ $FIXPERM == "n" ]; then
-			chmod $PERM $DIR
-		else
-			return 1
-		fi
-	fi
+    checkuser $USER "-N" || continue
 
-	chgrp $HTTPD $DIR
+    USERDIR=$WEBDIR/$USER
+    if [ ! -d "$USERDIR" ]; then
+        sudo mkdir -p $USERDIR
+        sudo chown $USER $USERDIR
+        sudo chmod 750 $USERDIR
+    fi
+    if [ ! -f "$USERDIR/index.aspx" ]; then
+        echo "<p>$USER</p>\n<p><%=\"Test\"%></p>" | sudo tee $USERDIR/index.aspx > /dev/null
+        sudo chown $USER $USERDIR/index.aspx
+    fi
+done
 
-	return 0
-}
-
-checkdir $SOCKDIR $SOCKDIR_PERM
-checkdir $WEBDIR $WEBDIR_PERM
+cd - > /dev/null

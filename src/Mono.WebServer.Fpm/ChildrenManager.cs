@@ -95,8 +95,8 @@ namespace Mono.WebServer.Fpm
 							throw new Exception ("You must specify a socket for the shim");
 						spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
 						break;
-					default:
-						spawner = () => Spawner.SpawnChild (configFile, fastCgiCommand, childConfigurationManager.InstanceType);
+					default: // Static
+						spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
 						break;
 				}
 

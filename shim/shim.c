@@ -13,7 +13,30 @@
 
 #define UNIX_PATH_MAX 108
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 10
+
+#ifdef DEBUG
+#define log1(str) printf ("Shim [%5d]: %s\n", getpid (), str)
+#define log(fmt, ...) do{printf ("Shim [%5d]: ", getpid ()); printf (fmt, __VA_ARGS__); printf ("\n");}while(0)
+#else
+#define log1(str)
+#define log(...)
+#endif
+
+ssize_t send_string (int fd, const char * value)
+{
+    return send (fd, value, strlen (value) + 1, 0);
+}
+
+ssize_t send_int (int fd, int value)
+{
+    int size = snprintf (NULL, 0, "%d", value);
+    char buffer [size + 1];
+    snprintf (buffer, size + 1, "%d", value);
+    buffer [size] = 0;
+    log("%d (%s) has size %d", value, buffer, size);
+    return send_string (fd, buffer);
+}
 
 bool start_server (const char * path, int * socket_fd)
 {
@@ -29,7 +52,7 @@ bool start_server (const char * path, int * socket_fd)
     local.sun_family = AF_UNIX;
 
     if (strlen (path) >= UNIX_PATH_MAX) {
-        fprintf (stderr, "Path %s is too long!", path);
+        fprintf (stderr, "Shim: Path %s is too long!", path);
         return false;
     }
     strncpy (local.sun_path, path, UNIX_PATH_MAX - 1);
@@ -50,18 +73,36 @@ bool start_server (const char * path, int * socket_fd)
         perror ("listen");
         return false;
     }
+    
+    chmod (path, 0660);
 
     return true;
 }
 
-pid_t spawn (char * command)
+pid_t spawn (char * command, int fd)
 {
     assert (command != 0);
+    log1 ("Spawning!");
     pid_t child = fork ();
     if (child)
-        return child;
+        return 0;
 
-    printf ("Spawning!\n");
+    log1 ("Forked!");
+
+    if (setsid () == -1) {
+        perror ("setsid");
+        exit(1);
+    }
+
+    child = fork ();
+    if (child) {
+        send_int (fd, child);
+        log ("Sent pid %d", child);
+        exit (0);
+        return -1;
+    }
+
+    log1 ("Reforked!");
 
     char * args [4];
     args [0] = "/bin/sh";
@@ -93,31 +134,18 @@ bool run_connection (int fd, char * command)
         if (received == 0)
             return true;
 
-
         if (strncmp (buffer, "SPAWN\n", 6) == 0) {
-            pid_t spawned = spawn (command);
-            if (spawned >= 0) {
-                int written = snprintf (buffer, BUFFER_SIZE - 1, "%d\n", spawned);
-                buffer [written] = 0;
-                printf ("Shim: Sending %d\n", spawned);
-                if (send (fd, buffer, received, 0) < 0) {
-                    perror ("send");
-                    return false;
-                }
-            } else {
-                strncpy (buffer, "NOK\n", 4);
-                buffer [5] = 0;
-                printf ("Shim: Sending NOK\n");
-                if (send (fd, buffer, received, 0) < 0) {
+            pid_t spawned = spawn (command, fd);
+            if (spawned != 0) {
+                log1 ("Sending NOK");
+                if (send_string (fd, "NOK\n") < 0) {
                     perror ("send");
                     return false;
                 }
             }
         } else {
-            strncpy (buffer, "NACK!\n", 6);
-            buffer [7] = 0;
-            printf ("Shim: Sending NACK!\n");
-            if (send (fd, buffer, received, 0) < 0) {
+            log1 ("Sending NACK!");
+            if (send_string (fd, "NACK!\n") < 0) {
                 perror ("send");
                 return false;
             }
@@ -127,11 +155,10 @@ bool run_connection (int fd, char * command)
 
 int main (int argc, char * argv [])
 {
-	printf ("Shim: I'm uid %d euid %d\n", getuid (), geteuid ());
-	uid_t euid = geteuid ();
-	setreuid (euid, euid);
-	printf ("Shim: I'm uid %d euid %d\n", getuid (), geteuid ());
-    int local_fd;
+    uid_t euid = geteuid ();
+    setreuid (euid, euid);
+	log1 ("Started.");
+    log ("I'm uid %d euid %d", getuid (), geteuid ());
 
     if (argc <= 2) {
         fprintf (stderr, "Usage: %s <socket> <command>\n", argv [0]);
@@ -159,13 +186,14 @@ int main (int argc, char * argv [])
     }
     command [total_length - 1] = 0;
 
-    printf ("Shim: Will run %s\n", command);
+    log ("Will run %s", command);
 
+    int local_fd;
     if (!start_server (path, &local_fd))
         return 1;
 
     for (;;) {
-        printf ("Shim: Waiting for a connection...\n");
+        log1 ("Waiting for a connection...");
         struct sockaddr_un remote;
         socklen_t t = sizeof (remote);
         int remote_fd = accept (local_fd, (struct sockaddr *)&remote, &t);
@@ -174,11 +202,10 @@ int main (int argc, char * argv [])
             return 1;
         }
 
-        printf ("Shim: Connected.\n");
+        log1 ("Connected.");
 
-        if (!run_connection (remote_fd, command)) {
-            printf ("Shim: Something went wrong while processing input\n");
-        }
+        if (!run_connection (remote_fd, command))
+            log1 ("Something went wrong while processing input");
 
         close (remote_fd);
     }

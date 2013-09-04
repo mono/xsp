@@ -44,28 +44,32 @@ namespace Mono.WebServer.Fpm
 		static readonly byte[] spawnString = Encoding.UTF8.GetBytes ("SPAWN\n");
 		static readonly BufferManager buffers = new BufferManager (100);
 
-		public static Action RunAs(string user, Action action)
+		public static Action RunAs(string user, string group, Action action)
 		{
 			if (user == null)
 				throw new ArgumentNullException ("user");
 			if (action == null)
 				throw new ArgumentNullException ("action");
 			return () => {
-				using (var identity = new WindowsIdentity(user))
-					using (identity.Impersonate())
-						action ();
+				var identity = Platform.Impersonate (user, group);
+				if (identity == null)
+					return;
+				using (identity)
+					action ();
 			};
 		}
 
-		public static Func<T> RunAs<T>(string user, Func<T> action)
+		public static Func<T> RunAs<T>(string user, string group, Func<T> action)
 		{
 			if (user == null)
 				throw new ArgumentNullException ("user");
 			if (action == null)
 				throw new ArgumentNullException ("action");
 			return () => {
-				using (var identity = new WindowsIdentity(user))
-				using (identity.Impersonate())
+				var identity = Platform.Impersonate (user, group);
+				if (identity == null)
+					return default (T);
+				using (identity)
 					return action ();
 			};
 		}

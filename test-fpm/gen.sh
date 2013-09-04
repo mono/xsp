@@ -36,7 +36,7 @@ do
         sudo chmod 750 $USERDIR
     fi
     if [ ! -f "$USERDIR/index.aspx" ]; then
-        echo "<p>$USER</p>\n<p><%=\"Test\"%></p>" | sudo tee $USERDIR/index.aspx > /dev/null
+        echo -e "<p>$USER</p>\n<p><%=\"Test\"%></p>" | sudo tee $USERDIR/index.aspx > /dev/null
         sudo chown $USER $USERDIR/index.aspx
     fi
 done

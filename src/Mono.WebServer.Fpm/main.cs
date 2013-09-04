@@ -38,40 +38,6 @@ using Mono.Unix;
 namespace Mono.WebServer.Fpm {
 	public static class Server
 	{
-		static ConfigurationManager SetUid (ConfigurationManager configurationManager)
-		{
-			UnixUserInfo fpm = null;
-			try {
-				fpm = new UnixUserInfo (configurationManager.FpmUser);
-			}
-			catch (ArgumentException e) {
-				Logger.Write (e);
-			}
-			if (fpm != null) {
-				var userId = fpm.UserId;
-				if (userId > UInt32.MaxValue || userId <= 0)
-					Logger.Write (LogLevel.Error, "Uid for {0} ({1}) not in range for suid", configurationManager.FpmUser, userId);
-				Syscall.setuid ((uint)userId);
-			}
-			return configurationManager;
-		}
-
-		static void SetGid(ConfigurationManager configurationManager)
-		{
-			UnixGroupInfo fpmGroup = null;
-			try {
-				fpmGroup = new UnixGroupInfo (configurationManager.FpmGroup);
-			} catch (ArgumentException e) {
-				Logger.Write (e);
-			}
-			if (fpmGroup != null) {
-				var groupId = fpmGroup.GroupId;
-				if (groupId > UInt32.MaxValue || groupId <= 0)
-					Logger.Write (LogLevel.Error, "Gid for {0} ({1}) not in range for sgid", configurationManager.FpmGroup, groupId);
-				Syscall.setgid ((uint)groupId);
-			}
-		}
-
 		public static int Main (string [] args)
 		{
 			var configurationManager = new ConfigurationManager ("mono-fpm");
@@ -123,13 +89,7 @@ namespace Mono.WebServer.Fpm {
 			FileInfo[] configFiles = configDirInfo.GetFiles ("*.xml");
 			ChildrenManager.StartChildren (configFiles, configurationManager);
 
-			if (Platform.IsUnix) {
-				SetGid (configurationManager);
-				SetUid (configurationManager);
-
-				Logger.Write (LogLevel.Debug, "Uid {0}, euid {1}, gid {2}, egid {3}", Syscall.getuid (), Syscall.geteuid (), Syscall.getgid (), Syscall.getegid ());
-			} else
-				Logger.Write (LogLevel.Warning, "Not dropping privileges");
+			Platform.SetIdentity (configurationManager.FpmUser, configurationManager.FpmGroup);
 
 			if (!configurationManager.Stoppable) {
 				var sleep = new ManualResetEvent (false);

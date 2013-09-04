@@ -40,6 +40,12 @@ AC_ARG_WITH([unit-tests],
  AC_HELP_STRING([--with-unit-tests],[build the unit tests]),
  [UNIT_TESTS=$withval])
 
+AC_CHECK_FUNCS(send recv bind listen accept \
+ chmod unlink fork execv exit \
+ getpid getuid geteuid getgid getegid setreuid setregid \
+ strlen strncpy strncmp printf fprintf snprintf \
+ perror,, AC_MSG_ERROR("Cannot find standard functions"))
+
 # Mono
 SHAMROCK_CHECK_MONO_MODULE(2.10.0)
 SHAMROCK_FIND_MONO_2_0_COMPILER

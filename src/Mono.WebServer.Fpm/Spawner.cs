@@ -51,11 +51,13 @@ namespace Mono.WebServer.Fpm
 			if (action == null)
 				throw new ArgumentNullException ("action");
 			return () => {
-				var identity = Platform.Impersonate (user, group);
-				if (identity == null)
-					return;
-				using (identity)
-					action ();
+				try{
+					using (Platform.Impersonate (user, group))
+						action ();
+				} catch (ArgumentException e) {
+					Logger.Write (LogLevel.Error, "Couldn't run as {0} {1}!", user, group);
+					Logger.Write (e);
+				}
 			};
 		}
 
@@ -66,11 +68,14 @@ namespace Mono.WebServer.Fpm
 			if (action == null)
 				throw new ArgumentNullException ("action");
 			return () => {
-				var identity = Platform.Impersonate (user, group);
-				if (identity == null)
+				try{
+					using (Platform.Impersonate (user, group))
+						return action ();
+				} catch (ArgumentException e) {
+					Logger.Write (LogLevel.Error, "Couldn't run as {0} {1}!", user, group);
+					Logger.Write (e);
 					return default (T);
-				using (identity)
-					return action ();
+				}
 			};
 		}
 

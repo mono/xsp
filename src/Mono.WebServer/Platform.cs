@@ -41,52 +41,32 @@ namespace Mono.WebServer {
 			}
 		}
 
-		static uint? GetUid (string user)
+		static uint GetUid (string user)
 		{
-			UnixUserInfo info = null;
-			try {
-				info = new UnixUserInfo (user);
-			} catch (ArgumentException e) {
-				Logger.Write (e);
-			}
-			if (info != null) {
-				long uid = info.UserId;
-				if (uid <= UInt32.MaxValue && uid > 0)
-					return (uint)uid;
-				Logger.Write (LogLevel.Error, "Uid for {0} ({1}) not in range for suid", user, uid);
-			}
-			return null;
+			UnixUserInfo info = new UnixUserInfo (user);
+			long uid = info.UserId;
+			if (uid > UInt32.MaxValue || uid <= 0)
+				throw new ArgumentOutOfRangeException ("user", String.Format ("Uid for {0} ({1}) not in range for suid", user, uid));
+			return (uint)uid;
 		}
 
-		static uint? GetGid (string group)
+		static uint GetGid (string group)
 		{
-			UnixGroupInfo info = null;
-			try {
-				info = new UnixGroupInfo (group);
-			} catch (ArgumentException e) {
-				Logger.Write (e);
-			}
-			if (info != null) {
-				var gid = info.GroupId;
-				if (gid <= UInt32.MaxValue && gid > 0)
-					return (uint)gid;
-				Logger.Write (LogLevel.Error, "Gid for {0} ({1}) not in range for sgid", group, gid);
-			}
-			return null;
+			UnixGroupInfo info = new UnixGroupInfo (group);
+			var gid = info.GroupId;
+			if (gid > UInt32.MaxValue || gid <= 0)
+				throw new ArgumentOutOfRangeException ("group", String.Format ("Gid for {0} ({1}) not in range for sgid", group, gid));
+			return (uint)gid;
 		}
 
 		static void SetUser (string user)
 		{
-			uint? gid = GetUid (user);
-			if (gid != null)
-				Syscall.setuid (gid.Value);
+			Syscall.setuid (GetUid (user));
 		}
 
 		static void SetGroup (string group)
 		{
-			var uid = GetGid (group);
-			if (uid != null)
-				Syscall.setgid (uid.Value);
+			Syscall.setgid (GetGid (group));
 		}
 
 		public static void LogIdentity ()
@@ -118,16 +98,13 @@ namespace Mono.WebServer {
 
 		public static IDisposable Impersonate(string user,string group)
 		{
-			uint? uid = GetUid (user);
-			uint? gid = GetGid (group);
-			if (uid != null && gid != null) {
-				uint euid = Syscall.geteuid ();
-				uint egid = Syscall.getegid ();
-				Syscall.setegid (gid.Value);
-				Syscall.seteuid (uid.Value);
-				return new IdentityToken(euid, egid);
-			}
-			return null;
+			uint uid = GetUid (user);
+			uint gid = GetGid (group);
+			uint euid = Syscall.geteuid ();
+			uint egid = Syscall.getegid ();
+			Syscall.setegid (gid);
+			Syscall.seteuid (uid);
+			return new IdentityToken (euid, egid);
 		}
 	}
 }

@@ -114,5 +114,6 @@
     <Compile Include="Log\FileLogger.cs" />
     <Compile Include="Log\ILogger.cs" />
     <Compile Include="AssemblyInfo4.cs" />
+    <Compile Include="IdentityToken.cs" />
   </ItemGroup>
 </Project>

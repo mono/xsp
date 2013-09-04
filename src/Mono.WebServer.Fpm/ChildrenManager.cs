@@ -89,28 +89,25 @@ namespace Mono.WebServer.Fpm
 				string fastCgiCommand = configurationManager.FastCgiCommand;
 
 				Func<Process> spawner;
-				switch (childConfigurationManager.InstanceType) {
-					case InstanceType.Ondemand:
-						if (String.IsNullOrEmpty (childConfigurationManager.ShimSocket))
-							throw new Exception ("You must specify a socket for the shim");
-						spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
-						break;
-					default: // Static
-						spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
-						break;
-				}
+				if (childConfigurationManager.InstanceType == InstanceType.Ondemand) {
+					if (String.IsNullOrEmpty (childConfigurationManager.ShimSocket))
+						throw new Exception ("You must specify a socket for the shim");
+					spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
+				} else
+					spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
 
 				Action spawnShim = () => Spawner.SpawnShim (configurationManager.ShimCommand, childConfigurationManager.ShimSocket, configFile, fastCgiCommand);
 
 				string user = childConfigurationManager.User;
+				string group = childConfigurationManager.Group;
 				if (String.IsNullOrEmpty (user)) {
 					if (Platform.IsUnix) {
 						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
 						string owner = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
 						if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
-							Spawner.RunAs (owner, spawnShim) ();
+							Spawner.RunAs (owner, group, spawnShim) ();
 						else
-							spawner = Spawner.RunAs (owner, spawner);
+							spawner = Spawner.RunAs (owner, group, spawner);
 					} else {
 						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
 						if (childConfigurationManager.InstanceType != InstanceType.Ondemand)
@@ -118,9 +115,9 @@ namespace Mono.WebServer.Fpm
 					}
 				} else {
 					if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
-						Spawner.RunAs (user, spawnShim) ();
+						Spawner.RunAs (user, group, spawnShim) ();
 					else
-						spawner = Spawner.RunAs (user, spawner);
+						spawner = Spawner.RunAs (user, group, spawner);
 				}
 
 				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = configFile };

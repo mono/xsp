@@ -41,36 +41,52 @@ namespace Mono.WebServer {
 			}
 		}
 
-		static void SetUser (string fpmUser)
+		static uint? GetUid (string user)
 		{
-			UnixUserInfo fpm = null;
+			UnixUserInfo info = null;
 			try {
-				fpm = new UnixUserInfo (fpmUser);
+				info = new UnixUserInfo (user);
 			} catch (ArgumentException e) {
 				Logger.Write (e);
 			}
-			if (fpm != null) {
-				var userId = fpm.UserId;
-				if (userId > UInt32.MaxValue || userId <= 0)
-					Logger.Write (LogLevel.Error, "Uid for {0} ({1}) not in range for suid", fpmUser, userId);
-				Syscall.setuid ((uint)userId);
+			if (info != null) {
+				long uid = info.UserId;
+				if (uid <= UInt32.MaxValue && uid > 0)
+					return (uint)uid;
+				Logger.Write (LogLevel.Error, "Uid for {0} ({1}) not in range for suid", user, uid);
 			}
+			return null;
 		}
 
-		static void SetGroup (string fpmGroup)
+		static uint? GetGid (string group)
 		{
-			UnixGroupInfo fpm = null;
+			UnixGroupInfo info = null;
 			try {
-				fpm = new UnixGroupInfo (fpmGroup);
+				info = new UnixGroupInfo (group);
 			} catch (ArgumentException e) {
 				Logger.Write (e);
 			}
-			if (fpmGroup != null) {
-				var groupId = fpm.GroupId;
-				if (groupId > UInt32.MaxValue || groupId <= 0)
-					Logger.Write (LogLevel.Error, "Gid for {0} ({1}) not in range for sgid", fpmGroup, groupId);
-				Syscall.setgid ((uint)groupId);
+			if (info != null) {
+				var gid = info.GroupId;
+				if (gid <= UInt32.MaxValue && gid > 0)
+					return (uint)gid;
+				Logger.Write (LogLevel.Error, "Gid for {0} ({1}) not in range for sgid", group, gid);
 			}
+			return null;
+		}
+
+		static void SetUser (string user)
+		{
+			uint? gid = GetUid (user);
+			if (gid != null)
+				Syscall.setuid (gid.Value);
+		}
+
+		static void SetGroup (string group)
+		{
+			var uid = GetGid (group);
+			if (uid != null)
+				Syscall.setgid (uid.Value);
 		}
 
 		public static void LogIdentity ()
@@ -98,6 +114,20 @@ namespace Mono.WebServer {
 				LogIdentity ();
 			} else
 				Logger.Write (LogLevel.Warning, "Not dropping privileges");
+		}
+
+		public static IDisposable Impersonate(string user,string group)
+		{
+			uint? uid = GetUid (user);
+			uint? gid = GetGid (group);
+			if (uid != null && gid != null) {
+				uint euid = Syscall.geteuid ();
+				uint egid = Syscall.getegid ();
+				Syscall.setegid (gid.Value);
+				Syscall.seteuid (uid.Value);
+				return new IdentityToken(euid, egid);
+			}
+			return null;
 		}
 	}
 }

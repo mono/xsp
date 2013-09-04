@@ -157,8 +157,10 @@ int main (int argc, char * argv [])
 {
     uid_t euid = geteuid ();
     setreuid (euid, euid);
-	log1 ("Started.");
-    log ("I'm uid %d euid %d", getuid (), geteuid ());
+    gid_t egid = getegid ();
+    setregid (egid, egid);
+    log1 ("Started.");
+    log ("I'm uid %d euid %d gid %d egid %d", getuid (), geteuid (), getgid (), getegid ());
 
     if (argc <= 2) {
         fprintf (stderr, "Usage: %s <socket> <command>\n", argv [0]);

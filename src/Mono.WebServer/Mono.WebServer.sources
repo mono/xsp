@@ -5,6 +5,7 @@
 ./FinePlatformID.cs
 ./HttpErrors.cs
 ./IApplicationHost.cs
+./IdentityToken.cs
 ./InitialWorkerRequest.cs
 ./IRequestBroker.cs
 ./LingeringNetworkStream.cs

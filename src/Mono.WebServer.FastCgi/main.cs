@@ -37,7 +37,7 @@ using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 using Mono.FastCgi;
 using Mono.WebServer.FastCgi.Sockets;
-using System.Diagnostics;
+using Mono.Unix.Native;
 
 namespace Mono.WebServer.FastCgi
 {
@@ -50,15 +50,21 @@ namespace Mono.WebServer.FastCgi
 		static ApplicationServer appserver;
 
 		public static VPathToHost GetApplicationForPath (string vhost,
-                                                                 int port,
-                                                                 string path,
-                                                                 string realPath)
+		                                                 int port,
+		                                                 string path,
+		                                                 string realPath)
 		{
 			return appserver.GetApplicationForPath (vhost,	port, path, false);
 		}
 
 		public static int Main (string [] args)
 		{
+			if (Platform.IsUnix) {
+				uint uid = Syscall.geteuid ();
+				uint gid = Syscall.getegid ();
+				Platform.SetIdentity (uid, gid);
+			}
+
 			var configurationManager = new ConfigurationManager ("fastcgi-mono-server");
 			if (!configurationManager.LoadCommandLineArgs (args))
 				return 1;
@@ -89,8 +95,8 @@ namespace Mono.WebServer.FastCgi
 			Logger.Level = LogLevel.All;
 #endif
 
-			Logger.Write (LogLevel.Debug,
-				Assembly.GetExecutingAssembly ().GetName ().Name);
+			Logger.Write (LogLevel.Debug, Assembly.GetExecutingAssembly ().GetName ().Name);
+			Platform.LogIdentity ();
 
 			string root_dir;
 			if (!TryGetRootDirectory (configurationManager, out root_dir))
@@ -113,7 +119,7 @@ namespace Mono.WebServer.FastCgi
 				Socket socket;
 				if (!TryCreateSocket (configurationManager, out socket))
 					return 1;
-				server = new ServerProxy(CreateServer (configurationManager, socket));
+				server = new ServerProxy (CreateServer (configurationManager, socket));
 			}
 
 			var stoppable = configurationManager.Stoppable;
@@ -142,7 +148,7 @@ namespace Mono.WebServer.FastCgi
 				server.RequestReceived += (sender, e) => {
 					TryRunLocked (
 						() => aliveLock.TryEnterWriteLock (0),
-						() => {	alive = true; },
+						() => { alive = true; },
 						aliveLock.ExitWriteLock
 					);
 				};
@@ -164,7 +170,7 @@ namespace Mono.WebServer.FastCgi
 						() => {
 							if (!alive)
 								return;
-							RunLocked(
+							RunLocked (
 								aliveLock.EnterWriteLock,
 								() => { alive = false; },
 								aliveLock.ExitWriteLock
@@ -186,7 +192,7 @@ namespace Mono.WebServer.FastCgi
 				throw new ArgumentNullException ("code");
 			if (releaseLock == null)
 				throw new ArgumentNullException ("releaseLock");
-			TryRunLocked (() => {takeLock (); return true;}, code, releaseLock);
+			TryRunLocked (() => { takeLock (); return true; }, code, releaseLock);
 		}
 
 		static void TryRunLocked (Func<bool> takeLock, Action code, Action releaseLock)
@@ -302,7 +308,7 @@ namespace Mono.WebServer.FastCgi
 			if (Uri.TryCreate (socket_type, UriKind.Absolute, out uri) && TryCreateSocketFromUri (uri, out socket))
 				return true;
 
-			string[] socket_parts = socket_type.Split (new[] {':'}, 3);
+			string [] socket_parts = socket_type.Split (new [] { ':' }, 3);
 
 			SocketCreator creator;
 			return TryGetSocketCreator (socket_parts [0], out creator)
@@ -314,47 +320,46 @@ namespace Mono.WebServer.FastCgi
 			socket = null;
 			
 			switch (uri.Scheme) {
-			case "pipe":
-				return TryCreatePipe (out socket);
-			case "unix":
-			case "file":
-				if (String.IsNullOrEmpty (uri.PathAndQuery))
-					throw new ArgumentException (String.Format ("Path is null in \"{0}\"", uri));
-				return TryCreateUnixSocket (uri.PathAndQuery, out socket, uri.UserInfo);
-			case "tcp":
-				return TryCreateTcpSocket (uri.Host, uri.Port, out socket);
-			default:
-				Logger.Write (LogLevel.Error, WRONG_KIND, uri.Scheme);
-				return false;
+				case "pipe":
+					return TryCreatePipe (out socket);
+				case "unix":
+				case "file":
+					if (String.IsNullOrEmpty (uri.PathAndQuery))
+						throw new ArgumentException (String.Format ("Path is null in \"{0}\"", uri));
+					return TryCreateUnixSocket (uri.PathAndQuery, out socket, uri.UserInfo);
+				case "tcp":
+					return TryCreateTcpSocket (uri.Host, uri.Port, out socket);
+				default:
+					Logger.Write (LogLevel.Error, WRONG_KIND, uri.Scheme);
+					return false;
 			}
 		}
 
 		static bool TryGetSocketCreator (string socket_kind, out SocketCreator creator)
 		{
 			switch (socket_kind.ToLower ()) {
-			case "pipe":
-				creator = (ConfigurationManager configmanager, string[] socketParts, out Socket socket) => TryCreatePipe (out socket);
-				return true;
+				case "pipe":
+					creator = (ConfigurationManager configmanager, string [] socketParts, out Socket socket) => TryCreatePipe (out socket);
+					return true;
 				// The FILE sockets is of the format
 				// "file[:PATH]".
-			case "unix":
-			case "file":
-				creator = TryCreateUnixSocket;
-				return true;
+				case "unix":
+				case "file":
+					creator = TryCreateUnixSocket;
+					return true;
 				// The TCP socket is of the format
 				// "tcp[[:ADDRESS]:PORT]".
-			case "tcp":
-				creator = TryCreateTcpSocket;
-				return true;
-			default:
-				Logger.Write (LogLevel.Error, WRONG_KIND, socket_kind);
-				creator = null;
-				return false;
+				case "tcp":
+					creator = TryCreateTcpSocket;
+					return true;
+				default:
+					Logger.Write (LogLevel.Error, WRONG_KIND, socket_kind);
+					creator = null;
+					return false;
 			}
 		}
 
-		static bool TryGetRootDirectory (ConfigurationManager configurationManager,
-		                              out string rootDir)
+		static bool TryGetRootDirectory (ConfigurationManager configurationManager, out string rootDir)
 		{
 			rootDir = configurationManager.Root;
 			if (!String.IsNullOrEmpty (rootDir)) {
@@ -366,8 +371,7 @@ namespace Mono.WebServer.FastCgi
 				}
 			}
 			rootDir = Environment.CurrentDirectory;
-			Logger.Write (LogLevel.Debug, "Root directory: {0}",
-				rootDir);
+			Logger.Write (LogLevel.Debug, "Root directory: {0}", rootDir);
 			return true;
 		}
 
@@ -383,7 +387,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool TryCreateTcpSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
+		static bool TryCreateTcpSocket (ConfigurationManager configurationManager, string [] socketParts, out Socket socket)
 		{
 			socket = null;
 			ushort port;
@@ -418,23 +422,19 @@ namespace Mono.WebServer.FastCgi
 			try {
 				socket = new TcpSocket (address, port);
 			} catch (System.Net.Sockets.SocketException e) {
-				Logger.Write (LogLevel.Error,
-					"Error creating the socket: {0}",
-					e.Message);
+				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
 				return false;
 			}
 
-			Logger.Write (LogLevel.Debug,
-				"Listening on port: {0}", port);
-			Logger.Write (LogLevel.Debug,
-				"Listening on address: {0}", address);
+			Logger.Write (LogLevel.Debug, "Listening on port: {0}", port);
+			Logger.Write (LogLevel.Debug, "Listening on address: {0}", address);
 			return true;
 		}
 
-		static bool TryCreateUnixSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
+		static bool TryCreateUnixSocket (ConfigurationManager configurationManager, string [] socketParts, out Socket socket)
 		{
 			string path = socketParts.Length == 2
-				? socketParts[1]
+				? socketParts [1]
 				: configurationManager.Filename;
 
 			return TryCreateUnixSocket (path, out socket);
@@ -465,8 +465,7 @@ namespace Mono.WebServer.FastCgi
 					uperm = Convert.ToUInt16 (uperm.ToString (), 8);
 					socket = new UnixSocket (realPath, uperm);
 				}
-			}
-			catch (System.Net.Sockets.SocketException e) {
+			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
 				return false;
 			}
@@ -480,16 +479,13 @@ namespace Mono.WebServer.FastCgi
 			try {
 				socket = new UnmanagedSocket (IntPtr.Zero);
 			} catch (System.Net.Sockets.SocketException e) {
-				Logger.Write (LogLevel.Error,
-					"Pipe socket is not bound.");
+				Logger.Write (LogLevel.Error, "Pipe socket is not bound.");
 				Logger.Write (e);
 				var errorcode = e.SocketErrorCode;
-				Logger.Write (LogLevel.Debug,
-					"Errorcode: {0}", errorcode);
+				Logger.Write (LogLevel.Debug, "Errorcode: {0}", errorcode);
 				return false;
 			} catch (NotSupportedException) {
-				Logger.Write (LogLevel.Error,
-					"Error: Pipe sockets are not supported on this system.");
+				Logger.Write (LogLevel.Error, "Error: Pipe sockets are not supported on this system.");
 				return false;
 			}
 			return true;

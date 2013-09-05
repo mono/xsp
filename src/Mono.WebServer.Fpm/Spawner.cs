@@ -36,6 +36,7 @@ using Mono.WebServer.FastCgi;
 using Mono.Unix;
 using System.Net.Sockets;
 using Mono.WebServer.FastCgi.Compatibility;
+using System.IO;
 
 namespace Mono.WebServer.Fpm
 {
@@ -133,13 +134,17 @@ namespace Mono.WebServer.Fpm
 			}
 		}
 
-		public static void SpawnShim (string shimCommand, string socket, string configFile, string fastCgiCommand) {
+		public static void SpawnShim (string shimCommand, string socket, string fastCgiCommand, string configFile) {
+			if (shimCommand == null)
+				throw new ArgumentNullException ("shimCommand");
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
+			if (fastCgiCommand == null)
+				throw new ArgumentNullException ("fastCgiCommand");
 			if (configFile == null)
 				throw new ArgumentNullException ("configFile");
 			if (configFile.Length == 0)
 				throw new ArgumentException ("Config file name can't be empty", "configFile");
-			if (fastCgiCommand == null)
-				throw new ArgumentNullException ("fastCgiCommand");
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = shimCommand,
@@ -148,6 +153,29 @@ namespace Mono.WebServer.Fpm
 				}
 			};
 			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", shimCommand, process.StartInfo.Arguments);
+			process.Start ();
+		}
+
+		public static void SpawnShim (ConfigurationManager configurationManager, string shimSocket, string root, string onDemandSock) {
+			if (configurationManager == null)
+				throw new ArgumentNullException ("configurationManager");
+			if (shimSocket == null)
+				throw new ArgumentNullException ("shimSocket");
+			if (root == null)
+				throw new ArgumentNullException ("root");
+			if (onDemandSock == null)
+				throw new ArgumentNullException ("onDemandSock");
+			var arguments = String.Format ("{0} {1} --applications /:\"{2}\" --idle-time {3} --ondemand --ondemandsock unix://660@{4}{5} --loglevels {6} --name {7}", 
+			                               shimSocket, configurationManager.FastCgiCommand, root, configurationManager.ChildIdleTime, onDemandSock,
+			                               configurationManager.Verbose ? " --verbose" : String.Empty, configurationManager.LogLevels, Path.GetFileName (root));
+			var process = new Process {
+				StartInfo = new ProcessStartInfo {
+					FileName = configurationManager.ShimCommand,
+					Arguments = arguments,
+					UseShellExecute = true
+				}
+			};
+			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", configurationManager.ShimCommand, process.StartInfo.Arguments);
 			process.Start ();
 		}
 	}

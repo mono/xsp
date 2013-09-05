@@ -36,6 +36,8 @@ using System.Diagnostics;
 using Mono.FastCgi;
 using Mono.WebServer.FastCgi;
 using System.Threading;
+using System.Security.AccessControl;
+using Mono.Unix.Native;
 
 namespace Mono.WebServer.Fpm
 {
@@ -72,6 +74,78 @@ namespace Mono.WebServer.Fpm
 			children.RemoveAll (child => child.Process != null && child.Process.HasExited);
 		}
 
+		static void CreateAutomaticDirs (out string shimSocketDir, out string frontSocketDir, out string backSocketDir)
+		{
+			string socketDir = Path.Combine (Path.GetTempPath (), "mono-fpm-automatic");
+			CreateWithPerm (socketDir, "755");
+			shimSocketDir = Path.Combine (socketDir, "shim");
+			CreateWithPerm (shimSocketDir, "3733", "fpm");
+			frontSocketDir = Path.Combine (socketDir, "front");
+			CreateWithPerm (frontSocketDir, "3730", "nginx");
+			backSocketDir = Path.Combine (socketDir, "back");
+			CreateWithPerm (backSocketDir, "3733", "fpm");
+		}
+
+		public static void StartAutomaticChildren (IEnumerable<UnixDirectoryInfo> webDirs, ConfigurationManager configurationManager)
+		{
+			if (webDirs == null)
+				throw new ArgumentNullException ("webDirs");
+			if (configurationManager == null)
+				throw new ArgumentNullException ("configurationManager");
+
+			string shimSocketDir;
+			string frontSocketDir;
+			string backSocketDir;
+			CreateAutomaticDirs (out shimSocketDir, out frontSocketDir, out backSocketDir);
+			foreach (UnixDirectoryInfo directoryInfo in webDirs) {
+				if (directoryInfo == null)
+					continue;
+
+				var user = directoryInfo.OwnerUser.UserName;
+				var group = directoryInfo.OwnerGroup.GroupName;
+				var dirname = directoryInfo.Name;
+
+				if (directoryInfo.OwnerUserId < 100) {
+					Logger.Write (LogLevel.Debug, "Directory {0} skipped because owned by {1}:{2} ({3}:{4})",
+					              dirname, user, group, directoryInfo.OwnerUserId, directoryInfo.OwnerGroupId);
+					continue; // Skip non-user directories
+				}
+
+				string shimSocket = Path.Combine (shimSocketDir, dirname);
+				string frontSocket = Path.Combine (frontSocketDir, dirname);
+				string backSocket = Path.Combine (backSocketDir, dirname);
+
+				Func<Process> spawner = () => Spawner.SpawnOndemandChild (shimSocket);
+				Action spawnShim = () => Spawner.SpawnShim (configurationManager, shimSocket, directoryInfo.FullName, backSocket);
+				Spawner.RunAs (user, configurationManager.WebGroup, spawnShim) ();
+
+				var child = new ChildInfo { Spawner = spawner, OnDemandSock =  backSocket, Name = directoryInfo.FullName };
+				children.Add (child);
+				
+				PrepareAutomaticChild (configurationManager, frontSocket, child, 500);
+			}
+		}
+
+		static void PrepareAutomaticChild (ConfigurationManager configurationManager, string frontSocket, ChildInfo child, uint backlog)
+		{
+			Socket socket;
+			if (FastCgi.Server.TryCreateUnixSocket (frontSocket, out socket, "660")) {
+				var server = new GenericServer<Connection> (socket, child);
+				server.Start (configurationManager.Stoppable, (int)backlog);
+			}
+		}
+
+		static void CreateWithPerm (string path, string permissions, string groupName = null)
+		{
+			Directory.CreateDirectory (path);
+			uint perm = Convert.ToUInt32(permissions, 8);
+			Syscall.chmod (path, NativeConvert.ToFilePermissions (perm));
+			if (groupName == null)
+				return;
+			var group = new UnixGroupInfo (groupName);
+			Syscall.chown (path, 0, (uint)group.GroupId);
+		}
+
 		public static void StartChildren(FileInfo[] configFiles, ConfigurationManager configurationManager)
 		{
 			if (configFiles == null)
@@ -90,23 +164,29 @@ namespace Mono.WebServer.Fpm
 
 				var spawner = GetSpawner (configurationManager.ShimCommand, filename, childConfigurationManager, fullFilename, configurationManager.FastCgiCommand);
 
-				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = fullFilename };
+				var child = new ChildInfo { Spawner = spawner, OnDemandSock = childConfigurationManager.OnDemandSock, Name = fullFilename };
 				children.Add (child);
 
-				if (childConfigurationManager.InstanceType == InstanceType.Static) {
-					if (child.TrySpawn ()) {
-						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (fullFilename));
-						Thread.Sleep (500);
-						// TODO: improve this (it's used to wait for the child to be ready)
-					} else
-						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", fullFilename);
-					break;
-				} else {
-					Socket socket;
-					if (FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
-						var server = new GenericServer<Connection> (socket, child);
-						server.Start (configurationManager.Stoppable, (int)childConfigurationManager.Backlog);
-					}
+				PrepareChild (configurationManager, childConfigurationManager, fullFilename, child);
+			}
+		}
+
+		static void PrepareChild (ConfigurationManager configurationManager, ChildConfigurationManager childConfigurationManager, string fullFilename, ChildInfo child)
+		{
+			if (childConfigurationManager.InstanceType == InstanceType.Static) {
+				if (child.TrySpawn ()) {
+					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (fullFilename));
+					Thread.Sleep (500);
+					// TODO: improve this (it's used to wait for the child to be ready)
+				}
+				else
+					Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", fullFilename);
+			}
+			else {
+				Socket socket;
+				if (FastCgi.Server.TryCreateSocket (childConfigurationManager, out socket)) {
+					var server = new GenericServer<Connection> (socket, child);
+					server.Start (configurationManager.Stoppable, (int)childConfigurationManager.Backlog);
 				}
 			}
 		}
@@ -122,7 +202,7 @@ namespace Mono.WebServer.Fpm
 			else
 				spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
 
-			Action spawnShim = () => Spawner.SpawnShim (shimCommand, childConfigurationManager.ShimSocket, configFile, fastCgiCommand);
+			Action spawnShim = () => Spawner.SpawnShim (shimCommand, childConfigurationManager.ShimSocket, fastCgiCommand, configFile);
 			string user = childConfigurationManager.User;
 			string group = childConfigurationManager.Group;
 			if (String.IsNullOrEmpty (user)) {

@@ -36,8 +36,8 @@ namespace Mono.WebServer {
 
 		public static bool IsUnix {
 			get {
-				var platform = (int)Environment.OSVersion.Platform;
-				return platform == 4 || platform == 6 || platform == 128;
+				var platform = Environment.OSVersion.Platform;
+				return platform == PlatformID.Unix || platform == PlatformID.MacOSX || platform == (PlatformID)128;
 			}
 		}
 

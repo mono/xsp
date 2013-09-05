@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 
 #define bool char
@@ -109,6 +110,8 @@ pid_t spawn (char * command, int fd)
     args [1] = "-c";
     args [2] = command;
     args [3] = 0;
+
+	log ("Running /bin/sh -c %s", command);
 
     if (execv (*args, args) == -1) {
         perror ("execv");

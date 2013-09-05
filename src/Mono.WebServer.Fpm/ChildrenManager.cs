@@ -81,55 +81,25 @@ namespace Mono.WebServer.Fpm
 			foreach (FileInfo fileInfo in configFiles) {
 				if (fileInfo == null)
 					continue;
-				var childConfigurationManager = new ChildConfigurationManager ("child-" + fileInfo.Name);
-				Logger.Write (LogLevel.Debug, "Loaded {0} [{1}]", fileInfo.Name, childConfigurationManager.InstanceType.ToString ().ToLowerInvariant ());
-				string configFile = fileInfo.FullName;
-				if (!childConfigurationManager.TryLoadXmlConfig (configFile))
+				var filename = fileInfo.Name;
+				var childConfigurationManager = new ChildConfigurationManager ("child-" + filename);
+				Logger.Write (LogLevel.Debug, "Loaded {0} [{1}]", filename, childConfigurationManager.InstanceType.ToString ().ToLowerInvariant ());
+				string fullFilename = fileInfo.FullName;
+				if (!childConfigurationManager.TryLoadXmlConfig (fullFilename))
 					continue;
-				string fastCgiCommand = configurationManager.FastCgiCommand;
 
-				Func<Process> spawner;
-				if (childConfigurationManager.InstanceType == InstanceType.Ondemand) {
-					if (String.IsNullOrEmpty (childConfigurationManager.ShimSocket))
-						throw new Exception ("You must specify a socket for the shim");
-					spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
-				} else
-					spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
+				var spawner = GetSpawner (configurationManager.ShimCommand, filename, childConfigurationManager, fullFilename, configurationManager.FastCgiCommand);
 
-				Action spawnShim = () => Spawner.SpawnShim (configurationManager.ShimCommand, childConfigurationManager.ShimSocket, configFile, fastCgiCommand);
-
-				string user = childConfigurationManager.User;
-				string group = childConfigurationManager.Group;
-				if (String.IsNullOrEmpty (user)) {
-					if (Platform.IsUnix) {
-						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", fileInfo.Name);
-						string owner = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
-						if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
-							Spawner.RunAs (owner, group, spawnShim) ();
-						else
-							spawner = Spawner.RunAs (owner, group, spawner);
-					} else {
-						Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", fileInfo.Name);
-						if (childConfigurationManager.InstanceType != InstanceType.Ondemand)
-							spawnShim ();
-					}
-				} else {
-					if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
-						Spawner.RunAs (user, group, spawnShim) ();
-					else
-						spawner = Spawner.RunAs (user, group, spawner);
-				}
-
-				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = configFile };
+				var child = new ChildInfo { Spawner = spawner, ConfigurationManager = childConfigurationManager, Name = fullFilename };
 				children.Add (child);
 
 				if (childConfigurationManager.InstanceType == InstanceType.Static) {
 					if (child.TrySpawn ()) {
-						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (configFile));
+						Logger.Write (LogLevel.Notice, "Started fastcgi daemon [static] with pid {0} and config file {1}", child.Process.Id, Path.GetFileName (fullFilename));
 						Thread.Sleep (500);
 						// TODO: improve this (it's used to wait for the child to be ready)
 					} else
-						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", configFile);
+						Logger.Write (LogLevel.Error, "Couldn't start child with config file {0}", fullFilename);
 					break;
 				} else {
 					Socket socket;
@@ -139,6 +109,45 @@ namespace Mono.WebServer.Fpm
 					}
 				}
 			}
+		}
+
+		static Func<Process> GetSpawner (string shimCommand, string filename, ChildConfigurationManager childConfigurationManager, string configFile, string fastCgiCommand)
+		{
+			Func<Process> spawner;
+			if (childConfigurationManager.InstanceType == InstanceType.Ondemand) {
+				if (String.IsNullOrEmpty (childConfigurationManager.ShimSocket))
+					throw new Exception ("You must specify a socket for the shim");
+				spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
+			}
+			else
+				spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
+
+			Action spawnShim = () => Spawner.SpawnShim (shimCommand, childConfigurationManager.ShimSocket, configFile, fastCgiCommand);
+			string user = childConfigurationManager.User;
+			string group = childConfigurationManager.Group;
+			if (String.IsNullOrEmpty (user)) {
+				if (Platform.IsUnix) {
+					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to file owner", filename);
+					string owner = UnixFileSystemInfo.GetFileSystemEntry (configFile).OwnerUser.UserName;
+					if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
+						Spawner.RunAs (owner, group, spawnShim) ();
+					else
+						spawner = Spawner.RunAs (owner, group, spawner);
+				}
+				else {
+					Logger.Write (LogLevel.Warning, "Configuration file {0} didn't specify username, defaulting to the current one", filename);
+					if (childConfigurationManager.InstanceType != InstanceType.Ondemand)
+						spawnShim ();
+				}
+			}
+			else {
+				if (childConfigurationManager.InstanceType == InstanceType.Ondemand)
+					Spawner.RunAs (user, group, spawnShim) ();
+				else
+					spawner = Spawner.RunAs (user, group, spawner);
+			}
+
+			return spawner;
 		}
 	}
 }

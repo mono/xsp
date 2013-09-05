@@ -43,7 +43,7 @@ namespace Mono.WebServer {
 
 		static uint GetUid (string user)
 		{
-			UnixUserInfo info = new UnixUserInfo (user);
+			var info = new UnixUserInfo (user);
 			long uid = info.UserId;
 			if (uid > UInt32.MaxValue || uid <= 0)
 				throw new ArgumentOutOfRangeException ("user", String.Format ("Uid for {0} ({1}) not in range for suid", user, uid));
@@ -52,7 +52,7 @@ namespace Mono.WebServer {
 
 		static uint GetGid (string group)
 		{
-			UnixGroupInfo info = new UnixGroupInfo (group);
+			var info = new UnixGroupInfo (group);
 			var gid = info.GroupId;
 			if (gid > UInt32.MaxValue || gid <= 0)
 				throw new ArgumentOutOfRangeException ("group", String.Format ("Gid for {0} ({1}) not in range for sgid", group, gid));

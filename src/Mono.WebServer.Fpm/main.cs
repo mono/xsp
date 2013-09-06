@@ -32,7 +32,6 @@ using System.Reflection;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 using System.Threading;
-using Mono.Unix.Native;
 using Mono.Unix;
 using System.Linq;
 using System.Collections.Generic;
@@ -108,6 +107,13 @@ namespace Mono.WebServer.Fpm {
 						let dir = entry as UnixDirectoryInfo
 						where dir != null
 						select dir;
+
+					if (configurationManager.HttpdGroup == null) {
+						Logger.Write (LogLevel.Error, "Couldn't autodetect the httpd group, you must specify it explicitly with --httpd-group");
+						return 1;
+					}
+					if (!CheckGroupExists (configurationManager.FpmGroup) || !CheckGroupExists (configurationManager.HttpdGroup) || !CheckUserExists (configurationManager.FpmUser))
+						return 1;
 					ChildrenManager.StartAutomaticChildren (webDirs, configurationManager);
 				}
 			}
@@ -125,6 +131,30 @@ namespace Mono.WebServer.Fpm {
 			ChildrenManager.TermChildren();
 			ChildrenManager.KillChildren();
 			return 0;
+		}
+
+		static bool CheckUserExists (string user)
+		{
+			try {
+				new UnixUserInfo (user);
+				return true;
+			}
+			catch (ArgumentException) {
+				Logger.Write (LogLevel.Error, "User {0} doesn't exist, but it's needed for automatic mode", user);
+				return false;
+			}
+		}
+
+		static bool CheckGroupExists (string group)
+		{
+			try {
+				new UnixGroupInfo (group);
+				return true;
+			}
+			catch (ArgumentException) {
+				Logger.Write (LogLevel.Error, "Group {0} doesn't exist, but it's needed for automatic mode", group);
+				return false;
+			}
 		}
 	}
 }

@@ -37,6 +37,7 @@ using Mono.Unix;
 using System.Net.Sockets;
 using Mono.WebServer.FastCgi.Compatibility;
 using System.IO;
+using MonoDevelop.Core.Execution;
 
 namespace Mono.WebServer.Fpm
 {
@@ -145,10 +146,15 @@ namespace Mono.WebServer.Fpm
 				throw new ArgumentNullException ("configFile");
 			if (configFile.Length == 0)
 				throw new ArgumentException ("Config file name can't be empty", "configFile");
+			var builder = new ProcessArgumentBuilder ();
+			builder.AddSingle (socket, fastCgiCommand);
+			builder.Add ("--ondemand");
+			builder.AddFormatSafe ("--configfile '{2}'", configFile);
+			var arguments = builder.ToString();
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = shimCommand,
-					Arguments = String.Format ("{0} {1} --configfile \"{2}\" --ondemand", socket, fastCgiCommand, configFile),
+					Arguments = arguments,
 					UseShellExecute = true
 				}
 			};
@@ -165,9 +171,9 @@ namespace Mono.WebServer.Fpm
 				throw new ArgumentNullException ("root");
 			if (onDemandSock == null)
 				throw new ArgumentNullException ("onDemandSock");
-			var arguments = String.Format ("{0} {1} --applications /:\"{2}\" --idle-time {3} --ondemand --ondemandsock unix://660@{4}{5} --loglevels {6} --name {7}", 
-			                               shimSocket, configurationManager.FastCgiCommand, root, configurationManager.ChildIdleTime, onDemandSock,
-			                               configurationManager.Verbose ? " --verbose" : String.Empty, configurationManager.LogLevels, Path.GetFileName (root));
+
+			var arguments = BuildArguments (configurationManager, shimSocket, root, onDemandSock);
+
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = configurationManager.ShimCommand,
@@ -177,6 +183,22 @@ namespace Mono.WebServer.Fpm
 			};
 			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", configurationManager.ShimCommand, process.StartInfo.Arguments);
 			process.Start ();
+		}
+
+		static string BuildArguments (ConfigurationManager configurationManager, string shimSocket, string root, string onDemandSock)
+		{
+			var builder = new ProcessArgumentBuilder ();
+			builder.AddSingle (shimSocket, configurationManager.FastCgiCommand);
+			if (configurationManager.Verbose)
+				builder.Add ("--verbose");
+			builder.Add ("--ondemand");
+			builder.AddFormatSafe ("--applications /:'{0}'", root);
+			builder.Add ("--idle-time", configurationManager.ChildIdleTime);
+			builder.AddFormatSafe ("--ondemandsock 'unix://660@{0}'", onDemandSock);
+			builder.AddFormat ("--loglevels {0}", configurationManager.LogLevels);
+			builder.AddFormatSafe ("--name '{0}'", Path.GetFileName (root));
+			var arguments = builder.ToString ();
+			return arguments;
 		}
 	}
 }

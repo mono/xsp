@@ -74,16 +74,16 @@ namespace Mono.WebServer.Fpm
 			children.RemoveAll (child => child.Process != null && child.Process.HasExited);
 		}
 
-		static void CreateAutomaticDirs (out string shimSocketDir, out string frontSocketDir, out string backSocketDir)
+		static void CreateAutomaticDirs (string fpmGroup, string httpdGroup, out string shimSocketDir, out string frontSocketDir, out string backSocketDir)
 		{
 			string socketDir = Path.Combine (Path.GetTempPath (), "mono-fpm-automatic");
 			CreateWithPerm (socketDir, "755");
 			shimSocketDir = Path.Combine (socketDir, "shim");
-			CreateWithPerm (shimSocketDir, "3733", "fpm");
+			CreateWithPerm (shimSocketDir, "3733", fpmGroup);
 			frontSocketDir = Path.Combine (socketDir, "front");
-			CreateWithPerm (frontSocketDir, "3730", "nginx");
+			CreateWithPerm (frontSocketDir, "3730", httpdGroup);
 			backSocketDir = Path.Combine (socketDir, "back");
-			CreateWithPerm (backSocketDir, "3733", "fpm");
+			CreateWithPerm (backSocketDir, "3733", fpmGroup);
 		}
 
 		public static void StartAutomaticChildren (IEnumerable<UnixDirectoryInfo> webDirs, ConfigurationManager configurationManager)
@@ -96,7 +96,7 @@ namespace Mono.WebServer.Fpm
 			string shimSocketDir;
 			string frontSocketDir;
 			string backSocketDir;
-			CreateAutomaticDirs (out shimSocketDir, out frontSocketDir, out backSocketDir);
+			CreateAutomaticDirs (configurationManager.FpmGroup, configurationManager.HttpdGroup, out shimSocketDir, out frontSocketDir, out backSocketDir);
 			foreach (UnixDirectoryInfo directoryInfo in webDirs) {
 				if (directoryInfo == null)
 					continue;

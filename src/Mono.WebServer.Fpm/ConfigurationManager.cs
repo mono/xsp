@@ -27,6 +27,9 @@
 //
 
 using Mono.WebServer.Options;
+using Mono.Unix;
+using Mono.Unix.Native;
+using System;
 
 namespace Mono.WebServer.Fpm {
 	class ConfigurationManager : Options.ConfigurationManager, IHelpConfigurationManager
@@ -36,13 +39,14 @@ namespace Mono.WebServer.Fpm {
 
 		readonly UInt16Setting childIdleTime = new UInt16Setting ("child-idle-time", "Time to wait (in seconds) before stopping a child started with --web-dir", defaultValue: 60);
 
-		readonly StringSetting configDir = new StringSetting ("config-dir", "Directory containing the configuration files.");
+		readonly StringSetting configDir = new StringSetting ("config-dir|configdir", "Directory containing the configuration files.");
 		readonly StringSetting fastCgiCommand = new StringSetting ("fastcgi-command", "Name (if in PATH) or full path of the fastcgi executable", defaultValue: "fastcgi-mono-server4");
 		readonly StringSetting shimCommand = new StringSetting ("shim-command", "Name (if in PATH) or full path of the shim executable", defaultValue: "shim");
 		readonly StringSetting fpmUser = new StringSetting ("fpm-user", "Name of the user to use for the fpm daemon", defaultValue: "fpm");
 		readonly StringSetting fpmGroup = new StringSetting ("fpm-group", "Name of the group to use for the fpm daemon", defaultValue: "fpm");
-		readonly StringSetting webDir = new StringSetting ("web-dir", "Directory containing the user web directories.");
+		readonly StringSetting webDir = new StringSetting ("web-dir|webdir", "Directory containing the user web directories.");
 		readonly StringSetting webGroup = new StringSetting ("web-group", "Name of the group to use for the web directories daemons", defaultValue: "nobody");
+		readonly StringSetting httpdGroup = new StringSetting ("httpd-group", "Name of the httpd group to use for the web sockets dir", defaultValue: HttpdEuristic ());
 		#endregion
 
 		#region Typesafe properties
@@ -75,6 +79,9 @@ namespace Mono.WebServer.Fpm {
 		public string WebGroup {
 			get { return webGroup; }
 		}
+		public string HttpdGroup {
+			get { return httpdGroup; }
+		}
 		#endregion
 
 		public string ProgramName {
@@ -87,7 +94,22 @@ namespace Mono.WebServer.Fpm {
 
 		public ConfigurationManager (string name) : base(name)
 		{
-			Add (stoppable, childIdleTime, configDir, fastCgiCommand, fpmUser, fpmGroup, webDir, webGroup);
+			Add (stoppable, childIdleTime, configDir, fastCgiCommand, fpmUser, fpmGroup, webDir, webGroup, httpdGroup);
+		}
+
+		static readonly string[] knownHttpdGroups = {"www-data", "nginx", "apache2", "http", "www"};
+
+		static string HttpdEuristic ()
+		{
+			if (Platform.IsUnix)
+				foreach (string group in knownHttpdGroups) {
+					try {
+						new UnixGroupInfo (group);
+						return group;
+					} catch (ArgumentException) {
+					}
+				}
+			return null;
 		}
 	}
 }

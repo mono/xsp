@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Mono.WebServer.Log {
 	public static class Logger
@@ -57,6 +58,14 @@ namespace Mono.WebServer.Log {
 			}
 		}
 
+
+		static int? ProcessId {
+			get {
+				if (Verbose && (Level & LogLevel.Debug) != LogLevel.None)
+					return Process.GetCurrentProcess ().Id;
+				return null;
+			}
+		}
 		#endregion
 		
 		static Logger ()
@@ -95,10 +104,10 @@ namespace Mono.WebServer.Log {
 		static string GetFormatString ()
 		{
 			return ThreadId == null 
-				? "[{1}] {2,-7}: {2}" 
+				? "[{2}] {3,-7}: {4}" 
 				: Name == null
-					? "{0,-2} [{1}] {2,-7}: {3}"
-					: "{0,-2} {4,-8} [{1}] {2,-7}: {3}";
+					? "{1,2} [{2}] {3,-7}: {4}"
+					: "{0,5}:{1,2} {5,-8} [{2}] {3,-7}: {4}";
 		}
 
 		public static void Write (LogLevel level, string message)
@@ -110,7 +119,7 @@ namespace Mono.WebServer.Log {
 			string time = Verbose
 				? DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss.ffffff")
 				: DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss");
-			string text = String.Format (CultureInfo.CurrentCulture, format, ThreadId, time, level, message, Name);
+			string text = String.Format (CultureInfo.CurrentCulture, format, ProcessId, ThreadId, time, level, message, Name);
 
 			if (WriteToConsole)
 				lock (write_lock)

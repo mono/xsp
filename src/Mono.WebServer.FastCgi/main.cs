@@ -111,7 +111,10 @@ namespace Mono.WebServer.FastCgi
 
 			if (configurationManager.OnDemand) {
 				Socket socket;
-				if (!TryCreateUnixSocket (configurationManager.OnDemandSock, out socket))
+				Uri uri;
+				if (Uri.TryCreate (configurationManager.OnDemandSock, UriKind.Absolute, out uri))
+					TryCreateSocketFromUri (uri, out socket);
+				else if (!TryCreateUnixSocket (configurationManager.OnDemandSock, out socket))
 					return 1;
 				server = CreateOnDemandServer (configurationManager, socket);
 				CreateWatchdog (configurationManager, server);
@@ -305,8 +308,13 @@ namespace Mono.WebServer.FastCgi
 			var socket_type = configurationManager.Socket;
 
 			Uri uri;
-			if (Uri.TryCreate (socket_type, UriKind.Absolute, out uri) && TryCreateSocketFromUri (uri, out socket))
-				return true;
+			if (Uri.TryCreate (socket_type, UriKind.Absolute, out uri)) {
+				Logger.Write (LogLevel.Debug, "Parsed {0} as URI {1}", socket_type, uri);
+				if (TryCreateSocketFromUri (uri, out socket)) {
+					Logger.Write (LogLevel.Debug, "Created socket {0} from URI {1}", socket, uri);
+					return true;
+				}
+			}
 
 			string [] socket_parts = socket_type.Split (new [] { ':' }, 3);
 
@@ -454,9 +462,10 @@ namespace Mono.WebServer.FastCgi
 				else
 					realPath = path;
 
-				if (perm == null)
+				if (perm == null) {
 					socket = new UnixSocket (realPath);
-				else {
+					Logger.Write (LogLevel.Debug, "Listening on file {0} with default permissions", realPath);
+				} else {
 					ushort uperm;
 					if (!UInt16.TryParse (perm, out uperm)) {
 						Logger.Write (LogLevel.Error, "Error parsing permissions \"{0}\". Use octal.", perm);
@@ -464,12 +473,12 @@ namespace Mono.WebServer.FastCgi
 					}
 					uperm = Convert.ToUInt16 (uperm.ToString (), 8);
 					socket = new UnixSocket (realPath, uperm);
+					Logger.Write (LogLevel.Debug, "Listening on file {0} with permissions {1}", realPath, Convert.ToString (uperm, 8));
 				}
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Write (LogLevel.Error, "Error creating the socket: {0}", e.Message);
 				return false;
 			}
-			Logger.Write (LogLevel.Debug, "Listening on file: {0}", path);
 			return true;
 		}
 

@@ -10,7 +10,7 @@ checkdir $SOCKDIR   $SOCKDIR_PERM   $SOCKDIR_GROUP
 checkdir $SHIMDIR   $SHIMDIR_PERM   $SHIMDIR_GROUP
 checkdir $WEBDIR    $WEBDIR_PERM    $WEBDIR_GROUP
 
-diff template  "$CONFIGDIR/template" 2> /dev/null
+diff template  "$CONFIGDIR/template" > /dev/null 2> /dev/null
 if [ $? == 1 -o ! -f "$CONFIGDIR/template" ]; then
     sudo cp template $CONFIGDIR
 fi

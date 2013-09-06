@@ -3,7 +3,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <stdlib.h>
+#include <time.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
@@ -16,13 +18,40 @@
 
 #define BUFFER_SIZE 10
 
+#define PREFIX "%5d    shim     [%s]        : "
+
 #ifdef DEBUG
-#define log1(str) printf ("Shim [%5d]: %s\n", getpid (), str)
-#define log(fmt, ...) do{printf ("Shim [%5d]: ", getpid ()); printf (fmt, __VA_ARGS__); printf ("\n");}while(0)
+const bool do_log = true;
 #else
-#define log1(str)
-#define log(...)
+const bool do_log = false;
 #endif
+
+char time_buffer[50];
+
+char * time_str (void)
+{
+    time_t now = time (0);
+    strftime (time_buffer, 50, "%Y-%m-%d %H:%M:%S       ", localtime (&now));
+    return time_buffer;
+}
+
+void log1 (char * str)
+{
+    if(!do_log) return;
+    printf (PREFIX, getpid (), time_str ());
+    printf("%s\n", str);
+}
+
+void log(char * fmt, ...)
+{
+    if(!do_log) return;
+    printf (PREFIX, getpid (), time_str ());
+    va_list argptr;
+    va_start(argptr, fmt);
+    vprintf(fmt, argptr);
+    va_end(argptr);
+    printf ("\n");
+}
 
 ssize_t send_string (int fd, const char * value)
 {
@@ -111,7 +140,7 @@ pid_t spawn (char * command, int fd)
     args [2] = command;
     args [3] = 0;
 
-	log ("Running /bin/sh -c %s", command);
+    log ("Running /bin/sh -c %s", command);
 
     if (execv (*args, args) == -1) {
         perror ("execv");

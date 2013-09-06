@@ -43,7 +43,7 @@ AC_ARG_WITH([unit-tests],
 AC_CHECK_FUNCS(send recv bind listen accept \
  chmod unlink fork execv exit \
  getpid getuid geteuid getgid getegid setreuid setregid \
- strlen strncpy strncmp printf fprintf snprintf \
+ strlen strncpy strncmp printf fprintf snprintf vprintf strftime time \
  perror,, AC_MSG_ERROR("Cannot find standard functions"))
 
 # Mono

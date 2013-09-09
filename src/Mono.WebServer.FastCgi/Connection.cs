@@ -108,7 +108,7 @@ namespace Mono.FastCgi {
 		
 		public void Run ()
 		{
-			Logger.Write (LogLevel.Notice, Strings.Connection_BeginningRun);
+			Logger.Write (LogLevel.Debug, Strings.Connection_BeginningRun);
 			if (socket == null) {
 				Logger.Write (LogLevel.Notice, Strings.Connection_NoSocketInRun);
 				return;
@@ -153,8 +153,7 @@ namespace Mono.FastCgi {
 				}
 			}
 			
-			Logger.Write (LogLevel.Notice,
-				Strings.Connection_EndingRun);
+			Logger.Write (LogLevel.Debug, Strings.Connection_EndingRun);
 		}
 
 		void CloseSocket ()

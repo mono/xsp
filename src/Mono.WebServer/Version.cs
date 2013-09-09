@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 
 namespace Mono.WebServer {
-	public class Version
+	public static class Version
 	{
 		public static void Show ()
 		{

@@ -59,10 +59,11 @@ namespace Mono.WebServer.Fpm {
 			Logger.Write (LogLevel.Debug, "ChildInfo.OnAccept");
 			if (Process == null || Process.HasExited) {
 				if (TrySpawn ()) {
-					int id = Process.Id;
+					var process = Process;
+					int id = process.Id;
 					Logger.Write (LogLevel.Notice, "Started fastcgi daemon [dynamic] with pid {0} and config file {1}", id, Path.GetFileName (Name));
-					Process.EnableRaisingEvents = true;
-					Process.Exited += (sender, e) => Logger.Write (LogLevel.Notice, "Fastcgi daemon [dynamic] with pid {0} exited", id);
+					process.EnableRaisingEvents = true;
+					process.Exited += (sender, e) => Logger.Write (LogLevel.Notice, "Fastcgi daemon [dynamic] with pid {0} exited [it is {1}ly dead]", id, process.HasExited.ToString ().ToLowerInvariant ());
 					// Let the daemon start
 					Thread.Sleep (300);
 				} else
@@ -71,7 +72,7 @@ namespace Mono.WebServer.Fpm {
 				Logger.Write (LogLevel.Debug, "Recycling child with pid {0}", Process.Id);
 
 			Logger.Write (LogLevel.Debug, "Will connect to backend");
-			UnixClient onDemandSocket = new UnixClient ();
+			var onDemandSocket = new UnixClient ();
 			Logger.Write (LogLevel.Debug, "Connecting to backend on {0}", OnDemandSock);
 			if (OnDemandSock.StartsWith ("\\0", StringComparison.Ordinal))
 				onDemandSocket.Connect ('\0' + OnDemandSock.Substring (2));

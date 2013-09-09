@@ -324,7 +324,7 @@ namespace Mono.WebServer
 			return GetRequestData ();
 		}
 
-		void LocationAccessible (string localPath)
+		static void LocationAccessible (string localPath)
 		{
 			bool doThrow = false;
 			

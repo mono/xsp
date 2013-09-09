@@ -51,6 +51,7 @@
     <Compile Include="Spawner.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="InstanceType.cs" />
+    <Compile Include="ProcessArgumentBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">

@@ -32,8 +32,9 @@ using System.Reflection;
 using Mono.WebServer.Log;
 using Mono.WebServer.Options;
 using System.Threading;
-using Mono.Unix.Native;
 using Mono.Unix;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Mono.WebServer.Fpm {
 	public static class Server
@@ -73,21 +74,49 @@ namespace Mono.WebServer.Fpm {
 			Logger.Write (LogLevel.Debug, Assembly.GetExecutingAssembly ().GetName ().Name);
 
 			string configDir = configurationManager.ConfigDir;
-			if (String.IsNullOrEmpty (configDir)) {
-				Logger.Write (LogLevel.Error, "You MUST provide a configuration directory with the --config-dir parameter");
+			string webDir = configurationManager.WebDir;
+			if (String.IsNullOrEmpty (configDir) && (!Platform.IsUnix || String.IsNullOrEmpty (webDir))) {
+				if(Platform.IsUnix)
+					Logger.Write (LogLevel.Error, "You MUST provide a configuration directory with the --config-dir parameter or web directories with the --web-dir parameter.");
+				else
+					Logger.Write (LogLevel.Error, "You MUST provide a configuration directory with the --config-dir parameter.");
 				return 1;
 			}
 
-			var configDirInfo = new DirectoryInfo (configDir);
-			if (!configDirInfo.Exists) {
-				Logger.Write (LogLevel.Error, "The configuration directory \"{0}\" does not exist!", configDir);
-				return 1;
+			if (!String.IsNullOrEmpty (configDir)) {
+				var configDirInfo = new DirectoryInfo (configDir);
+				if (!configDirInfo.Exists) {
+					Logger.Write (LogLevel.Error, "The configuration directory \"{0}\" does not exist!", configDir);
+				} else {
+					Logger.Write (LogLevel.Debug, "Configuration directory {0} exists, loading configuration files", configDir);
+
+					FileInfo[] configFiles = configDirInfo.GetFiles ("*.xml");
+					ChildrenManager.StartChildren (configFiles, configurationManager);
+				}
 			}
 
-			Logger.Write (LogLevel.Debug, "Configuration directory {0} exists, loading configuration files", configDir);
+			if (Platform.IsUnix && !String.IsNullOrEmpty (webDir)) {
+				var webDirInfo = new UnixDirectoryInfo (Path.GetFullPath (webDir));
+				if (!webDirInfo.Exists) {
+					Logger.Write (LogLevel.Error, "The web directory \"{0}\" does not exist!", webDir);
+				} else {
+					Logger.Write (LogLevel.Debug, "Web directory {0} exists, starting children", webDir);
 
-			FileInfo[] configFiles = configDirInfo.GetFiles ("*.xml");
-			ChildrenManager.StartChildren (configFiles, configurationManager);
+					IEnumerable<UnixDirectoryInfo> webDirs =
+						from entry in webDirInfo.GetFileSystemEntries ()
+						let dir = entry as UnixDirectoryInfo
+						where dir != null
+						select dir;
+
+					if (configurationManager.HttpdGroup == null) {
+						Logger.Write (LogLevel.Error, "Couldn't autodetect the httpd group, you must specify it explicitly with --httpd-group");
+						return 1;
+					}
+					if (!CheckGroupExists (configurationManager.FpmGroup) || !CheckGroupExists (configurationManager.HttpdGroup) || !CheckUserExists (configurationManager.FpmUser))
+						return 1;
+					ChildrenManager.StartAutomaticChildren (webDirs, configurationManager);
+				}
+			}
 
 			Platform.SetIdentity (configurationManager.FpmUser, configurationManager.FpmGroup);
 
@@ -102,6 +131,30 @@ namespace Mono.WebServer.Fpm {
 			ChildrenManager.TermChildren();
 			ChildrenManager.KillChildren();
 			return 0;
+		}
+
+		static bool CheckUserExists (string user)
+		{
+			try {
+				new UnixUserInfo (user);
+				return true;
+			}
+			catch (ArgumentException) {
+				Logger.Write (LogLevel.Error, "User {0} doesn't exist, but it's needed for automatic mode", user);
+				return false;
+			}
+		}
+
+		static bool CheckGroupExists (string group)
+		{
+			try {
+				new UnixGroupInfo (group);
+				return true;
+			}
+			catch (ArgumentException) {
+				Logger.Write (LogLevel.Error, "Group {0} doesn't exist, but it's needed for automatic mode", group);
+				return false;
+			}
 		}
 	}
 }

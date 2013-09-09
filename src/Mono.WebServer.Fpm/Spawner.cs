@@ -36,6 +36,8 @@ using Mono.WebServer.FastCgi;
 using Mono.Unix;
 using System.Net.Sockets;
 using Mono.WebServer.FastCgi.Compatibility;
+using System.IO;
+using MonoDevelop.Core.Execution;
 
 namespace Mono.WebServer.Fpm
 {
@@ -51,11 +53,13 @@ namespace Mono.WebServer.Fpm
 			if (action == null)
 				throw new ArgumentNullException ("action");
 			return () => {
-				var identity = Platform.Impersonate (user, group);
-				if (identity == null)
-					return;
-				using (identity)
-					action ();
+				try{
+					using (Platform.Impersonate (user, group))
+						action ();
+				} catch (ArgumentException e) {
+					Logger.Write (LogLevel.Error, "Couldn't run as {0} {1}!", user, group);
+					Logger.Write (e);
+				}
 			};
 		}
 
@@ -66,11 +70,14 @@ namespace Mono.WebServer.Fpm
 			if (action == null)
 				throw new ArgumentNullException ("action");
 			return () => {
-				var identity = Platform.Impersonate (user, group);
-				if (identity == null)
+				try{
+					using (Platform.Impersonate (user, group))
+						return action ();
+				} catch (ArgumentException e) {
+					Logger.Write (LogLevel.Error, "Couldn't run as {0} {1}!", user, group);
+					Logger.Write (e);
 					return default (T);
-				using (identity)
-					return action ();
+				}
 			};
 		}
 
@@ -128,22 +135,70 @@ namespace Mono.WebServer.Fpm
 			}
 		}
 
-		public static void SpawnShim (string shimCommand, string socket, string configFile, string fastCgiCommand) {
+		public static void SpawnShim (string shimCommand, string socket, string fastCgiCommand, string configFile) {
+			if (shimCommand == null)
+				throw new ArgumentNullException ("shimCommand");
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
+			if (fastCgiCommand == null)
+				throw new ArgumentNullException ("fastCgiCommand");
 			if (configFile == null)
 				throw new ArgumentNullException ("configFile");
 			if (configFile.Length == 0)
 				throw new ArgumentException ("Config file name can't be empty", "configFile");
-			if (fastCgiCommand == null)
-				throw new ArgumentNullException ("fastCgiCommand");
+			var builder = new ProcessArgumentBuilder ();
+			builder.AddSingle (socket, fastCgiCommand);
+			builder.Add ("--ondemand");
+			builder.AddFormatSafe ("--configfile '{2}'", configFile);
+			var arguments = builder.ToString();
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = shimCommand,
-					Arguments = String.Format ("{0} {1} --configfile \"{2}\" --ondemand", socket, fastCgiCommand, configFile),
+					Arguments = arguments,
 					UseShellExecute = true
 				}
 			};
 			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", shimCommand, process.StartInfo.Arguments);
 			process.Start ();
+		}
+
+		public static void SpawnShim (ConfigurationManager configurationManager, string shimSocket, string root, string onDemandSock) {
+			if (configurationManager == null)
+				throw new ArgumentNullException ("configurationManager");
+			if (shimSocket == null)
+				throw new ArgumentNullException ("shimSocket");
+			if (root == null)
+				throw new ArgumentNullException ("root");
+			if (onDemandSock == null)
+				throw new ArgumentNullException ("onDemandSock");
+
+			var arguments = BuildArguments (configurationManager, shimSocket, root, onDemandSock);
+
+			var process = new Process {
+				StartInfo = new ProcessStartInfo {
+					FileName = configurationManager.ShimCommand,
+					Arguments = arguments,
+					UseShellExecute = true
+				}
+			};
+			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", configurationManager.ShimCommand, process.StartInfo.Arguments);
+			process.Start ();
+		}
+
+		static string BuildArguments (ConfigurationManager configurationManager, string shimSocket, string root, string onDemandSock)
+		{
+			var builder = new ProcessArgumentBuilder ();
+			builder.AddSingle (shimSocket, configurationManager.FastCgiCommand);
+			if (configurationManager.Verbose)
+				builder.Add ("--verbose");
+			builder.Add ("--ondemand");
+			builder.AddFormatSafe ("--applications /:'{0}'", root);
+			builder.Add ("--idle-time", configurationManager.ChildIdleTime);
+			builder.AddFormatSafe ("--ondemandsock 'unix://660@{0}'", onDemandSock);
+			builder.AddFormat ("--loglevels {0}", configurationManager.LogLevels);
+			builder.AddFormatSafe ("--name '{0}'", Path.GetFileName (root));
+			var arguments = builder.ToString ();
+			return arguments;
 		}
 	}
 }

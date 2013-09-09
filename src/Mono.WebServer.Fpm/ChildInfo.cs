@@ -33,11 +33,12 @@ using Mono.WebServer.FastCgi;
 using Mono.WebServer.Log;
 using System.IO;
 using System.Threading;
+using Mono.Unix;
 
 namespace Mono.WebServer.Fpm {
 	struct ChildInfo : IServerCallback<Connection>
 	{
-		public FastCgi.ConfigurationManager ConfigurationManager { get; set; }
+		public string OnDemandSock { get; set; }
 
 		public Process Process { get; private set; }
 
@@ -69,11 +70,15 @@ namespace Mono.WebServer.Fpm {
 			} else
 				Logger.Write (LogLevel.Debug, "Recycling child with pid {0}", Process.Id);
 
-			Socket onDemandSocket;
-			FastCgi.Server.TryCreateUnixSocket (ConfigurationManager.OnDemandSock, out onDemandSocket);
-			onDemandSocket.Connect ();
-			SocketPassing.SendTo (onDemandSocket.Handle, socket.Handle);
-			Logger.Write (LogLevel.Debug, "Sent fd {0} via fd {1}", socket.Handle, onDemandSocket.Handle);
+			Logger.Write (LogLevel.Debug, "Will connect to backend");
+			UnixClient onDemandSocket = new UnixClient ();
+			Logger.Write (LogLevel.Debug, "Connecting to backend on {0}", OnDemandSock);
+			if (OnDemandSock.StartsWith ("\\0", StringComparison.Ordinal))
+				onDemandSocket.Connect ('\0' + OnDemandSock.Substring (2));
+			else
+				onDemandSocket.Connect (OnDemandSock);
+			SocketPassing.SendTo (onDemandSocket.Client.Handle, socket.Handle);
+			Logger.Write (LogLevel.Debug, "Sent fd {0} via fd {1}", socket.Handle, onDemandSocket.Client.Handle);
 			onDemandSocket.Close ();
 
 			return new Connection (socket);

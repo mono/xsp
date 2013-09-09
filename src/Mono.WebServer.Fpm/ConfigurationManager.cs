@@ -28,7 +28,6 @@
 
 using Mono.WebServer.Options;
 using Mono.Unix;
-using Mono.Unix.Native;
 using System;
 
 namespace Mono.WebServer.Fpm {

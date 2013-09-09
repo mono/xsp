@@ -256,7 +256,7 @@ namespace Mono.WebServer
 			if (result.Count == 0)
 				return "/";
 
-			StringBuilder res = new StringBuilder();
+			var res = new StringBuilder();
 			foreach (var part in result) {
 				res.Append ('/');
 				res.Append (part);

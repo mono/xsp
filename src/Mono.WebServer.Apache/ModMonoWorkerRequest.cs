@@ -255,7 +255,7 @@ namespace Mono.WebServer
 			return (val.Trim () == "SUCCESS");
 		}
 
-		bool CheckClientCertificateExtensions (X509Certificate cert)
+		static bool CheckClientCertificateExtensions (X509Certificate cert)
 		{
 			const KeyUsages ku = KeyUsages.digitalSignature | KeyUsages.keyEncipherment | KeyUsages.keyAgreement;
 			KeyUsageExtension kux = null;
@@ -295,7 +295,7 @@ namespace Mono.WebServer
 			return false;
 		}
 
-		bool CheckChain (X509Certificate cert)
+		static bool CheckChain (X509Certificate cert)
 		{
 			return new X509Chain ().Build (cert);
 		}

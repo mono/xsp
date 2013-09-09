@@ -148,13 +148,12 @@ namespace Mono.WebServer.FastCgi
 
 				// On a new connection try to set alive to true
 				// If we can't then don't bother, it's not needed
-				server.RequestReceived += (sender, e) => {
+				server.RequestReceived += (sender, e) =>
 					TryRunLocked (
 						() => aliveLock.TryEnterWriteLock (0),
-						() => { alive = true; },
+						() => alive = true,
 						aliveLock.ExitWriteLock
 					);
-				};
 
 				var pluto = new Watchdog (configurationManager.IdleTime * 1000);
 				pluto.End += (sender, e) => {
@@ -167,7 +166,7 @@ namespace Mono.WebServer.FastCgi
 
 				// Check every second for hearthbeats
 				var t = new Timer (1000);
-				t.Elapsed += (sender, e) => {
+				t.Elapsed += (sender, e) =>
 					RunLocked (
 						aliveLock.EnterUpgradeableReadLock,
 						() => {
@@ -175,14 +174,13 @@ namespace Mono.WebServer.FastCgi
 								return;
 							RunLocked (
 								aliveLock.EnterWriteLock,
-								() => { alive = false; },
+								() => alive = false,
 								aliveLock.ExitWriteLock
 							);
 							pluto.Kick ();
 						},
 						aliveLock.ExitUpgradeableReadLock
 					);
-				};
 				t.Start ();
 			}
 		}

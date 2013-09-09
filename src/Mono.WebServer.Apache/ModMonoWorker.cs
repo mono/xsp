@@ -56,7 +56,7 @@ namespace Mono.WebServer.Apache
 			this.server = server;
 		}
 
-		void Dispose (Action disposer, string name)
+		static void Dispose (Action disposer, string name)
 		{
 			if (disposer == null)
 				return;

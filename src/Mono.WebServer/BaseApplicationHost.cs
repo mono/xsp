@@ -221,14 +221,14 @@ namespace Mono.WebServer
 						endsWith = handlerPath.Substring (1);
 
 					if (handlerPath.IndexOf ('*') == -1)
-						if (handlerPath [0] != '/') {
-							string vpath = HttpRuntime.AppDomainAppVirtualPath;
+					if (handlerPath [0] != '/') {
+						string vpath = HttpRuntime.AppDomainAppVirtualPath;
 
-							if (vpath == "/")
-								vpath = String.Empty;
+						if (vpath == "/")
+							vpath = String.Empty;
 
-							matchExact = String.Concat (vpath, "/", handlerPath);
-						}
+						matchExact = String.Concat (vpath, "/", handlerPath);
+					}
 				}
 
 				if (matchExact != null) {

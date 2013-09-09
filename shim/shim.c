@@ -20,11 +20,8 @@
 
 #define PREFIX "%5d    shim     [%s]        : "
 
-#ifdef DEBUG
-const bool do_log = true;
-#else
-const bool do_log = false;
-#endif
+bool debug = false;
+bool verbose = false;
 
 char time_buffer[50];
 
@@ -35,17 +32,23 @@ char * time_str (void)
     return time_buffer;
 }
 
+void print_prefix (void)
+{
+	if (verbose)
+		printf (PREFIX, getpid (), time_str ());
+}
+
 void log1 (char * str)
 {
-    if(!do_log) return;
-    printf (PREFIX, getpid (), time_str ());
+    if(!debug) return;
+	print_prefix ();
     printf("%s\n", str);
 }
 
 void log(char * fmt, ...)
 {
-    if(!do_log) return;
-    printf (PREFIX, getpid (), time_str ());
+    if(!debug) return;
+    print_prefix ();
     va_list argptr;
     va_start(argptr, fmt);
     vprintf(fmt, argptr);
@@ -103,7 +106,7 @@ bool start_server (const char * path, int * socket_fd)
         perror ("listen");
         return false;
     }
-    
+
     chmod (path, 0660);
 
     return true;
@@ -185,12 +188,18 @@ bool run_connection (int fd, char * command)
     }
 }
 
-int main (int argc, char * argv [])
+int main (int argc, char * argv [], char *envp[])
 {
     uid_t euid = geteuid ();
     setreuid (euid, euid);
     gid_t egid = getegid ();
     setregid (egid, egid);
+
+    char * verbose_env = getenv("VERBOSE");
+    char * debug_env = getenv("DEBUG");
+    verbose = verbose_env && (verbose_env[0] == 'y' || verbose_env[0] == 'Y');
+    debug = debug_env && (debug_env[0] == 'y' || debug_env[0] == 'Y');
+
     log1 ("Started.");
     log ("I'm uid %d euid %d gid %d egid %d", getuid (), geteuid (), getgid (), getegid ());
 

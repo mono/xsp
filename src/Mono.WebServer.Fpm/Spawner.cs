@@ -41,7 +41,7 @@ using MonoDevelop.Core.Execution;
 
 namespace Mono.WebServer.Fpm
 {
-	static class Spawner 
+	static class Spawner
 	{
 		static readonly byte[] spawnString = Encoding.UTF8.GetBytes ("SPAWN\n");
 		static readonly BufferManager buffers = new BufferManager (100);
@@ -135,30 +135,37 @@ namespace Mono.WebServer.Fpm
 			}
 		}
 
-		public static void SpawnShim (string shimCommand, string socket, string fastCgiCommand, string configFile) {
-			if (shimCommand == null)
-				throw new ArgumentNullException ("shimCommand");
+		public static void SpawnShim (ConfigurationManager configurationManager, string socket, string configFile) {
+			if (configurationManager == null)
+				throw new ArgumentNullException ("configurationManager");
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
-			if (fastCgiCommand == null)
-				throw new ArgumentNullException ("fastCgiCommand");
 			if (configFile == null)
 				throw new ArgumentNullException ("configFile");
 			if (configFile.Length == 0)
 				throw new ArgumentException ("Config file name can't be empty", "configFile");
 			var builder = new ProcessArgumentBuilder ();
-			builder.AddSingle (socket, fastCgiCommand);
+			builder.AddSingle (socket, configurationManager.FastCgiCommand);
 			builder.Add ("--ondemand");
-			builder.AddFormatSafe ("--configfile '{2}'", configFile);
+			builder.AddFormatSafe ("--configfile '{0}'", configFile);
 			var arguments = builder.ToString();
-			var process = new Process {
-				StartInfo = new ProcessStartInfo {
-					FileName = shimCommand,
-					Arguments = arguments,
-					UseShellExecute = true
-				}
+
+			var startInfo = new ProcessStartInfo {
+				FileName = configurationManager.ShimCommand,
+				Arguments = arguments,
+				UseShellExecute = false
 			};
-			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", shimCommand, process.StartInfo.Arguments);
+
+			if ((configurationManager.LogLevels & LogLevel.Debug) != LogLevel.None)
+				startInfo.EnvironmentVariables.Add ("DEBUG", "y");
+
+			if (configurationManager.Verbose)
+				startInfo.EnvironmentVariables.Add ("VERBOSE", "y");
+
+			var process = new Process {
+				StartInfo = startInfo
+			};
+			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", configurationManager.ShimCommand, process.StartInfo.Arguments);
 			process.Start ();
 		}
 
@@ -174,13 +181,22 @@ namespace Mono.WebServer.Fpm
 
 			var arguments = BuildArguments (configurationManager, shimSocket, root, onDemandSock);
 
-			var process = new Process {
-				StartInfo = new ProcessStartInfo {
-					FileName = configurationManager.ShimCommand,
-					Arguments = arguments,
-					UseShellExecute = true
-				}
+			var startInfo = new ProcessStartInfo {
+				FileName = configurationManager.ShimCommand,
+				Arguments = arguments,
+				UseShellExecute = false
 			};
+
+			if ((configurationManager.LogLevels & LogLevel.Debug) != LogLevel.None)
+				startInfo.EnvironmentVariables.Add ("DEBUG", "y");
+
+			if (configurationManager.Verbose)
+				startInfo.EnvironmentVariables.Add ("VERBOSE", "y");
+
+			var process = new Process {
+				StartInfo = startInfo
+			};
+
 			Logger.Write (LogLevel.Debug, "Spawning shim \"{0} {1}\"", configurationManager.ShimCommand, process.StartInfo.Arguments);
 			process.Start ();
 		}

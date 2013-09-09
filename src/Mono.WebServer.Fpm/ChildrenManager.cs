@@ -36,7 +36,6 @@ using System.Diagnostics;
 using Mono.FastCgi;
 using Mono.WebServer.FastCgi;
 using System.Threading;
-using System.Security.AccessControl;
 using Mono.Unix.Native;
 
 namespace Mono.WebServer.Fpm
@@ -162,7 +161,7 @@ namespace Mono.WebServer.Fpm
 				if (!childConfigurationManager.TryLoadXmlConfig (fullFilename))
 					continue;
 
-				var spawner = GetSpawner (configurationManager.ShimCommand, filename, childConfigurationManager, fullFilename, configurationManager.FastCgiCommand);
+				var spawner = GetSpawner (configurationManager, filename, childConfigurationManager, fullFilename);
 
 				var child = new ChildInfo { Spawner = spawner, OnDemandSock = childConfigurationManager.OnDemandSock, Name = fullFilename };
 				children.Add (child);
@@ -191,7 +190,7 @@ namespace Mono.WebServer.Fpm
 			}
 		}
 
-		static Func<Process> GetSpawner (string shimCommand, string filename, ChildConfigurationManager childConfigurationManager, string configFile, string fastCgiCommand)
+		static Func<Process> GetSpawner (ConfigurationManager configurationManager, string filename, ChildConfigurationManager childConfigurationManager, string configFile)
 		{
 			Func<Process> spawner;
 			if (childConfigurationManager.InstanceType == InstanceType.Ondemand) {
@@ -200,9 +199,9 @@ namespace Mono.WebServer.Fpm
 				spawner = () => Spawner.SpawnOndemandChild (childConfigurationManager.ShimSocket);
 			}
 			else
-				spawner = () => Spawner.SpawnStaticChild (configFile, fastCgiCommand);
+				spawner = () => Spawner.SpawnStaticChild (configFile, configurationManager.FastCgiCommand);
 
-			Action spawnShim = () => Spawner.SpawnShim (shimCommand, childConfigurationManager.ShimSocket, fastCgiCommand, configFile);
+			Action spawnShim = () => Spawner.SpawnShim (configurationManager, childConfigurationManager.ShimSocket, configFile);
 			string user = childConfigurationManager.User;
 			string group = childConfigurationManager.Group;
 			if (String.IsNullOrEmpty (user)) {

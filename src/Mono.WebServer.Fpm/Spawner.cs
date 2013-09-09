@@ -29,7 +29,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Security.Principal;
 using Mono.WebServer.Log;
 using System.Text;
 using Mono.WebServer.FastCgi;
@@ -145,7 +144,7 @@ namespace Mono.WebServer.Fpm
 			if (configFile.Length == 0)
 				throw new ArgumentException ("Config file name can't be empty", "configFile");
 			var builder = new ProcessArgumentBuilder ();
-			builder.AddSingle (socket, configurationManager.FastCgiCommand);
+			builder.AddSingle (socket, GetFastCgiCommand (configurationManager.FastCgiCommand));
 			builder.Add ("--ondemand");
 			builder.AddFormatSafe ("--configfile '{0}'", configFile);
 			var arguments = builder.ToString();
@@ -201,10 +200,32 @@ namespace Mono.WebServer.Fpm
 			process.Start ();
 		}
 
+		static string GetFastCgiCommand (string filename)
+		{
+			if (filename.StartsWith ("/", StringComparison.Ordinal))
+				return filename;
+			if (filename.Contains ("/"))
+				return Path.Combine (Environment.CurrentDirectory, filename);
+			string paths = Environment.GetEnvironmentVariable ("PATH");
+			foreach (var path in paths.Split(':')) {
+				string combined = Path.Combine (path, filename);
+				if (File.Exists (combined) && IsExecutable (combined))
+					return combined;
+			}
+			throw new ArgumentException (String.Format ("Couldn't find fastcgi executable at {0}", filename), "filename");
+		}
+
+		static bool IsExecutable (string path)
+		{
+			return Platform.IsUnix
+				? new UnixFileInfo (path).CanAccess (Mono.Unix.Native.AccessModes.X_OK)
+				: path.EndsWith (".exe", StringComparison.Ordinal);
+		}
+
 		static string BuildArguments (ConfigurationManager configurationManager, string shimSocket, string root, string onDemandSock)
 		{
 			var builder = new ProcessArgumentBuilder ();
-			builder.AddSingle (shimSocket, configurationManager.FastCgiCommand);
+			builder.AddSingle (shimSocket, GetFastCgiCommand (configurationManager.FastCgiCommand));
 			if (configurationManager.Verbose)
 				builder.Add ("--verbose");
 			builder.Add ("--ondemand");

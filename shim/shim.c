@@ -112,9 +112,10 @@ bool start_server (const char * path, int * socket_fd)
     return true;
 }
 
-pid_t spawn (char * command, int fd)
+pid_t spawn (int fd, char * params [])
 {
-    assert (command != 0);
+    assert (params != 0);
+    assert (*params != 0);
     log1 ("Spawning!");
     pid_t child = fork ();
     if (child)
@@ -137,15 +138,9 @@ pid_t spawn (char * command, int fd)
 
     log1 ("Reforked!");
 
-    char * args [4];
-    args [0] = "/bin/sh";
-    args [1] = "-c";
-    args [2] = command;
-    args [3] = 0;
+    log ("Running %s", params);
 
-    log ("Running /bin/sh -c %s", command);
-
-    if (execv (*args, args) == -1) {
+    if (execv (*params, params) == -1) {
         perror ("execv");
         exit (1);
     }
@@ -153,10 +148,11 @@ pid_t spawn (char * command, int fd)
     return -1;
 }
 
-bool run_connection (int fd, char * command)
+bool run_connection (int fd, char * params [])
 {
     assert (fd != 0);
-    assert (command != 0);
+    assert (params != 0);
+    assert (*params != 0);
     for (;;) {
         char buffer [BUFFER_SIZE];
         ssize_t received = recv (fd, buffer, BUFFER_SIZE, 0);
@@ -170,7 +166,7 @@ bool run_connection (int fd, char * command)
             return true;
 
         if (strncmp (buffer, "SPAWN\n", 6) == 0) {
-            pid_t spawned = spawn (command, fd);
+            pid_t spawned = spawn (fd, params);
             if (spawned != 0) {
                 log1 ("Sending NOK");
                 if (send_string (fd, "NOK\n") < 0) {
@@ -209,27 +205,9 @@ int main (int argc, char * argv [], char *envp[])
     }
 
     const char * path = argv [1];
+	char ** params = argv + 2;
 
-    int total_length = 0;
-
-    int i;
-    for (i = 2; i < argc; i++)
-        total_length += strlen (argv [i]) + 1;
-
-    char * command = malloc (total_length * sizeof (char));
-    if (!command) {
-        perror ("malloc");
-        return 1;
-    }
-    int j = 0;
-    for (i = 2; i < argc; i++) {
-        strcpy(command + j, argv [i]);
-        j += strlen (argv [i]) + 1;
-        command [j - 1] = ' ';
-    }
-    command [total_length - 1] = 0;
-
-    log ("Will run %s", command);
+    log ("Will run %s", *params);
 
     int local_fd;
     if (!start_server (path, &local_fd))
@@ -247,7 +225,7 @@ int main (int argc, char * argv [], char *envp[])
 
         log1 ("Connected.");
 
-        if (!run_connection (remote_fd, command))
+        if (!run_connection (remote_fd, params))
             log1 ("Something went wrong while processing input");
 
         close (remote_fd);

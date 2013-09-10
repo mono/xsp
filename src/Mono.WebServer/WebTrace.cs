@@ -47,10 +47,10 @@ namespace Mono.WebServer
 		{
 			string threadid = String.Format ("thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
 			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));			
-			string filepath = sf != null ? sf.GetFileName () : null;
-			if (!String.IsNullOrEmpty (filepath))
-				return String.Format (" [{0}, {1}, in {2}:{3}]", domainid, threadid, filepath, sf.GetFileLineNumber ());
-			return String.Format (" [{0}, {1}]", domainid, threadid);
+			string filepath = sf == null ? null : sf.GetFileName ();
+			int lineNumber = sf == null ? null : sf.GetFileLineNumber ();
+			string format = String.IsNullOrEmpty (filepath) ? " [{0}, {1}]" : " [{0}, {1}, in {2}:{3}]";
+			return String.Format (format, domainid, threadid, filepath, lineNumber);
 		}
 
 		static void Enter (string format, StackFrame sf, params object[] parms)

@@ -202,12 +202,16 @@ namespace Mono.WebServer.Fpm
 
 		static string GetFastCgiCommand (string filename)
 		{
-			if (filename.StartsWith ("/", StringComparison.Ordinal))
+			if (filename == null)
+				throw new ArgumentNullException ("filename");
+			if (filename.Length == 0)
+				throw new ArgumentException ("Filename can't be null for the fastcgi command", "filename");
+			if (filename.StartsWith (Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
 				return filename;
-			if (filename.Contains ("/"))
+			if (filename.Contains (Path.DirectorySeparatorChar.ToString()))
 				return Path.Combine (Environment.CurrentDirectory, filename);
 			string paths = Environment.GetEnvironmentVariable ("PATH");
-			foreach (var path in paths.Split(':')) {
+			foreach (var path in paths.Split(Path.PathSeparator)) {
 				string combined = Path.Combine (path, filename);
 				if (File.Exists (combined) && IsExecutable (combined))
 					return combined;

@@ -113,36 +113,9 @@ namespace Mono.WebServer.Apache
 
 		VPathToHost GetOrCreateApplication (string vhost, int port, string filepath, string virt)
 		{
-			string vdir = Path.GetDirectoryName (virt);
-			string pdir = Path.GetDirectoryName (filepath);
-			var vinfo = new DirectoryInfo (vdir);
-			var pinfo = new DirectoryInfo (pdir);
-			string final_pdir = null;
-			string final_vdir = null;
-			while (vinfo != null && pinfo != null) {
-				if (CheckDirectory (pinfo)) {
-					final_pdir = pinfo.ToString ();
-					final_vdir = vinfo.ToString ();
-					break;
-				}
-
-				if (pinfo.Name != vinfo.Name) {
-					final_vdir = vinfo.ToString ();
-					break;
-				}
-
-				pinfo = pinfo.Parent;
-				vinfo = vinfo.Parent;
-			}
-
-			if (final_pdir == null) {
-				final_pdir = pinfo.ToString ();
-			}
-
-			if (final_vdir == null) {
-				final_vdir = vinfo.ToString ();
-			}
-
+			string final_vdir;
+			string final_pdir;
+			GetPhysicalDirectory (virt, filepath, out final_vdir, out final_pdir);
 
 			//Logger.Write (LogLevel.Error, "final_pdir: {0} final_vdir: {1}", final_pdir, final_vdir);
 			VPathToHost vapp = server.GetApplicationForPath (vhost, port, virt, false);
@@ -158,20 +131,43 @@ namespace Mono.WebServer.Apache
 			return vapp;
 		}
 
-		static bool CheckDirectory (DirectoryInfo info)
+		internal static void GetPhysicalDirectory (string vfile, string pfile, out string final_vdir, out string final_pdir)
+		{
+			string vdir = Path.GetDirectoryName (vfile);
+			string pdir = Path.GetDirectoryName (pfile);
+			var vinfo = new DirectoryInfo (vdir);
+			var pinfo = new DirectoryInfo (pdir);
+			final_pdir = null;
+			final_vdir = null;
+			while (vinfo != null && pinfo != null) {
+				if (IsRootDirectory (pinfo)) {
+					final_pdir = pinfo.ToString ();
+					final_vdir = vinfo.ToString ();
+					break;
+				}
+				if (pinfo.Name != vinfo.Name) {
+					final_vdir = vinfo.ToString ();
+					break;
+				}
+				pinfo = pinfo.Parent;
+				vinfo = vinfo.Parent;
+			}
+			if (final_pdir == null) {
+				final_pdir = pinfo.ToString ();
+			}
+			if (final_vdir == null) {
+				final_vdir = vinfo.ToString ();
+			}
+		}
+
+		static bool IsRootDirectory (DirectoryInfo info)
 		{
 			if (!info.Exists)
 				return false;
 
-			FileInfo [] g1 = info.GetFiles ("Global.asax");
-			if (g1.Length != 0)
-				return true;
-
-			g1 = info.GetFiles ("global.asax");
-			if (g1.Length != 0)
-				return true;
-
-			return (info.GetDirectories ("bin").Length != 0);
+			return File.Exists (Path.Combine (info.FullName, "Global.asax"))
+				|| File.Exists (Path.Combine (info.FullName, "global.asax"))
+				|| Directory.Exists (Path.Combine (info.FullName, "bin"));
 		}
 
 		void InnerRun ()

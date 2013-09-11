@@ -48,6 +48,7 @@
     <Compile Include="FailLogger.cs" />
     <Compile Include="CompatArraySegmentTest.cs" />
     <Compile Include="DebugServer.cs" />
+    <Compile Include="ModMonoWorkerTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -66,6 +67,10 @@
     <ProjectReference Include="..\Mono.WebServer.FastCgi\Mono.WebServer.FastCgi.csproj">
       <Project>{6A65EE42-6B11-40F4-8E3C-B40E4AB21001}</Project>
       <Name>Mono.WebServer.FastCgi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mono.WebServer.Apache\Mono.WebServer.Apache.csproj">
+      <Project>{4F774362-208F-4C21-9668-9013BE0C5032}</Project>
+      <Name>Mono.WebServer.Apache</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

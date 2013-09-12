@@ -71,7 +71,7 @@ namespace Mono.WebServer
 		int clientBlock;
 		StringBuilder out_headers = new StringBuilder ();
 		string physical_path;
-		readonly ModMonoConfig mod_mono_config;
+		ModMonoConfig mod_mono_config;
 		readonly Socket client;
 		readonly static bool use_libc;
 

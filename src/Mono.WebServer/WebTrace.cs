@@ -48,7 +48,7 @@ namespace Mono.WebServer
 			string threadid = String.Format ("thread_id: {0}", Thread.CurrentThread.ManagedThreadId.ToString ("x"));
 			string domainid = String.Format ("appdomain_id: {0}", AppDomain.CurrentDomain.Id.ToString ("x"));			
 			string filepath = sf == null ? null : sf.GetFileName ();
-			int lineNumber = sf == null ? null : sf.GetFileLineNumber ();
+			int lineNumber = sf == null ? -1 : sf.GetFileLineNumber ();
 			string format = String.IsNullOrEmpty (filepath) ? " [{0}, {1}]" : " [{0}, {1}, in {2}:{3}]";
 			return String.Format (format, domainid, threadid, filepath, lineNumber);
 		}

@@ -441,7 +441,7 @@ namespace Mono.WebServer
 				return null;
 
 			var content_length = (string) headers ["Content-Length"];
-			long length;
+			long length = 0;
 
 			// If not empty parse, if correctly parsed validate
 			if (!String.IsNullOrEmpty (content_length)

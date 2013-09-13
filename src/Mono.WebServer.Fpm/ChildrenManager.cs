@@ -115,7 +115,8 @@ namespace Mono.WebServer.Fpm
 				string backSocket = Path.Combine (backSocketDir, dirname);
 
 				Func<Process> spawner = () => Spawner.SpawnOndemandChild (shimSocket);
-				Action spawnShim = () => Spawner.SpawnShim (configurationManager, shimSocket, directoryInfo.FullName, backSocket);
+				UnixDirectoryInfo info = directoryInfo;
+				Action spawnShim = () => Spawner.SpawnShim (configurationManager, shimSocket, info.FullName, backSocket);
 				Spawner.RunAs (user, configurationManager.WebGroup, spawnShim) ();
 
 				var child = new ChildInfo { Spawner = spawner, OnDemandSock =  backSocket, Name = directoryInfo.FullName };

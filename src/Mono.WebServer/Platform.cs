@@ -77,7 +77,7 @@ namespace Mono.WebServer {
 		public static void SetIdentity (uint uid, uint gid)
 		{
 			// TODO: Use platform-specific code
-			if (Platform.IsUnix) {
+			if (IsUnix) {
 				Syscall.setgid (gid);
 				Syscall.setuid (uid);
 				LogIdentity ();
@@ -88,7 +88,7 @@ namespace Mono.WebServer {
 		public static void SetIdentity (string user, string group)
 		{
 			// TODO: Use platform-specific code
-			if (Platform.IsUnix) {
+			if (IsUnix) {
 				SetGroup (group);
 				SetUser (user);
 				LogIdentity ();

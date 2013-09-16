@@ -28,6 +28,7 @@
 
 using System.IO;
 using Mono.WebServer.Options;
+using Mono.WebServer.Options.Settings;
 
 namespace Mono.WebServer.Apache {
 	class ConfigurationManager : ServerConfigurationManager

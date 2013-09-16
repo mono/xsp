@@ -1,5 +1,5 @@
 //
-// NullableInt32Setting.cs
+// SettingsCollection.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,14 +26,13 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using System.Collections.ObjectModel;
 
-namespace Mono.WebServer.Options {
-	public class NullableInt32Setting : NullableSetting<int>
-	{
-		public NullableInt32Setting (string name, string description, string appSetting = null, string environment = null, int? defaultValue = null, string prototype = null)
-			: base (name, Int32.TryParse, description, appSetting, environment, defaultValue, prototype)
+namespace Mono.WebServer.Options.Settings {
+	public sealed class SettingsCollection : KeyedCollection<string, ISetting> {
+		protected override string GetKeyForItem (ISetting item)
 		{
+			return item.Name;
 		}
 	}
 }

@@ -1,5 +1,5 @@
 //
-// ISetting.cs
+// UInt32Setting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -28,17 +28,12 @@
 
 using System;
 
-namespace Mono.WebServer.Options {
-	public interface ISetting
+namespace Mono.WebServer.Options.Settings {
+	public class UInt32Setting : Setting<uint>
 	{
-		string Name { get; }
-		string Description { get; }
-		string AppSetting { get; }
-		string Environment { get; }
-		string Prototype { get; }
-		[Obsolete]
-		object Value { get; }
-
-		void MaybeParseUpdate (SettingSource settingSource, string value);
+		public UInt32Setting (string name, string description, string appSetting = null, string environment = null, uint defaultValue = default(UInt32), string prototype = null)
+			: base (name, UInt32.TryParse, description, appSetting, environment, defaultValue, prototype)
+		{
+		}
 	}
 }

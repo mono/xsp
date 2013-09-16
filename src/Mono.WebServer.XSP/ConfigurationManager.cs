@@ -27,8 +27,9 @@
 //
 
 using System.Net;
-using Mono.WebServer.Options;
+using Mono.WebServer.Options.Settings;
 using TP = Mono.Security.Protocol.Tls;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.XSP {
 	class ConfigurationManager : ServerConfigurationManager

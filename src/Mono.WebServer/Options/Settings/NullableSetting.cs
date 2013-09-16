@@ -1,5 +1,5 @@
-//
-// NullableUInt16Setting.cs
+﻿//
+// NullableSetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,14 +26,26 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
-namespace Mono.WebServer.Options {
-	public class NullableUInt16Setting : NullableSetting<ushort>
+namespace Mono.WebServer.Options.Settings {
+	public class NullableSetting<T>:Setting<T?> where T : struct
 	{
-		public NullableUInt16Setting (string name, string description, string appSetting = null, string environment = null, ushort? defaultValue = null, string prototype = null)
-			: base (name, UInt16.TryParse, description, appSetting, environment, defaultValue, prototype)
+		public NullableSetting (string name, Parser<T> parser, string description, string appSetting = null, string environment = null, T? defaultValue = null, string prototype = null)
+			: base (name, ToNullable(parser), description, appSetting, environment, defaultValue, prototype)
 		{
+		}
+
+		static Parser<T?> ToNullable (Parser<T> parser)
+		{
+			return delegate (string input, out T? output)
+			{
+				T temp;
+				if (!parser (input, out temp)) {
+					output = null;
+					return false;
+				}
+				output = temp;
+				return true;
+			};
 		}
 	}
 }

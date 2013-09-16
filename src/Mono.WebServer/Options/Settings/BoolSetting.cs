@@ -1,5 +1,5 @@
 //
-// SettingsCollection.cs
+// BoolSetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,13 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.ObjectModel;
+using System;
 
-namespace Mono.WebServer.Options {
-	public sealed class SettingsCollection : KeyedCollection<string, ISetting> {
-		protected override string GetKeyForItem (ISetting item)
+namespace Mono.WebServer.Options.Settings {
+	public class BoolSetting : Setting<bool>
+	{
+		public BoolSetting (string name, string description, string appSetting = null, string environment = null, bool defaultValue = false, string prototype = null)
+			: base (name, Boolean.TryParse, description, appSetting, environment, defaultValue, prototype)
 		{
-			return item.Name;
 		}
 	}
 }

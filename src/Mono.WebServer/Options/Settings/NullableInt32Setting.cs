@@ -1,5 +1,5 @@
 //
-// UInt16Setting.cs
+// NullableInt32Setting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -28,11 +28,11 @@
 
 using System;
 
-namespace Mono.WebServer.Options {
-	public class UInt16Setting : Setting<ushort>
+namespace Mono.WebServer.Options.Settings {
+	public class NullableInt32Setting : NullableSetting<int>
 	{
-		public UInt16Setting (string name, string description, string appSetting = null, string environment = null, ushort defaultValue = default(UInt16), string prototype = null)
-			: base (name, UInt16.TryParse, description, appSetting, environment, defaultValue, prototype)
+		public NullableInt32Setting (string name, string description, string appSetting = null, string environment = null, int? defaultValue = null, string prototype = null)
+			: base (name, Int32.TryParse, description, appSetting, environment, defaultValue, prototype)
 		{
 		}
 	}

@@ -1,5 +1,5 @@
 //
-// Int32Setting.cs
+// ISetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -28,12 +28,17 @@
 
 using System;
 
-namespace Mono.WebServer.Options {
-	public class Int32Setting : Setting<int>
+namespace Mono.WebServer.Options.Settings {
+	public interface ISetting
 	{
-		public Int32Setting (string name, string description, string appSetting = null, string environment = null, int defaultValue = default(Int32), string prototype = null)
-			: base (name, Int32.TryParse, description, appSetting, environment, defaultValue, prototype)
-		{
-		}
+		string Name { get; }
+		string Description { get; }
+		string AppSetting { get; }
+		string Environment { get; }
+		string Prototype { get; }
+		[Obsolete]
+		object Value { get; }
+
+		void MaybeParseUpdate (SettingSource settingSource, string value);
 	}
 }

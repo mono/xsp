@@ -33,6 +33,7 @@ using System.Xml;
 using Mono.Unix;
 using Mono.WebServer.Log;
 using NDesk.Options;
+using Mono.WebServer.Options.Settings;
 
 namespace Mono.WebServer.Options {
 	public abstract partial class ConfigurationManager {

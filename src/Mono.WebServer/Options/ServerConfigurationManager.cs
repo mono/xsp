@@ -28,6 +28,7 @@
 
 using System;
 using System.Net;
+using Mono.WebServer.Options.Settings;
 
 namespace Mono.WebServer.Options {
 	public abstract class ServerConfigurationManager : ConfigurationManager, IHelpConfigurationManager

@@ -1,5 +1,5 @@
 //
-// UInt32Setting.cs
+// UInt16Setting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -28,11 +28,11 @@
 
 using System;
 
-namespace Mono.WebServer.Options {
-	public class UInt32Setting : Setting<uint>
+namespace Mono.WebServer.Options.Settings {
+	public class UInt16Setting : Setting<ushort>
 	{
-		public UInt32Setting (string name, string description, string appSetting = null, string environment = null, uint defaultValue = default(UInt32), string prototype = null)
-			: base (name, UInt32.TryParse, description, appSetting, environment, defaultValue, prototype)
+		public UInt16Setting (string name, string description, string appSetting = null, string environment = null, ushort defaultValue = default(UInt16), string prototype = null)
+			: base (name, UInt16.TryParse, description, appSetting, environment, defaultValue, prototype)
 		{
 		}
 	}

@@ -28,6 +28,7 @@
 
 using System;
 using Mono.WebServer.Log;
+using Mono.WebServer.Options.Settings;
 
 namespace Mono.WebServer.Options {
 	public abstract partial class ConfigurationManager {

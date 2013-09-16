@@ -28,6 +28,7 @@
 //
 
 using System;
+using Mono.WebServer.Options.Settings;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {

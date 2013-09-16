@@ -1,5 +1,5 @@
-﻿//
-// NullableSetting.cs
+//
+// Int32Setting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,26 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace Mono.WebServer.Options {
-	public class NullableSetting<T>:Setting<T?> where T : struct
-	{
-		public NullableSetting (string name, Parser<T> parser, string description, string appSetting = null, string environment = null, T? defaultValue = null, string prototype = null)
-			: base (name, ToNullable(parser), description, appSetting, environment, defaultValue, prototype)
-		{
-		}
+using System;
 
-		static Parser<T?> ToNullable (Parser<T> parser)
+namespace Mono.WebServer.Options.Settings {
+	public class Int32Setting : Setting<int>
+	{
+		public Int32Setting (string name, string description, string appSetting = null, string environment = null, int defaultValue = default(Int32), string prototype = null)
+			: base (name, Int32.TryParse, description, appSetting, environment, defaultValue, prototype)
 		{
-			return delegate (string input, out T? output)
-			{
-				T temp;
-				if (!parser (input, out temp)) {
-					output = null;
-					return false;
-				}
-				output = temp;
-				return true;
-			};
 		}
 	}
 }

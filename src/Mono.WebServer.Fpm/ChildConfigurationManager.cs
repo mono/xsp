@@ -27,7 +27,7 @@
 //
 
 using System;
-using Mono.WebServer.Options;
+using Mono.WebServer.Options.Settings;
 
 namespace Mono.WebServer.Fpm {
 	class ChildConfigurationManager : FastCgi.ConfigurationManager

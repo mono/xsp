@@ -78,26 +78,12 @@
     <Compile Include="MapPathEventArgs.cs" />
     <Compile Include="MapPathEventHandler.cs" />
     <Compile Include="MonoWorkerRequest.cs" />
-    <Compile Include="Options\BoolSetting.cs" />
     <Compile Include="Options\ConfigurationManagerExtensions.cs" />
     <Compile Include="Options\ConfigurationManager.Fields.cs" />
     <Compile Include="Options\IHelpConfigurationManager.cs" />
-    <Compile Include="Options\NullableUInt16Setting.cs" />
-    <Compile Include="Options\EnumSetting.cs" />
-    <Compile Include="Options\NullableInt32Setting.cs" />
-    <Compile Include="Options\NullableSetting.cs" />
-    <Compile Include="Options\UInt32Setting.cs" />
-    <Compile Include="Options\Int32Setting.cs" />
-    <Compile Include="Options\ISetting.cs" />
     <Compile Include="Options\ServerConfigurationManager.cs" />
     <Compile Include="Options\ConfigurationManager.cs" />
     <Compile Include="Options\Options.cs" />
-    <Compile Include="Options\Parser.cs" />
-    <Compile Include="Options\Settings.cs" />
-    <Compile Include="Options\SettingsCollection.cs" />
-    <Compile Include="Options\SettingSource.cs" />
-    <Compile Include="Options\StringSetting.cs" />
-    <Compile Include="Options\UInt16Setting.cs" />
     <Compile Include="Options\Descriptions.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Platform.cs" />
@@ -115,5 +101,22 @@
     <Compile Include="Log\ILogger.cs" />
     <Compile Include="AssemblyInfo4.cs" />
     <Compile Include="IdentityToken.cs" />
+    <Compile Include="Options\Settings\BoolSetting.cs" />
+    <Compile Include="Options\Settings\Int32Setting.cs" />
+    <Compile Include="Options\Settings\EnumSetting.cs" />
+    <Compile Include="Options\Settings\UInt16Setting.cs" />
+    <Compile Include="Options\Settings\UInt32Setting.cs" />
+    <Compile Include="Options\Settings\StringSetting.cs" />
+    <Compile Include="Options\Settings\NullableInt32Setting.cs" />
+    <Compile Include="Options\Settings\NullableSetting.cs" />
+    <Compile Include="Options\Settings\ISetting.cs" />
+    <Compile Include="Options\Settings\NullableUInt16Setting.cs" />
+    <Compile Include="Options\Settings\Setting.cs" />
+    <Compile Include="Options\Settings\SettingsCollection.cs" />
+    <Compile Include="Options\Settings\SettingSource.cs" />
+    <Compile Include="Options\Settings\Parser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Options\Settings\" />
   </ItemGroup>
 </Project>

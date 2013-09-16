@@ -1,5 +1,5 @@
 //
-// DebugServer.cs
+// StringSetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -27,25 +27,19 @@
 //
 
 using System;
-using Mono.WebServer.XSP;
 
-namespace Mono.WebServer.Test
-{
-	public class DebugServer : IDisposable
+namespace Mono.WebServer.Options.Settings {
+	public class StringSetting : Setting<string>
 	{
-		ApplicationServer server;
-
-		public void Dispose ()
+		public StringSetting (string name, string description, string appSetting = null, string environment = null, string defaultValue = null, string prototype = null)
+			: base (name, FakeParse, description, appSetting, environment, defaultValue, prototype)
 		{
-			if (server != null)
-				server.Stop ();
 		}
 
-		public int Run ()
+		static bool FakeParse (string value, out string result)
 		{
-			CompatTuple<int, string, ApplicationServer> res = Server.DebugMain (new [] { "--applications", "/:.", "--port", "9000", "--nonstop" });
-			server = res.Item3;
-			return res.Item1;
+			result = value;
+			return !String.IsNullOrEmpty (value);
 		}
 	}
 }

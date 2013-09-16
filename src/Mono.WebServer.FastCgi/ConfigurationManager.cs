@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Mono.WebServer.Options.Settings;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.FastCgi {

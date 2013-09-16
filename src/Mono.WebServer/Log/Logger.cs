@@ -3,8 +3,10 @@
 //
 // Author:
 //   Brian Nickel (brian.nickel@gmail.com)
+//   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
 //
 // Copyright (C) 2007 Brian Nickel
+// Copyright (C) 2013 Leonardo Taglialegne
 // 
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the

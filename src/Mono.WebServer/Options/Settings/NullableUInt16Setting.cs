@@ -1,5 +1,5 @@
 //
-// DebugServer.cs
+// NullableUInt16Setting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -27,25 +27,13 @@
 //
 
 using System;
-using Mono.WebServer.XSP;
 
-namespace Mono.WebServer.Test
-{
-	public class DebugServer : IDisposable
+namespace Mono.WebServer.Options.Settings {
+	public class NullableUInt16Setting : NullableSetting<ushort>
 	{
-		ApplicationServer server;
-
-		public void Dispose ()
+		public NullableUInt16Setting (string name, string description, string appSetting = null, string environment = null, ushort? defaultValue = null, string prototype = null)
+			: base (name, UInt16.TryParse, description, appSetting, environment, defaultValue, prototype)
 		{
-			if (server != null)
-				server.Stop ();
-		}
-
-		public int Run ()
-		{
-			CompatTuple<int, string, ApplicationServer> res = Server.DebugMain (new [] { "--applications", "/:.", "--port", "9000", "--nonstop" });
-			server = res.Item3;
-			return res.Item1;
 		}
 	}
 }

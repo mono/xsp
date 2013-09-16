@@ -26,9 +26,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Mono.WebServer.Options;
+using Mono.WebServer.Options.Settings;
 using Mono.Unix;
 using System;
+using Mono.WebServer.Options;
 
 namespace Mono.WebServer.Fpm {
 	class ConfigurationManager : Options.ConfigurationManager, IHelpConfigurationManager

@@ -1,5 +1,5 @@
-//
-// DebugServer.cs
+﻿//
+// EnumSetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -27,25 +27,24 @@
 //
 
 using System;
-using Mono.WebServer.XSP;
 
-namespace Mono.WebServer.Test
-{
-	public class DebugServer : IDisposable
+namespace Mono.WebServer.Options.Settings {
+	public class EnumSetting<T> : Setting<T> where T : struct 
 	{
-		ApplicationServer server;
-
-		public void Dispose ()
+		static bool EnumParser<TEnum> (string input, out TEnum output)
 		{
-			if (server != null)
-				server.Stop ();
+			output = default (TEnum);
+			try {
+				output = (TEnum)Enum.Parse (typeof (TEnum), input, true);
+				return true;
+			} catch (ArgumentException) { // TODO: catch more specific type
+				return false;
+			}
 		}
 
-		public int Run ()
+		public EnumSetting (string name, string description, string appSetting = null, string environment = null, T defaultValue = default(T), string prototype = null)
+			: base (name, EnumParser, description, appSetting, environment, defaultValue, prototype)
 		{
-			CompatTuple<int, string, ApplicationServer> res = Server.DebugMain (new [] { "--applications", "/:.", "--port", "9000", "--nonstop" });
-			server = res.Item3;
-			return res.Item1;
 		}
 	}
 }

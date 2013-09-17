@@ -1,5 +1,5 @@
 //
-// DebugServer.cs
+// ISetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -27,25 +27,18 @@
 //
 
 using System;
-using Mono.WebServer.XSP;
 
-namespace Mono.WebServer.Test
-{
-	public class DebugServer : IDisposable
+namespace Mono.WebServer.Options.Settings {
+	public interface ISetting
 	{
-		ApplicationServer server;
+		string Name { get; }
+		string Description { get; }
+		string AppSetting { get; }
+		string Environment { get; }
+		string Prototype { get; }
+		[Obsolete]
+		object Value { get; }
 
-		public void Dispose ()
-		{
-			if (server != null)
-				server.Stop ();
-		}
-
-		public int Run ()
-		{
-			CompatTuple<int, string, ApplicationServer> res = Server.DebugMain (new [] { "--applications", "/:.", "--port", "9000", "--nonstop" });
-			server = res.Item3;
-			return res.Item1;
-		}
+		void MaybeParseUpdate (SettingSource settingSource, string value);
 	}
 }

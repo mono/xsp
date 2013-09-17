@@ -1,5 +1,5 @@
-//
-// DebugServer.cs
+﻿//
+// NullableSetting.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,26 +26,26 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using Mono.WebServer.XSP;
-
-namespace Mono.WebServer.Test
-{
-	public class DebugServer : IDisposable
+namespace Mono.WebServer.Options.Settings {
+	public class NullableSetting<T>:Setting<T?> where T : struct
 	{
-		ApplicationServer server;
-
-		public void Dispose ()
+		public NullableSetting (string name, Parser<T> parser, string description, string appSetting = null, string environment = null, T? defaultValue = null, string prototype = null)
+			: base (name, ToNullable(parser), description, appSetting, environment, defaultValue, prototype)
 		{
-			if (server != null)
-				server.Stop ();
 		}
 
-		public int Run ()
+		static Parser<T?> ToNullable (Parser<T> parser)
 		{
-			CompatTuple<int, string, ApplicationServer> res = Server.DebugMain (new [] { "--applications", "/:.", "--port", "9000", "--nonstop" });
-			server = res.Item3;
-			return res.Item1;
+			return delegate (string input, out T? output)
+			{
+				T temp;
+				if (!parser (input, out temp)) {
+					output = null;
+					return false;
+				}
+				output = temp;
+				return true;
+			};
 		}
 	}
 }

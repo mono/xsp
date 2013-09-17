@@ -1,5 +1,5 @@
 //
-// DebugServer.cs
+// SettingSource.cs
 //
 // Author:
 //   Leonardo Taglialegne <leonardo.taglialegne@gmail.com>
@@ -26,26 +26,13 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using Mono.WebServer.XSP;
-
-namespace Mono.WebServer.Test
-{
-	public class DebugServer : IDisposable
+namespace Mono.WebServer.Options.Settings {
+	public enum SettingSource 
 	{
-		ApplicationServer server;
-
-		public void Dispose ()
-		{
-			if (server != null)
-				server.Stop ();
-		}
-
-		public int Run ()
-		{
-			CompatTuple<int, string, ApplicationServer> res = Server.DebugMain (new [] { "--applications", "/:.", "--port", "9000", "--nonstop" });
-			server = res.Item3;
-			return res.Item1;
-		}
+		Default,
+		AppSettings,
+		Environment,
+		Xml,
+		CommandLine
 	}
 }

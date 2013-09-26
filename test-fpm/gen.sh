@@ -8,6 +8,7 @@ checkuser "fpm" "" || exit 1
 checkdir $CONFIGDIR $CONFIGDIR_PERM $CONFIGDIR_GROUP
 checkdir $SOCKDIR   $SOCKDIR_PERM   $SOCKDIR_GROUP
 checkdir $SHIMDIR   $SHIMDIR_PERM   $SHIMDIR_GROUP
+checkdir $BACKDIR   $BACKDIR_PERM   $BACKDIR_GROUP
 checkdir $WEBDIR    $WEBDIR_PERM    $WEBDIR_GROUP
 
 diff template  "$CONFIGDIR/template" > /dev/null 2> /dev/null

@@ -76,8 +76,13 @@ namespace Mono.WebServer.Fpm {
 			Logger.Write (LogLevel.Debug, "Connecting to backend on {0}", OnDemandSock);
 			if (OnDemandSock.StartsWith ("\\0", StringComparison.Ordinal))
 				onDemandSocket.Connect ('\0' + OnDemandSock.Substring (2));
-			else
-				onDemandSocket.Connect (OnDemandSock);
+			else {
+				Uri uri;
+				if (Uri.TryCreate (OnDemandSock, UriKind.Absolute, out uri))
+					onDemandSocket.Connect (uri.PathAndQuery);
+				else
+					onDemandSocket.Connect (OnDemandSock);
+			}
 			SocketPassing.SendTo (onDemandSocket.Client.Handle, socket.Handle);
 			Logger.Write (LogLevel.Debug, "Sent fd {0} via fd {1}", socket.Handle, onDemandSocket.Client.Handle);
 			onDemandSocket.Close ();

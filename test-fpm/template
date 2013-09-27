@@ -1,6 +1,6 @@
 <Settings>
 	<Setting Name="shimsock" Value="/tmp/shims/$(filename)" />
-	<Setting Name="ondemandsock" Value="\0back$(filename)" />
+	<Setting Name="ondemandsock" Value="unix://660@/tmp/backs/$(filename)" />
 	<Setting Name="instance-type" Value="ondemand" />
 	<Setting Name="user" Value="$(filename)" />
 	<Setting Name="name" Value="$(filename)" />

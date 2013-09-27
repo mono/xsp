@@ -60,6 +60,8 @@ namespace Mono.WebServer.FastCgi {
 
 		public OnDemandServer (Socket socket)
 		{
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
 			backend = new GenericServer<ConnectionProxy> (socket, this);
 			var fakeBackend = new FakeGenericServer<ConnectionProxy> (backend);
 			server = new Mono.FastCgi.Server (fakeBackend);

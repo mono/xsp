@@ -138,7 +138,7 @@ pid_t spawn (int fd, char * params [])
 
     log1 ("Reforked!");
 
-    log ("Running %s", params);
+    log ("Running %s", *params);
 
     if (execv (*params, params) == -1) {
         perror ("execv");

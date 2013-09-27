@@ -39,13 +39,12 @@ using Mono.FastCgi;
 using Mono.WebServer.FastCgi.Sockets;
 using Mono.Unix.Native;
 
-namespace Mono.WebServer.FastCgi
-{
+namespace Mono.WebServer.FastCgi {
 	public static class Server
 	{
 		const string WRONG_KIND = "Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".";
 
-		delegate bool SocketCreator (ConfigurationManager configmanager, string [] socketParts, out Socket socket);
+		delegate bool SocketCreator (ConfigurationManager configmanager,string[] socketParts,out Socket socket);
 
 		static ApplicationServer appserver;
 
@@ -57,7 +56,7 @@ namespace Mono.WebServer.FastCgi
 			return appserver.GetApplicationForPath (vhost,	port, path, false);
 		}
 
-		public static int Main (string [] args)
+		public static int Main (string[] args)
 		{
 			if (Platform.IsUnix) {
 				uint uid = Syscall.geteuid ();
@@ -112,9 +111,7 @@ namespace Mono.WebServer.FastCgi
 			if (configurationManager.OnDemand) {
 				Socket socket;
 				Uri uri;
-				if (Uri.TryCreate (configurationManager.OnDemandSock, UriKind.Absolute, out uri))
-					TryCreateSocketFromUri (uri, out socket);
-				else if (!TryCreateUnixSocket (configurationManager.OnDemandSock, out socket))
+				if (!TryCreateOnDemandSocket (configurationManager.OnDemandSock, out socket, out uri))
 					return 1;
 				server = CreateOnDemandServer (configurationManager, socket);
 				CreateWatchdog (configurationManager, server);
@@ -141,6 +138,12 @@ namespace Mono.WebServer.FastCgi
 			return 0;
 		}
 
+		static bool TryCreateOnDemandSocket (string onDemandSock, out Socket socket, out Uri uri)
+		{
+			return (Uri.TryCreate (onDemandSock, UriKind.Absolute, out uri) && TryCreateSocketFromUri (uri, out socket))
+				|| TryCreateUnixSocket (onDemandSock, out socket);
+		}
+
 		static void CreateWatchdog (ConfigurationManager configurationManager, IServer server)
 		{
 			using (var aliveLock = new System.Threading.ReaderWriterLockSlim ()) {
@@ -150,10 +153,10 @@ namespace Mono.WebServer.FastCgi
 				// If we can't then don't bother, it's not needed
 				server.RequestReceived += (sender, e) =>
 					TryRunLocked (
-						() => aliveLock.TryEnterWriteLock (0),
-						() => alive = true,
-						aliveLock.ExitWriteLock
-					);
+					() => aliveLock.TryEnterWriteLock (0),
+					() => alive = true,
+					aliveLock.ExitWriteLock
+				);
 
 				var pluto = new Watchdog (configurationManager.IdleTime * 1000);
 				pluto.End += (sender, e) => {
@@ -168,19 +171,19 @@ namespace Mono.WebServer.FastCgi
 				var t = new Timer (1000);
 				t.Elapsed += (sender, e) =>
 					RunLocked (
-						aliveLock.EnterUpgradeableReadLock,
-						() => {
-							if (!alive)
-								return;
-							RunLocked (
-								aliveLock.EnterWriteLock,
-								() => alive = false,
-								aliveLock.ExitWriteLock
-							);
-							pluto.Kick ();
-						},
-						aliveLock.ExitUpgradeableReadLock
-					);
+					aliveLock.EnterUpgradeableReadLock,
+					() => {
+						if (!alive)
+							return;
+						RunLocked (
+							aliveLock.EnterWriteLock,
+							() => alive = false,
+							aliveLock.ExitWriteLock
+						);
+						pluto.Kick ();
+					},
+					aliveLock.ExitUpgradeableReadLock
+				);
 				t.Start ();
 			}
 		}
@@ -193,7 +196,10 @@ namespace Mono.WebServer.FastCgi
 				throw new ArgumentNullException ("code");
 			if (releaseLock == null)
 				throw new ArgumentNullException ("releaseLock");
-			TryRunLocked (() => { takeLock (); return true; }, code, releaseLock);
+			TryRunLocked (() => {
+				takeLock ();
+				return true;
+			}, code, releaseLock);
 		}
 
 		static void TryRunLocked (Func<bool> takeLock, Action code, Action releaseLock)
@@ -218,16 +224,20 @@ namespace Mono.WebServer.FastCgi
 
 		static IServer CreateOnDemandServer (ConfigurationManager configurationManager, Socket socket)
 		{
+			if (configurationManager == null)
+				throw new ArgumentNullException ("configurationManager");
+			if (socket == null)
+				throw new ArgumentNullException ("socket");
 			var server = new OnDemandServer (socket) {
 				MaxConnections = configurationManager.MaxConns,
 				MaxRequests = configurationManager.MaxReqs,
 				MultiplexConnections = configurationManager.Multiplex
 			};
 
-			server.SetResponder (typeof (Responder));
+			server.SetResponder (typeof(Responder));
 
-			Logger.Write (LogLevel.Debug, "Max connections: {0}",       server.MaxConnections);
-			Logger.Write (LogLevel.Debug, "Max requests: {0}",          server.MaxRequests);
+			Logger.Write (LogLevel.Debug, "Max connections: {0}", server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}", server.MaxRequests);
 			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}", server.MultiplexConnections);
 			return server;
 		}
@@ -241,10 +251,10 @@ namespace Mono.WebServer.FastCgi
 				MultiplexConnections = configurationManager.Multiplex
 			};
 
-			server.SetResponder (typeof (Responder));
+			server.SetResponder (typeof(Responder));
 
-			Logger.Write (LogLevel.Debug, "Max connections: {0}",       server.MaxConnections);
-			Logger.Write (LogLevel.Debug, "Max requests: {0}",          server.MaxRequests);
+			Logger.Write (LogLevel.Debug, "Max connections: {0}", server.MaxConnections);
+			Logger.Write (LogLevel.Debug, "Max requests: {0}", server.MaxRequests);
 			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}", server.MultiplexConnections);
 			return server;
 		}
@@ -285,9 +295,9 @@ namespace Mono.WebServer.FastCgi
 			if (applications == null && app_config_dir == null &&
 			    app_config_file == null && !autoMap) {
 				Logger.Write (LogLevel.Error,
-				              "There are no applications defined, and path mapping is disabled.");
+					"There are no applications defined, and path mapping is disabled.");
 				Logger.Write (LogLevel.Error,
-				              "Define an application using /applications, /appconfigfile, /appconfigdir");
+					"Define an application using /applications, /appconfigfile, /appconfigdir");
 				/*
 				Logger.Write (LogLevel.Error,
 					"or by enabling application mapping with /automappaths=True.");
@@ -314,11 +324,11 @@ namespace Mono.WebServer.FastCgi
 				}
 			}
 
-			string [] socket_parts = socket_type.Split (new [] { ':' }, 3);
+			string[] socket_parts = socket_type.Split (new [] { ':' }, 3);
 
 			SocketCreator creator;
 			return TryGetSocketCreator (socket_parts [0], out creator)
-				&& creator (configurationManager, socket_parts, out socket);
+			&& creator (configurationManager, socket_parts, out socket);
 		}
 
 		static bool TryCreateSocketFromUri (Uri uri, out Socket socket)
@@ -345,16 +355,16 @@ namespace Mono.WebServer.FastCgi
 		{
 			switch (socket_kind.ToLower ()) {
 				case "pipe":
-					creator = (ConfigurationManager configmanager, string [] socketParts, out Socket socket) => TryCreatePipe (out socket);
+					creator = (ConfigurationManager configmanager, string[] socketParts, out Socket socket) => TryCreatePipe (out socket);
 					return true;
-				// The FILE sockets is of the format
-				// "file[:PATH]".
+			// The FILE sockets is of the format
+			// "file[:PATH]".
 				case "unix":
 				case "file":
 					creator = TryCreateUnixSocket;
 					return true;
-				// The TCP socket is of the format
-				// "tcp[[:ADDRESS]:PORT]".
+			// The TCP socket is of the format
+			// "tcp[[:ADDRESS]:PORT]".
 				case "tcp":
 					creator = TryCreateTcpSocket;
 					return true;
@@ -393,7 +403,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool TryCreateTcpSocket (ConfigurationManager configurationManager, string [] socketParts, out Socket socket)
+		static bool TryCreateTcpSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			socket = null;
 			ushort port;
@@ -419,8 +429,8 @@ namespace Mono.WebServer.FastCgi
 					address = IPAddress.Loopback;
 				else if (!IPAddress.TryParse (address_str, out address)) {
 					Logger.Write (LogLevel.Error,
-					              "Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
-					              address_str);
+						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
+						address_str);
 					return false;
 				}
 			}
@@ -437,7 +447,7 @@ namespace Mono.WebServer.FastCgi
 			return true;
 		}
 
-		static bool TryCreateUnixSocket (ConfigurationManager configurationManager, string [] socketParts, out Socket socket)
+		static bool TryCreateUnixSocket (ConfigurationManager configurationManager, string[] socketParts, out Socket socket)
 		{
 			string path = socketParts.Length == 2
 				? socketParts [1]

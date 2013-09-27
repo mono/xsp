@@ -84,7 +84,7 @@ namespace Mono.WebServer.FastCgi
 		{
 			if (socket == null)
 				throw new ArgumentNullException ("socket");
-			if (callback==null)
+			if (callback == null)
 				throw new ArgumentNullException ("callback");
 			listen_socket = socket;
 			serverCallback = callback;

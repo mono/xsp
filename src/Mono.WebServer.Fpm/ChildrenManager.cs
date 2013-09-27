@@ -80,7 +80,7 @@ namespace Mono.WebServer.Fpm
 			shimSocketDir = Path.Combine (socketDir, "shim");
 			CreateWithPerm (shimSocketDir, "3733", fpmGroup);
 			frontSocketDir = Path.Combine (socketDir, "front");
-			CreateWithPerm (frontSocketDir, "3730", httpdGroup);
+			CreateWithPerm (frontSocketDir, "2730", httpdGroup);
 			backSocketDir = Path.Combine (socketDir, "back");
 			CreateWithPerm (backSocketDir, "3733", fpmGroup);
 		}

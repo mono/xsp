@@ -48,11 +48,13 @@ An example template follows:
         <Setting Name="user" Value="$(filename)" />
         <Setting Name="name" Value="$(filename)" />
         <Setting Name="socket" Value="unix://660@/tmp/sockets/$(filename)" />
-        <Setting Name="applications" Value="/:/tmp/website/$(filename)" />
+        <Setting Name="applications" Value="/:/tmp/website/$(filename)/" />
         <Setting Name="idle-time" Value="20" />
     </Settings>
 
-This will make mono-fpm listen on `/tmp/sockets/$(filename)` (where `$(filename)` gets replaced by the actual file name minus the extension) and spawn a C shim which will listen on `/tmp/shims/$(filename)`.
+This will make mono-fpm listen on `/tmp/sockets/$(filename)` and spawn a C shim which will listen on `/tmp/shims/$(filename)`.
+
+While parsing `$(filename)` gets replaced by the actual file name (minus the extension), `$(user)` by the file owner and `$(group)` by the file group.
 
 The main configuration parameters are:
 
@@ -101,6 +103,46 @@ As you can see the `map` directive allows to achieve a single-file configuration
 **Beware, this is the youngest part of mono-fpm, and probably the least secure.**
 
 Just pass `--web-dir` to mono-fpm to specify a directory in which the users' websites are located. Mono-fpm will start one C shim per directory (skipping those with owner uid < 100), and listen on `/tmp/mono-fpm-automatic/front/<directory name>`.
+
+## Permissions
+
+Recent versions of mono-fpm and fastcgi-mono-server allow for specification of permissions on sockets, using the following syntax:
+
+    unix://<perm>@<path>
+
+where perm are the permissions, written in octal.
+
+The permission for the various sockets should be as follows (with "httpd" being the httpd *group*):
+
+### httpd <-> fpm sockets (`socket`)
+
+They should be writable by both fpm and the httpd, and will be created by fpm *while still root*.
+
+Advice: use 660 (rw-rw----) as permission and put it into a directory with permission 2730 (rwx-ws---) and owned by root:httpd.
+
+### fpm <-> shim sockets (`shimsock`)
+
+They should be writable by both fpm and the user, and will be created by the C shim.
+
+Advice: use 660 (rw-rw----) as permission and put it into a directory with permission 3733 (rwx-ws-wt) and owned by root:fpm.
+
+### fpm <-> fastcgi-mono-server sockets (`ondemandsock`)
+
+They should be writable by both fpm and the user, and will be created by the fastcgi-mono-server daemon.
+
+Advice: use 660 (rw-rw----) as permission and put it into a directory with permission 3733 (rwx-ws-wt) and owned by root:fpm.
+
+### Websites directories
+
+They should be writable by the user and readable by nginx.
+
+Advice: use 2750 (rwxr-s---) as permission, chown it to user:httpd and put it into a directory with permission 2711 (rwx--s--x) and owned by root:httpd.
+
+### Configuration directory
+
+This only need to be readable by root.
+
+Advice: use 700 (rwx------) as permission. The files themselves can be chowned to the user if needed for configuration.
 
 ## Debug
 

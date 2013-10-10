@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using Mono.WebServer.Log;
 using Mono.WebServer.FastCgi;
 using NRecord = Mono.WebServer.FastCgi.Record;
+using Mono.WebServer.FastCgi.Compatibility;
 
 namespace Mono.FastCgi {
 	public class Connection
@@ -337,8 +338,8 @@ namespace Mono.FastCgi {
 			if (IsConnected)
 				lock (send_lock) {
 					try {
-						send_buffers.EnforceBodyLength(bodyLength);
-						Array.Copy(bodyData, bodyIndex, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyLength);
+						CompatArraySegment<byte> body = send_buffers.EnforceBodyLength(bodyLength);
+						Array.Copy(bodyData, bodyIndex, body.Array, body.Offset, bodyLength);
 						var record = new NRecord (1, type, requestID, bodyLength, send_buffers);
 						record.Send (socket);
 					} catch (System.Net.Sockets.SocketException) {
@@ -353,8 +354,8 @@ namespace Mono.FastCgi {
 			try {	
 				if (IsConnected) {
 					byte[] bodyData = body.GetData ();
-					send_buffers.EnforceBodyLength(bodyData.Length);
-					Array.Copy(bodyData, 0, send_buffers.Body.Value.Array, send_buffers.Body.Value.Offset, bodyData.Length);
+					CompatArraySegment<byte> bodyBuffer = send_buffers.EnforceBodyLength(bodyData.Length);
+					Array.Copy(bodyData, 0, bodyBuffer.Array, bodyBuffer.Offset, bodyData.Length);
 					var record = new NRecord (1, RecordType.EndRequest, requestID, bodyData.Length, send_buffers);
 					record.Send (socket);
 				}

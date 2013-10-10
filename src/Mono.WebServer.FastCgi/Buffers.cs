@@ -31,7 +31,7 @@ using Mono.WebServer.FastCgi.Compatibility;
 
 namespace Mono.WebServer.FastCgi
 {
-	public struct Buffers
+	public class Buffers
 	{
 		public CompatArraySegment<byte>? Header { get; private set; }
 		public CompatArraySegment<byte>? Body { get; private set; }
@@ -40,8 +40,11 @@ namespace Mono.WebServer.FastCgi
 		readonly BufferManager bigBufferManager;
 		readonly BufferManager smallBufferManager;
 
+		public Buffers ()
+		{
+		}
+
 		public Buffers (BufferManager bigBufferManager, BufferManager smallBufferManager)
-			: this ()
 		{
 			if (bigBufferManager == null)
 				throw new ArgumentNullException ("bigBufferManager");
@@ -55,7 +58,7 @@ namespace Mono.WebServer.FastCgi
 			Padding = smallBufferManager.ClaimBuffer ();
 		}
 
-		public Buffers (byte[] buffer, int headerSize, int bodySize) : this ()
+		public Buffers (byte[] buffer, int headerSize, int bodySize)
 		{
 			Header = MaybeSegment (buffer, 0, headerSize);
 			Body = MaybeSegment (buffer, headerSize, bodySize);
@@ -79,6 +82,7 @@ namespace Mono.WebServer.FastCgi
 					bigBufferManager.ReturnBuffer (Body.Value);
 				Body = new CompatArraySegment<byte> (new byte[length]);
 			}
+
 			return Body.Value;
 		}
 
@@ -94,9 +98,7 @@ namespace Mono.WebServer.FastCgi
 
 		static CompatArraySegment<byte>? MaybeSegment (byte[] buffer, int offset)
 		{
-			if (buffer == null)
-				return null;
-			return MaybeSegment (buffer, offset, buffer.Length - offset);
+			return buffer == null ? null : MaybeSegment (buffer, offset, buffer.Length - offset);
 		}
 
 		static CompatArraySegment<byte>? MaybeSegment (byte[] buffer, int offset, int count)

@@ -2,8 +2,13 @@
 -------------------------------
 
     We will assume you want to install XSP in /usr.
+    
+    To compile XSP from a fresh git clone (as opposed to a tarball),
+    run this first:
 
-    To compile XSP type and install it to /usr:
+	./autogen.sh
+
+    To compile XSP and install it to /usr:
 
 	./configure --prefix=/usr
 	make 

@@ -28,6 +28,7 @@
 
 using Mono.WebServer.FastCgi.Compatibility;
 using NUnit.Framework;
+using System;
 
 namespace Mono.WebServer.Test {
 	[TestFixture]
@@ -40,6 +41,13 @@ namespace Mono.WebServer.Test {
 
 			test [0] = -3;
 			Assert.AreEqual (-3, test [0]);
+
+			try {
+				var test2 = new CompatArraySegment<int> (new int[1]);
+				test2 [1] = 0;
+				Assert.Fail ("Out of range access");
+			} catch (ArgumentOutOfRangeException) {
+			}
 		}
 	}
 }

@@ -62,13 +62,13 @@ namespace Mono.WebServer.FastCgi.Compatibility
 
 		public T this[int index] {
 			get {
-				if (index < 0 || count < index)
+				if (index < 0 || count <= index)
 					throw new ArgumentOutOfRangeException ("index");
 
 				return array[offset + index];
 			}
 			set {
-				if (index < 0 || count < index)
+				if (index < 0 || count <= index)
 					throw new ArgumentOutOfRangeException ("index");
 
 				array[offset + index] = value;

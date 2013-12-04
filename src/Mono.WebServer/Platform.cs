@@ -29,43 +29,48 @@
 using System;
 using System.IO;
 using Mono.Unix;
-using Mono.WebServer.Log;
 using Mono.Unix.Native;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer {
 	public static class Platform
 	{
+		public static readonly FinePlatformID Value;
+
 		public static string Name {
 			get { return Value.ToString (); }
 		}
-
-		static FinePlatformID Value {
-			get {
-				switch (Environment.OSVersion.Platform) {
-					case PlatformID.Unix:
-					case (PlatformID)128:
-					// Well, there are chances MacOSX is reported as Unix instead of MacOSX.
-					// Instead of platform check, we'll do a feature checks (Mac specific root folders)
-						if (Directory.Exists ("/Applications")
-						   && Directory.Exists ("/System")
-						   && Directory.Exists ("/Users")
-						   && Directory.Exists ("/Volumes"))
-							return FinePlatformID.MacOSX;
-						return FinePlatformID.Linux;
-
-					case PlatformID.MacOSX:
-						return FinePlatformID.MacOSX;
-
-					default:
-						return FinePlatformID.Windows;
-				}
-			}
-		}
-
+		
 		public static bool IsUnix {
 			get {
 				var platform = Environment.OSVersion.Platform;
 				return platform == PlatformID.Unix || platform == PlatformID.MacOSX || platform == (PlatformID)128;
+			}
+		}
+
+		static Platform() {
+			Value = GetPlatformId();
+		}
+
+		static FinePlatformID GetPlatformId() {
+			switch (Environment.OSVersion.Platform)
+			{
+				case PlatformID.Unix:
+				case (PlatformID)128:
+					// Well, there are chances MacOSX is reported as Unix instead of MacOSX.
+					// Instead of platform check, we'll do a feature checks (Mac specific root folders)
+					if (Directory.Exists("/Applications")
+					   && Directory.Exists("/System")
+					   && Directory.Exists("/Users")
+					   && Directory.Exists("/Volumes"))
+						return FinePlatformID.MacOSX;
+					return FinePlatformID.Linux;
+
+				case PlatformID.MacOSX:
+					return FinePlatformID.MacOSX;
+
+				default:
+					return FinePlatformID.Windows;
 			}
 		}
 

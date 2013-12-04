@@ -27,7 +27,7 @@
 //
 
 namespace Mono.WebServer {
-	enum FinePlatformID {
+	public enum FinePlatformID {
 		Windows,
 		Linux,
 		MacOSX

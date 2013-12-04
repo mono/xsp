@@ -29,23 +29,27 @@
 using System;
 using System.IO;
 using Mono.Unix;
-using Mono.WebServer.Log;
 using Mono.Unix.Native;
+using Mono.WebServer.Log;
 
 namespace Mono.WebServer {
 	public static class Platform
 	{
+		public static readonly FinePlatformID Value;
+
 		public static string Name {
 			get { return Value.ToString (); }
 		}
-
-		static readonly FinePlatformID PlatformId;
-		static FinePlatformID Value {
-			get { return PlatformId; }
-		}
 		
+		public static bool IsUnix {
+			get {
+				var platform = Environment.OSVersion.Platform;
+				return platform == PlatformID.Unix || platform == PlatformID.MacOSX || platform == (PlatformID)128;
+			}
+		}
+
 		static Platform() {
-			PlatformId = GetPlatformId();
+			Value = GetPlatformId();
 		}
 
 		static FinePlatformID GetPlatformId() {
@@ -67,13 +71,6 @@ namespace Mono.WebServer {
 
 				default:
 					return FinePlatformID.Windows;
-			}
-		}
-
-		public static bool IsUnix {
-			get {
-				var platform = Environment.OSVersion.Platform;
-				return platform == PlatformID.Unix || platform == PlatformID.MacOSX || platform == (PlatformID)128;
 			}
 		}
 

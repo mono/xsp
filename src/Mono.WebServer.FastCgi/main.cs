@@ -140,6 +140,7 @@ namespace Mono.WebServer.FastCgi {
 
 		static bool TryCreateOnDemandSocket (string onDemandSock, out Socket socket, out Uri uri)
 		{
+			socket = null;
 			return (Uri.TryCreate (onDemandSock, UriKind.Absolute, out uri) && TryCreateSocketFromUri (uri, out socket))
 				|| TryCreateUnixSocket (onDemandSock, out socket);
 		}

@@ -39,26 +39,34 @@ namespace Mono.WebServer {
 			get { return Value.ToString (); }
 		}
 
+		static readonly FinePlatformID PlatformId;
 		static FinePlatformID Value {
-			get {
-				switch (Environment.OSVersion.Platform) {
-					case PlatformID.Unix:
-					case (PlatformID)128:
+			get { return PlatformId; }
+		}
+		
+		static Platform() {
+			PlatformId = GetPlatformId();
+		}
+
+		static FinePlatformID GetPlatformId() {
+			switch (Environment.OSVersion.Platform)
+			{
+				case PlatformID.Unix:
+				case (PlatformID)128:
 					// Well, there are chances MacOSX is reported as Unix instead of MacOSX.
 					// Instead of platform check, we'll do a feature checks (Mac specific root folders)
-						if (Directory.Exists ("/Applications")
-						   && Directory.Exists ("/System")
-						   && Directory.Exists ("/Users")
-						   && Directory.Exists ("/Volumes"))
-							return FinePlatformID.MacOSX;
-						return FinePlatformID.Linux;
-
-					case PlatformID.MacOSX:
+					if (Directory.Exists("/Applications")
+					   && Directory.Exists("/System")
+					   && Directory.Exists("/Users")
+					   && Directory.Exists("/Volumes"))
 						return FinePlatformID.MacOSX;
+					return FinePlatformID.Linux;
 
-					default:
-						return FinePlatformID.Windows;
-				}
+				case PlatformID.MacOSX:
+					return FinePlatformID.MacOSX;
+
+				default:
+					return FinePlatformID.Windows;
 			}
 		}
 

@@ -30,7 +30,7 @@ endif
 sources = $(shell cat $(srcdir)/Mono.WebServer.XSP.sources)
 build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 
-EXTRA_DIST = $(sources) AssemblyInfo.cs.in
+EXTRA_DIST = $(sources) AssemblyInfo.cs.in Mono.WebServer.XSP.sources
 
 xsp2.exe: $(build_sources)
 	$(GMCS) -d:NET_2_0 $(MCSFLAGS) $(references2) /out:$@ $(build_sources)

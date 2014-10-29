@@ -168,8 +168,12 @@ namespace Mono.WebServer.FastCgi {
 
 			int total = 0;
 			while (total < length) {
-				total += socket.Send (data.Value.Array, data.Value.Offset + total,
-				                      length - total, System.Net.Sockets.SocketFlags.None);
+				int written = socket.Send(data.Value.Array, data.Value.Offset + total,
+				                          length - total, System.Net.Sockets.SocketFlags.None);
+				if (written <= 0)
+					throw new System.Net.Sockets.SocketException();
+
+				total += written;
 			}
 		}
 
@@ -180,9 +184,13 @@ namespace Mono.WebServer.FastCgi {
 
 			int total = 0;
 			while (total < length) {
-				total += socket.Receive (data.Array, total + data.Offset,
-				                         length - total,
-				                         System.Net.Sockets.SocketFlags.None);
+				int read = socket.Receive(data.Array, total + data.Offset,
+				                           length - total,
+				                           System.Net.Sockets.SocketFlags.None);
+				if (read <= 0)
+					throw new System.Net.Sockets.SocketException();
+
+				total += read;
 			}
 		}
 	}

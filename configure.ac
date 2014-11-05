@@ -53,14 +53,6 @@ SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_FIND_MONO_RUNTIME
 SHAMROCK_FIND_PROGRAM_OR_BAIL(GACUTIL, gacutil)
 SHAMROCK_FIND_PROGRAM_OR_BAIL(SN, sn)
-SHAMROCK_CHECK_MONO_2_0_GAC_ASSEMBLIES([        
-        System.Core
-	System.Configuration
-	System.Data
-	System.Web
-	Mono.Posix
-	Mono.Security
-])
 SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([        
         System.Core
 	System.Configuration
@@ -78,13 +70,13 @@ if test "x$RUNTIME" = "x" ; then
 fi
 
 CS="C#"
-if test "x$GMCS" = "xno" -a "x$DMCS" = "xno" ; then
-	AC_MSG_ERROR([No $CS compiler found. gmcs or dmcs must be installed.])
+if test "x$DMCS" = "xno" ; then
+	AC_MSG_ERROR([No $CS compiler found. dmcs must be installed.])
 fi
 
-AC_MSG_CHECKING([for Mono 2.0 GAC for Mono.Data.Sqlite.dll])
-if test -e "$($PKG_CONFIG --variable=libdir mono)/mono/2.0/Mono.Data.Sqlite.dll" -o \
-        -e "$($PKG_CONFIG --variable=prefix mono)/lib/mono/2.0/Mono.Data.Sqlite.dll"; then
+AC_MSG_CHECKING([for Mono 4.0 GAC for Mono.Data.Sqlite.dll])
+if test -e "$($PKG_CONFIG --variable=libdir mono)/mono/4.0/Mono.Data.Sqlite.dll" -o \
+        -e "$($PKG_CONFIG --variable=prefix mono)/lib/mono/4.0/Mono.Data.Sqlite.dll"; then
 	AC_MSG_RESULT([found])
 	HAVE_MONO_SQLITE=yes
 else
@@ -106,7 +98,7 @@ esac
 
 AM_CONDITIONAL(UNITTESTS, test x${UNIT_TESTS} = xyes)
 AM_CONDITIONAL(PLATFORM_WIN32, test x$platform_win32 = xyes)
-AM_CONDITIONAL(NET_2_0, test ! x$GMCS = xno)
+AM_CONDITIONAL(NET_2_0, test ! x$DMCS = xno)
 AM_CONDITIONAL(NET_4_0, test ! x$DMCS = xno)
 AM_CONDITIONAL(XSP_ONLY, test x$platform_win32 = xyes)
 
@@ -196,12 +188,6 @@ SHAVE_INIT([build/m4/shave], [enable])
 AC_OUTPUT
 
 TARGET_FRAMEWORKS=""
-if test "x$SAVED_GMCS" = "xno"; then
-   GMCS_STRING="not found"
-else
-   GMCS_STRING="$SAVED_GMCS"
-   TARGET_FRAMEWORKS=".NET 2.0"
-fi
 
 if test "x$SAVED_DMCS" = "xno"; then
    DMCS_STRING="not found"
@@ -223,7 +209,6 @@ ${PACKAGE}-${VERSION}
     Datadir:                 ${expanded_datadir}
     Libdir:                  ${expanded_libdir}
     Build documentation:     ${enable_docs}
-    Mono 2.0 compiler:       ${GMCS_STRING}
     Mono 4.0 compiler:       ${DMCS_STRING}
     Target frameworks:       ${TARGET_FRAMEWORKS}
     Build SQLite samples:    ${HAVE_MONO_SQLITE}

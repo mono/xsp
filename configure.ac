@@ -194,9 +194,9 @@ if test "x$SAVED_DMCS" = "xno"; then
 else
    DMCS_STRING="$SAVED_DMCS"
    if test -n "$TARGET_FRAMEWORKS"; then
-      TARGET_FRAMEWORKS="$TARGET_FRAMEWORKS, .NET 4.0"
+      TARGET_FRAMEWORKS="$TARGET_FRAMEWORKS, .NET 4.5"
    else
-      TARGET_FRAMEWORKS=".NET 4.0"
+      TARGET_FRAMEWORKS=".NET 4.5"
    fi
 fi
 
@@ -209,7 +209,7 @@ ${PACKAGE}-${VERSION}
     Datadir:                 ${expanded_datadir}
     Libdir:                  ${expanded_libdir}
     Build documentation:     ${enable_docs}
-    Mono 4.0 compiler:       ${DMCS_STRING}
+    Mono compiler:           ${DMCS_STRING}
     Target frameworks:       ${TARGET_FRAMEWORKS}
     Build SQLite samples:    ${HAVE_MONO_SQLITE}
 EOF

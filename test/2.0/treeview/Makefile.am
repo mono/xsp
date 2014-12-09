@@ -20,7 +20,7 @@ EXTRA_DIST = $(testfiles) \
 CLEANFILES = $(samplesbin_SCRIPTS)
 
 treeview.dll: $(treeview_build)
-	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
+	$(DMCS) -r:System.Web.dll -t:library -out:$@ $^
 
 dist-hook:
 	$(mkinstalldirs) $(distdir)/TreeLineImages

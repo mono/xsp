@@ -29,14 +29,14 @@ EXTRA_DIST = $(testfiles) \
 	     $(serviceclient_src)
 
 %.dll: %.cs
-	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
+	$(DMCS) -r:System.Web.dll -t:library -out:$@ $^
 
 extensions.dll: $(extensions_build)
-	$(GMCS) -r:System.Web.dll -r:System.Web.Services.dll -target:library \
+	$(DMCS) -r:System.Web.dll -r:System.Web.Services.dll -target:library \
 		-out:$@ $^
 
 ServiceClient.exe: extensions.dll $(serviceclient_build)
-	$(GMCS) -r:System.Web.dll -r:System.Web.Services.dll -r:extensions.dll \
+	$(DMCS) -r:System.Web.dll -r:System.Web.Services.dll -r:extensions.dll \
 		-out:$@ \
 		$(srcdir)/ServiceClient.cs $(srcdir)/Reference.cs
 

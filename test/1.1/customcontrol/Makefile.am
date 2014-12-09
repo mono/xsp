@@ -23,7 +23,7 @@ EXTRA_DIST = $(testfiles) \
 CLEANFILES = $(samplesbin_SCRIPTS)
 
 %.dll: %.cs
-	$(GMCS) -r:System.Web.dll -t:library -out:$@ $^
+	$(DMCS) -r:System.Web.dll -t:library -out:$@ $^
 
 tabcontrol.dll: $(tabcontrol_build)
 

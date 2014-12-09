@@ -12,7 +12,7 @@ unittestsdir = $(pkglibdir)/unittests/Tests.XSP.Security
 unittests_DATA = $(security_test_sources) Tests.XSP.Security.dll Makefile
 
 Tests.XSP.Security.dll: $(security_test_sources)
-	$(GMCS) -debug -pkg:mono-nunit -out:$@ -t:library $(security_test_sources)
+	$(DMCS) -debug -pkg:mono-nunit -out:$@ -t:library $(security_test_sources)
 
 run-test: Tests.XSP.Security.dll
 	nunit-console Tests.XSP.Security.dll

@@ -75,7 +75,7 @@ namespace Mono.WebServer
 		bool cert_validity;
 		readonly static bool cert_check_apache;
 		readonly static bool cert_check_mono;
-        readonly static bool send_file_remote;
+		readonly static bool send_file_remote;
 
 		string [][] unknownHeaders;
 		static string [] indexFiles = { "index.aspx",
@@ -111,10 +111,10 @@ namespace Mono.WebServer
 				break;
 			}
 
-            string sfr = Environment.GetEnvironmentVariable("MOD_MONO_SEND_FILE");
-            if (sfr != null)
-                sfr = sfr.ToLower(CultureInfo.InvariantCulture);
-            send_file_remote = sfr == "remote";
+			string sfr = Environment.GetEnvironmentVariable("MOD_MONO_SEND_FILE");
+			if (sfr != null)
+				sfr = sfr.ToLower(CultureInfo.InvariantCulture);
+			send_file_remote = sfr == "remote";
 		}
 
 		static void SetDefaultIndexFiles (string list)
@@ -581,19 +581,19 @@ namespace Mono.WebServer
 
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
-            if (!send_file_remote)
-            {
-			    if (offset == 0) {
-				    var info = new FileInfo (filename);
-				    if (info.Length == length) {
-					    if (requestId == -1)
-						    worker.SendFile (filename);
-					    else
-						    requestBroker.SendFile (requestId, filename);
-					    return;
-				    }
-			    }
-            }
+			if (!send_file_remote)
+			{
+				if (offset == 0) {
+					var info = new FileInfo (filename);
+					if (info.Length == length) {
+						if (requestId == -1)
+							worker.SendFile (filename);
+						else
+							requestBroker.SendFile (requestId, filename);
+						return;
+					}
+				}
+			}
 
 			FileStream file = null;
 			try {

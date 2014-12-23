@@ -111,6 +111,8 @@ namespace Mono.WebServer
 				break;
 			}
 
+			// Sends the file as a content stream rather than path.
+			// This is important when we're running on a different host than httpd
 			string sfr = Environment.GetEnvironmentVariable("MOD_MONO_SEND_STATIC_FILE");
 			if (sfr != null)
 				sfr = sfr.ToLower(CultureInfo.InvariantCulture);

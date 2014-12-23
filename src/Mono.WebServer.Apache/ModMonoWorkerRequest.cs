@@ -111,10 +111,10 @@ namespace Mono.WebServer
 				break;
 			}
 
-			string sfr = Environment.GetEnvironmentVariable("MOD_MONO_SEND_FILE");
+			string sfr = Environment.GetEnvironmentVariable("MOD_MONO_SEND_STATIC_FILE");
 			if (sfr != null)
 				sfr = sfr.ToLower(CultureInfo.InvariantCulture);
-			send_file_remote = sfr == "remote";
+			send_file_remote = sfr == "stream";
 		}
 
 		static void SetDefaultIndexFiles (string list)

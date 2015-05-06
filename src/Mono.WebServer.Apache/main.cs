@@ -120,6 +120,9 @@ namespace Mono.WebServer.Apache {
 				? new ModMonoTCPWebSource (configurationManager.Address, port, lockfile)
 				: new ModMonoWebSource (configurationManager.Filename, lockfile);
 
+            if (configurationManager.MinThreads.HasValue)
+                ThreadPool.SetMinThreads(configurationManager.MinThreads.Value, configurationManager.MinThreads.Value);
+
 			if(configurationManager.Terminate) {
 				if (configurationManager.Verbose)
 					Logger.Write (LogLevel.Notice, "Shutting down running mod-mono-server...");

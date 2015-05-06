@@ -116,7 +116,7 @@ namespace Mono.WebServer
 			string sfr = Environment.GetEnvironmentVariable("MOD_MONO_SEND_STATIC_FILE");
 			if (sfr != null)
 				sfr = sfr.ToLower(CultureInfo.InvariantCulture);
-			send_file_remote = sfr == "stream";
+			send_file_remote = sfr != "local";
 		}
 
 		static void SetDefaultIndexFiles (string list)

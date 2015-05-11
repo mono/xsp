@@ -121,7 +121,7 @@ namespace Mono.WebServer.Apache {
 				: new ModMonoWebSource (configurationManager.Filename, lockfile);
 
             if (configurationManager.MinThreads.HasValue)
-                ThreadPool.SetMinThreads(configurationManager.MinThreads.Value, configurationManager.MinThreads.Value);
+                ThreadPool.SetMinThreads(configurationManager.MinThreads.Value, 16);
 
 			if(configurationManager.Terminate) {
 				if (configurationManager.Verbose)

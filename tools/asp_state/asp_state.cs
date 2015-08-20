@@ -11,6 +11,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting;
+using Mono.Unix;
+using Mono.Unix.Native;
 
 namespace Mono.ASPNET.Tools {
 
@@ -64,10 +66,22 @@ and works until <Enter> is pressed.
 		public static void Main (string [] args)
 		{
 			if (args.Length == 0) {
+				UnixSignal [] signals = new UnixSignal[] {
+		                    new UnixSignal(Signum.SIGINT),
+                		    new UnixSignal(Signum.SIGTERM),
+                		};
 				RemotingConfiguration.Configure (ConfigurationFileName, false);
 				ShowVerboseConfigurationInfo(ConfigurationFileName);
-				Console.Write("Press <Enter> to stop...");
-				Console.ReadLine ();
+
+       			        // Wait for a unix signal to exit
+		                for (bool exit = false; !exit; )
+                		{
+                    			int id = UnixSignal.WaitAny(signals);
+                    			if (id >= 0 && id < signals.Length)
+                    			{
+                        			if (signals[id].IsSet) exit = true;
+                    			}
+	                	}
 			} else {
 				ShowUsage();
 			}

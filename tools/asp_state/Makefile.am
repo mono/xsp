@@ -1,4 +1,4 @@
-MCSFLAGS= -debug+ -debug:full -nologo
+MCSFLAGS= -debug+ -debug:full -nologo -r:Mono.Posix.dll
 
 if NET_4_0
 scripts4 = asp-state4.exe

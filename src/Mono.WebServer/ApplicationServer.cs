@@ -258,7 +258,7 @@ namespace Mono.WebServer
 				}
 
 				string vpath = app [pos++];
-				string realpath = app[pos++];
+				string realpath = Path.Combine(PhysicalRoot, app[pos++]);
 
 				if (!vpath.EndsWith ("/"))
 					vpath += "/";

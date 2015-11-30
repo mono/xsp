@@ -20,7 +20,7 @@ pkgconfig_DATA += xsp-4.pc
 sources = $(shell cat $(srcdir)/Mono.WebServer.XSP.sources)
 build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 
-EXTRA_DIST = $(sources) AssemblyInfo.cs.in
+EXTRA_DIST = $(sources) Mono.WebServer.XSP.sources AssemblyInfo.cs.in
 
 xsp4.exe: $(build_sources)
 	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(references4) /out:$@ $(build_sources)

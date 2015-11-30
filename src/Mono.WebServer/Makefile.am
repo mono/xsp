@@ -11,7 +11,7 @@ GACUTIL4=$(GACUTIL) -package 4.5
 noinst_SCRIPTS= $(monowebserver4_install)
 
 CLEANFILES = 4.0/Mono.WebServer2.dll*
-EXTRA_DIST = AssemblyInfo4.cs.in
+EXTRA_DIST = $(sources) AssemblyInfo4.cs.in Mono.WebServer.sources
 
 sources = $(shell cat $(srcdir)/Mono.WebServer.sources)
 

@@ -66,7 +66,7 @@ namespace Mono.WebServer.FastCgi
 			wr.SendStatus (301, "Moved Permanently");
 			wr.SendUnknownResponseHeader ("Connection", "close");
 			wr.SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
-			wr.SendUnknownResponseHeader ("Location", String.Format ("http://{0}{1}", host, location));
+			wr.SendUnknownResponseHeader ("Location", String.Format ("{0}://{1}{2}", wr.GetProtocol(), host, location));
 			Encoding enc = Encoding.ASCII;
 			wr.SendUnknownResponseHeader ("Content-Type", "text/html; charset=" + enc.WebName);
 			string content = String.Format (CONTENT301, host, location);

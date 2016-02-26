@@ -35,8 +35,7 @@ namespace Mono.WebServer.FastCgi.Sockets {
 		}
 		
 		public TcpSocket (System.Net.IPAddress address, int port)
-			: this (new System.Net.IPEndPoint (Equals(address, System.Net.IPAddress.Any) ?
-				System.Net.IPAddress.Loopback : address, port))
+			: this (new System.Net.IPEndPoint (address, port))
 		{
 		}
 	}

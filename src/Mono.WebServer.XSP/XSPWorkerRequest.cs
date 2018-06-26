@@ -748,8 +748,8 @@ namespace Mono.WebServer
 			if (secure || no_libc)
 				return 0;
 			// 6 -> SOL_TCP, 3 -> TCP_CORK
-			bool t = val;
-			return setsockopt ((int) socket, 6, 3, ref t, (IntPtr) IntPtr.Size);
+			int t = val ? 1 : 0;
+			return setsockopt ((int) socket, 6, 3, ref t, (IntPtr) sizeof(int));
 		}
 
 		unsafe int Send (byte [] buffer, int offset, int len)
@@ -776,7 +776,7 @@ namespace Mono.WebServer
 		}
 
 		[DllImport ("libc", SetLastError=true)]
-		extern static int setsockopt (int handle, int level, int opt, ref bool val, IntPtr len);
+		extern static int setsockopt (int handle, int level, int opt, ref int val, IntPtr len);
 
 		[DllImport ("libc", SetLastError=true)]
 		extern static int sendfile (int out_fd, int in_fd, ref long offset, IntPtr count);

@@ -72,8 +72,9 @@ namespace Mono.WebServer
 		/// </summary>
 		/// <returns>ID to use for a new request.</returns>
 		/// <param name="curlen">Current length of the allocation tables.</param>
-		int GrowRequests (ref int curlen)
+		int GrowRequests ()
 		{
+			int curlen = request_ids.Length;
 			int newsize = curlen + curlen/3;
 			var new_request_ids = new int [newsize];
 			var new_requests = new Worker [newsize];
@@ -91,8 +92,7 @@ namespace Mono.WebServer
 			Array.Clear (buffers, 0, buffers.Length);
 			buffers = new_buffers;
 
-			curlen = newsize;
-			return curlen + 1;
+			return curlen;
 		}
 		
 		/// <summary>
@@ -115,7 +115,7 @@ namespace Mono.WebServer
 
 			int newid;
 			if (requests_count >= reqlen)
-				newid = GrowRequests (ref reqlen);
+				newid = GrowRequests ();
 			else
 				newid = Array.IndexOf (request_ids, 0);
 

@@ -72,9 +72,9 @@ if test "x$DMCS" = "xno" ; then
 	AC_MSG_ERROR([No $CS compiler found. dmcs must be installed.])
 fi
 
-AC_MSG_CHECKING([for Mono 4.0 GAC for Mono.Data.Sqlite.dll])
-if test -e "$($PKG_CONFIG --variable=libdir mono)/mono/4.0/Mono.Data.Sqlite.dll" -o \
-        -e "$($PKG_CONFIG --variable=prefix mono)/lib/mono/4.0/Mono.Data.Sqlite.dll"; then
+AC_MSG_CHECKING([for Mono 4.5 GAC for Mono.Data.Sqlite.dll])
+if test -e "$($PKG_CONFIG --variable=libdir mono)/mono/4.5/Mono.Data.Sqlite.dll" -o \
+        -e "$($PKG_CONFIG --variable=prefix mono)/lib/mono/4.5/Mono.Data.Sqlite.dll"; then
 	AC_MSG_RESULT([found])
 	HAVE_MONO_SQLITE=yes
 else

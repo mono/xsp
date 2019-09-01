@@ -45,7 +45,7 @@ void log1 (char * str)
     printf("%s\n", str);
 }
 
-void log(char * fmt, ...)
+void shim_log (char * fmt, ...)
 {
     if(!debug) return;
     print_prefix ();
@@ -67,7 +67,7 @@ ssize_t send_int (int fd, int value)
     char buffer [size + 1];
     snprintf (buffer, size + 1, "%d", value);
     buffer [size] = 0;
-    log("%d (%s) has size %d", value, buffer, size);
+    shim_log ("%d (%s) has size %d", value, buffer, size);
     return send_string (fd, buffer);
 }
 
@@ -131,14 +131,14 @@ pid_t spawn (int fd, char * params [])
     child = fork ();
     if (child) {
         send_int (fd, child);
-        log ("Sent pid %d", child);
+        shim_log ("Sent pid %d", child);
         exit (0);
         return -1;
     }
 
     log1 ("Reforked!");
 
-    log ("Running %s", *params);
+    shim_log ("Running %s", *params);
 
     if (execv (*params, params) == -1) {
         perror ("execv");
@@ -197,7 +197,7 @@ int main (int argc, char * argv [], char *envp[])
     debug = debug_env && (debug_env[0] == 'y' || debug_env[0] == 'Y');
 
     log1 ("Started.");
-    log ("I'm uid %d euid %d gid %d egid %d", getuid (), geteuid (), getgid (), getegid ());
+    shim_log ("I'm uid %d euid %d gid %d egid %d", getuid (), geteuid (), getgid (), getegid ());
 
     if (argc <= 2) {
         fprintf (stderr, "Usage: %s <socket> <command>\n", argv [0]);
@@ -207,7 +207,7 @@ int main (int argc, char * argv [], char *envp[])
     const char * path = argv [1];
 	char ** params = argv + 2;
 
-    log ("Will run %s", *params);
+    shim_log ("Will run %s", *params);
 
     int local_fd;
     if (!start_server (path, &local_fd))

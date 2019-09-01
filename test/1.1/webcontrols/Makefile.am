@@ -37,7 +37,7 @@ samples_DATA = \
 		peopletable.xsl \
 		index.aspx
 
-EXTRA_DIST = $(samples_DATA)
+EXTRA_DIST = $(samples_DATA) dbpage_test_setup.cs
 
 if USE_SQLITE
 sqlitedir = $(pkglibdir)/test/1.1/webcontrols

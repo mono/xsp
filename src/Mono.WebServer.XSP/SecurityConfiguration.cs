@@ -36,7 +36,6 @@ using System.Text;
 using Mono.Security.Authenticode;
 using MSX = Mono.Security.X509;
 using Mono.Security.X509.Extensions;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 
 namespace Mono.WebServer.XSP {
 
@@ -49,7 +48,6 @@ namespace Mono.WebServer.XSP {
 
 		public SecurityConfiguration ()
 		{
-			Protocol = SecurityProtocolType.Default;
 		}
 
 		// properties
@@ -87,8 +85,6 @@ namespace Mono.WebServer.XSP {
 			}
 		}
 
-		public SecurityProtocolType Protocol { get; set; }
-
 		// methods
 
 		public void CheckSecurityContextValidity ()
@@ -108,37 +104,10 @@ namespace Mono.WebServer.XSP {
 				return "(non-secure)";
 
 			var sb = new StringBuilder ("(");
-			switch (Protocol) {
-			case SecurityProtocolType.Default:
-				sb.Append ("auto-detect SSL3/TLS1");
-				break;
-			case SecurityProtocolType.Ssl3:
-				sb.Append ("SSL3");
-				break;
-			case SecurityProtocolType.Tls:
-				sb.Append ("TLS1");
-				break;
-			}
 			if (RequireClientCertificates)
 				sb.Append (" with mandatory client certificates");
 			sb.Append (")");
 			return sb.ToString ();
-		}
-
-		[Obsolete("Use the typesafe Protocol property")]
-		public void SetProtocol (string protocol)
-		{
-			if (protocol != null) {
-				try {
-					Protocol = (SecurityProtocolType) Enum.Parse (typeof (SecurityProtocolType), protocol);
-				}
-				catch (Exception e) {
-					string message = String.Format ("The value '{0}' given for security protocol is invalid.", protocol);
-					throw new CryptographicException (message, e);
-				}
-			} else {
-				Protocol = SecurityProtocolType.Default;
-			}
 		}
 
 		// private stuff

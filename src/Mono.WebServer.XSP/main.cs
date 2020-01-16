@@ -124,23 +124,7 @@ namespace Mono.WebServer.XSP
 
 			configurationManager.SetupLogger ();
 
-			WebSource webSource;
-			if (security.Enabled) {
-				try {
-					key = security.KeyPair;
-					webSource = new XSPWebSource (configurationManager.Address,
-						configurationManager.RandomPort ? default(ushort) : configurationManager.Port,
-						security.Protocol, security.ServerCertificate,
-						GetPrivateKey, security.AcceptClientCertificates,
-						security.RequireClientCertificates, !root);
-				}
-				catch (CryptographicException ce) {
-					Logger.Write (ce);
-					return new CompatTuple<int,string,ApplicationServer> (1, "Error while setting up https", null);
-				}
-			} else {
-				webSource = new XSPWebSource (configurationManager.Address, configurationManager.Port, !root);
-			}
+			WebSource webSource = new XSPWebSource (configurationManager.Address, configurationManager.Port, !root);
 
 			var server = new ApplicationServer (webSource, configurationManager.Root) {
 				Verbose = configurationManager.Verbose,
@@ -226,21 +210,6 @@ namespace Mono.WebServer.XSP
 				return false;
 			
 			// TODO: add mutual exclusivity rules
-			if(manager.Https)
-				security.Enabled = true;
-
-			if (manager.HttpsClientAccept) {
-				security.Enabled = true;
-				security.AcceptClientCertificates = true;
-				security.RequireClientCertificates = false;
-			}
-
-			if (manager.HttpsClientRequire) {
-				security.Enabled = true;
-				security.AcceptClientCertificates = true;
-				security.RequireClientCertificates = true;
-			}
-
 			if (manager.P12File != null)
 				security.Pkcs12File = manager.P12File;
 
@@ -252,8 +221,6 @@ namespace Mono.WebServer.XSP
 
 			if (manager.PkPwd != null)
 				security.Password = manager.PkPwd;
-
-			security.Protocol = manager.Protocols;
 
 			int minThreads = manager.MinThreads ?? 0;
 			if(minThreads > 0)

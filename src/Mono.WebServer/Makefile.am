@@ -19,7 +19,7 @@ monowebserver4_build_sources = $(addprefix $(srcdir)/, $(sources)) $(addprefix $
 
 4.0/Mono.WebServer2.dll: $(monowebserver4_build_sources)
 	-$(MKDIR_P) 4.0
-	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(monowebserver4_references) /target:library /out:$@ $(monowebserver4_build_sources)
+	$(DMCS) $(MCSFLAGS) $(monowebserver4_references) /target:library /out:$@ $(monowebserver4_build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 
 install-data-local:

@@ -18,7 +18,7 @@ build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 EXTRA_DIST = $(sources) AssemblyInfo.cs.in $(resources) Mono.WebServer.Fpm.sources
 
 mono-fpm.exe: $(build_sources)
-	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(references) /out:$@ \
+	$(DMCS) $(MCSFLAGS) $(references) /out:$@ \
 		$(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 

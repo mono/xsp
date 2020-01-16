@@ -19,7 +19,7 @@ build_sources = $(addprefix $(srcdir)/, $(sources)) AssemblyInfo.cs
 EXTRA_DIST = $(sources) AssemblyInfo.cs.in $(resources) Mono.WebServer.FastCgi.sources
 
 fastcgi-mono-server4.exe: $(build_sources)
-	$(DMCS) -d:NET_2_0 -d:NET_4_0 $(MCSFLAGS) $(references4) /out:$@ \
+	$(DMCS) $(MCSFLAGS) $(references4) /out:$@ \
 		$(build_sources)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 

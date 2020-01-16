@@ -33,9 +33,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using Mono.Security.Protocol.Tls;
 using Mono.WebServer.Log;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 
 namespace Mono.WebServer.XSP
 {
@@ -58,29 +56,12 @@ namespace Mono.WebServer.XSP
 		int reuses;
 
 		public XSPWorker (Socket client, EndPoint localEP, ApplicationServer server,
-			bool secureConnection,
-			SecurityProtocolType securityProtocol,
 			X509Certificate cert,
-			PrivateKeySelectionCallback keyCB,
 			bool allowClientCert,
 			bool requireClientCert) 
 		{
-			if (secureConnection) {
-				ssl = new SslInformation {
-					AllowClientCertificate = allowClientCert,
-					RequireClientCertificate = requireClientCert,
-					RawServerCertificate = cert.GetRawCertData ()
-				};
-
-				netStream = new LingeringNetworkStream (client, true);
-				var s = new SslServerStream (netStream, cert, requireClientCert, false);
-				s.PrivateKeyCertSelectionDelegate += keyCB;
-				s.ClientCertValidationDelegate += ClientCertificateValidation;
-				stream = s;
-			} else {
-				netStream = new LingeringNetworkStream (client, false);
-				stream = netStream;
-			}
+			netStream = new LingeringNetworkStream (client, false);
+			stream = netStream;
 
 			sock = client;
 			this.server = server;
@@ -177,12 +158,6 @@ namespace Mono.WebServer.XSP
 			
 			broker = (XSPRequestBroker) vapp.RequestBroker;
 			requestId = broker.RegisterRequest (this);
-
-			if (ssl != null) {
-				var s = (stream as SslServerStream);
-				ssl.KeySize = s.CipherStrength;
-				ssl.SecretKeySize = s.KeyExchangeStrength;
-			}
 
 			try {
 				string redirect;

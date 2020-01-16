@@ -96,8 +96,6 @@ esac
 
 AM_CONDITIONAL(UNITTESTS, test x${UNIT_TESTS} = xyes)
 AM_CONDITIONAL(PLATFORM_WIN32, test x$platform_win32 = xyes)
-AM_CONDITIONAL(NET_2_0, test ! x$DMCS = xno)
-AM_CONDITIONAL(NET_4_0, test ! x$DMCS = xno)
 AM_CONDITIONAL(XSP_ONLY, test x$platform_win32 = xyes)
 
 # Put the version in the new required format (for svn revisions)

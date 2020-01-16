@@ -28,7 +28,6 @@
 
 using System.Net;
 using Mono.WebServer.Options.Settings;
-using TP = Mono.Security.Protocol.Tls;
 using Mono.WebServer.Options;
 
 namespace Mono.WebServer.XSP {
@@ -38,9 +37,6 @@ namespace Mono.WebServer.XSP {
 		readonly BoolSetting nonstop = new BoolSetting ("nonstop", "Don't stop the server by pressing enter. Must be used when the server has no controlling terminal.");
 		readonly BoolSetting quiet = new BoolSetting ("quiet", "Disable the initial start up information.");
 		readonly BoolSetting randomPort = new BoolSetting ("random-port", "Listen on a randomly assigned port. The port numer will be reported to the caller via a text file.");
-		readonly BoolSetting https = new BoolSetting ("https", "Enable SSL for the server.");
-		readonly BoolSetting httpsClientAccept = new BoolSetting ("https-client-accept", "Enable SSL for the server with optional client certificates.");
-		readonly BoolSetting httpsClientRequire = new BoolSetting ("https-client-require", "Enable SSL for the server with mandatory client certificates.");
 		readonly BoolSetting noHidden = new BoolSetting ("no-hidden", "Allow access to hidden files (see 'man xsp' for details).");
 
 		readonly NullableInt32Setting minThreads = new NullableInt32Setting ("minThreads", "The minimum number of threads the thread pool creates on startup. Increase this value to handle a sudden inflow of connections.");
@@ -52,7 +48,6 @@ namespace Mono.WebServer.XSP {
 		readonly StringSetting pkPwd = new StringSetting ("pkpwd", "Password to decrypt the private key.");
 		readonly StringSetting pidFile = new StringSetting ("pidfile", "Write the process PID to the specified file.");
 
-		readonly EnumSetting<TP.SecurityProtocolType> protocols = new EnumSetting<TP.SecurityProtocolType> ("protocols", "specify which protocols are available for SSL. Possible values: Default (all), Tls, Ssl2, Ssl3", defaultValue: TP.SecurityProtocolType.Default);
 		#endregion
 
 		#region Typesafe properties
@@ -64,15 +59,6 @@ namespace Mono.WebServer.XSP {
 		}
 		public bool RandomPort {
 			get { return randomPort; }
-		}
-		public bool Https {
-			get { return https; }
-		}
-		public bool HttpsClientAccept {
-			get { return httpsClientAccept; }
-		}
-		public bool HttpsClientRequire {
-			get { return httpsClientRequire; }
 		}
 		public bool NoHidden {
 			get { return noHidden; }
@@ -101,9 +87,6 @@ namespace Mono.WebServer.XSP {
 			get { return pidFile; }
 		}
 
-		public TP.SecurityProtocolType Protocols {
-			get { return protocols; }
-		}
 		#endregion
 
 		public override string ProgramName {
@@ -118,10 +101,9 @@ namespace Mono.WebServer.XSP {
 
 		public ConfigurationManager (string name, bool quietDefault) : base (name)
 		{
-			Add (nonstop, quiet, randomPort, https, httpsClientAccept, httpsClientRequire, noHidden,
+			Add (nonstop, quiet, randomPort, noHidden,
 			     minThreads, port,
-			     p12File, cert, pkFile, pkPwd, pidFile,
-			     protocols);
+			     p12File, cert, pkFile, pkPwd, pidFile);
 			address.MaybeUpdate (SettingSource.Default, IPAddress.Any);
 			quiet.MaybeUpdate (SettingSource.Default, quietDefault);
 		}

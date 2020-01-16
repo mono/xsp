@@ -280,11 +280,7 @@ namespace Mono.WebServer
 			string hostVPath = HostVPath;
 			int hostVPathLen = HostVPath.Length;
 			int pathLen = path != null ? path.Length : 0;
-#if NET_2_0
 			bool inThisApp = path.StartsWith (hostVPath, StringComparison.Ordinal);
-#else
-			bool inThisApp = path.StartsWith (hostVPath);
-#endif
 			if (pathLen == 0 || (inThisApp && (pathLen == hostVPathLen || (pathLen == hostVPathLen + 1 && path [pathLen - 1] == '/')))) {
 				if (needToReplacePathSeparator)
 					return HostPath.Replace ('/', pathSeparatorChar);

@@ -30,9 +30,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Mono.Security.Protocol.Tls;
 using Mono.WebServer.XSP;
-using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 using X509Certificate = System.Security.Cryptography.X509Certificates.X509Certificate;
 
 namespace Mono.WebServer {
@@ -43,22 +41,16 @@ namespace Mono.WebServer {
 	public class XSPWebSource: WebSource
 	{
 		IPEndPoint bindAddress;
-		readonly bool secureConnection;
-		readonly SecurityProtocolType securityProtocol;
 		readonly X509Certificate cert;
-		readonly PrivateKeySelectionCallback keyCB;
 		readonly bool allowClientCert;
 		readonly bool requireClientCert;
 
-		public XSPWebSource(IPAddress address, int port, SecurityProtocolType securityProtocol,
-				    X509Certificate cert, PrivateKeySelectionCallback keyCB, 
+		public XSPWebSource(IPAddress address, int port,
+				    X509Certificate cert,
 				    bool allowClientCert, bool requireClientCert, bool single_app)
 		{			
-			secureConnection = (cert != null && keyCB != null);
 			bindAddress = new IPEndPoint (address, port);
-			this.securityProtocol = securityProtocol;
 			this.cert = cert;
-			this.keyCB = keyCB;
 			this.allowClientCert = allowClientCert;
 			this.requireClientCert = requireClientCert;
 		}
@@ -101,7 +93,7 @@ namespace Mono.WebServer {
 		public override Worker CreateWorker (Socket client, ApplicationServer server)
 		{
 			return new XSPWorker (client, client.LocalEndPoint, server,
-				secureConnection, securityProtocol, cert, keyCB, allowClientCert, requireClientCert);
+				cert, allowClientCert, requireClientCert);
 		}
 		
 		public override Type GetApplicationHostType ()

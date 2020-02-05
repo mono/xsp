@@ -374,8 +374,9 @@ namespace Mono.WebServer
 		void OnAccept (object sender, SocketAsyncEventArgs e)
 		{
 			if (!started && SingleApplication) {
-				// We are shutting down. Last call...
-				Environment.Exit (0);
+				// We are shutting down. No further processing. Likely a SocketError.OperationAborted anyway.
+				CloseSocket(e.AcceptSocket);
+				return;
 			}
 
 			Socket accepted = e.AcceptSocket;

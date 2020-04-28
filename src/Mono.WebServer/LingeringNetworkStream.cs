@@ -73,7 +73,7 @@ namespace Mono.WebServer
 					if (nread == 0)
 						break;
 
-					waited += (int) (DateTime.UtcNow - start).TotalMilliseconds * 1000;
+					waited = (int) (DateTime.UtcNow - start).TotalMilliseconds * 1000;
 				}
 			} catch {
 				// ignore - we don't care, we're closing anyway

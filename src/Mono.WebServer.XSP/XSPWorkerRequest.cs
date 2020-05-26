@@ -723,7 +723,16 @@ namespace Mono.WebServer
 				while (length > 0) {
 					int result = sendfile ((int) socket, (int) handle, ref offset, (IntPtr) length);
 					if (result == -1)
-						throw new System.ComponentModel.Win32Exception ();
+					{
+						var ex = new System.ComponentModel.Win32Exception();
+						if (ex.NativeErrorCode == (int)Errno.EINTR || ex.NativeErrorCode == (int)Errno.EAGAIN)
+						{
+							// If socket was not ready for sending, let's keep retrying..
+							continue;
+						}
+
+						throw ex;
+					}
 
 					// sendfile() will set 'offset' for us
 					length -= result;
@@ -783,6 +792,12 @@ namespace Mono.WebServer
 
 		[DllImport ("libc", SetLastError=true, EntryPoint="send")]
 		unsafe extern static int send (int s, byte *buffer, IntPtr len, int flags);
+
+		internal enum Errno
+		{
+			EINTR = 4,
+			EAGAIN = 11 // same as EWOULDBLOCK
+		}
 	}
 }
 

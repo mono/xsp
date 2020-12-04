@@ -112,7 +112,7 @@ namespace Mono.WebServer
 				Logger.Write (ex);
 			}
 
-			Logger.Write (LogLevel.Standard, "Worker initialized with no_libc: {0}, no_dns_lookup: {1}, testing: {3}.", no_libc, no_dns_lookups, running_tests);
+			Logger.Write (LogLevel.Standard, "Worker initialized with no_libc: {0}, no_dns_lookup: {1}, testing: {2}.", no_libc, no_dns_lookups, running_tests);
 		}
 
 		static bool CheckOS ()

@@ -76,6 +76,7 @@ namespace Mono.WebServer
 
 		static readonly bool running_tests;
 		static readonly bool no_libc;
+		static readonly bool no_dns_lookups;
 		static readonly string server_software;
 		static readonly string serverHeader;
 
@@ -89,6 +90,7 @@ namespace Mono.WebServer
 		static XSPWorkerRequest ()
 		{
 			no_libc = CheckOS ();
+			no_dns_lookups = CheckDisableDnsLookups();
 			running_tests = (Environment.GetEnvironmentVariable ("XSP_RUNNING_TESTS") != null);
 			Assembly assembly = Assembly.GetExecutingAssembly ();
 			string title = "Mono-XSP Server";
@@ -109,6 +111,8 @@ namespace Mono.WebServer
 				Logger.Write (LogLevel.Error, "Worker initialization exception occurred. Continuing anyway:");
 				Logger.Write (ex);
 			}
+
+			Logger.Write (LogLevel.Standard, "Worker initialized with no_libc: {0}, no_dns_lookup: {1}, testing: {2}.", no_libc, no_dns_lookups, running_tests);
 		}
 
 		static bool CheckOS ()
@@ -124,6 +128,29 @@ namespace Mono.WebServer
 			}
 
 			return !is_linux;
+		}
+
+		static bool CheckDisableDnsLookups()
+		{
+			bool result = false;
+			int dummy = 0;
+			string setting = Environment.GetEnvironmentVariable ("XSP_NO_DNS_LOOKUPS");
+
+			try {
+				setting = ConfigurationManager.AppSettings ["MonoServerDisableDnsLookups"] ?? setting;
+			} catch (Exception ex)
+			{
+				Logger.Write (LogLevel.Warning, "Unable to access MonoServerDisableDnsLookups appSetting.");
+				Logger.Write (ex);
+			}
+
+			if (bool.TryParse(setting, out result))
+				return result;
+
+			if (int.TryParse(setting, out dummy))
+				result = dummy != 0;
+
+			return result;
 		}
 
 		static void SetDefaultIndexFiles (string list)
@@ -487,6 +514,10 @@ namespace Mono.WebServer
 		{
 			string ip = GetRemoteAddress ();
 			string name;
+
+			if (no_dns_lookups) //< XXX: Avoid slow dns lookups
+				return ip;
+
 			try {
 				IPHostEntry entry = Dns.GetHostEntry (ip);
 				name = entry.HostName;

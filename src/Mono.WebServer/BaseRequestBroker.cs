@@ -71,7 +71,6 @@ namespace Mono.WebServer
 		/// This *MUST* be called with the reqlock held!
 		/// </summary>
 		/// <returns>ID to use for a new request.</returns>
-		/// <param name="curlen">Current length of the allocation tables.</param>
 		int GrowRequests ()
 		{
 			int curlen = request_ids.Length;

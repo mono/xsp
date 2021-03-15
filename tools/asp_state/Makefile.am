@@ -1,4 +1,4 @@
-MCSFLAGS= -debug+ -debug:full -nologo
+MCSFLAGS= -debug+ -debug:full -nologo -r:Mono.Posix.dll
 
 scripts4 = asp-state4.exe
 data4 = asp-state4.exe.config

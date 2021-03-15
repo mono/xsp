@@ -266,8 +266,33 @@ namespace Mono.WebServer.FastCgi.Sockets {
 		static UnmanagedSocket ()
 		{
 			try {
-				string os = File.ReadAllText("/proc/sys/kernel/ostype");
-				supports_libc = os.StartsWith ("Linux");
+				string uname;
+				try {
+					var p = new System.Diagnostics.Process();
+
+					p.StartInfo.UseShellExecute = false;
+					p.StartInfo.RedirectStandardOutput = true;
+					p.StartInfo.FileName = "uname";
+
+					p.Start();
+
+					uname = p.StandardOutput.ReadToEnd();
+					p.WaitForExit();
+					if (uname == null) 
+						uname = "";
+					uname = uname.Trim().ToLower();
+
+					supports_libc = uname.StartsWith("linux") ||
+						uname.StartsWith("freebsd") ||
+						uname.StartsWith("netbsd") ||
+						uname.StartsWith("openbsd");
+				} catch {
+					uname = "";
+				}
+				if (uname == "") {
+					string os = File.ReadAllText("/proc/sys/kernel/ostype");
+					supports_libc = os.StartsWith ("Linux");
+				}
 			} catch {
 			}
 		}
